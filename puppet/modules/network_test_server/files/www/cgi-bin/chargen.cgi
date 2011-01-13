@@ -1,0 +1,1 @@
+../htdocs/qtest/cgi-bin/chargen.cgi

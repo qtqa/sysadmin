@@ -1,0 +1,56 @@
+# kdmrc for ubuntu, deployed by puppet
+# FIXME: use augeas to edit this file so we do not clobber upstream changes?
+
+[General]
+ConfigVersion=2.4
+StaticServers=:0
+ReserveServers=:1,:2,:3
+ServerVTs=-7
+ConsoleTTYs=tty1,tty2,tty3,tty4,tty5,tty6
+PidFile=/var/run/kdm.pid
+
+[Xdmcp]
+Enable=false
+Willing=/etc/kde4/kdm/Xwilling
+
+[Shutdown]
+
+
+[X-*-Core]
+Setup=/etc/kde4/kdm/Xsetup
+Startup=/etc/kde4/kdm/Xstartup
+Reset=/etc/kde4/kdm/Xreset
+Session=/etc/kde4/kdm/Xsession
+AllowRootLogin=false
+AllowNullPasswd=false
+AllowShutdown=Root
+ClientLogFile=.xsession-errors-%d
+
+[X-*-Greeter]
+LogoArea=Logo
+LogoPixmap=/usr/share/kde4/apps/kdm/pics/kdelogo.png
+MinShowUID=1000
+MaxShowUID=29999
+Preloader=/usr/bin/preloadkde
+UseTheme=true
+Theme=/usr/share/kde4/apps/kdm/themes/oxygen-air
+
+[X-:*-Core]
+ServerCmd=/usr/bin/X
+ServerArgsLocal=-br -nolisten tcp
+AllowNullPasswd=true
+AllowShutdown=All
+
+[X-:*-Greeter]
+PreselectUser=Previous
+FocusPasswd=true
+LoginMode=DefaultLocal
+AllowClose=true
+
+[X-:0-Core]
+AutoLoginEnable=true
+AutoLoginAgain=true
+AutoLoginUser=<%= testuser %>
+ClientLogFile=.xsession-errors
+
+[X-:0-Greeter]

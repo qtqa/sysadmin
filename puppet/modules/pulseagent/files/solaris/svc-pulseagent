@@ -1,0 +1,18 @@
+#!/bin/sh
+DIR=`dirname $0`
+PULSE=$DIR/pulse-agent/bin/pulse
+
+case "$1" in
+start)
+    su - pulse $0 real_start
+    ;;
+stop)
+    su - pulse $PULSE stop
+    ;;
+real_start)
+    nohup $PULSE start 2>&1 | logger -t pulseagent &
+    ;;
+esac
+
+exit 0
+

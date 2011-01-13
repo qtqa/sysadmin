@@ -1,0 +1,1 @@
+../htdocs/qtest/cgi-bin/get-cookie.cgi

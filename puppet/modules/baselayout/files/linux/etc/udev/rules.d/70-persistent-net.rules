@@ -1,0 +1,4 @@
+# This file is enforced to be empty by puppet.
+# This is done so that VMs cloned from a template always use eth0 as their
+# primary interface. Without this, the VMs will count up through eth1, eth2, ...
+# each time they are booted with a new MAC address.

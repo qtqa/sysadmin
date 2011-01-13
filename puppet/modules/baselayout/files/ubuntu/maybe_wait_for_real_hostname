@@ -1,0 +1,35 @@
+# On Ubuntu (and probably other distros), although an init script
+# may have `Required-Start: $networking', the hostname may not be accurately
+# set until later.
+# This breaks daemons which don't cope with their hostname changing underneath
+# them, so this script is provided so that those daemons can delay startup
+# until the real hostname is known.
+
+# If we're starting kdm through upstart, or we're starting _anything_ through
+# SysV-style init script...
+if [ "x$UPSTART_JOB" = "xkdm" ] || [ "x$1" = "xstart" ]; then
+    i=2
+    if [ "x$UPSTART_JOB" != "x" ]; then
+        tag=$UPSTART_JOB
+    else
+        tag=$(readlink -f $0)
+        tag=$(basename $tag)
+    fi
+    WAITED=0
+    FAILED=0
+    while [ "x$(/usr/bin/facter hostname)" = "xlocalhost" ]; do
+        if [ $i -gt 512 ]; then
+            echo "hostname is still localhost after repeated delays; will proceed with startup anyway, but it might not work" | logger -t $tag
+            FAILED=1
+            break
+        fi
+        echo "hostname is localhost; delaying startup for $i seconds" | logger -t $tag
+        sleep $i
+        WAITED=$(expr $WAITED + $i)
+        i=$(expr $i '*' 2)
+    done
+    if [ $WAITED -gt 0 ] && [ "x$FAILED" = "x0" ]; then
+        echo "hostname updated from localhost to $(/usr/bin/facter hostname) after delay of $WAITED seconds" | logger -t $tag
+    fi
+fi
+

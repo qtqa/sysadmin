@@ -1,0 +1,13 @@
+LANG="en_US.UTF-8"
+
+### Note! This is a hack deployed by Qt QA.
+###
+### We must block the boot process until the machine really has
+### discovered its hostname - KDE session breaks if hostname changes
+### during startup.
+###
+### This achieves the blocking by sourcing our maybe_wait_for_real_hostname
+### script from /etc/default/locale, which itself is sourced by some
+### important init scripts, in particular the kdm script.
+. /etc/default/maybe_wait_for_real_hostname
+

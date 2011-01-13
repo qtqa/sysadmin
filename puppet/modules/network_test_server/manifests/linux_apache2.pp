@@ -1,0 +1,130 @@
+class network_test_server::linux::apache2 {
+    package {
+        "apache2":          ensure  =>  present;
+    }
+
+    service { "apache2":
+        enable  =>  true,
+        ensure  =>  running,
+        require =>  Package["apache2"],
+    }
+
+    apache2_module {
+        "ssl":              ensure  =>  present;
+        "dav_fs":           ensure  =>  present;
+        "headers":          ensure  =>  present;
+
+        # disable mod_deflate, because it interferes with Content-Length expected by tests
+        "deflate":          ensure  =>  absent;
+    }
+
+    apache2_conf {
+        "main.conf":    ensure  =>  present;
+        "security":     ensure  =>  present;
+        "ssl.conf":     ensure  =>  present;
+        "dav.conf":     ensure  =>  present;
+    }
+
+    # dav upload directory
+    file { "/home/writeables/dav":
+        ensure  =>  directory,
+        mode    =>  1777,
+        require =>  File["/home/writeables"],
+    }
+
+    # Disable all of the "default" apache2 sites
+    exec { "/usr/sbin/a2dissite '*'":
+        onlyif  =>  "/bin/sh -c 'test $(ls /etc/apache2/sites-enabled | wc -l) -gt 0'",
+        require =>  Package["apache2"],
+        notify  =>  Service["apache2"],
+    }
+
+    # Deploy docs and scripts
+    file { "/home/qt-test-server/www":
+        ensure  =>  directory,
+        recurse =>  remote,
+        source  =>  "puppet:///modules/network_test_server/www",
+        require =>  User["qt-test-server"],
+    }
+
+    # Hardcoded timestamps for testing purposes on a few files
+    file_timestamp {
+        "/home/qt-test-server/www/htdocs/fluke.gif":
+            timestamp   =>  '2007-05-22 12:04:57 GMT',
+            require =>  File["/home/qt-test-server/www"],
+        ;
+        "/home/qt-test-server/www/htdocs/index.html":
+            timestamp   =>  '2008-11-15 13:52 GMT',
+            require =>  File["/home/qt-test-server/www"],
+        ;
+    }
+
+    # Some testdata created by special means
+    exec {
+        "make mediumfile":
+            command => "/bin/dd if=/dev/zero of=/home/qt-test-server/www/htdocs/mediumfile bs=1 count=0 seek=10000000",
+            creates =>  "/home/qt-test-server/www/htdocs/mediumfile",
+            require =>  File["/home/qt-test-server/www"],
+        ;
+    }
+
+}
+
+# Set mtime on file to given timestamp
+# timestamp may be anything parseable by /bin/date
+# FIXME: add support directly to puppet for this
+define file_timestamp($timestamp) {
+    $since_epoch = generate("/bin/sh", "-c", "date -d '$timestamp' +%s | tr -d '\n'")
+    exec {
+        "/usr/bin/touch -d '@$since_epoch' '$name'":
+            onlyif  =>  "/bin/sh -c \"/usr/bin/stat -c '%Y' '$name' | /bin/grep -v -q '$since_epoch'\"",
+        ;
+    }   
+}
+
+define apache2_module($ensure) {
+    if $ensure == "present" {
+        exec { "/usr/sbin/a2enmod $name":
+            creates =>  "/etc/apache2/mods-enabled/$name.load",
+            require =>  Package["apache2"],
+            notify  =>  Service["apache2"],
+        }
+    }
+    else {
+        exec { "/usr/sbin/a2dismod $name":
+            onlyif  =>  "/usr/bin/test -e /etc/apache2/mods-enabled/$name.load",
+            require =>  Package["apache2"],
+            notify  =>  Service["apache2"],
+        }
+    }
+}
+
+define apache2_site($ensure) {
+    if $ensure == "present" {
+    }
+    else {
+        exec { "/usr/sbin/a2dismod $name":
+            onlyif  =>  "/usr/bin/test -e /etc/apache2/mods-enabled/$name.load",
+            require =>  Package["apache2"],
+            notify  =>  Service["apache2"],
+        }
+    }
+}
+
+define apache2_conf($ensure) {
+    if $ensure == "present" {
+        file { "/etc/apache2/conf.d/$name":
+            source  =>  "puppet:///modules/network_test_server/config/apache2/$name",
+            require =>  Package["apache2"],
+            notify  =>  Service["apache2"],
+        }
+    }
+    else {
+        file { "/etc/apache2/conf.d/$name":
+            ensure  =>  absent,
+            notify  =>  Service["apache2"],
+        }
+    }
+}
+
+

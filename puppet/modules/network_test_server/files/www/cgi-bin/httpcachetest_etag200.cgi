@@ -1,0 +1,1 @@
+../htdocs/qtest/cgi-bin/httpcachetest_etag200.cgi

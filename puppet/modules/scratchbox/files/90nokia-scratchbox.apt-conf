@@ -1,0 +1,2 @@
+# Scratchbox repos do not have GPG keys
+APT::Get::AllowUnauthenticated 1;

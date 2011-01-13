@@ -1,0 +1,24 @@
+###### Custom mac /etc/profile
+# This section is what is shipped with OSX:
+##############################################################
+# System-wide .profile for sh(1)
+if [ -x /usr/libexec/path_helper ]; then
+        eval `/usr/libexec/path_helper -s`
+fi
+
+if [ "${BASH-no}" != "no" ]; then
+        [ -r /etc/bashrc ] && . /etc/bashrc
+fi
+
+##############################################################
+# This is our addition.
+# Ideally we would not have to do this, but OSX seems to be
+# lacking any kind of hook which would be usable for us.
+# So we implement our own Linux-like /etc/profile.d .
+if test -d /etc/profile.d ; then
+    for s in /etc/profile.d/*.sh ; do
+        test -r $s && . $s
+    done
+    unset s
+fi
+
