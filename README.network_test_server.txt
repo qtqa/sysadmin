@@ -44,7 +44,7 @@ and runs open proxies!
 == Phase 2: puppet setup
 
 It is recommended that you watch the system log during this step.
-For example, run `test -f /var/log/syslog &' before proceeding.
+For example, run `tail -f /var/log/syslog &' before proceeding.
 
 From this git repo, put bootstrap/ubuntu1004_bootstrap.sh onto the machine,
 and run it.  e.g.
@@ -69,5 +69,7 @@ It is recommended to reboot the machine after the initial puppet setup to
 ensure that all services are correctly launched after boot, and that no outdated
 configuration files remain in use.
 
-As a brief test to see if the server is working, you can try the `networkselftest'
-Qt autotest.  Unfortunately it does not cover everything.
+As a brief test to see if the server is working, you can try the networkselftest
+Qt autotest.  On a machine _other_ than the network test server, put the test server
+IP address into /etc/hosts as qt-test-server.qt-test-net, and run the networkselftest
+testcase from Qt; if everything is set up correctly, it should 100% pass.
