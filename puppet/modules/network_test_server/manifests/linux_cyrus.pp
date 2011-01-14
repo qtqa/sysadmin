@@ -6,9 +6,10 @@ class network_test_server::linux::cyrus {
 
     service {
         "cyrus2.2":
-            enable  =>  true,
-            ensure  =>  running,
-            require =>  [ Package["cyrus-imapd-2.2"], File["/etc/cyrus.conf"] ],
+            enable    => true,
+            ensure    => running,
+            hasstatus => true,
+            require   => [ Package["cyrus-imapd-2.2"], File["/etc/cyrus.conf"] ],
         ;
     }
 

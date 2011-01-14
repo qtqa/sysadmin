@@ -19,11 +19,13 @@ class network_test_server::linux::squid {
             enable  =>  true,
             ensure  =>  running,
             require =>  [ Package["squid3"], File["/etc/default/squid3", "/etc/squid3/squid.conf"] ],
+            pattern =>  '-f /etc/squid3/squid.conf',
         ;
         "squid3-authenticating-ntlm":
             enable  =>  true,
             ensure  =>  running,
             require =>  [ Package["squid3"], File["/etc/default/squid3", "/etc/squid3/squid-authenticating-ntlm.conf"] ],
+            pattern =>  '-f /etc/squid3/squid-authenticating-ntlm.conf',
         ;
     }
 
