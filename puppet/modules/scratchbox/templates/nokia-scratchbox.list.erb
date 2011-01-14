@@ -2,7 +2,7 @@
 # see https://projects.maemo.org/docs/environment.html
 <%=
   # internal or external?
-  if fqdn ~= /\.nokia\.com$/
+  if fqdn =~ /\.nokia\.com$/
     return 'deb http://maemo.research.nokia.com/repository/scratchbox 1.0/'
   else
     return 'deb https://files.maemo.org/repository/scratchbox 1.0/'
