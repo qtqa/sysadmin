@@ -3,8 +3,8 @@
 <%=
   # internal or external?
   if fqdn =~ /\.nokia\.com$/
-    return 'deb http://maemo.research.nokia.com/repository/scratchbox 1.0/'
+    'deb http://maemo.research.nokia.com/repository/scratchbox 1.0/'
   else
-    return 'deb https://files.maemo.org/repository/scratchbox 1.0/'
+    'deb https://files.maemo.org/repository/scratchbox 1.0/'
   end
 %>
