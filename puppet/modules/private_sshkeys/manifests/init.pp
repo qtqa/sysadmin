@@ -3,7 +3,7 @@ import "*"
 # Stub for private_sshkeys module; put your real ssh keys into a
 # module under the `private' directory
 define trusted_authorized_keys($user) {
-    warn("There are no trusted authorized keys declared.  If you want passwordless ssh access to your test machines, add your ssh keys to the `private_sshkeys' puppet module")
+    warning("There are no trusted authorized keys declared.  If you want passwordless ssh access to your test machines, add your ssh keys to the `private_sshkeys' puppet module")
 
     # Example implementation:
     # Ssh_authorized_key {
@@ -20,7 +20,7 @@ define trusted_authorized_keys($user) {
 }
 
 define dropbox_authorized_keys($user) {
-    warn("There are no dropbox authorized keys declared.  If you want your test machines to have passwordless ssh access to some servers (e.g. to upload files), add the test machine ssh keys to the `private_sshkeys' puppet module")
+    warning("There are no dropbox authorized keys declared.  If you want your test machines to have passwordless ssh access to some servers (e.g. to upload files), add the test machine ssh keys to the `private_sshkeys' puppet module")
 
     # Example implementation is similar as for trusted_authorized_keys but inverted;
     # here, instead of the public keys of the users who adminster your test machines,
