@@ -127,6 +127,13 @@ node 'binaries.test.qt.nokia.com' inherits default {
     include simple_fileserver
 }
 
+# test results server
+node 'testr.test.qt.nokia.com' inherits default {
+    include puppet
+    include sshkeys
+    include testr
+}
+
 # Note: we match any domain here, rather than just `qt-test-net', because facter
 # refuses to consider `qt-test-net' a valid domain name, since it doesn't contain a dot
 node /^qt-test-server\./ inherits default {
