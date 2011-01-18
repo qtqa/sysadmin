@@ -1,8 +1,10 @@
 class meego_osc::ubuntu {
-    
+
     if (!$testuser) {
         fail("testuser should be set before including meego_osc")
     }
+
+    include meego_osc::linux::tmpreaper
 
     $home = "/home/$testuser"
 
