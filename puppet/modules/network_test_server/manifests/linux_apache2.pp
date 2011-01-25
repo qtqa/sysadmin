@@ -16,6 +16,9 @@ class network_test_server::linux::apache2 {
 
         # disable mod_deflate, because it interferes with Content-Length expected by tests
         "deflate":          ensure  =>  absent;
+
+        # used by auth-digest paths
+        "auth_digest":      ensure  =>  present;
     }
 
     apache2_conf {
