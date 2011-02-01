@@ -10,6 +10,7 @@ class network_test_server::linux {
     include network_test_server::linux::cyrus
     include network_test_server::linux::samba
     include network_test_server::linux::tmpreaper
+    include network_test_server::linux::sshd
 
     user {
         "qt-test-server":
