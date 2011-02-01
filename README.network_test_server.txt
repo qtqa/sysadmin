@@ -71,5 +71,9 @@ configuration files remain in use.
 
 As a brief test to see if the server is working, you can try the networkselftest
 Qt autotest.  On a machine _other_ than the network test server, put the test server
-IP address into /etc/hosts as qt-test-server.qt-test-net, and run the networkselftest
-testcase from Qt; if everything is set up correctly, it should 100% pass.
+IP address into /etc/hosts with short and full name, e.g. :
+
+  192.168.1.30  qt-test-server  qt-test-server.qt-test-net
+
+...and run the networkselftest testcase from Qt; if everything is set up
+correctly, it should 100% pass.
