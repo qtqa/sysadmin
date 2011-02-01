@@ -65,7 +65,12 @@ fi
 
 if ! test -e /opt/local/bin/git; then
     echo Installing git...
-    /opt/local/bin/port install git
+    # git was renamed to git-core in macports; allow for either name
+    if /opt/local/bin/port info git >/dev/null 2>&1; then
+        /opt/local/bin/port install git
+    else
+        /opt/local/bin/port install git-core
+    fi
 else
     echo git is already installed
 fi
