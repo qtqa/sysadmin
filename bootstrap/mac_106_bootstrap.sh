@@ -55,6 +55,19 @@ else
     echo macports is already installed
 fi
 
+# Ensures java development headers are installed.
+# This used to be a part of OSX, but now has to be installed separately,
+# and it is needed by some software in macports.
+# See https://trac.macports.org/ticket/26939
+if ! test -e /System/Library/Frameworks/JavaVM.framework/Headers/jni.h; then
+    curl $INPUT/javadeveloper_10.6_10m3261.dmg -o javadev.dmg
+    hdiutil attach ./javadev.dmg
+    installer -pkg "/Volumes/Java Developer/JavaDeveloper.pkg" -target /
+    hdiutil detach "/Volumes/Java Developer"
+else
+    echo Java development headers are already installed
+fi
+
 # Ensures puppet is installed.
 if ! test -e /opt/local/bin/puppet; then
     echo Installing puppet...
