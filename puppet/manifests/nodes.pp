@@ -7,7 +7,7 @@ node default {
 
     # For hosts where you want to use distcc, set this to the appropriate DISTCC_HOSTS
     # Note: prefer usage of icecream where possible, since that has a scheduler
-    $distcc_hosts = "localhost"
+    $distcc_hosts = [ "localhost" ]
 
     include puppet
 }
@@ -20,7 +20,15 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     include qt_prereqs
     include pulseagent
     include ccache
-    include distcc
+
+    # Note: distcc is commented here because it must be set _after_ $distcc_hosts
+    # is set to the correct value - and that value isn't known yet.
+    # To use distcc, in your node definition in private_nodes you should have
+    # something like:
+    #
+    # $distcc_hosts = [ "localhost", "host1", "host2", "host3" ]
+    # include distcc
+
     include distccd
     include puppet
     include sshkeys
@@ -37,7 +45,7 @@ node 'legacy-snowleopard-tester.test.qt.nokia.com' inherits default {
     include qt_prereqs
     include pulseagent
     include ccache
-    include distcc
+    #include distcc
     include distccd
     include puppet
     include sshkeys
