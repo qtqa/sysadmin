@@ -2,7 +2,7 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
     include macports
 
     # Ensure some packages via macports.
-    Package { provider => darwinport }
+    Package { provider => $macports_provider }
     package {
         "git-core":     ensure => present;
     }

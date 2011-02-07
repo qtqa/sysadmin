@@ -3,7 +3,7 @@ class ccache::mac
     include macports
 
     package { "ccache":
-        provider    =>  darwinport,
+        provider    =>  $macports_provider,
         ensure      =>  present,
     }
 
