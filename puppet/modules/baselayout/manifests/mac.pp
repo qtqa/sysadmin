@@ -52,6 +52,10 @@ automatic login for that user.                                    \
             ensure      =>  present,
             source      =>  "puppet:///modules/baselayout/mac/syslog.conf",
         ;
+        "/etc/launchd.conf":
+            ensure      =>  present,
+            source      =>  "puppet:///modules/baselayout/mac/launchd.conf",
+        ;
 
         # Erase any broken global gitconfig.
         # ~/.gitconfig is the one canonical place for git configuration
