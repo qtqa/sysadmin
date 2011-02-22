@@ -106,6 +106,7 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include crosscompilers
     include intel_compiler
     include vmware_tools
+    include symbian_linux
 
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan
