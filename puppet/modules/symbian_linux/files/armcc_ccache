@@ -38,7 +38,7 @@ sub using_ccache {
 
 # Run armcc through ccache
 sub run_ccache {
-    # Two fixups are required:
+    # Three fixups are required:
     #
     #  (1) CCACHE_CPP2 must always be set
     $ENV{CCACHE_CPP2} = 1;
@@ -51,6 +51,12 @@ sub run_ccache {
         if ($arg eq '--preinclude') {
             push @args, '--ccache-skip';
         }
+    }
+
+    #  (3) remove usage of CCACHE_PATH; we use this to activate icecc, but we know
+    #      that won't work for armcc
+    if (exists($ENV{CCACHE_PATH})) {
+        delete $ENV{CCACHE_PATH};
     }
 
     exec(CCACHE, 'armcc', @args);
