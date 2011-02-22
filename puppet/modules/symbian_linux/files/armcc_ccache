@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+=head1 armcc - wrapper for armcc with ccache
+
+This is a simple wrapper script to allow RVCT 2.2 to work with ccache.
+
+This wrapper sets CCACHE_CPP2=1, and gives a hint to ccache that the
+RVCT `--preinclude' headers are not the sources being compiled.
+
+=head2 Usage
+
+Put this in PATH before real armcc.
+
+=cut
+
+use FindBin;
+
+use constant CCACHE => '/usr/bin/ccache';
+
+# Removes directory containing this wrapper from PATH
+sub fixup_path {
+    my @new_path;
+    foreach my $dir (split /:/, $ENV{PATH}) {
+        unless ($dir eq $FindBin::Bin) {
+            push @new_path, $dir;
+        }
+    }
+    $ENV{PATH} = join(':', @new_path);
+}
+
+# Returns true if ccache is installed and not disabled
+sub using_ccache {
+    return (-x(CCACHE) && !$ENV{CCACHE_DISABLE});
+}
+
+# Run armcc through ccache
+sub run_ccache {
+    # Two fixups are required:
+    #
+    #  (1) CCACHE_CPP2 must always be set
+    $ENV{CCACHE_CPP2} = 1;
+
+    #  (2) we must replace all `--preinclude' with `--preinclude --ccache-skip',
+    #      otherwise ccache thinks the preinclude file is the file to be compiled
+    my @args = ();
+    foreach my $arg (@ARGV) {
+        push @args, $arg;
+        if ($arg eq '--preinclude') {
+            push @args, '--ccache-skip';
+        }
+    }
+
+    exec(CCACHE, 'armcc', @args);
+    die "exec ccache armcc: $!";
+}
+
+sub main {
+    fixup_path;
+    if (using_ccache) {
+        run_ccache;
+    }
+    else {
+        exec('armcc', @ARGV);
+        die "exec armcc: $!";
+    }
+}
+
+main;

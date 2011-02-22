@@ -22,5 +22,14 @@ class symbian_linux::ubuntu
     package { "wine1.2":
         ensure  =>  present,
     }
+
+    if $testuser {
+        # This wrapper allows armcc and ccache to work nicely together.
+        file { "/home/$testuser/bin/armcc":
+            source  =>  "puppet:///modules/symbian_linux/armcc_ccache",
+            mode    =>  0755,
+        }
+    }
+
 }
 
