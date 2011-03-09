@@ -14,8 +14,13 @@ class network_test_server::linux::apache2 {
         "dav_fs":           ensure  =>  present;
         "headers":          ensure  =>  present;
 
-        # disable mod_deflate, because it interferes with Content-Length expected by tests
-        "deflate":          ensure  =>  absent;
+        # enable mod_deflate, but make sure our custom deflate.conf is
+        # deployed first (otherwise all requests will be gzipped and
+        # tests will fail when they receive an unexpected Content-Length)
+        "deflate":
+            ensure  =>  present,
+            require =>  File["/etc/apache2/mods-available/deflate.conf"],
+        ;
 
         # used by auth-digest paths
         "auth_digest":      ensure  =>  present;
@@ -26,6 +31,22 @@ class network_test_server::linux::apache2 {
         "security":     ensure  =>  present;
         "ssl.conf":     ensure  =>  present;
         "dav.conf":     ensure  =>  present;
+    }
+
+    # replace the default mod_deflate conf with an empty one.
+    #
+    # The distro package typically provides a configuration for mod_deflate
+    # which turns on deflate for all paths, for HTML and text formats.
+    #
+    # We do not want this, because it makes our Content-Length less predictable.
+    # So, we'll make sure the global configuration does _not_ turn on deflate.
+    #
+    # Certain paths on the server will explicitly enable deflate (e.g. look for
+    # `DEFLATE' in other .conf files)
+    file { "/etc/apache2/mods-available/deflate.conf":
+        source  =>  "puppet:///modules/network_test_server/config/apache2/deflate.conf",
+        require =>  Package["apache2"],
+        notify  =>  Service["apache2"],
     }
 
     # dav upload directory
