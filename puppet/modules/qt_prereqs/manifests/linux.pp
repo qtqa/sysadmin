@@ -50,6 +50,11 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # make sure we have at least some simple way to download
             # files from command line
             "curl":                              ensure => installed;
+
+            # these are used by some CPAN modules we want to install
+            # for test scripts
+            "libmysqlclient-dev":                ensure => installed;
+            "libgd2-xpm-dev":                    ensure => installed;
         }
     }
 
