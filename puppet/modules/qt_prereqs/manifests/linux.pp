@@ -46,6 +46,10 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             "flex":                              ensure => installed;
             "bison":                             ensure => installed;
             "gperf":                             ensure => installed;
+
+            # make sure we have at least some simple way to download
+            # files from command line
+            "curl":                              ensure => installed;
         }
     }
 
