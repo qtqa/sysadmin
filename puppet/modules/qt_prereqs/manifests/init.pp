@@ -1,7 +1,5 @@
 import "*"
 
-include hosts
-
 class qt_prereqs {
     case $operatingsystem {
         Darwin:     { include qt_prereqs::mac }

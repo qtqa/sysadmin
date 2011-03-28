@@ -47,6 +47,7 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     $testuser = "qt"
     include baselayout
     include qt_prereqs
+    include hosts
     include pulseagent
     include ccache
     include qadungeon
@@ -73,6 +74,7 @@ node 'legacy-snowleopard-tester.test.qt.nokia.com' inherits default {
     $testuser = "pulseagent"
     include baselayout
     include qt_prereqs
+    include hosts
     include pulseagent
     include ccache
     #include distcc
@@ -85,6 +87,7 @@ node 'snowleopard-packager.test.qt.nokia.com' inherits default {
     $testuser = "pulseagent"
     include baselayout
     include qt_prereqs
+    include hosts
     include pulseagent
     include ccache
     include qadungeon
@@ -98,6 +101,7 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include puppet
     include baselayout
     include qt_prereqs
+    include hosts
     include pulseagent
     include sshkeys
     include qadungeon
@@ -117,6 +121,7 @@ node 'maemo-tester.test.qt.nokia.com' inherits default {
     include puppet
     include baselayout
     include qt_prereqs
+    include hosts
     include sshkeys
     include ccache
     include icecc
@@ -198,6 +203,7 @@ node 'solaris-master.test.qt.nokia.com' inherits default {
     # Pulse.  Also, this is useful anyway because people manually do builds on
     # the master sometimes.
     include qt_prereqs
+    include hosts
 }
 
 # containers themselves
@@ -211,6 +217,7 @@ node 'solaris-container.test.qt.nokia.com' inherits default {
     include ccache
     include sshkeys
     include qt_prereqs
+    include hosts
 }
 
 #====================== Test machines ========================================
