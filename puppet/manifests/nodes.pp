@@ -114,6 +114,10 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
 
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan
+
+    # Allow test machines to install python modules with pip or easy_install
+    # to $HOME/python26
+    include homedir_virtualenv
 }
 
 node 'maemo-tester.test.qt.nokia.com' inherits default {
