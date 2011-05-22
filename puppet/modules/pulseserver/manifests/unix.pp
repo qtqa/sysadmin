@@ -1,5 +1,6 @@
 class pulseserver::unix {
-    $user = "pulseserver"
+    $user          = "pulseserver"
+    $pulse_version = "2.3.12"
 
     File {
         owner   =>  $user,
@@ -29,7 +30,7 @@ class pulseserver::unix {
         subscribe   =>  File["pulse server directory"],
         # NOTE! tar might use --strip-path or --strip-components, we don't know which in advance.
         # Just try both.
-        command     =>  "/bin/sh -c 'wget -O - $input/pulse-2.2.11.tar.gz > $homedir/pulse-server-install.tar.gz && { tar -xvzf $homedir/pulse-server-install.tar.gz -C $pulseserver_dir --strip-component 1 || tar -xvzf $homedir/pulse-server-install.tar.gz -C $pulseserver_dir --strip-path 1; } && chown -R $user:users $pulseserver_dir'",
+        command     =>  "/bin/sh -c 'wget -O - $input/pulse-$pulse_version.tar.gz > $homedir/pulse-server-install.tar.gz && { tar -xvzf $homedir/pulse-server-install.tar.gz -C $pulseserver_dir --strip-component 1 || tar -xvzf $homedir/pulse-server-install.tar.gz -C $pulseserver_dir --strip-path 1; } && chown -R $user:users $pulseserver_dir'",
         creates     =>  "$pulseserver_dir/bin/pulse",
     }
 
