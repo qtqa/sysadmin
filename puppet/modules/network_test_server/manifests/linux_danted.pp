@@ -28,7 +28,7 @@ class network_test_server::linux::danted {
         # Fix it as needed.
         package { "dante-server":
             ensure  =>  present,
-            require =>  File["/etc/init.d/danted-authenticating"],
+            require =>  File["/etc/init.d/danted", "/etc/init.d/danted-authenticating"],
         }
     }
 
@@ -56,8 +56,11 @@ class network_test_server::linux::danted {
             require =>  Package["dante-server"],
             notify  =>  Service["danted-authenticating"],
         ;
+        "/etc/init.d/danted":
+            source  =>  "puppet:///modules/network_test_server/init/danted",
+        ;
         "/etc/init.d/danted-authenticating":
-            source  =>  "puppet:///modules/network_test_server/init/danted-authenticating",
+            source  =>  "puppet:///modules/network_test_server/init/danted",
         ;
     }
 
