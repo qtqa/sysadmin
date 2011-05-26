@@ -19,6 +19,9 @@ class homedir_cpan::mac {
         file { $LOCALLIB_BOOTSTRAP:
             source      =>  "puppet:///modules/homedir_cpan/mac/local-lib-bootstrap.pl",
         }
+        file { "/etc/profile.d/local-lib-perl.sh":
+            source      =>  "puppet:///modules/homedir_cpan/profile.d/local-lib-perl.sh",
+        }
 
         exec { "install local::lib for $testuser":
             command     => "/usr/bin/sudo -u $testuser -i /bin/sh -c '
