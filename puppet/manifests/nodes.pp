@@ -51,6 +51,7 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     include pulseagent
     include ccache
     include qadungeon
+    include homedir_cpan
 
     # Note: distcc is commented here because it must be set _after_ $distcc_hosts
     # is set to the correct value - and that value isn't known yet.

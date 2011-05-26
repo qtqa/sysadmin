@@ -7,6 +7,7 @@ import "*"
 class homedir_cpan {
     case $operatingsystem {
         Ubuntu:     { include homedir_cpan::ubuntu }
+        Darwin:     { include homedir_cpan::mac }
         default:    { error("homedir_cpan is not yet implemented for $operatingsystem") }
     }
 }
