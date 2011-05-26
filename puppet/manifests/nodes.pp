@@ -52,6 +52,7 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     include ccache
     include qadungeon
     include homedir_cpan
+    include homedir_virtualenv
 
     # Note: distcc is commented here because it must be set _after_ $distcc_hosts
     # is set to the correct value - and that value isn't known yet.

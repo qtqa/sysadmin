@@ -4,7 +4,7 @@
 # $HOME/python<version> directory which is suitable for installing
 # python modules into using easy_install or pip, without requiring root access.
 # The virtualenv command must be installed first (e.g. python-virtualenv
-# on Ubuntu).
+# on Ubuntu, py26-virtualenv from macports on Mac).
 #
 
 # Returns python<major_version><minor_version>, e.g. `python26',
@@ -22,6 +22,34 @@ _qtqa_python_handle() {
     fi
 }
 
+# Run some command while holding an exclusive lock on a file.
+# The file must not yet exist, and locking directories is not supported.
+#
+# Parameters:
+#   $1    the file to lock
+#   rest  the command and arguments to run
+#
+_qtqa_lock() {
+    LOCKFILE="$1"
+    shift
+
+    # on Linux, flock seems widely available.  lockfile is also often available.
+    # on OSX 10.6, flock seems never available and lockfile is always available.
+
+    if test -f /usr/bin/flock; then
+        /usr/bin/flock --exclusive "$LOCKFILE" "$@"
+    elif test -f /usr/bin/lockfile; then
+        /usr/bin/lockfile "$LOCKFILE"
+        "$@"
+        status=$?
+        rm -f "$LOCKFILE"
+        ( exit $status; )
+    else
+        echo "Internal error: neither flock nor lockfile is available." 1>&2
+        false
+    fi
+}
+
 # Creates a virtualenv at the given prefix, if it doesn't already exist.
 # If it looks like a virtualenv already exists there, do nothing.
 #
@@ -31,26 +59,26 @@ _qtqa_python_handle() {
 _qtqa_create_virtualenv() {
     LOCAL_PYTHONPREFIX="$1"
 
-    # Create the directory if it doesn't exist, so we at least can flock it.
+    # Create the directory if it doesn't exist, so we at least can lock it.
     mkdir -p "$LOCAL_PYTHONPREFIX" >/dev/null 2>&1
 
     # If the prefix doesn't exist yet, run virtualenv to set it up.
-    # This is flocked so that, if we're in the process of installing, we'll
+    # This is locked so that, if we're in the process of installing, we'll
     # wait for it to complete before invoking `test'.
     #
     # Note that there is a small but non-zero chance that some shells in parallel
     # will manage to pass this check.  This means that the virtualenv will be set
     # up multiple times, which wastes a bit of time but otherwise has no ill effect,
-    # as there is another flock to serialize the virtualenv setup.
+    # as there is another lock to serialize the virtualenv setup.
     #
-    if ! flock --exclusive "$LOCAL_PYTHONPREFIX" test -f "$LOCAL_PYTHONPREFIX/bin/python"; then
+    if ! _qtqa_lock "$LOCAL_PYTHONPREFIX/lock" test -f "$LOCAL_PYTHONPREFIX/bin/python"; then
 
         # Tell the user what we're doing, because this will slow down the
         # first login a little bit.
         echo -n "Creating a local python setup at $LOCAL_PYTHONPREFIX ... " 1>&2
 
-        # This is flocked to prevent multiple installs in parallel.
-        flock --exclusive "$LOCAL_PYTHONPREFIX" virtualenv --quiet "$LOCAL_PYTHONPREFIX" 1>&2
+        # This is locked to prevent multiple installs in parallel.
+        _qtqa_lock "$LOCAL_PYTHONPREFIX/lock" virtualenv --quiet "$LOCAL_PYTHONPREFIX" 1>&2
 
         if test -f "$LOCAL_PYTHONPREFIX/bin/python"; then
             echo "OK." 1>&2
@@ -120,6 +148,7 @@ _qtqa_virtualenv_main() {
 
     # Avoid unnecessary pollution
     unset -f _qtqa_python_handle
+    unset -f _qtqa_lock
     unset -f _qtqa_create_virtualenv
     unset -f _qtqa_source_virtualenv
     unset -f _qtqa_virtualenv_main
