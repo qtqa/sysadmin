@@ -42,6 +42,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # for QML visual tests
             "ttf-mscorefonts-installer":         ensure => installed;
 
+            # enable phonon to play more media formats
+            "gstreamer0.10-plugins-bad":         ensure => installed;
+
             # for webkit
             "flex":                              ensure => installed;
             "bison":                             ensure => installed;
