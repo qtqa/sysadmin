@@ -42,6 +42,14 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # for QML visual tests
             "ttf-mscorefonts-installer":         ensure => installed;
 
+            # for xcb qpa backend:
+            "libx11-xcb-dev":                    ensure => installed;
+            "libxcb-icccm1-dev":                 ensure => installed;
+            "libxcb-image0-dev":                 ensure => installed;
+            "libxcb-keysyms1-dev":               ensure => installed;
+            "libxcb-shm0-dev":                   ensure => installed;
+            "libxcb-sync0-dev":                  ensure => installed;
+
             # enable phonon to play more media formats
             "gstreamer0.10-plugins-bad":         ensure => installed;
 
