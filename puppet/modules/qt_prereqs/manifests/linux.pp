@@ -70,6 +70,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # this is used by the CI system python classes, and needed
             # to run the CI selftests correctly
             "sqlite3":                           ensure => installed;
+
+            # this is used by the QtSystem module
+            "libgconf2-dev":                     ensure => installed;
         }
     }
 
@@ -79,7 +82,7 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             "$sevenzip":        ensure => installed;
             "libasound2-dev":   ensure => installed;
             "libbluetooth-dev": ensure => installed;
-        }    
+        }
     }
 
 }
