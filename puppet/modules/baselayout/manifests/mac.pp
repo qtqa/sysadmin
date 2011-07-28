@@ -78,5 +78,22 @@ automatic login for that user.                                    \
             user    =>  "$testuser",
         }
     }
+
+    # Allow core dumps to work on Mac; see Technical Note TN2124 for details.
+    # /cores must exist and be writable by an unprivileged user ...
+    file { "/cores":
+        ensure  =>  directory,
+        mode    =>  1777,
+    }
+
+    # ... and must be cleaned up regularly (note that core dumps can
+    # be very large, typically much larger than e.g. on Linux).
+    # Here we delete anything which is 1 day old or more.
+    cron { "clean cores":
+        command =>  "/usr/bin/find /cores -type f -mtime +0 -delete",
+        user    =>  root,
+        minute  =>  [ 20 ],  # hourly at 20 past the hour
+        require =>  File["/cores"],
+    }
 }
 
