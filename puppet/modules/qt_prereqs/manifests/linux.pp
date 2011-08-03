@@ -74,6 +74,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # this is used by the QtSystem module
             "libgconf2-dev":                     ensure => installed;
 
+            # this is used by the QtMultimediaKit module
+            "libopenal-dev":                     ensure => installed;
+
             # needed by some client tool
             "libbz2-dev":                        ensure => installed;
         }
