@@ -8,7 +8,7 @@ class ccache::mac
     }
 
     if $testuser {
-        exec { "/usr/bin/sudo -u $testuser -i /opt/local/bin/ccache -M 4G":
+        exec { "/usr/bin/sudo -u $testuser -H -i /opt/local/bin/ccache -M 4G":
             require     =>  Package["ccache"],
         }
 

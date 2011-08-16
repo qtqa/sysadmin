@@ -5,7 +5,7 @@ class ccache::linux
     }
 
     if $testuser {
-        exec { "/usr/bin/sudo -u $testuser -i /usr/bin/ccache -M 4G":
+        exec { "/usr/bin/sudo -u $testuser -H -i /usr/bin/ccache -M 4G":
             require     =>  Package["ccache"],
         }
 

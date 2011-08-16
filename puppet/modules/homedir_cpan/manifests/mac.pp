@@ -24,7 +24,7 @@ class homedir_cpan::mac {
         }
 
         exec { "install local::lib for $testuser":
-            command     => "/usr/bin/sudo -u $testuser -i /bin/sh -c '
+            command     => "/usr/bin/sudo -u $testuser -H -i /bin/sh -c '
 
     $LOCALLIB_BOOTSTRAP $LOCALLIB_VERSION >>$LOCALLIB_LOG 2>&1 && touch $LOCALLIB_MARKER
 
