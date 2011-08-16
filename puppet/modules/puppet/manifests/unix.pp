@@ -9,7 +9,13 @@ class puppet::unix {
 
     $git = $operatingsystem ? {
         Solaris =>  "$env git",
-        Darwin  =>  "/opt/local/bin/git",
+        Darwin  =>  $macosx_productversion ? {
+            # On OSX <  10.7, we use git from macports.
+            # On OSX >= 10.7, we use git from xcode which goes to /usr/bin.
+            10.5    =>  "/opt/local/bin/git",
+            10.6    =>  "/opt/local/bin/git",
+            default =>  "/usr/bin/git",
+        },
         default =>  "/usr/bin/git",
     }
 

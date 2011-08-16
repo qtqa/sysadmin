@@ -59,7 +59,10 @@ automatic login for that user.                                    \
 
         # Erase any broken global gitconfig.
         # ~/.gitconfig is the one canonical place for git configuration
-        "/opt/local/etc/gitconfig":
+        "/opt/local/etc/gitconfig":	# macports git
+            ensure  =>  absent,
+        ;
+        "/etc/gitconfig":               # xcode git
             ensure  =>  absent,
         ;
     }

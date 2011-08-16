@@ -3,8 +3,13 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
 
     # Ensure some packages via macports.
     Package { provider => $macports_provider }
-    package {
-        "git-core":     ensure => present;
+
+    # Only these older macs need git from macports;
+    # newer macs get it from xcode
+    if ( $macosx_productversion == "10.5" ) or ( $macosx_productversion == "10.6" ) {
+        package {
+            "git-core":     ensure => present;
+        }
     }
 
     # 10.6: Re-enable LCD font smoothing for some monitors
