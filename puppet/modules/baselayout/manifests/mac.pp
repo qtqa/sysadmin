@@ -98,5 +98,31 @@ automatic login for that user.                                    \
         minute  =>  [ 20 ],  # hourly at 20 past the hour
         require =>  File["/cores"],
     }
+
+    # Make sure java is installed (OSX 10.7 only; earlier have it by default)
+    if ($macosx_productversion == "10.7") {
+
+        $javadmg = "JavaForMacOSX10.7.dmg"
+        $javavol = "/Volumes/Java for Mac OS X 10.7"
+        $javapkg = "$javavol/JavaForMacOSX10.7.pkg"
+
+        exec { "install java":
+            # note, initial detach is in case the volume was mounted from a previous attempt
+            command     =>  "/bin/sh -c '
+
+                hdiutil detach \"$javavol\"             ;
+                curl -O \"$input/mac/$javadmg\"         &&
+                hdiutil attach \"./$javadmg\"           &&
+                installer -pkg \"$javapkg\" -target /   &&
+                hdiutil detach \"$javavol\"             &&
+                rm -f \"./$javadmg\"
+
+            '",
+            path        =>  "/usr/bin:/bin:/usr/sbin:/sbin",
+            creates     =>  "/Library/Java/Home/bin/java",
+            logoutput   =>  "true",
+        }
+
+    }
 }
 
