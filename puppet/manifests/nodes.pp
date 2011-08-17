@@ -43,7 +43,7 @@ is run on this host."
 
 #====================== Mac ===================================================
 
-node 'snowleopard-tester.test.qt.nokia.com' inherits default {
+node 'lion-tester.test.qt.nokia.com' inherits default {
     $testuser = "qt"
     include baselayout
     include qt_prereqs
@@ -59,6 +59,25 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     # To use distcc, in your node definition in private_nodes you should have
     # something like:
     #
+    # $distcc_hosts = [ "localhost", "host1", "host2", "host3" ]
+    # include distcc
+
+    include distccd
+    include puppet
+    include sshkeys
+}
+
+node 'snowleopard-tester.test.qt.nokia.com' inherits default {
+    $testuser = "qt"
+    include baselayout
+    include qt_prereqs
+    include hosts
+    include pulseagent
+    include ccache
+    include qadungeon
+    include homedir_cpan
+    include homedir_virtualenv
+
     # $distcc_hosts = [ "localhost", "host1", "host2", "host3" ]
     # include distcc
 
