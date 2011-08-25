@@ -79,6 +79,7 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
             # needed by some client tool
             "libbz2-dev":                        ensure => installed;
+            "libedit-dev":                       ensure => installed;
         }
     }
 
