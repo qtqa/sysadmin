@@ -100,7 +100,7 @@ automatic login for that user.                                    \
     }
 
     # Make sure java is installed (OSX 10.7 only; earlier have it by default)
-    if ($macosx_productversion == "10.7") {
+    if ($macosx_productversion_major == "10.7") {
 
         $javadmg = "JavaForMacOSX10.7.dmg"
         $javavol = "/Volumes/Java for Mac OS X 10.7"

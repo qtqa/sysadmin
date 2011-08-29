@@ -6,7 +6,7 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
 
     # Only these older macs need git from macports;
     # newer macs get it from xcode
-    if ( $macosx_productversion == "10.5" ) or ( $macosx_productversion == "10.6" ) {
+    if ( $macosx_productversion_major == "10.5" ) or ( $macosx_productversion_major == "10.6" ) {
         package {
             "git-core":     ensure => present;
         }
