@@ -99,9 +99,9 @@ automatic login for that user.                                    \
         require =>  File["/cores"],
     }
 
-    # Make sure java is installed (OSX 10.7 only; earlier have it by default)
     if ($macosx_productversion_major == "10.7") {
 
+        # Make sure java is installed (OSX 10.7 only; earlier have it by default)
         $javadmg = "JavaForMacOSX10.7.dmg"
         $javavol = "/Volumes/Java for Mac OS X 10.7"
         $javapkg = "$javavol/JavaForMacOSX10.7.pkg"
@@ -123,6 +123,20 @@ automatic login for that user.                                    \
             logoutput   =>  "true",
         }
 
+        # Make sure we never keep "Saved Application States".
+        # This is Lion's "Resume" feature.
+        #
+        # This can cause the terminal containing the Pulse agent to be restarted after a reboot,
+        # as well as being started normally, so there will be left +1 terminal window after each
+        # reboot.  It also potentially screws up the state of autotests, as various QtGui
+        # autotests are leaving behind some unknown state here.
+        #
+        file { "/Users/$testuser/Library/Saved Application State":
+            ensure  =>  directory,  # it's a directory ...
+            purge   =>  true,       # which should always be empty ...
+            recurse =>  true,       # (recursively) ...
+            mode    =>  0500,       # and should never be writable
+        }
     }
 }
 
