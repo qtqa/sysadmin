@@ -86,7 +86,7 @@ automatic login for that user.                                    \
     # /cores must exist and be writable by an unprivileged user ...
     file { "/cores":
         ensure  =>  directory,
-        mode    =>  1777,
+        mode    =>  1555,   # TEMPORARILY DISABLED
     }
 
     # ... and must be cleaned up regularly (note that core dumps can
