@@ -1,5 +1,5 @@
 class pulseserver::linux inherits pulseserver::unix {
-    exec { "/bin/sh -c 'wget $input/java/jdk-6u21-linux-i586.rpm -O /tmp/jdk-install.rpm && /usr/bin/yum --nogpgcheck -y -d 0 -e 0 localinstall /tmp/jdk-install.rpm && rm /tmp/jdk-install.rpm'":
+    exec { "/bin/sh -c 'wget $input/java/jdk-6u27-linux-amd64.rpm -O /tmp/jdk-install.rpm && /usr/bin/yum --nogpgcheck -y -d 0 -e 0 localinstall /tmp/jdk-install.rpm && rm /tmp/jdk-install.rpm'":
         creates     =>  "/usr/bin/java",
     }
 

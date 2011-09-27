@@ -24,7 +24,7 @@ fi
 JAVA_OPTS="\
     -Dpulse.enable.request.logging=true \
     -Dpulse.jetty.max.threads=1024 \
-    -Xmx1024m \
+    -Xmx2048m \
     -Dcom.sun.management.jmxremote=true \
     -Dcom.sun.management.jmxremote.port=8199 \
     -Dcom.sun.management.jmxremote.ssl=false \
