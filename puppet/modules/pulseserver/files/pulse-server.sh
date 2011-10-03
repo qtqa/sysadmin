@@ -8,6 +8,7 @@ if [ "x$1" = "x--daemonize" ]; then
 fi
 
 PULSEDIR=$HOME/pulse
+cd $PULSEDIR
 
 # Make sure the server always has $HOME/bin at front of PATH
 # This is for the git wrapper, hook scripts, etc.
