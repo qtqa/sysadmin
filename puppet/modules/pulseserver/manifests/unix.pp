@@ -41,6 +41,33 @@ class pulseserver::unix {
         mode    =>  0755,
     }
 
+    file { "$homepath/bin":
+        ensure  =>  directory,
+        mode    =>  0755,
+    }
+
+    file { "$homedir/bin/pulseserver-git":
+        ensure  =>  present,
+        source  =>  "puppet:///modules/pulseserver/pulseserver-git",
+        mode    =>  0755,
+        require =>  File["$homepath/bin"],
+    }
+
+    # symlink $HOME/bin/git to our wrapper script.
+    file { "$homepath/bin/git":
+        ensure  =>  "$homepath/bin/pulseserver-git",
+        require =>  File["$homepath/bin/pulseserver-git"],
+    }
+
+    # maintain the git cache regularly
+    cron { "pulseserver-git maintain-cache":
+        command =>  "$homepath/bin/pulseserver-git maintain-cache",
+        user    =>  $user,
+        hour    =>  [ 3, 15 ],
+        minute  =>  [ 10 ],
+        require =>  File["$homepath/bin/pulseserver-git"],
+    }
+
     package { "postgresql-server":
         ensure  => installed,
     }

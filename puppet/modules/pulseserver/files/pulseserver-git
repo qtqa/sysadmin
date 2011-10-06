@@ -1,0 +1,323 @@
+#!/usr/bin/env perl
+# vim: expandtab:ts=4
+package QtQA::App::PulseServerGit;
+use strict;
+use warnings;
+
+=head1 NAME
+
+pulseserver-git - git wrapper for use on Pulse server
+
+=head1 SYNOPSIS
+
+  # Put in PATH in front of real git, then use it transparently ...
+  ln -s path/to/pulseserver-git $HOME/bin/git
+  export PATH=$HOME/bin:$PATH
+  git clone foo:bar/baz.git path/to/baz
+
+  # Or invoke directly for some maintenance tasks
+  pulseserver-git maintain-cache [ options ]
+
+=head2 Options / commands
+
+When invoked directly, pulseserver-git understands these options/commands:
+
+=over
+
+=item B<maintain-cache>
+
+Perform cache maintenance: create the git-object-cache if it doesn't exist, and
+update the cache from all clones on the server.
+It is recommended to run this from a cron job.
+
+=item B<--dry-run>
+
+Don't actually do anything, just print out what would be run.
+
+=item B<--help>
+
+Show this help.
+
+=back
+
+=head1 DESCRIPTION
+
+This script, if placed in path before the real `git', implements a single new
+feature useful on the pulse server:
+
+=over
+
+=item transparent caching / object sharing
+
+Clones will transparently make use of an object cache directory, to vastly speed
+up the cloning of similar repositories and to save disk space.
+
+=back
+
+It may add a few other minor features later (e.g. logging; recovering from hangs).
+
+=head1 INSTALLATION
+
+  ln -s path/to/pulseserver-git $HOME/bin/git
+
+Make the pulseserver transparently use this git script.
+
+=head1 CAVEATS
+
+Using an object cache has risks.  Corruption of the object cache can damage all
+git repositories using the cache.
+
+=cut
+
+use Fcntl qw(:flock);
+use File::Basename;
+use File::Spec::Functions;
+use FindBin;
+use Getopt::Long qw(:config pass_through);
+use Pod::Usage;
+
+# the "real" git command to use.
+my $GIT = '/usr/bin/git';
+
+# the pulse installation directory
+my $PULSE_INSTALL_DIR = catfile( $ENV{ HOME }, 'pulse' );
+
+# the pulse data directory
+my $PULSE_DATA_DIR = catfile( $ENV{ HOME }, qw(.pulse2 data) );
+
+# path to the git object cache
+my $GIT_OBJECT_CACHE = catfile( $ENV{ HOME }, qw(pulse git-object-cache) );
+
+# marker file indicating object cache is created
+my $GIT_OBJECT_CACHE_SENTINEL = catfile( $GIT_OBJECT_CACHE, 'README' );
+
+# maintain-cache lockfile to ensure maximum of one running maintain-cache
+my $MAINTAIN_CACHE_LOCKFILE = catfile( $ENV{ HOME }, '.pulseserver-git-maintain-cache' );
+
+sub new
+{
+    my ($class) = @_;
+
+    return bless {}, $class;
+}
+
+# If @args looks like a clone command that we can safely intercept,
+# then returns a ref to a hash containing these keys:
+#
+#   original_args   =>  reference to array holding the original arguments
+#   new_args        =>  reference to array holding the new arguments we should use
+#
+sub parse_clone
+{
+    my ($self, @args) = @_;
+
+    # Sample command:
+    #
+    #  git clone --no-checkout qtgitreadonly:qa-dungeon/working-area.git scm
+    #
+    unless ( scalar(@args) == 4
+       && $args[0] eq 'clone'
+       && $args[1] eq '--no-checkout'
+       && $args[2] !~ m{^-} # for the last two args, we use a basic hueristic
+       && $args[3] !~ m{^-} # to guess for non-option args
+    ) {
+
+        if (scalar(@args) >= 1 && $args[0] eq 'clone') {
+            # This warrants a warning, as we should aim for 100% of clones to use the cache.
+            $self->print_warning( "clone command `@args' is not understood.  Cache won't be used.\n" );
+        }
+
+        return;
+    }
+
+    my @new_args = (
+        'clone',
+        '--verbose',
+        '--reference',
+        $GIT_OBJECT_CACHE,
+        '--no-checkout',
+        $args[2],
+        $args[3],
+    );
+
+    my $out = {
+        original_args => [ @args ],
+        new_args      => \@new_args,
+    };
+    return $out;
+}
+
+sub print_warning
+{
+    my ($self, $text) = @_;
+
+    warn __PACKAGE__ . ": $text";
+
+    return;
+}
+
+sub exe
+{
+    my ($self, @cmd) = @_;
+
+    if ($self->{ dryrun }) {
+        $self->print_warning("+ [dry-run] @cmd\n");
+        return;
+    }
+
+    $self->print_warning("+ @cmd\n");
+
+    my $status = system(@cmd);
+    if ($status != 0) {
+        my $exitcode = ($status >> 8);
+        if ($exitcode == 0) {
+            $exitcode = 1;
+        }
+        exit $exitcode;
+    }
+
+    return;
+}
+
+sub handle_git_clone
+{
+    my ($self, $clone_info) = @_;
+
+    if (! -f $GIT_OBJECT_CACHE_SENTINEL) {
+        $self->print_warning(
+            "commandline `@{ $clone_info->{ original_args } }' looks like a clone which we'd like to intercept, but the "
+           ."git object cache doesn't seem to exist yet ($GIT_OBJECT_CACHE_SENTINEL was not "
+           ."found).  `pulseserver-git maintain-cache' probably needs to be run.  Cache won't "
+           ."be used.\n"
+        );
+        return $self->exe( $GIT, @{ $clone_info->{ original_args }} );
+    }
+
+    return $self->exe( $GIT, @{ $clone_info->{ new_args } } );
+}
+
+sub update_cache
+{
+    my ($self) = @_;
+
+    foreach my $dir (glob "$PULSE_DATA_DIR/projects/*/scm" ) {
+        (-d "$dir/.git") || next;
+
+        # Get the number part (e.g. 12345)
+        my $prjid = basename( dirname( $dir ) );
+
+        # `eval' because should not be fatal if this fails - the repo might be
+        # in the middle of cloning, for example, in which case we'll get it next time :)
+        eval {
+            # use ionice and nice to reduce impact, since this is not time-critical.
+            # we fetch e.g. pulse project with id 12345 into refs/project_12345/* ,
+            # and these are never cleaned up, to reduce the incidence of dangling objects.
+            $self->exe(
+                'ionice',
+                '-n7',
+                'nice',
+                'git',
+                "--git-dir=$GIT_OBJECT_CACHE",
+                'fetch',
+                $dir,
+                "+refs/*:refs/project_$prjid/*",
+            );
+        };
+        if ($@) {
+            $self->print_warning( "cache not updated with $dir - $@" );
+        }
+    }
+
+    return;
+}
+
+sub ensure_cache_exists
+{
+    my ($self) = @_;
+
+    if (-e $GIT_OBJECT_CACHE_SENTINEL) {
+        # nothing to be done
+        return;
+    }
+
+    # note: we use `exe' here mostly for automated dry-run handling
+    # We try to be atomic, so destroy any half-created stuff and create the sentinel
+    # file as the very last step.
+    $self->exe( 'rm', '-rf', $GIT_OBJECT_CACHE );
+    $self->exe( 'mkdir', '-p', $GIT_OBJECT_CACHE );
+    $self->exe( $GIT, "--git-dir=$GIT_OBJECT_CACHE", 'init' );
+    $self->exe( $GIT, "--git-dir=$GIT_OBJECT_CACHE", 'config', 'gc.auto', '0' );
+
+    my $fullname = catfile( $FindBin::Bin, basename( $0 ) );
+    $self->exe( '/bin/sh', '-c', "echo 'Created by $fullname - DO NOT MESS WITH THIS DIRECTORY!' > $GIT_OBJECT_CACHE_SENTINEL" );
+
+    return;
+}
+
+sub maintain_cache
+{
+    my ($self) = @_;
+
+    my $fh;
+    open( $fh, '>>', $MAINTAIN_CACHE_LOCKFILE ) || die "open $MAINTAIN_CACHE_LOCKFILE: $!";
+
+    # Make sure we are the only maintain-cache running.
+    # Depending on how often this happens, it might make sense to change this from an error
+    # to a success (0 exit code).
+    flock( $fh, LOCK_EX|LOCK_NB ) || die "could not lock $MAINTAIN_CACHE_LOCKFILE.  Is some maintain-cache already running?";
+
+    truncate( $fh, 0 ) || die "truncate $MAINTAIN_CACHE_LOCKFILE: $!";
+    print $fh "$$\n";
+
+    $self->ensure_cache_exists( );
+    $self->update_cache( );
+
+    flock( $fh, LOCK_UN );
+    close( $fh );
+
+    return;
+}
+
+sub run
+{
+    my ($self, @args) = @_;
+
+    # Guard against infinite recursion.
+    if ($ENV{ _PULSESERVER_GIT_RUNNING }) {
+        exec( $GIT, @args );
+    }
+    local $ENV{ _PULSESERVER_GIT_RUNNING } = 1;
+
+    # Was I called via a `git' symlink or not?
+    $self->{ transparent } = ( basename( $0 ) eq 'git' );
+
+    # Handle --help ourselves (only if not transparent)
+    if (!$self->{ transparent }) {
+        local @ARGV = @args;
+        GetOptions(
+            'h|help|?'  =>  sub { pod2usage( 2 ) },
+            'dry-run'   =>  \$self->{ dryrun },
+        ) || die $!;
+        @args = @ARGV;
+
+        if (scalar(@args) == 1 && $args[0] eq 'maintain-cache') {
+            return $self->maintain_cache( );
+        }
+    }
+
+    if (my $clone_info = $self->parse_clone( @args )) {
+        return $self->handle_git_clone( $clone_info );
+    }
+
+    # Nothing special to be done.
+    if ($self->{ dryrun }) {
+        # just call `exe' to get the right logging.
+        return $self->exe( $GIT, @args );
+    }
+
+    exec( $GIT, @args );
+}
+
+QtQA::App::PulseServerGit->new( )->run( @ARGV ) if !caller;
+1;
+
