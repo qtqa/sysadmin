@@ -1,6 +1,15 @@
 class baselayout::linux inherits baselayout::unix {
+
+    # Do not use KDE since Ubuntu 11
+    if $operatingsystem == "Ubuntu" and $lsbmajdistrelease < 11 {
+        $use_kde = 1
+    }
+
     if $testuser {
-        include kdesettings
+
+        if $use_kde {
+            include kdesettings
+        }
 
         user { $testuser:
             ensure      =>  present,
@@ -59,7 +68,7 @@ class baselayout::linux inherits baselayout::unix {
         "$ssh":  ensure => installed;
     }
 
-    if $testuser {
+    if $testuser and $use_kde {
         package {
             "$kde": ensure => installed;
         }
@@ -75,10 +84,14 @@ class baselayout::linux inherits baselayout::unix {
 # Run a command at startup.
 # Uses freedesktop $HOME/.config/autostart, which seems to be supported on
 # most Linux for several years
-define startup($command, $user) {
+# Additional $terminal variable to fix execution issue on Ubuntu 11.10,
+# as it is broken on 11.10 (according to apt-file search nothing provides
+# xdg-terminal).
+define startup($command, $user, $terminal=false) {
     file { "/home/$user/.config/autostart/$name.desktop":
         ensure  =>  present,
         owner   =>  $user,
+        mode    =>  0755,
         content =>  template("baselayout/xdg-autostart.desktop.erb"),
         require =>  File["/home/$user/.config/autostart"],
     }

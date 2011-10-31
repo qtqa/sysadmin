@@ -32,6 +32,22 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
     }
 
     if $operatingsystem == "Ubuntu" {
+
+        $libxcb_icccm_dev = $lsbmajdistrelease ? {
+            10          =>  "libxcb-icccm1-dev",
+            default     =>  "libxcb-icccm4-dev",
+        }
+
+        if $lsbmajdistrelease >= 11 {
+            package {
+                "libegl1-mesa-dev":                  ensure => installed;
+                "libgl1-mesa-dev":                   ensure => installed;
+                "libgles1-mesa-dev":                 ensure => installed;
+                "libgles2-mesa-dev":                 ensure => installed;
+                "libxrender-dev":                    ensure => installed;
+            }
+        }
+
         package {
             "libgstreamer-plugins-base0.10-dev": ensure => installed;
             "libdbus-1-dev":                     ensure => installed;
@@ -44,7 +60,7 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
             # for xcb qpa backend:
             "libx11-xcb-dev":                    ensure => installed;
-            "libxcb-icccm1-dev":                 ensure => installed;
+            "$libxcb_icccm_dev":                 ensure => installed;
             "libxcb-image0-dev":                 ensure => installed;
             "libxcb-keysyms1-dev":               ensure => installed;
             "libxcb-shm0-dev":                   ensure => installed;

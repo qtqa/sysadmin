@@ -131,7 +131,6 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include crosscompilers
     include intel_compiler
     include vmware_tools
-    include symbian_linux
 
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan
@@ -161,6 +160,10 @@ node 'maemo-tester.test.qt.nokia.com' inherits default {
 }
 
 node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+    include symbian_linux
+}
+
+node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
 }
 
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
