@@ -12,14 +12,6 @@ class ccache::mac
             require     =>  Package["ccache"],
         }
 
-        define ccache_link($command) {
-            file {
-                "/Users/$testuser/bin/$command":
-                    ensure  =>  "/opt/local/bin/ccache",
-                    require =>  File["/Users/$testuser/bin"],
-            }
-        }
-
         ccache_link {
                 "gcc":     command => "gcc";
                 "gcc-4.0": command => "gcc-4.0";

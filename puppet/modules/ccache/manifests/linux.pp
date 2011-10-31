@@ -9,14 +9,6 @@ class ccache::linux
             require     =>  Package["ccache"],
         }
 
-        define ccache_link($command) {
-            file {
-                "/home/$testuser/bin/$command":
-                    ensure  =>  "/usr/bin/ccache",
-                    require =>  File["/home/$testuser/bin"],
-            }
-        }
-
         ccache_link {
                 "gcc":     command => "gcc";
                 "g++":     command => "g++";
