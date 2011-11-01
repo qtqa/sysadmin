@@ -28,6 +28,7 @@ class baselayout::ubuntu inherits baselayout::linux {
             owner   =>  "root",
             mode    =>  0444,
             source  =>  "puppet:///modules/baselayout/ubuntu/locale",
+            require =>  File["/etc/default/maybe_wait_for_real_hostname"],
         ;
         "/etc/sysctl.conf":
             owner   =>  "root",
