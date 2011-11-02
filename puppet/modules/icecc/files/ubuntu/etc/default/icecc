@@ -1,5 +1,7 @@
 # Defaults for icecc initscript
 # sourced by /etc/init.d/icecc
-. /etc/default/maybe_wait_for_real_hostname
+if test -f /etc/default/maybe_wait_for_real_hostname; then
+    . /etc/default/maybe_wait_for_real_hostname
+fi
 START_ICECC="true"
 START_ICECC_SCHEDULER="false"
