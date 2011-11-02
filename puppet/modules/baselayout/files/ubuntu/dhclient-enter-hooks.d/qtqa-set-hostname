@@ -16,6 +16,7 @@ if { [ "x$reason" == "xBOUND" ] || [ "x$reason" == "xRENEW" ]; } &&
 then
     echo "change hostname from $(hostname) to $new_host_name" |
         logger -t qtqa-set-hostname
+    echo "$new_host_name" > /etc/hostname
     hostname "$new_host_name"
 fi
 
