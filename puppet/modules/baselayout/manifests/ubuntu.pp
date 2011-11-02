@@ -62,6 +62,18 @@ class baselayout::ubuntu inherits baselayout::linux {
             "dconf-tools":      ensure => installed;
         }
 
+        # Ensure we set the hostname to whatever is returned by DHCP.
+        # Scriptlets in the dhclient-enter-hooks.d directory are sourced by dhclient-script
+        # whenever the connection comes up.  We deploy a scriptlet which explicitly sets the
+        # hostname according to the value returned by the DHCP response.
+        file {
+            "/etc/dhcp/dhclient-enter-hooks.d/qtqa-set-hostname":
+                owner   =>  "root",
+                mode    =>  0444,
+                source  =>  "puppet:///modules/baselayout/ubuntu/dhclient-enter-hooks.d/qtqa-set-hostname",
+            ;
+        }
+
         if $testuser {
             file {
                 # This enables autologin as $testuser

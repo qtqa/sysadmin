@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Deployed by puppet
+#
+# This script sets the hostname for the machine according to
+# the value sent back with the DHCP response.
+#
+
+# We set new host name if we are BOUND (new dhcp lease) or RENEW
+# (renewed lease), and the DHCP request returned a non-empty hostname
+# which is not equal to our current hostname.
+#
+if { [ "x$reason" == "xBOUND" ] || [ "x$reason" == "xRENEW" ]; } &&
+    [ "x$new_host_name" != "x" ] &&
+    [ "x$new_host_name" != "x$(hostname)" ];
+then
+    echo "change hostname from $(hostname) to $new_host_name" |
+        logger -t qtqa-set-hostname
+    hostname "$new_host_name"
+fi
+
