@@ -161,13 +161,17 @@ node 'maemo-tester.test.qt.nokia.com' inherits default {
 
 node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     include symbian_linux
+    include pulseagent
 }
 
 node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+    $pulseagent_short_datadir = true
+    include pulseagent
 }
 
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     include meego_osc
+    include pulseagent
 }
 
 #====================== Servers =================================================

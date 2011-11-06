@@ -25,6 +25,12 @@ class pulseagent::unix {
         group   =>  "$testgroup",
     }
 
+    file { "$homedir/.pulse2-agent":
+        ensure  =>  directory,
+        owner   =>  $testuser,
+        group   =>  $testgroup,
+    }
+
     exec { "install pulseagent":
         subscribe   =>  File["pulseagent directory"],
         # NOTE! tar might use --strip-path or --strip-components, we don't know which in advance.
@@ -36,6 +42,26 @@ class pulseagent::unix {
     $pulsescript = $operatingsystem ? {
         Darwin  =>  "$homedir/pulse-agent.command",
         default =>  "$homedir/pulse-agent.sh",
+    }
+
+    if $pulseagent_short_datadir {
+        file {
+            "pulseagent build directory":
+                name    =>  "/build",
+                ensure  =>  directory,
+                owner   =>  $testuser,
+                group   =>  $testgroup,
+            ;
+            "pulseagent configuration":
+                name    =>  "$homedir/.pulse2-agent/config.properties",
+                ensure  =>  present,
+                owner   =>  $testuser,
+                group   =>  $testgroup,
+                source  =>  "puppet:///modules/pulseagent/config.properties",
+                mode    =>  0644,
+                require =>  File["$homedir/.pulse2-agent"],
+            ;
+         }
     }
 
     file { "pulseagent script":
