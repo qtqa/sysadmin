@@ -123,7 +123,6 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include baselayout
     include qt_prereqs
     include hosts
-    include pulseagent
     include sshkeys
     include qadungeon
     include ccache
