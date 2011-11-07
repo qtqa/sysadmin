@@ -103,6 +103,13 @@ class baselayout::ubuntu inherits baselayout::linux {
                     onlyif  => "/bin/sh -c 'test $(DISPLAY=:0 dconf read /org/gnome/desktop/session/idle-delay) != \"uint32 0\"'",
                     user    => $testuser,
                     require => Package["dconf-tools", "ubuntu-desktop"],
+                ;
+                "disable remind-reload query":
+                    command => "/bin/sh -c 'DISPLAY=:0 dconf write /apps/update-manager/remind-reload false'",
+                    onlyif  => "/bin/sh -c 'test $(DISPLAY=:0 dconf read /apps/update-manager/remind-reload) = true'",
+                    user    => $testuser,
+                    require => Package["dconf-tools", "ubuntu-desktop"],
+                ;
             }
         }
     }
