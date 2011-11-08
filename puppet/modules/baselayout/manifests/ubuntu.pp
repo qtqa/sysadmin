@@ -110,6 +110,12 @@ class baselayout::ubuntu inherits baselayout::linux {
                     user    => $testuser,
                     require => Package["dconf-tools", "ubuntu-desktop"],
                 ;
+                "disable screensaver idle-activation":
+                    command => "/bin/sh -c 'DISPLAY=:0 dconf write /org/gnome/desktop/screensaver/idle-activation-enabled false'",
+                    onlyif  => "/bin/sh -c 'test $(DISPLAY=:0 dconf read /org/gnome/desktop/screensaver/idle-activation-enabled) = true'",
+                    user    => $testuser,
+                    require => Package["dconf-tools", "ubuntu-desktop"],
+                ;
             }
         }
     }
