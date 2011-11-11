@@ -126,7 +126,6 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include sshkeys
     include qadungeon
     include ccache
-    include icecc
     include crosscompilers
     include intel_compiler
     include vmware_tools
@@ -161,21 +160,26 @@ node 'maemo-tester.test.qt.nokia.com' inherits default {
 node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     include symbian_linux
     include pulseagent
+    include icecc
 }
 
 node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     $pulseagent_short_datadir = true
     include pulseagent
+    # icecc initialisation delayed until scheduler address is set
+    #include icecc
 }
 
 node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     $pulseagent_short_datadir = true
     include pulseagent
+    include icecc
 }
 
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     include meego_osc
     include pulseagent
+    include icecc
 }
 
 #====================== Servers =================================================
