@@ -45,6 +45,11 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
                 "libgles1-mesa-dev":                 ensure => installed;
                 "libgles2-mesa-dev":                 ensure => installed;
                 "libxrender-dev":                    ensure => installed;
+
+                # for qtwayland
+                "libwayland-dev":                    ensure => installed;
+                "libxcomposite-dev":                 ensure => installed;
+                "libffi-dev":                        ensure => installed;
             }
         }
 
