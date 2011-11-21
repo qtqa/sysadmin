@@ -161,6 +161,7 @@ node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include symbian_linux
     include pulseagent
     include icecc
+    include testcocoon
 }
 
 node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
@@ -168,12 +169,14 @@ node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include pulseagent
     # icecc initialisation delayed until scheduler address is set
     #include icecc
+    include testcocoon
 }
 
 node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     $pulseagent_short_datadir = true
     include pulseagent
     include icecc
+    include testcocoon
 }
 
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
