@@ -177,6 +177,7 @@ node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include pulseagent
     include icecc
     include testcocoon
+    include armel_cross
 }
 
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
