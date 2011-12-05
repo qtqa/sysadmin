@@ -46,6 +46,28 @@ class pulseserver::unix {
         mode    =>  0755,
     }
 
+    # Scripts supporting the log synchronization to testresults.qt-project.org
+    file {
+        "$homedir/bin/publish_log_hook":
+            ensure  =>  present,
+            source  =>  "puppet:///modules/pulseserver/publish_log_hook",
+            mode    =>  0755,
+            require =>  File["$homedir/bin"],
+        ;
+        "$homedir/bin/publish_log_hook.DEV":
+            ensure  =>  present,
+            source  =>  "puppet:///modules/pulseserver/publish_log_hook.DEV",
+            mode    =>  0755,
+            require =>  File["$homedir/bin/publish_log_hook"],
+        ;
+        "$homedir/bin/publish_log_hook.PROD":
+            ensure  =>  present,
+            source  =>  "puppet:///modules/pulseserver/publish_log_hook.PROD",
+            mode    =>  0755,
+            require =>  File["$homedir/bin/publish_log_hook"],
+        ;
+    }
+
     file { "$homedir/bin/pulseserver-git":
         ensure  =>  present,
         source  =>  "puppet:///modules/pulseserver/pulseserver-git",
