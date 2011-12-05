@@ -1,0 +1,59 @@
+/*
+    Source: git://gitorious.org/qtqa/sysadmin
+    Note: this CSS attempts to track the style from wiki.qt-project.org
+*/
+html {
+    background: #e3e3e2 url('/img/page_bg.png') repeat-x 0 0;
+}
+#p-logo a, #p-logo a:hover {
+    text-decoration: none;
+}
+#p-logo img {
+    vertical-align: middle;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    color: black;
+    background: none;
+    margin: 0;
+    overflow: hidden;
+    padding-top: .5em;
+    padding-bottom: .17em;
+}
+h1 { font-size: 300%; }
+body {
+    font-family: Verdana, sans-serif;
+}
+/* scale back up to a sane default */
+div#globalWrapper {
+    background-clip: padding-box;
+    background-color: #ffffff;
+    border-radius: 9px;
+    box-shadow: 0 0 4px #DDDDDD;
+    margin: 0 auto;
+    padding: 30px 30px 30px;
+    max-width: 1350px;
+    min-width: 900px;
+    font-size: 90%;
+}
+ul {
+    line-height: 1.5em;
+    list-style-type: square;
+    margin: .3em 0 0 0;
+    padding: 0 0 0 1em;
+    list-style: none;
+}
+ol {
+    line-height: 1.5em;
+    margin: .3em 0 0 3.2em;
+    padding: 0;
+    list-style-image: none;
+}
+li {
+    margin-bottom: .1em;
+}
+ul li {
+    background: url('/img/bullet.png') no-repeat 2px 8px transparent;
+    padding: 0 0 0 18px;
+}

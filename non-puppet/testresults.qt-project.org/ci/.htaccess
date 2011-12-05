@@ -1,0 +1,6 @@
+# Source: git://gitorious.org/qtqa/sysadmin
+Options +Indexes
+IndexOptions +FancyIndexing
+IndexStyleSheet /css/qt.css
+HeaderName /include/ci-fancy-index-header.html
+ReadmeName /include/ci-fancy-index-footer.html
