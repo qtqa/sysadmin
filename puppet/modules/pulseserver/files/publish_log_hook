@@ -248,7 +248,10 @@ sub run_post_stage
     my $dest_dir = $dest_intermediate_dirs[-1];
     my $dest_file = catfile( $dest_dir, 'log.txt.gz' );
 
-    $self->printv( "src: $src\ndest: $dest_file\n" );
+    # Destination file used while upload is in progress (for atomicity)
+    my $dest_file_tmp = catfile( $dest_dir, '.uploading-log.txt.gz' );
+
+    $self->printv( "src: $src\ndest: $dest_file\ndest tmp: $dest_file_tmp\n" );
 
     # Common part of ssh command.
     my @ssh_base = ('ssh', '-oBatchMode=yes', $self->{ ssh_dest_host });
@@ -278,8 +281,11 @@ sub run_post_stage
         # Make the directory on remote host
         "mkdir -p $dest_dir </dev/null"
 
-        # Either write directly, or write with compression, to the dest file
-       ." && ".($already_compressed ? 'cat' : 'gzip --to-stdout')." > $dest_file"
+        # Either write directly, or write with compression, to the temp dest file
+       ." && ".($already_compressed ? 'cat' : 'gzip --to-stdout')." > $dest_file_tmp"
+
+        # Then move the temp dest file into place (near-atomic)
+       ." && mv $dest_file_tmp $dest_file"
 
         # Touch all intermediate directories, so that modified timestamp can be
         # used to make meaningful judgments about CI activity.
