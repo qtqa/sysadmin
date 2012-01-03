@@ -1,10 +1,14 @@
 class armel_cross::ubuntu
 {
-    $mesa_dev_armel_cross_version = '7.11.2-0qtqa7'
-
-    package { "mesa-dev-armel-cross":
-        ensure      =>  $mesa_dev_armel_cross_version,
+    # Everything depends on this
+    Package {
         require     =>  File["/etc/apt/sources.list.d/armel_cross-qtqa.list"],
+    }
+
+    package {
+        "mesa-dev-armel-cross":     ensure => '7.11.2-0qtqa7';          # for QtGui
+        "openssl-dev-armel-cross":  ensure => '1.0.0e-0qtqa1';          # for QtNetwork
+        "libedit-dev-armel-cross":  ensure => '2.11-20080614-2.2qtqa5'; # for QtJsonDb
     }
 
     package { "g++-arm-linux-gnueabi":
