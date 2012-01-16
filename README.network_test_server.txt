@@ -49,7 +49,7 @@ For example, run `tail -f /var/log/syslog &' before proceeding.
 From this git repo, put bootstrap/ubuntu1004_bootstrap.sh onto the machine,
 and run it.  e.g.
 
-# wget http://qt.gitorious.org/projects/qtqa/repos/sysadmin/blobs/raw/master/bootstrap/ubuntu1004_bootstrap.sh \
+# wget http://qt.gitorious.org/qtqa/sysadmin/blobs/raw/master/bootstrap/ubuntu1004_bootstrap.sh \
     && sh ./ubuntu1004_bootstrap.sh git://qt.gitorious.org/qtqa/sysadmin.git
 
 This will install and run puppet.  Since you named the machine qt-test-server
