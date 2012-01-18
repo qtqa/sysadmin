@@ -15,16 +15,14 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         default     =>  "p7zip",
     }
 
-    $lsb = $operatingsystem ? {
-        MeeGo       =>  "meego-lsb",
-        default     =>  "lsb",
-    }
-
     package {
         "$git":             ensure => installed;
         "$gstreamer":       ensure => installed;
         "chrpath":          ensure => installed;
-        "$lsb":             ensure => installed;
+        "lsb":              ensure => installed;
+        "$sevenzip":        ensure => installed;
+        "libasound2-dev":   ensure => installed;
+        "libbluetooth-dev": ensure => installed;
 
         # for krazy:
         "libxml-writer-perl": ensure => installed;
@@ -105,15 +103,6 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
             # optional dependency for QLocale
             "libicu-dev":                        ensure => installed;
-        }
-    }
-
-    # These packages should not be installed inside the meego SDK
-    if $operatingsystem != "MeeGo" {
-        package {
-            "$sevenzip":        ensure => installed;
-            "libasound2-dev":   ensure => installed;
-            "libbluetooth-dev": ensure => installed;
         }
     }
 
