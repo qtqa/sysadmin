@@ -24,6 +24,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         "libasound2-dev":   ensure => installed;
         "libbluetooth-dev": ensure => installed;
 
+        # for testlib's valgrind QBENCHMARK backend
+        "valgrind":         ensure => installed;
+
         # for krazy:
         "libxml-writer-perl": ensure => installed;
         "libtie-ixhash-perl": ensure => installed;
