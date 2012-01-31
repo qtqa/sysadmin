@@ -25,6 +25,8 @@ class ccache::mac
                 "c++":     command => "c++";
                 "c++-4.0": command => "c++-4.0";
                 "c++-4.2": command => "c++-4.2";
+                "clang":   command => "clang";
+                "clang++": command => "clang++";
         }
     }
 }
