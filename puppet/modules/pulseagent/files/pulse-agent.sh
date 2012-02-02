@@ -1,4 +1,26 @@
 #!/bin/sh
+
+if [ "x$PULSEAGENT_IN_SCREEN" != "x1" ] && which screen >/dev/null; then
+    echo "pulse-agent.sh launched outside of screen ..." \
+        | logger -s -t pulseagent
+
+    PULSEAGENT_IN_SCREEN=1
+    export PULSEAGENT_IN_SCREEN
+
+    # Check if a pulseagent screen is already running.
+    # -r and -X combination tries to send a command to an existing screen
+    # session, without actually attaching (which would fail since we
+    # have no terminal).
+    if screen -r pulseagent -X time; then
+        echo "pulseagent screen session already exists - exiting" \
+            | logger -s -t pulseagent
+        exit 0
+    fi
+
+    echo "creating a new pulseagent screen session" | logger -s -t pulseagent
+    exec screen -D -m -q -S pulseagent "$0" "$@"
+fi
+
 PULSEDIR=$HOME/pulse-agent
 
 # Don't exit on SIGHUP; this allows running this script in a terminal to get
