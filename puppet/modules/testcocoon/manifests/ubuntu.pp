@@ -1,7 +1,7 @@
 class testcocoon::ubuntu
 {
     # Note, ~qtqa suffix denotes a slightly forked version of testcocoon.
-    $testcocoon_version = '1.6.14~qtqa'
+    $testcocoon_version = '1.6.14~qtqa1'
 
     package { "testcocoon":
         ensure      =>  $testcocoon_version,
