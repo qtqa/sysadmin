@@ -4,6 +4,11 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
     # Ensure some packages via macports.
     Package { provider => $macports_provider }
 
+    package {
+        # for testing cmake support in Qt5
+        "cmake":            ensure => installed;
+    }
+
     # Only these older macs need git from macports;
     # newer macs get it from xcode
     if ( $macosx_productversion_major == "10.5" ) or ( $macosx_productversion_major == "10.6" ) {

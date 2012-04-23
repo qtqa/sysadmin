@@ -30,6 +30,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         # for testlib's valgrind QBENCHMARK backend
         "valgrind":         ensure => installed;
 
+        # for testing cmake support in Qt5
+        "cmake":            ensure => installed;
+
         # for krazy:
         "libxml-writer-perl": ensure => installed;
         "libtie-ixhash-perl": ensure => installed;
