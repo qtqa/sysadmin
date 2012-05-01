@@ -33,6 +33,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         # for testing cmake support in Qt5
         "cmake":            ensure => installed;
 
+        # for QtPrintSupport
+        "libcups2-dev":     ensure => installed;
+
         # for krazy:
         "libxml-writer-perl": ensure => installed;
         "libtie-ixhash-perl": ensure => installed;
