@@ -81,6 +81,7 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             "libxcb-shm0-dev":                   ensure => installed;
             "libxcb-sync0-dev":                  ensure => installed;
             "libxcb-xfixes0-dev":                ensure => installed;
+            "libxcb-randr0-dev":                 ensure => installed;
 
             # enable phonon to play more media formats
             "gstreamer0.10-plugins-bad":         ensure => installed;
