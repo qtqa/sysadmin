@@ -136,6 +136,9 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     # Allow test machines to install python modules with pip or easy_install
     # to $HOME/python26
     include homedir_virtualenv
+
+    # Provide small filesystem for testing of out-of-space errors
+    include smallfs
 }
 
 node 'maemo-tester.test.qt.nokia.com' inherits default {

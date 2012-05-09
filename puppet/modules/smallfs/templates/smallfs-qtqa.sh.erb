@@ -1,0 +1,5 @@
+# This file is deployed by puppet.
+# Autotests may use the filesystem mounted at "QT_TEST_SMALL_FS" in any way they wish;
+# it is a small filesystem (a few MB), intended for testing out-of-space handling.
+QT_TEST_SMALL_FS=<%= mountpoint %>
+export QT_TEST_SMALL_FS
