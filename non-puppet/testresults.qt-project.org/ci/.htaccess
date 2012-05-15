@@ -12,4 +12,5 @@ ReadmeName /include/ci-fancy-index-footer.html
     SetEnv no-gzip 1
     AddType text/plain .gz
     AddEncoding gzip .gz
+    AddCharset utf-8 .gz
 </FilesMatch>
