@@ -11,8 +11,13 @@ use warnings;
 use Carp;
 use Cwd qw( abs_path );
 use FindBin;
+use English qw( -no_match_vars );
 
 our $DIR = abs_path( $FindBin::Bin );
+our $WINDOWS = ($OSNAME =~ m{win32}i);
+
+# Avoid any usage of the git_mirror.pl from within puppet
+local $ENV{ HARDGIT_SKIP } = 1;
 
 sub chdir_or_die
 {
@@ -47,24 +52,81 @@ sub update_git_dir
     # Note that we warn, instead of dying, because puppet should still run if at all possible
     # (e.g. puppet should still run if the git server is down).
     system_or_carp( qw(git pull -q) );
-    system_or_carp( qw(git diff) );
+    system_or_carp( qw(git --no-pager diff) );
 
     chdir_or_die( $DIR );
 
     return;
 }
 
+sub find_puppet
+{
+    return 'puppet' unless $WINDOWS;
+
+    foreach my $key ('ProgramFiles', 'ProgramFiles(x86)') {
+        my $path = $ENV{ $key };
+        next unless $path;
+
+        my $candidate = "$path\\Puppet Labs\\Puppet\\bin\\puppet.bat";
+        if (-f $candidate) {
+            return $candidate;
+        }
+    }
+
+    return 'puppet';
+}
+
+sub run_and_exit
+{
+    my (@cmd) = @_;
+
+    if (!$WINDOWS) {
+        exec @cmd;
+        die "exec @cmd: $!";
+    }
+
+    # On Windows, we avoid exec because it effectively "detaches" (gets a new
+    # PID and, if run from a console, returns control to the console).
+    system( @cmd );
+    exit $?;
+}
+
 sub run_puppet
 {
-    exec(
-        'puppet',
+    my @puppet_command = (
+        find_puppet( ),
+    );
+
+    if ($WINDOWS) {
+        push @puppet_command, (
+            # 'apply' is the command we want; we just don't use it on platforms
+            # other than Windows because we still have some very old puppet
+            # installations which don't support it.
+            'apply',
+
+            # avoid color because puppet on Windows doesn't automatically turn
+            # it off when not at a console
+            '--color=false',
+
+            # On Windows, we need to use ';' instead of ':' in the module path,
+            # which means the entry in $confdir/puppet.conf doesn't
+            # work (or we'd need a different puppet.conf for Windows vs elsewhere)
+            '--modulepath', "$DIR/private/modules;$DIR/modules",
+        );
+    } else {
+        push @puppet_command, (
+            '--logdest', 'syslog',
+        );
+    }
+
+    push @puppet_command, (
         '--confdir', $DIR,
-        @ARGV,
-        '--logdest', 'syslog',
         "$DIR/manifests/site.pp",
     );
 
-    die "exec: $!";
+    run_and_exit( @puppet_command );
+
+    return;
 }
 
 sub run

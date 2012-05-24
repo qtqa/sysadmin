@@ -8,6 +8,7 @@ class puppet {
         SuSE:       { include puppet::unix }
         OpenSuSE:   { include puppet::unix }
         Solaris:    { include puppet::solaris }
+        Windows:    { include puppet::windows }
     }
 }
 

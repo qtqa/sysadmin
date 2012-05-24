@@ -14,10 +14,12 @@ puppet's domain-specific language.
 
 The basic setup on each test machine is like this:
 
- - the test machine has a copy of this repo (usually at /var/qtqa/sysadmin)
+ - the test machine has a copy of this repo (usually at /var/qtqa/sysadmin,
+   or c:\qtqa\sysadmin on Windows)
 
- - a script is run by a cron job on the test machine which updates the repo
-   and runs puppet (in one-shot mode, not as a daemon)
+ - a script is run by a cron job (unix) / scheduled task (Windows) on the
+   test machine which updates the repo and runs puppet (in one-shot mode,
+   not as a daemon)
 
 Getting the machine up and running to this point requires that at least git
 and puppet are installed, and a clone of this repo has been done.
@@ -37,7 +39,15 @@ write up your own bootstrap script as you go :-)
 OTHER NOTES
 ===========
 
-To temporarily disable the usage of puppet, touch /var/qtqa/sysadmin/puppet/disable_puppet
+To temporarily disable the usage of puppet, touch:
+
+  /var/qtqa/sysadmin/puppet/disable_puppet
+  c:\qtqa\sysadmin\puppet\disable_puppet
 
 Using this repository in conjuction with a puppet server probably won't work
 due to our usage of the `generate' puppet function in a few places.
+
+On Unix, puppet will log to the system log.
+
+On Windows, puppet will log to c:\qtqa\sysadmin\puppet\last_puppet_run.txt,
+but this is considered a FIXME until some better solution is implemented.
