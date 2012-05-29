@@ -8,6 +8,8 @@ use warnings;
 #  (2) perl is installed (preferably strawberry perl)
 
 use English qw( -no_match_vars );
+use File::Basename qw( dirname );
+use File::Path qw( mkpath );
 use File::Spec::Functions qw( catfile tmpdir );
 use Getopt::Long;
 use LWP::UserAgent;
@@ -107,6 +109,11 @@ sub maybe_git_clone
         return;
     }
 
+    my $dest_parent = dirname( $dest );
+    if (! -d $dest_parent) {
+        mkpath( $dest_parent );
+    }
+
     # Avoid usage of git_mirror.pl from bootstrap script
     local $ENV{ HARDGIT_SKIP } = 1;
 
@@ -124,7 +131,7 @@ sub run_puppet
 
     my $script = 'c:\qtqa\sysadmin\puppet\sync_and_run.bat';
 
-    system_or_die( $EXECUTABLE_NAME, $script );
+    system_or_die( $script );
 
     return;
 }
