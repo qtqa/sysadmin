@@ -1,2 +1,3 @@
+puppet/cache/
 puppet/private/
 puppet/last_puppet_run.txt

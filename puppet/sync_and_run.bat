@@ -7,4 +7,4 @@ rem puppet run.
 set PUPPET_LOG=%~dp0last_puppet_run.txt
 date /T >"%PUPPET_LOG%"
 time /T >>"%PUPPET_LOG%"
-perl "%~dp0sync_and_run.pl" >>"%PUPPET_LOG%" 2>&1
+perl "%~dp0sync_and_run.pl" --facts-from-reverse-dns >>"%PUPPET_LOG%" 2>&1

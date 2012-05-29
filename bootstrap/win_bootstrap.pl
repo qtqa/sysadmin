@@ -122,7 +122,7 @@ sub run_puppet
 {
     print "Running puppet...\n";
 
-    my $script = 'c:\qtqa\sysadmin\puppet\sync_and_run.pl';
+    my $script = 'c:\qtqa\sysadmin\puppet\sync_and_run.bat';
 
     system_or_die( $EXECUTABLE_NAME, $script );
 

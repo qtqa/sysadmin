@@ -10,10 +10,15 @@ use warnings;
 
 use Carp;
 use Cwd qw( abs_path );
-use FindBin;
 use English qw( -no_match_vars );
+use File::Path qw( mkpath );
+use File::Spec::Functions;
+use FindBin;
+use Getopt::Long;
+use IO::Socket::INET;
 
 our $DIR = abs_path( $FindBin::Bin );
+our $CACHEDIR = catfile( $DIR, 'cache' );
 our $WINDOWS = ($OSNAME =~ m{win32}i);
 
 # Avoid any usage of the git_mirror.pl from within puppet
@@ -36,6 +41,207 @@ sub system_or_carp
     if ($? != 0) {
         carp "system @cmd: $?";
     }
+
+    return;
+}
+
+# Prints --help message and exits.
+sub usage
+{
+    warn <<'END_USAGE';
+Usage: sync_and_run.pl [OPTIONS]
+
+Update sysadmin repository and run puppet.
+
+Options:
+
+  --help                        Print this help.
+
+  --facts-from-reverse-dns      Override some facter facts according to the results of a reverse
+                                DNS lookup on the current host.
+
+                                This is a workaround for systems whose local idea of their FQDN
+                                do not match reality (for example, Windows systems who don't set
+                                their hostname via DHCP).
+
+                                To improve reliability, the reverse DNS lookup results are cached
+                                on disk.  If the lookup fails for any reason, the values from
+                                cache are used instead.
+
+                                At least the 'hostname', 'domain' and 'fqdn' facts are affected
+                                by this option.
+
+END_USAGE
+
+    exit 2;
+}
+
+# Returns the "primary" IP address of this machine, where "primary"
+# means the IP address used for outgoing connections to a world-accessible
+# host.
+# Dies on error.
+sub find_primary_ip
+{
+    # This may be any host with a high likelihood of never going away.
+    # 8.8.8.8:53 == Google Public DNS
+    my $remotehost = '8.8.8.8';
+    my $remoteport = 53;
+
+    my $socket = IO::Socket::INET->new(
+        PeerAddr => $remotehost,
+        PeerPort => $remoteport,
+        Proto => 'tcp',
+    );
+    if (!$socket) {
+        die "connect to $remotehost:$remoteport: $!";
+    }
+
+    return $socket->sockhost( );
+}
+
+# Returns the "primary" FQDN for this machine, meaning the FQDN
+# according to a reverse DNS lookup of the return value of find_primary_ip().
+# This function invokes the "nslookup" utility.
+# Dies on error.
+sub find_primary_fqdn
+{
+    my ($ip) = find_primary_ip( );
+
+    my $output = qx(nslookup $ip 2>&1);
+    if ($? != 0) {
+        die "nslookup failed: $?\noutput: $output\n";
+    }
+
+    my $name;
+    while (
+        $output =~ m{
+            (?:
+                # unix style
+                # 113.136.30.172.in-addr.arpa     name = bq-menoetius.apac.nokia.com.
+                \Qin-addr.arpa\E
+                \s+
+                name
+                \s*
+                =
+                \s*
+                (?<name>[^\s]+)
+                \.
+                \s
+            )
+            |
+            (?:
+                # windows style
+                # Name:    bq-menoetius.apac.nokia.com
+                Name:
+                \s+
+                (?<name>[^\s]+)
+                \s
+            )
+        }xmsg
+    ) {
+        $name = $+{ name };
+    }
+
+    if (!$name) {
+        die "fqdn not found by reverse dns. nslookup output:\n$output\n";
+    }
+
+    return $name;
+}
+
+# Returns a cached value for $key.
+# Dies on error or if there is no cached value.
+sub cached
+{
+    my ($key) = @_;
+    my $cachefile = catfile( $CACHEDIR, $key );
+    open( my $fh, '<', $cachefile ) || die "open $cachefile: $!";
+
+    my $value = <$fh>;
+    chomp $value;
+
+    $value || die "$cachefile is empty";
+
+    return $value;
+}
+
+# Writes $value to the on-disk cache, under the given $key.
+# Dies on error.
+sub write_cache
+{
+    my ($key, $value) = @_;
+
+    if (! -d $CACHEDIR) {
+        mkpath( $CACHEDIR );
+    }
+
+    my $cachefile = catfile( $CACHEDIR, $key );
+    open( my $fh, '>', $cachefile ) || die "open $cachefile for write: $!";
+    print $fh "$value\n";
+
+    return;
+}
+
+# Returns a value either from $sub_ref->(), or from the cache
+# entry for $key.
+#
+# If $sub_ref succeeds, the calculated value is written to the cache.
+# Otherwise, a warning is printed and the value is read from the cache.
+#
+# Dies if $sub_ref fails and reading from the cache also fails.
+sub get_cacheable_value
+{
+    my ($key, $sub_ref) = @_;
+
+    my $value;
+
+    eval {
+        $value = $sub_ref->();
+    };
+
+    my $error;
+    if (!($error = $@)) {
+        eval {
+            write_cache( $key, $value );
+        };
+        if (my $error = $@) {
+            warn "while writing $key to cache: $error\n";
+        }
+        return $value;
+    }
+
+    warn "$error\nTrying to use cached $key...\n";
+
+    return cached( $key );
+}
+
+# Writes some values to the hashref $env which, if set in the system environment,
+# will override some facter facts according to the values returned by a reverse
+# DNS lookup.
+#
+# This is a workaround for machines whose local set hostname and/or domain name
+# can't be trusted.  Notably, most Windows machines fall into this category,
+# because they generally don't set their hostname via DHCP and may also be
+# limited to a host name with max length of 15 characters (for NetBIOS).
+sub modify_env_from_rdns
+{
+    my ($env) = @_;
+
+    my $fqdn;
+    eval {
+        $fqdn = get_cacheable_value( 'fqdn', \&find_primary_fqdn );
+    };
+    if (my $error = $@) {
+        warn "$error\nWarning: could not set environment from reverse DNS!\n";
+        return;
+    }
+
+    # 'bq-menoetius.apac.nokia.com' => ('bq-menoetius', 'apac.nokia.com')
+    my ($hostname, $domain) = split( /\./, $fqdn, 2 );
+
+    $env->{ FACTER_hostname } = $hostname;
+    $env->{ FACTER_domain } = $domain;
+    # No need to set FACTER_fqdn, it is calculated from the above two
 
     return;
 }
@@ -136,6 +342,17 @@ sub run
     if (-f 'disable_puppet') {
         print "not doing anything because $DIR/disable_puppet exists\n";
         return;
+    }
+
+    my $facts_from_reverse_dns = 0;
+    GetOptions(
+        'facts-from-reverse-dns' => \$facts_from_reverse_dns,
+        'help|h|?' => \&usage,
+    );
+
+    local %ENV = %ENV;
+    if ($facts_from_reverse_dns) {
+        modify_env_from_rdns( \%ENV );
     }
 
     for my $gitdir ($DIR, "$DIR/private") {
