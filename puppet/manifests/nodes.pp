@@ -186,6 +186,13 @@ node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include testusers
 }
 
+node 'ubuntu1204-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+    $pulseagent_short_datadir = true
+    include pulseagent
+    include icecc
+    include testusers
+}
+
 node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
     include meego_osc
     include pulseagent
