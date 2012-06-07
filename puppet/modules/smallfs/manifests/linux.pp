@@ -12,6 +12,7 @@ class smallfs::linux {
         provider => shell,
         command => "
 
+    mkdir -p $mountpoint ;
     rm -f $imgfile.tmp &&
     dd if=/dev/zero of=$imgfile.tmp bs=1MB count=2 &&
     yes | mkfs -t ext2 $imgfile.tmp &&
@@ -21,12 +22,7 @@ class smallfs::linux {
         logoutput => true,
     }
 
-    # We need to ensure that the mount point exists before attempting to mount...
-    file { $mountpoint:
-        ensure => directory,
-    }
-
-    # ... and, _after_ mounting, we need to make it world-writable.
+    # After mounting, we need to make it world-writable.
     file { "mounted $mountpoint":
         path => $mountpoint,
         mode => 0777,
@@ -40,7 +36,7 @@ class smallfs::linux {
         ensure => mounted,
         fstype => "ext2",
         options => "loop",
-        require => [ File[ $mountpoint ], Exec[ $imgfile ] ],
+        require => Exec[ $imgfile ],
     }
 
     # Put QT_TEST_SMALL_FS into the test environment.
