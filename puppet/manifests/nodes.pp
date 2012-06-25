@@ -43,7 +43,7 @@ is run on this host."
 
 #====================== Mac ===================================================
 
-node 'lion-tester.test.qt.nokia.com' inherits default {
+node 'lion-tester.test.qt-project.org' inherits default {
     $testuser = "qt"
     include baselayout
     include qt_prereqs
@@ -67,7 +67,7 @@ node 'lion-tester.test.qt.nokia.com' inherits default {
     include sshkeys
 }
 
-node 'snowleopard-tester.test.qt.nokia.com' inherits default {
+node 'snowleopard-tester.test.qt-project.org' inherits default {
     $testuser = "qt"
     include baselayout
     include qt_prereqs
@@ -86,12 +86,12 @@ node 'snowleopard-tester.test.qt.nokia.com' inherits default {
     include sshkeys
 }
 
-node 'snowleopard-parallels-server.test.qt.nokia.com' inherits default {
+node 'snowleopard-parallels-server.test.qt-project.org' inherits default {
     include puppet
     include distccd
 }
 
-node 'legacy-snowleopard-tester.test.qt.nokia.com' inherits default {
+node 'legacy-snowleopard-tester.test.qt-project.org' inherits default {
     $testuser = "pulseagent"
     include baselayout
     include qt_prereqs
@@ -104,7 +104,7 @@ node 'legacy-snowleopard-tester.test.qt.nokia.com' inherits default {
     include sshkeys
 }
 
-node 'snowleopard-packager.test.qt.nokia.com' inherits default {
+node 'snowleopard-packager.test.qt-project.org' inherits default {
     $testuser = "pulseagent"
     include baselayout
     include qt_prereqs
@@ -117,7 +117,7 @@ node 'snowleopard-packager.test.qt.nokia.com' inherits default {
 }
 
 #====================== Linux =================================================
-node 'linux-tester.test.qt.nokia.com' inherits default {
+node 'linux-tester.test.qt-project.org' inherits default {
     $testuser = "qt"
     include puppet
     include baselayout
@@ -141,14 +141,14 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include smallfs
 }
 
-node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+node 'ubuntu1004-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
     include pulseagent
     include icecc
     include testcocoon
     include testusers
 }
 
-node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+node 'ubuntu1110-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
     $pulseagent_short_datadir = true
     include pulseagent
     # icecc initialisation delayed until scheduler address is set
@@ -157,7 +157,7 @@ node 'ubuntu1110-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include testusers
 }
 
-node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+node 'ubuntu1110-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
     $pulseagent_short_datadir = true
     include pulseagent
     include icecc
@@ -166,7 +166,7 @@ node 'ubuntu1110-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include testusers
 }
 
-node 'ubuntu1204-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
+node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
     $pulseagent_short_datadir = true
     include pulseagent
     include icecc
@@ -220,7 +220,7 @@ node /^qt-test-server\./ inherits default {
 #====================== Solaris ===============================================
 
 # master nodes (those which have containers)
-node 'solaris-master.test.qt.nokia.com' inherits default {
+node 'solaris-master.test.qt-project.org' inherits default {
     $zone = false
     include puppet
     include baselayout
@@ -236,7 +236,7 @@ node 'solaris-master.test.qt.nokia.com' inherits default {
 }
 
 # containers themselves
-node 'solaris-container.test.qt.nokia.com' inherits default {
+node 'solaris-container.test.qt-project.org' inherits default {
     $zone = true
     $testuser = pulse
     include baselayout
