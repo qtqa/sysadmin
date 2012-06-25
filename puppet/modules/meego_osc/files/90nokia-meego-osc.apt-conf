@@ -1,2 +1,0 @@
-# allow repos to omit GPG keys
-APT::Get::AllowUnauthenticated 1;

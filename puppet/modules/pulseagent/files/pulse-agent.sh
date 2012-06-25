@@ -31,18 +31,7 @@ sleepint=8
 maxsleep=1800
 echo "pulse-agent.sh launched, entering pulse agent run loop..." | logger -s -t pulseagent
 while true; do
-    if [ "x$1" = "x-scratchbox" ]; then
-        echo "Running pulse agent through scratchbox" | logger -s -t pulseagent
-        SBHOME=/scratchbox/users/$USER/$HOME
-        MY_ENV=$SBHOME/pulse-agent.env
-        rm -f $MY_ENV
-        if test -d $SBHOME/pulse_java; then
-            echo "JAVA_HOME=$HOME/pulse_java; export JAVA_HOME" >> $MY_ENV
-        fi
-        /usr/bin/scratchbox -e $MY_ENV pulse-agent/bin/pulse start 2>&1 | logger -s -t pulseagent
-    else
-        $PULSEDIR/bin/pulse start 2>&1 | logger -s -t pulseagent
-    fi
+    $PULSEDIR/bin/pulse start 2>&1 | logger -s -t pulseagent
 
     # It's always an error if Pulse stops, unless we're shutting down.
     # We'll try hard to restart the Pulse agent.

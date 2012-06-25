@@ -141,27 +141,7 @@ node 'linux-tester.test.qt.nokia.com' inherits default {
     include smallfs
 }
 
-node 'maemo-tester.test.qt.nokia.com' inherits default {
-    $testuser = "qt"
-    include puppet
-    include baselayout
-    include qt_prereqs
-    include hosts
-    include sshkeys
-    include ccache
-    include icecc
-    include crosscompilers
-    include vmware_tools
-
-    # scratchbox stuff
-    include scratchbox
-    include scratchbox_qadungeon
-    include scratchbox_pulseagent
-    include scratchbox_baselayout
-}
-
 node 'ubuntu1004-x86.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
-    include symbian_linux
     include pulseagent
     include icecc
     include testcocoon
@@ -193,12 +173,6 @@ node 'ubuntu1204-x64.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com
     include testusers
 }
 
-node 'meego-obs-client.test.qt.nokia.com' inherits 'linux-tester.test.qt.nokia.com' {
-    include meego_osc
-    include pulseagent
-    include icecc
-}
-
 #====================== Servers =================================================
 
 node 'pulse.test.qt.nokia.com' inherits default {
@@ -217,8 +191,6 @@ node 'pulse.test.qt.nokia.com' inherits default {
 node 'integrator.test.qt.nokia.com' inherits default {
     include baselayout
     include sshkeys
-
-    include integrator_www
 
     include puppet
     include qtintegration

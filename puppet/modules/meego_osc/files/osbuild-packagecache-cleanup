@@ -1,2 +1,0 @@
-#!/bin/sh
-exec /usr/sbin/tmpreaper 2d /var/tmp/osbuild-packagecache
