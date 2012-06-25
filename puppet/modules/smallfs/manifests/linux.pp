@@ -9,7 +9,6 @@ class smallfs::linux {
         cwd => $qtqadir,
         creates => $imgfile,
         path => [ "/bin", "/usr/bin", "/sbin" ],
-        provider => shell,
         command => "
 
     mkdir -p $mountpoint ;
