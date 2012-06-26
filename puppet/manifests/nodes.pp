@@ -173,7 +173,12 @@ node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project
     include testusers
 }
 
-#====================== Servers =================================================
+#====================== Windows ===============================================
+
+node 'windows7-msvc2010-x86.test.qt-project.org' inherits 'default' {
+}
+
+#====================== Servers ===============================================
 
 node 'pulse.test.qt.nokia.com' inherits default {
     # disable git cache because multiple gits will be running concurrently
