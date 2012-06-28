@@ -3,6 +3,10 @@ class puppet::windows {
     $sysadmindir = "$qtqadir\\sysadmin"
     $cmd = "c:\\Windows\\system32\\cmd.exe"
 
+    filebucket { 'main':
+        path => "$qtqadir\\puppet-backup",
+    }
+
     file { $qtqadir:
         ensure  =>  directory,
     }
