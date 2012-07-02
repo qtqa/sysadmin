@@ -8,6 +8,7 @@ class sshkeys {
         $homepath = $operatingsystem ? {
             Darwin  =>  "/Users/$testuser",
             Solaris =>  "/export/home/$testuser",
+            windows =>  "C:\\Users\\$testuser",
             default =>  "/home/$testuser",
         }
 
@@ -21,7 +22,13 @@ class sshkeys {
         file {
             "$sshdir":
                 ensure  =>  directory,
-                mode    =>  0700,
+                mode    =>  $operatingsystem ? {
+                    # .ssh directory should generally not be accessible to other users
+                    # (and ssh may warn about this).  However, on Windows, a mode of 0700
+                    # makes the directory unmanagable by puppet.
+                    windows => 0770,
+                    default => 0700,
+                }
             ;
             "$sshdir/config":
                 source  =>  $operatingsystem ? {
@@ -47,13 +54,19 @@ class sshkeys {
         }
 
         # Let all trusted users (e.g. test farm sysadmins) log into $testuser account
-        trusted_authorized_keys { "authorized_keys for $testuser":
-            user    =>  $testuser,
+        # Windows doesn't run sshd
+        if $operatingsystem != "windows" {
+            trusted_authorized_keys { "authorized_keys for $testuser":
+                user    =>  $testuser,
+            }
         }
     }
 
     # Let all trusted users (e.g. test farm sysadmins) log into root account
-    trusted_authorized_keys { "authorized_keys for root":
-        user    =>  "root",
+    # Windows doesn't run sshd
+    if $operatingsystem != "windows" {
+        trusted_authorized_keys { "authorized_keys for root":
+            user    =>  "root",
+        }
     }
 }
