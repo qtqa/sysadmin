@@ -1,4 +1,13 @@
 StrictHostKeyChecking=no
+BatchMode=yes
 
 SendEnv GIT_FORCE
 SendEnv GIT_PUSH
+
+Host dev-codereview.qt-project.org
+  Port 29418
+  User qt-builder
+
+Host codereview.qt-project.org
+  Port 29418
+  User qt-builder
