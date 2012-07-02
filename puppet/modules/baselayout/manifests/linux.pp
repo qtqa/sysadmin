@@ -81,18 +81,13 @@ class baselayout::linux inherits baselayout::unix {
     }
 }
 
-# Run a command at startup.
-# Uses freedesktop $HOME/.config/autostart, which seems to be supported on
-# most Linux for several years
-# Additional $terminal variable to fix execution issue on Ubuntu 11.10,
-# as it is broken on 11.10 (according to apt-file search nothing provides
-# xdg-terminal).
+# deprecated wrapper for baselayout::startup
 define startup($command, $user, $terminal=false) {
-    file { "/home/$user/.config/autostart/$name.desktop":
-        ensure  =>  present,
-        owner   =>  $user,
-        mode    =>  0755,
-        content =>  template("baselayout/xdg-autostart.desktop.erb"),
-        require =>  File["/home/$user/.config/autostart"],
+    warning("'startup' is deprecated, use 'baselayout::startup'")
+
+    baselayout::startup { $name:
+        path => $command,
+        user => $user,
+        terminal => $terminal,
     }
 }

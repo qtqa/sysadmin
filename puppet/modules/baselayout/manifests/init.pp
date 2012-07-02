@@ -10,6 +10,7 @@ class baselayout {
         CentOS:     { include baselayout::centos }
         Linux:      { include baselayout::linux }
         Solaris:    { include baselayout::solaris }
+        windows:    { include baselayout::windows }
     }
 }
 

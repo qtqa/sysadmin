@@ -7,8 +7,16 @@ class puppet::windows {
         path => "$qtqadir\\puppet-backup",
     }
 
-    file { $qtqadir:
-        ensure  =>  directory,
+    file {
+        $qtqadir:
+            ensure  =>  directory;
+        "$qtqadir\\bin":
+            ensure  =>  directory,
+            require =>  File[$qtqadir];
+        "$qtqadir\\bin\\qtqa-manage-lnk.pl":
+            source  =>  "puppet:///modules/puppet/qtqa-manage-lnk.pl",
+            require =>  File["$qtqadir\\bin"],
+            mode    =>  0755;
     }
 
     # NOTE: if you do not have access to scm.dev.nokia.troll.no (e.g. you are

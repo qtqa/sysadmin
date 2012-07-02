@@ -1,4 +1,4 @@
-class pulseagent::ubuntu inherits pulseagent::linux {
+class java::ubuntu {
     package { "default-jre": ensure => installed; }
 }
 
