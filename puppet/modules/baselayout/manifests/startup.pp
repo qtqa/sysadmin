@@ -8,7 +8,12 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
         $manage_lnk = "c:\\qtqa\\bin\\qtqa-manage-lnk.pl"
         $lnk = "C:\\Users\\$user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\$name.lnk"
         $attrs = "\"Path=$path\" \"Arguments=$arguments\""
-        $perl = "c:\\strawberry\\perl\\bin\\perl.exe"
+
+        # FIXME: we allow qtqa-manage-lnk.pl to use the destination user's local::lib
+        # to increase the chance qtqa-manage-lnk.pl can find the needed modules (Win32::Shortcut).
+        # This is a workaround - the correct solution is to enforce in puppet that the
+        # prerequisite modules of qtqa-manage-lnk.pl are globally installed.
+        $perl = "c:\\strawberry\\perl\\bin\\perl.exe -Mlocal::lib=C:\\Users\\$user\\perl5"
 
         exec { "enforce startup lnk $name":
             command => "$perl $manage_lnk --write $attrs \"$lnk\"",
