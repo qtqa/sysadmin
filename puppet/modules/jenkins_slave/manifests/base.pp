@@ -1,6 +1,6 @@
 class jenkins_slave::base {
     $jenkins_slave_name = $hostname
-    $jenkins_server = "http://ci-dev.qt-project.org"
+    $jenkins_server = $jenkins_slave::server
     $jenkins_workdir = $operatingsystem ? {
         windows  =>  "c:\\work",
         default  =>  "/work",

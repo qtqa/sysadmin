@@ -1,4 +1,4 @@
-class jenkins_slave {
+class jenkins_slave ($server) {
     include java
     case $operatingsystem {
         Ubuntu:     { include jenkins_slave::linux }
