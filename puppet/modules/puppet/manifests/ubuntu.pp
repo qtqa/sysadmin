@@ -9,7 +9,7 @@ class puppet::ubuntu inherits puppet::unix {
         }
 
         Package {
-            require => File[ "/etc/apt/sources.list.d/lucid-backports-puppet.conf" ]
+            require => File[ "/etc/apt/preferences.d/lucid-backports-puppet.conf" ]
         }
 
         package {
