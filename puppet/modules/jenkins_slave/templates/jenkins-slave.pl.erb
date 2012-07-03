@@ -106,9 +106,41 @@ sub run_slave_jar
     die "exec( @cmd ): $!";
 }
 
+# Calculates and returns an environment suitable for using java.
+# Returns a hash suitable for assignment to %ENV
+sub env_for_java
+{
+    my (%env) = %ENV;
+
+    # Is java already available/working ?
+    if (system('java', '-version') == 0) {
+        return %env;
+    }
+
+    warn "No working Java in PATH = $ENV{ PATH } .\n";
+
+    # Use JAVA_HOME environment variable if possible...
+    if (my $java_home = $env{ JAVA_HOME }) {
+        my $sep = $WINDOWS ? ';' : ':';
+        local $ENV{ PATH } = $ENV{ PATH } . $sep . catfile( $java_home, 'bin' );
+        if (system('java', '-version') == 0) {
+            warn "Found Java in JAVA_HOME = $java_home\n"
+                ."Set PATH = $env{ PATH }\n";
+            $env{ PATH } = $ENV{ PATH };
+            return %env;
+        }
+        warn "No working Java in JAVA_HOME = $java_home\n";
+    }
+
+    warn "No working Java found anywhere. Will probably fail to run...\n";
+    return %env;
+}
+
 sub run
 {
     chdir( $JENKINS_CWD ) || die "chdir $JENKINS_CWD: $!";
+
+    local %ENV = env_for_java( );
 
     fetch_slave_jar( );
     run_slave_jar( );
