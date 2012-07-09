@@ -53,9 +53,17 @@ class sshkeys {
             ;
         }
 
-        # Let all trusted users (e.g. test farm sysadmins) log into $testuser account
-        # Windows doesn't run sshd
         if $operatingsystem != "windows" {
+            # ssh will refuse to make use of a world-accessible id_rsa
+            # (except on Windows - where a mode of 0600 makes the file unmanageable by puppet)
+            file { "$sshdir/id_rsa":
+                owner => $testuser,
+                mode => 0600,
+                require => Secret_file["$sshdir/id_rsa"]
+            }
+
+            # Let all trusted users (e.g. test farm sysadmins) log into $testuser account
+            # (except on Windows - no sshd)
             trusted_authorized_keys { "authorized_keys for $testuser":
                 user    =>  $testuser,
             }
