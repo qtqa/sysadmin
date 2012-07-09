@@ -40,5 +40,14 @@ class jenkins_slave::base {
         name     =>  $jenkins_workdir,
         ensure   =>  directory,
     }
-}
 
+    file { "jenkins cli script":
+        name     =>  "$jenkins_slave_dir/jenkins-cli.pl",
+        ensure   =>  present,
+        owner    =>  "$testuser",
+        group    =>  "$testgroup",
+        content  =>  template("jenkins_slave/jenkins-cli.pl.erb"),
+        mode     =>  0755,
+        require  =>  File["jenkins workspace"],
+    }
+}

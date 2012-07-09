@@ -1,0 +1,186 @@
+#!/usr/bin/env perl
+#############################################################################
+##
+## Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
+## Contact: http://www.qt-project.org/
+##
+## $QT_BEGIN_LICENSE:LGPL$
+## GNU Lesser General Public License Usage
+## This file may be used under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation and
+## appearing in the file LICENSE.LGPL included in the packaging of this
+## file. Please review the following information to ensure the GNU Lesser
+## General Public License version 2.1 requirements will be met:
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## In addition, as a special exception, Nokia gives you certain additional
+## rights. These rights are described in the Nokia Qt LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## GNU General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU General
+## Public License version 3.0 as published by the Free Software Foundation
+## and appearing in the file LICENSE.GPL included in the packaging of this
+## file. Please review the following information to ensure the GNU General
+## Public License version 3.0 requirements will be met:
+## http://www.gnu.org/copyleft/gpl.html.
+##
+## Other Usage
+## Alternatively, this file may be used in accordance with the terms and
+## conditions contained in a signed written agreement between you and Nokia.
+##
+##
+##
+##
+##
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+use strict;
+use warnings;
+
+=head1 NAME
+
+jenkins-cli.pl - Perl wrapper for command line interface for Jenkins server
+
+=head1 USAGE
+
+ jenkins-cli.pl [--verbose] [--server <server-url>] -- <arguments>
+
+=head1 DESCRIPTION
+
+Download the Jenkins CLI from Jenkins server and run the given Jenkins CLI command.
+Targeted for system services so output is saved to log file and syslog by default.
+
+See: https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI for details
+
+=head1 ARGUMENTS
+
+CLI command to be executed with possible parameters for the command.
+Command `help' will list the available commands for the targeted server.
+
+Mandatory.
+
+=head1 OPTIONS
+
+=over
+
+=item --server <server-url>
+
+Optional. URL of the Jenkins server. If not defined, default value
+<%= jenkins_server %> is used.
+
+=item --verbose
+
+Prints command output also to standard output.
+
+
+=back
+
+=head1 EXAMPLE
+
+C<./jenkins-cli.pl -- help>
+
+Prints the available commands for the Jenkins server to log file in the script directory
+and system log.
+
+=cut
+
+#==============================================================================
+
+use English qw( -no_match_vars );
+use File::Spec::Functions;
+use FindBin;
+use Getopt::Long qw(GetOptionsFromArray);
+use LWP::UserAgent;
+use Pod::Usage;
+
+my $jenkins_slave_pl = "$FindBin::Bin/jenkins-slave.pl"; # to satisfy perlcritic
+require $jenkins_slave_pl;
+
+# True iff Windows
+my $WINDOWS = ($OSNAME =~ m{win32}i);
+
+# Jenkins server URL
+my $JENKINS_SERVER = '<%= jenkins_server %>';
+
+# Working directory when Jenkins slave.jar is run
+my $JENKINS_CWD = $FindBin::Bin;
+
+# Remote jenkins-cli.jar
+my $JENKINS_CLI_JAR_URL = "$JENKINS_SERVER/jnlpJars/jenkins-cli.jar";
+
+# Local jenkins-cli.jar
+my $JENKINS_CLI_JAR = catfile( $JENKINS_CWD, 'jenkins-cli.jar' );
+
+sub fetch_cli_jar
+{
+    if (-e $JENKINS_CLI_JAR) {
+        unlink( $JENKINS_CLI_JAR ) || die "unlink $JENKINS_CLI_JAR: $!";
+    }
+
+    my $ua = LWP::UserAgent->new( );
+    my $response = $ua->get(
+        $JENKINS_CLI_JAR_URL,
+        ':content_file' => $JENKINS_CLI_JAR,
+    );
+
+    if (!$response->is_success( )) {
+        die "fetch $JENKINS_CLI_JAR_URL: ".$response->decoded_content( );
+    }
+
+    return;
+}
+
+sub run_cli_jar
+{
+    my ($verbose, @commands) = @_;
+
+    my @cmd = (
+        'java',
+        '-jar',
+        $JENKINS_CLI_JAR,
+        '-s',
+        $JENKINS_SERVER,
+        @commands
+    );
+
+    print "+ @cmd\n";
+    my $status = system(@cmd);
+    die "command '@cmd' failed with: $status" if $status;
+    return;
+}
+
+# do not use run as it is defined already in jenkins-slave.pl
+sub run_cli
+{
+    my (@args) = @_;
+
+    my $verbose;
+    my $help;
+    my $man;
+
+    GetOptionsFromArray(\@args,
+        'server=s'      => \$JENKINS_SERVER,
+        'verbose'       => \$verbose,
+        'help'          => \$help,
+        'man'           => \$man,
+    );
+
+    pod2usage(-verbose => 1) if ($help);
+    pod2usage(-verbose => 2) if ($man);
+    pod2usage(-verbose => 99, -sections => qw(ARGUMENTS|EXAMPLE), -exitval => 2) if(!@args);
+
+    chdir( $JENKINS_CWD ) || die "chdir $JENKINS_CWD: $!";
+
+    local %ENV = env_for_java( );
+
+    fetch_cli_jar( );
+    run_cli_jar($verbose, @args);
+
+    return;
+}
+
+run_cli(@ARGV) unless caller;
+1;

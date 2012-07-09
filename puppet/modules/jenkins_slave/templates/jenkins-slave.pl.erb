@@ -112,8 +112,17 @@ sub env_for_java
 {
     my (%env) = %ENV;
 
+    my $dev_null;
+    if ($WINDOWS) {
+        $dev_null = 'NUL';
+    } else {
+        $dev_null = '/dev/null';
+    }
+
+    my $cmd = "java -version > $dev_null 2>&1";
+
     # Is java already available/working ?
-    if (system('java', '-version') == 0) {
+    if (system($cmd) == 0) {
         return %env;
     }
 
@@ -123,7 +132,7 @@ sub env_for_java
     if (my $java_home = $env{ JAVA_HOME }) {
         my $sep = $WINDOWS ? ';' : ':';
         local $ENV{ PATH } = $ENV{ PATH } . $sep . catfile( $java_home, 'bin' );
-        if (system('java', '-version') == 0) {
+        if (system($cmd) == 0) {
             warn "Found Java in JAVA_HOME = $java_home\n"
                 ."Set PATH = $env{ PATH }\n";
             $env{ PATH } = $ENV{ PATH };
