@@ -37,4 +37,29 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
             require =>  File["/home/$user/.config/autostart"],
         }
     }
+
+    if $operatingsystem == "Darwin" {
+        file { "/Users/$user/startup-$name.command":
+            ensure  =>  present,
+            owner   =>  $user,
+            mode    =>  0755,
+            content =>  template("baselayout/mac-startup.command.erb"),
+        }
+
+        exec { "$name login item":
+            command => "/usr/bin/sudo -u $user /bin/sh -c \" \
+                        \
+                        defaults write loginwindow AutoLaunchedApplicationDictionary -array-add \
+                        '<dict><key>Hide</key><false/><key>Path</key><string>/Users/$user/startup-$name.command</string></dict>' \
+                        \
+            \"",
+            unless  => "/usr/bin/sudo -u $user /bin/sh -c \" \
+                        \
+                        defaults read loginwindow AutoLaunchedApplicationDictionary | grep -q /Users/$user/startup-$name.command
+                        \
+            \"",
+            logoutput => true,
+            require => File["/Users/$user/startup-$name.command"],
+        }
+    }
 }

@@ -39,10 +39,7 @@ class pulseagent::unix {
         creates     =>  "$homedir/pulse-agent/bin/pulse",
     }
 
-    $pulsescript = $operatingsystem ? {
-        Darwin  =>  "$homedir/pulse-agent.command",
-        default =>  "$homedir/pulse-agent.sh",
-    }
+    $pulsescript = "$homedir/pulse-agent.sh"
 
     if $pulseagent_short_datadir {
         file {
