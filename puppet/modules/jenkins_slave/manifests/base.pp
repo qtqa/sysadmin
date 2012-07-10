@@ -13,11 +13,17 @@ class jenkins_slave::base {
     }
     $jenkins_slave_dir = "$homedir/jenkins"
 
+    if $operatingsystem != "windows" {
+        File {
+            owner    =>  "$testuser",
+            group    =>  "$testgroup",
+            mode     =>  0755,
+        }
+    }
+
     file { "jenkins slave directory":
         name     =>  $jenkins_slave_dir,
         ensure   =>  directory,
-        owner    =>  "$testuser",
-        group    =>  "$testgroup",
     }
 
     file { "jenkins slave script":
@@ -33,8 +39,6 @@ class jenkins_slave::base {
     file { "jenkins workspace":
         name     =>  $jenkins_workdir,
         ensure   =>  directory,
-        owner    =>  "$testuser",
-        group    =>  "$testgroup",
     }
 }
 
