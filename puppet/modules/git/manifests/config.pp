@@ -11,19 +11,30 @@ define git::config($key = '', $ensure = present, $content = '', $user) {
     $git = $::operatingsystem ? {
         # on mac, git may be at /opt/local/bin or at /usr/bin
         Darwin => "/usr/bin/env PATH=/opt/local/bin:/usr/bin git",
+        windows => $::architecture ? {
+            x64 => "\"C:\\Program Files (x86)\\Git\\cmd\\git.cmd\"",
+            default => "\"C:\\Program Files\\Git\\cmd\\git.cmd\"",
+        },
         default => "/usr/bin/git",
     }
 
     $gitconfig = $::operatingsystem ? {
         Darwin => "/Users/$user/.gitconfig",
+        windows => "C:\\Users\\$user\\.gitconfig",
         default => "/home/$user/.gitconfig",
+    }
+
+    if $::operatingsystem != 'windows' {
+        # on Windows, we can't actually run the command as the user,
+        # puppet doesn't support it. It doesn't matter since we explicitly
+        # set the path to the gitconfig file above.
+        Exec { user => $user }
     }
 
     if $ensure == absent {
         exec { "git::config unset $name":
             command => "$git config --file $gitconfig --unset \"$git_key\"",
             onlyif => "$git config --file $gitconfig \"$git_key\"",
-            user => $user,
             logoutput => true,
         }
     }
@@ -32,7 +43,6 @@ define git::config($key = '', $ensure = present, $content = '', $user) {
         exec { "git::config set $name":
             command => "$git config --file $gitconfig \"$git_key\" \"$content\"",
             unless => "$git config --file $gitconfig --get \"$git_key\" \"$content\"",
-            user => $user,
             logoutput => true,
         }
     }
