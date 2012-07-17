@@ -9,11 +9,19 @@ class baselayout::unix {
         #*
         # Enforce correct git configuration
         #*
-        file { "$homepath/.gitconfig":
-            content =>  template("baselayout/gitconfig.erb"),
-            owner   =>  $testuser,
-            group   =>  $testgroup,
-            mode    =>  0644,
+        Git::Config {
+            user => $testuser,
+        }
+
+        git::config {
+            "url.$qtgitreadonly.insteadof": content => "qtgitreadonly:";
+            "qtqa.hardgit.cachedir": content => "~/.git_object_cache";
+            "qtqa.hardgit.location": content => $location;
+            "qtqa.hardgit.server.qtgitreadonly.primary": content => $qtgitreadonly;
+            "qtqa.hardgit.server.qtgitreadonly.mirror-$location": content => $qtgitreadonly_local;
+            "core.autocrlf": content => "false";
+            "user.name": content => "Qt Continuous Integration System";
+            "user.email": content => "qt-info@nokia.com";
         }
 
         file { "$homepath/bin":
