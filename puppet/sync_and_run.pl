@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+package QtQA::Puppet::SyncAndRun;
 use strict;
 use warnings;
 
@@ -16,6 +17,13 @@ use File::Spec::Functions;
 use FindBin;
 use Getopt::Long;
 use IO::Socket::INET;
+
+# export a few things so that autotests can find and run puppet without
+# duplicating our code
+use parent 'Exporter';
+our @EXPORT = qw(
+    find_puppet
+);
 
 our $DIR = abs_path( $FindBin::Bin );
 our $CACHEDIR = catfile( $DIR, 'cache' );
