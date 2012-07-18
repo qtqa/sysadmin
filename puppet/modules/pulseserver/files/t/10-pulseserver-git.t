@@ -5,12 +5,13 @@ use warnings;
 
 use Capture::Tiny qw(capture);
 use Cwd qw(abs_path realpath);
+use English qw( -no-match_vars );
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
 use File::Temp qw(tempdir);
 use FindBin;
-use Test::More tests => 34;
+use Test::More;
 
 =head1 NAME
 
@@ -291,6 +292,13 @@ sub run_real_tests
 
 sub run
 {
+    if ($OSNAME =~ m{win32}i) {
+        plan skip_all => "this test is not relevant for $OSNAME";
+        return;
+    }
+
+    plan tests => 34;
+
     ok(-x $SCRIPT) || return;
 
     run_fake_tests();
