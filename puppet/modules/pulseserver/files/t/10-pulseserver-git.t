@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Capture::Tiny qw(capture);
-use Cwd qw(abs_path);
+use Cwd qw(abs_path realpath);
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
@@ -31,7 +31,7 @@ my $SCRIPT = abs_path( catfile( $FindBin::Bin, qw(.. pulseserver-git) ) );
 # No contact with real git servers.
 sub run_fake_tests
 {
-    local $ENV{HOME} = tempdir( basename($0).'-home.XXXXXX', TMPDIR => 1, CLEANUP => 1 );
+    local $ENV{HOME} = realpath tempdir( basename($0).'-home.XXXXXX', TMPDIR => 1, CLEANUP => 1 );
 
     my $status;
     my $stdout;
