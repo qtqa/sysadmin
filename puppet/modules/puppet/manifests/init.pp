@@ -1,5 +1,3 @@
-import '*'
-
 class puppet {
     case $operatingsystem {
         Darwin:     { include puppet::mac }

@@ -1,5 +1,3 @@
-import "*"
-
 import "private_sshkeys"
 
 class sshkeys {

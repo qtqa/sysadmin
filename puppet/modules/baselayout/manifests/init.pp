@@ -1,5 +1,3 @@
-import "*"
-
 # For fetching of files too sensitive for any source control
 include secret_file
 

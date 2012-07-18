@@ -1,5 +1,3 @@
-import "*"
-
 class cpan {
     case $operatingsystem {
         CentOS:     { include cpan::centos }

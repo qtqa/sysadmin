@@ -1,5 +1,3 @@
-import "*"
-
 class intel_compiler {
     case $operatingsystem {
         # Add more as implemented...

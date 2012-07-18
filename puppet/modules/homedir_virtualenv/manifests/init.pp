@@ -1,5 +1,3 @@
-import "*"
-
 # This module sets up the necessary environment so that users
 # can easily install python modules into a prefix under $HOME/pythonXY
 # and have all python scripts find them automatically, without any

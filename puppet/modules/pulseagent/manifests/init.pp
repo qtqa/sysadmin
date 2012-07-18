@@ -1,5 +1,3 @@
-import "*"
-
 class pulseagent {
     include java
     case $operatingsystem {

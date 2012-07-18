@@ -1,5 +1,3 @@
-import "*"
-
 # Stub for private_sshkeys module; put your real ssh keys into a
 # module under the `private' directory
 define trusted_authorized_keys($user) {
