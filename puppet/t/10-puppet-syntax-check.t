@@ -58,6 +58,37 @@ BEGIN {
     $QtQA::Puppet::SyncAndRun::DIR = catfile( $FindBin::Bin, '..' );
 }
 
+# puppet command used to parse (and not execute) a puppet manifest.
+# Consists of the first part of the command; additional options may be appended
+# by the caller.
+my @PUPPET_PARSE_CMD = puppet_parse_cmd();
+
+sub puppet_parse_cmd
+{
+    my $puppet = find_puppet();
+
+    my $version = qx($puppet --version);
+    if ($? != 0) {
+        die "'$puppet --version' exited with status $?";
+    }
+
+    chomp $version;
+
+    if ($version !~ m{\A(\d+)\.(\d+)\.}) {
+        die "Can't parse output from '$puppet --version': $version";
+    }
+
+    my ($maj, $min) = ($1, $2);
+
+    # puppet 2.7 and later use 'puppet parser validate';
+    # earlier use 'puppet apply --parseonly'
+    if ($maj > 2 || ($maj == 2 && $min >= 7)) {
+        return ($puppet, 'parser', 'validate');
+    }
+
+    return ($puppet, 'apply', '--parseonly');
+}
+
 # Returns a list of all .pp files in the current git repository.
 sub find_all_pp_files
 {
@@ -82,8 +113,7 @@ sub validate_some_pp_files
     return unless @filenames;
 
     my @cmd_base = (
-        find_puppet(),
-        'parser',
+        @PUPPET_PARSE_CMD,
         '--color',
         'false',
         '--confdir',
