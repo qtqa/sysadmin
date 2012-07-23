@@ -67,7 +67,7 @@ sub puppet_parse_cmd
 {
     my $puppet = find_puppet();
 
-    my $version = qx($puppet --version);
+    my $version = qx("$puppet" --version);
     if ($? != 0) {
         die "'$puppet --version' exited with status $?";
     }
