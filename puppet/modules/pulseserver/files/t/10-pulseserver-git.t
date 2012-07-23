@@ -292,7 +292,7 @@ sub run_real_tests
 
 sub run
 {
-    if ($OSNAME =~ m{win32}i) {
+    if ($OSNAME ne 'linux') {
         plan skip_all => "this test is not relevant for $OSNAME";
         return;
     }
