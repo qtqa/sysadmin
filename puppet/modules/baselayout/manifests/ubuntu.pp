@@ -12,6 +12,18 @@ class baselayout::ubuntu inherits baselayout::linux {
             ;
         }
 
+        # Hostname will only be set via DHCP if /etc/hostname is absent.
+        # Gleaned from https://bugs.launchpad.net/ubuntu/+source/dhcp3/+bug/90388
+        # Therefore, we remove /etc/hostname iff resolving our fqdn does not
+        # result in the correct IP address - we should then get the correct fqdn on
+        # next boot.
+        # Note: we used to remove this file at every boot, but that seems to make the
+        # boot sequence a bit racy, as some services don't like it when the hostname
+        # changes after they've started.
+        exec { "/bin/rm -f /etc/hostname":
+            onlyif => "/bin/sh -c \"[ x$(host $fqdn | sed -r -n -e 's/^.*has address //p') != x$ipaddress ]\""
+        }
+
         # Deployment of these files forces the boot process to stall until the correct hostname
         # has been set.  Various services don't like it if the hostname changes after they have
         # been launched.
@@ -102,22 +114,33 @@ class baselayout::ubuntu inherits baselayout::linux {
         }
     }
 
-    #========================= hostname fix ===================================
-    # This workaround seems required on Ubuntu 10.04 and 12.04, but not 11.10
-    if $lsbmajdistrelease != 11 {
-        # Hostname will only be set via DHCP if /etc/hostname is absent.
-        # Gleaned from https://bugs.launchpad.net/ubuntu/+source/dhcp3/+bug/90388
-        # Therefore, we remove /etc/hostname iff resolving our fqdn does not
-        # result in the correct IP address - we should then get the correct fqdn on
-        # next boot.
-        # Note: we used to remove this file at every boot, but that seems to make the
-        # boot sequence a bit racy, as some services don't like it when the hostname
-        # changes after they've started.
-        exec { "/bin/rm -f /etc/hostname":
-            onlyif => "/bin/sh -c \"[ x$(host $fqdn | sed -r -n -e 's/^.*has address //p') != x$ipaddress ]\""
+    #========================== Ubuntu 12.04 hostname fix =====================
+    if $lsbmajdistrelease >= 12 {
+        # Deploy an ifup hook to force the setting of hostname via DHCP, even
+        # if NetworkManager usually would not
+        file { "/etc/network/if-up.d/qtqa-force-hostname-from-dhcp":
+            ensure => present,
+            mode => 0755,
+            source => "puppet:///modules/baselayout/ubuntu/if-up.d/qtqa-force-hostname-from-dhcp",
+        }
+
+        # Ensure facter and everything else are in agreement with respect to the
+        # system's hostname.
+        #
+        # Note: it might make sense to extract these into a 'local_hostname' module
+        # at some point, if it seems that other OS can benefit from a similar fix.
+        #
+        file { "/etc/hostname":
+            ensure => present,
+            content => "$hostname\n",
+        }
+
+        host { $fqdn:
+            ensure => present,
+            ip => "127.0.0.1",
+            host_aliases => [ $hostname, 'localhost' ],
         }
     }
-
 
     #========================== common stuff ==================================
     # Applies to all supported Ubuntu versions
