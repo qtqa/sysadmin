@@ -97,6 +97,12 @@ verifying any output at all, but it is difficult to be more precise than
 "does something" when verifying the output because the output of puppet is
 not designed to be parsed in this way.
 
+The selftest::expect_no_warnings type may be used to test that no warnings
+occur during the processing of a manifest:
+
+  quux::config { "test config": }
+  selftest::expect_no_warnings { "empty quux::config has no warnings": }
+
 =head1 PERMISSION PROBLEMS
 
 Typically, puppet is run as root, but clearly that is not desirable for running
@@ -232,6 +238,22 @@ sub test_one_pp_file
             my $expected = [$1, $2];
             push @expected_output, $expected;
             is( $output =~ s{\Q${^MATCH}\E}{}, 1 ) || return;
+        }
+
+        my $no_warnings = 0;
+        while ($output =~ m{\btest-expect-no-warnings: ([^:\n]+)\n}msp) {
+            $no_warnings = $1;
+            is( $output =~ s{\Q${^MATCH}\E}{}, 1 ) || return;
+        }
+
+        my @warnings;
+        while ($output =~ m{\bwarning: ([^\n]+)\n}msg) {
+            push @warnings, $1;
+        }
+
+        if ($no_warnings) {
+            local $LIST_SEPARATOR = "\n  ";
+            ok( !@warnings, $no_warnings ) || diag( "warnings:\n  @warnings" );
         }
 
         foreach my $expected (@expected_output) {
