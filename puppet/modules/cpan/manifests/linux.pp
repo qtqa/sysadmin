@@ -2,7 +2,7 @@ class cpan::linux {
     # Note: using the above method of cpanm installation goes to different
     # paths in different cases.  I'm not sure of the exact rules, these paths
     # were determined by experimentation.
-    $cpanm = $operatingsystem ? {
+    $cpanm = $::operatingsystem ? {
         CentOS  =>  "/usr/bin/cpanm",
         default =>  "/usr/local/bin/cpanm",
     }

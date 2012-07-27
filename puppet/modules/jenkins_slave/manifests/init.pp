@@ -1,6 +1,6 @@
 class jenkins_slave ($server) {
     include java
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include jenkins_slave::linux }
         Linux:      { include jenkins_slave::linux }
         Darwin:     { include jenkins_slave::mac }

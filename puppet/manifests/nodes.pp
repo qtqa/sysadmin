@@ -1,5 +1,5 @@
 node default {
-    $testgroup = $operatingsystem ? {
+    $testgroup = $::operatingsystem ? {
         Darwin  =>  "staff",
         Solaris =>  "other",
         default =>  "users",
@@ -9,7 +9,7 @@ node default {
     # Note: prefer usage of icecream where possible, since that has a scheduler
     $distcc_hosts = [ "localhost" ]
 
-    if $operatingsystem == "Darwin" {
+    if $::operatingsystem == "Darwin" {
         # Hack for macs to work around http://projects.puppetlabs.com/issues/2331 :
         # On the first run, use the possibly broken `darwinport' provider (so that
         # compilation at least can succeed), but warn about it.  The first run

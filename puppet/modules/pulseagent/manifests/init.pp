@@ -1,6 +1,6 @@
 class pulseagent {
     include java
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include pulseagent::mac }
         Ubuntu:     { include pulseagent::linux }
         Linux:      { include pulseagent::linux }

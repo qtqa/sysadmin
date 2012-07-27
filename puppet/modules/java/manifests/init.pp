@@ -1,5 +1,5 @@
 class java {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include java::ubuntu }
     }
 }

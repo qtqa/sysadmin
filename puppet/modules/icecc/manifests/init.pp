@@ -1,5 +1,5 @@
 class icecc {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:    { include icecc::ubuntu }
     }
 }

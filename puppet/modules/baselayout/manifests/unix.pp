@@ -1,6 +1,6 @@
 class baselayout::unix inherits baselayout::base {
     if $testuser {
-        $homepath = $operatingsystem ? {
+        $homepath = $::operatingsystem ? {
             Darwin  =>  "/Users/$testuser",
             Solaris =>  "/export/home/$testuser",
             default =>  "/home/$testuser",

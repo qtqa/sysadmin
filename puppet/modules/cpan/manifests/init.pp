@@ -1,5 +1,5 @@
 class cpan {
-    case $operatingsystem {
+    case $::operatingsystem {
         CentOS:     { include cpan::centos }
         Ubuntu:     { include cpan::ubuntu }
     }

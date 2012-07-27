@@ -1,19 +1,19 @@
 class jenkins_slave::base {
-    $jenkins_slave_name = $hostname
+    $jenkins_slave_name = $::hostname
     $jenkins_server = $jenkins_slave::server
-    $jenkins_workdir = $operatingsystem ? {
+    $jenkins_workdir = $::operatingsystem ? {
         windows  =>  "c:\\work",
         default  =>  "/work",
     }
 
-    $homedir = $operatingsystem ? {
+    $homedir = $::operatingsystem ? {
         windows  =>  "c:\\Users\\$testuser",
         Darwin   =>  "/Users/$testuser",
         default  =>  "/home/$testuser",
     }
     $jenkins_slave_dir = "$homedir/jenkins"
 
-    if $operatingsystem != "windows" {
+    if $::operatingsystem != "windows" {
         File {
             owner    =>  "$testuser",
             group    =>  "$testgroup",

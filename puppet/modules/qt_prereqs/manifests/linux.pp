@@ -1,16 +1,16 @@
 class qt_prereqs::linux inherits qt_prereqs::unix {
 
-    $gstreamer = $operatingsystem ? {
+    $gstreamer = $::operatingsystem ? {
         Ubuntu      =>  "libgstreamer0.10-dev",
         default     =>  "gstreamer-devel",
     }
 
-    $git = $operatingsystem ? {
+    $git = $::operatingsystem ? {
         Ubuntu      =>  "git-core",
         default     =>  "git",
     }
 
-    $sevenzip = $operatingsystem ? {
+    $sevenzip = $::operatingsystem ? {
         Ubuntu      =>  "p7zip-full",
         default     =>  "p7zip",
     }
@@ -41,14 +41,14 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         "libtie-ixhash-perl": ensure => installed;
     }
 
-    if $operatingsystem == "Ubuntu" {
+    if $::operatingsystem == "Ubuntu" {
 
-        $libxcb_icccm_dev = $lsbmajdistrelease ? {
+        $libxcb_icccm_dev = $::lsbmajdistrelease ? {
             10          =>  "libxcb-icccm1-dev",
             default     =>  "libxcb-icccm4-dev",
         }
 
-        if $lsbmajdistrelease >= 11 {
+        if $::lsbmajdistrelease >= 11 {
             package {
                 "libegl1-mesa-dev":                  ensure => installed;
                 "libgl1-mesa-dev":                   ensure => installed;

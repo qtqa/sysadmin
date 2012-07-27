@@ -3,7 +3,7 @@ import "private_sshkeys"
 class sshkeys {
 
     if $testuser {
-        $homepath = $operatingsystem ? {
+        $homepath = $::operatingsystem ? {
             Darwin  =>  "/Users/$testuser",
             Solaris =>  "/export/home/$testuser",
             windows =>  "C:\\Users\\$testuser",
@@ -20,7 +20,7 @@ class sshkeys {
         file {
             "$sshdir":
                 ensure  =>  directory,
-                mode    =>  $operatingsystem ? {
+                mode    =>  $::operatingsystem ? {
                     # .ssh directory should generally not be accessible to other users
                     # (and ssh may warn about this).  However, on Windows, a mode of 0700
                     # makes the directory unmanagable by puppet.
@@ -29,7 +29,7 @@ class sshkeys {
                 }
             ;
             "$sshdir/config":
-                source  =>  $operatingsystem ? {
+                source  =>  $::operatingsystem ? {
                     # Solaris ssh does not understand SendEnv
                     Solaris =>  "puppet:///modules/sshkeys/config.basic",
                     default =>  "puppet:///modules/sshkeys/config",
@@ -51,7 +51,7 @@ class sshkeys {
             ;
         }
 
-        if $operatingsystem != "windows" {
+        if $::operatingsystem != "windows" {
             # ssh will refuse to make use of a world-accessible id_rsa
             # (except on Windows - where a mode of 0600 makes the file unmanageable by puppet)
             file { "$sshdir/id_rsa":
@@ -70,7 +70,7 @@ class sshkeys {
 
     # Let all trusted users (e.g. test farm sysadmins) log into root account
     # Windows doesn't run sshd
-    if $operatingsystem != "windows" {
+    if $::operatingsystem != "windows" {
         trusted_authorized_keys { "authorized_keys for root":
             user    =>  "root",
         }

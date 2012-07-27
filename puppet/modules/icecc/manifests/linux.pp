@@ -1,14 +1,14 @@
 class icecc::linux
 {
-    $icecc_package = $operatingsystem ? {
+    $icecc_package = $::operatingsystem ? {
         default     =>  "icecc",
     }
 
-    $icecc_service = $operatingsystem ? {
+    $icecc_service = $::operatingsystem ? {
         default     =>  "icecc",
     }
 
-    $icecc_binary = $operatingsystem ? {
+    $icecc_binary = $::operatingsystem ? {
         default     =>  "/usr/bin/icecc",
     }
 

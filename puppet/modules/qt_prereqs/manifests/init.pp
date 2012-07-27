@@ -1,5 +1,5 @@
 class qt_prereqs {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include qt_prereqs::mac }
         Ubuntu:     { include qt_prereqs::linux }
         Linux:      { include qt_prereqs::linux }

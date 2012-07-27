@@ -3,7 +3,7 @@ class baselayout::ubuntu inherits baselayout::linux {
     #========================== Ubuntu 10.04 stuff ============================
     # This logic only applies to Ubuntu 10.04, where we use KDE.
     #
-    if $lsbmajdistrelease < 11 {
+    if $::lsbmajdistrelease < 11 {
         file {
             "/etc/X11/default-display-manager":
                 owner   =>  "root",
@@ -21,7 +21,7 @@ class baselayout::ubuntu inherits baselayout::linux {
         # boot sequence a bit racy, as some services don't like it when the hostname
         # changes after they've started.
         exec { "/bin/rm -f /etc/hostname":
-            onlyif => "/bin/sh -c \"[ x$(host $fqdn | sed -r -n -e 's/^.*has address //p') != x$ipaddress ]\""
+            onlyif => "/bin/sh -c \"[ x$(host $::fqdn | sed -r -n -e 's/^.*has address //p') != x$::ipaddress ]\""
         }
 
         # Deployment of these files forces the boot process to stall until the correct hostname
@@ -56,7 +56,7 @@ class baselayout::ubuntu inherits baselayout::linux {
     #========================== Ubuntu 11.10 stuff ============================
     # This logic only applies to Ubuntu 11.10, where we use Gnome.
     #
-    if $lsbmajdistrelease >= 11 {
+    if $::lsbmajdistrelease >= 11 {
         package {
             "ubuntu-desktop":   ensure => installed;
             "dconf-tools":      ensure => installed;
@@ -115,7 +115,7 @@ class baselayout::ubuntu inherits baselayout::linux {
     }
 
     #========================== Ubuntu 12.04 hostname fix =====================
-    if $lsbmajdistrelease >= 12 {
+    if $::lsbmajdistrelease >= 12 {
         # Deploy an ifup hook to force the setting of hostname via DHCP, even
         # if NetworkManager usually would not
         file { "/etc/network/if-up.d/qtqa-force-hostname-from-dhcp":
@@ -132,13 +132,13 @@ class baselayout::ubuntu inherits baselayout::linux {
         #
         file { "/etc/hostname":
             ensure => present,
-            content => "$hostname\n",
+            content => "$::hostname\n",
         }
 
-        host { $fqdn:
+        host { $::fqdn:
             ensure => present,
             ip => "127.0.0.1",
-            host_aliases => [ $hostname, 'localhost' ],
+            host_aliases => [ $::hostname, 'localhost' ],
         }
     }
 

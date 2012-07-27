@@ -15,7 +15,7 @@ class pulseserver::unix {
         managehome  =>  true,
     }
 
-    $homedir = $operatingsystem ? {
+    $homedir = $::operatingsystem ? {
         default =>  "/home/$user",
     }
 

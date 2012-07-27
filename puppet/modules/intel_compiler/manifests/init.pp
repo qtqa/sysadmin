@@ -1,5 +1,5 @@
 class intel_compiler {
-    case $operatingsystem {
+    case $::operatingsystem {
         # Add more as implemented...
         Ubuntu:     { include intel_compiler::linux }
     }

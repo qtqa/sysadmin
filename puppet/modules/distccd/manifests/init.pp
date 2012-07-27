@@ -1,5 +1,5 @@
 class distccd {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include distccd::mac }
     }
 }

@@ -1,5 +1,5 @@
 class ccache {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include ccache::mac }
         Solaris:    { include ccache::solaris }
         Ubuntu:     { include ccache::linux }
@@ -8,7 +8,7 @@ class ccache {
 }
 
 define ccache_link($command) {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:  {
             file {
                 "/Users/$testuser/bin/$command":

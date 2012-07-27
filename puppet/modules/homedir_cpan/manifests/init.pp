@@ -3,10 +3,10 @@
 # and have all perl scripts find them automatically, without any
 # root permissions required.
 class homedir_cpan {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include homedir_cpan::ubuntu }
         Darwin:     { include homedir_cpan::mac }
-        default:    { error("homedir_cpan is not yet implemented for $operatingsystem") }
+        default:    { error("homedir_cpan is not yet implemented for $::operatingsystem") }
     }
 }
 

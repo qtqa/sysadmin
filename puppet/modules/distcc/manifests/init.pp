@@ -1,5 +1,5 @@
 class distcc {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include distcc::mac }
     }
 }

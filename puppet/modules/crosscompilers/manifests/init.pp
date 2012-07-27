@@ -1,5 +1,5 @@
 class crosscompilers {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include crosscompilers::linux }
     }
 }

@@ -1,7 +1,7 @@
 class baselayout::linux inherits baselayout::unix {
 
     # Do not use KDE since Ubuntu 11
-    if $operatingsystem == "Ubuntu" and $lsbmajdistrelease < 11 {
+    if $::operatingsystem == "Ubuntu" and $::lsbmajdistrelease < 11 {
         $use_kde = 1
     }
 
@@ -50,16 +50,16 @@ class baselayout::linux inherits baselayout::unix {
         ;
     }
 
-    $kde = $operatingsystem ? {
+    $kde = $::operatingsystem ? {
         Ubuntu      =>  "kde-full",
         default     =>  "kde",
     }
 
-    $ssh = $operatingsystem ? {
+    $ssh = $::operatingsystem ? {
         CentOS      =>  "openssh",
         default     =>  "ssh",
     }
-    $sshd = $operatingsystem ? {
+    $sshd = $::operatingsystem ? {
         CentOS      =>  "sshd",
         default     =>  "ssh",
     }

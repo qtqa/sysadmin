@@ -1,7 +1,7 @@
 # Run a command at startup.
 define baselayout::startup($path, $arguments="", $user, $terminal=false) {
 
-    if $operatingsystem == "windows" {
+    if $::operatingsystem == "windows" {
         # FIXME: assumes path to the Startup folder, because getting the real
         # path for a particular user is cumbersome (not directly supported by
         # puppet or facter)
@@ -23,7 +23,7 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
         }
     }
 
-    if $kernel == "Linux" {
+    if $::kernel == "Linux" {
         # Uses freedesktop $HOME/.config/autostart, which seems to be supported on
         # most Linux for several years
         # Additional $terminal variable to fix execution issue on Ubuntu 11.10,
@@ -38,7 +38,7 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
         }
     }
 
-    if $operatingsystem == "Darwin" {
+    if $::operatingsystem == "Darwin" {
         file { "/Users/$user/startup-$name.command":
             ensure  =>  present,
             owner   =>  $user,

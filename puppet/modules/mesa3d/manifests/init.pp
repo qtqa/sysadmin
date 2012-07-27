@@ -1,5 +1,5 @@
 class mesa3d {
-    case $operatingsystem {
+    case $::operatingsystem {
         Windows:    { include mesa3d::windows }
     }
 }

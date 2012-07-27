@@ -1,5 +1,5 @@
 class simple_fileserver {
-    case $operatingsystem {
+    case $::operatingsystem {
         CentOS:     { include simple_fileserver::centos }
     }
 }

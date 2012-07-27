@@ -10,10 +10,10 @@
 # Within the virtualenv, easy_install and pip are both made available
 # for installing packages.
 class homedir_virtualenv {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include homedir_virtualenv::ubuntu }
         Darwin:     { include homedir_virtualenv::mac }
-        default:    { error("homedir_virtualenv is not yet implemented for $operatingsystem") }
+        default:    { error("homedir_virtualenv is not yet implemented for $::operatingsystem") }
     }
 }
 

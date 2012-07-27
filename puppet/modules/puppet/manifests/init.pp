@@ -1,5 +1,5 @@
 class puppet {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include puppet::mac }
         Ubuntu:     { include puppet::ubuntu }
         CentOS:     { include puppet::centos }

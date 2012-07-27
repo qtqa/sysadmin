@@ -1,18 +1,18 @@
 class pulseagent::unix {
-    $homedir = $operatingsystem ? {
+    $homedir = $::operatingsystem ? {
         Darwin  =>  "/Users/$testuser",
         Solaris =>  "/export/home/$testuser",
         default =>  "/home/$testuser",
     }
-    $tar = $operatingsystem ? {
+    $tar = $::operatingsystem ? {
         Solaris =>  "/usr/sfw/bin/gtar",
         default =>  "tar",
     }
-    $tar_strip = $operatingsystem ? {
+    $tar_strip = $::operatingsystem ? {
         Solaris =>  "--strip-path",
         default =>  "--strip-components",
     }
-    $fetch_to_stdout = $operatingsystem ? {
+    $fetch_to_stdout = $::operatingsystem ? {
         Darwin  =>  "curl",
         default =>  "wget -O -",
     }

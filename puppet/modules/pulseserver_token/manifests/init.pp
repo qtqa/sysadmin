@@ -1,5 +1,5 @@
 class pulseserver_token {
-    case $operatingsystem {
+    case $::operatingsystem {
         CentOS:     { include pulseserver_token::unix }
     }
 }

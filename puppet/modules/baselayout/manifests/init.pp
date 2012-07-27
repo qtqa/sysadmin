@@ -2,7 +2,7 @@
 include secret_file
 
 class baselayout {
-    case $operatingsystem {
+    case $::operatingsystem {
         Darwin:     { include baselayout::mac }
         Ubuntu:     { include baselayout::ubuntu }
         CentOS:     { include baselayout::centos }

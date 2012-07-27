@@ -1,6 +1,6 @@
 class network_test_server::linux::danted {
 
-    if $operatingsystem == "Ubuntu" {
+    if $::operatingsystem == "Ubuntu" {
         # FIXME: tests were written against this ancient dante-server,
         # and they now fail against current versions.
         # For compatibility with the pre-puppet test server, we'll use this

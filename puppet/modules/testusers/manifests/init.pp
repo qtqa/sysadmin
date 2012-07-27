@@ -1,5 +1,5 @@
 class testusers {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include testusers::ubuntu }
     }
 }

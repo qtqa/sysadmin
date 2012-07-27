@@ -1,13 +1,13 @@
 class puppet::unix {
     # Hacky: for some systems we want our cron jobs to get some extra dirs
     # added to PATH
-    $env = $operatingsystem ? {
+    $env = $::operatingsystem ? {
         Solaris =>  "/usr/bin/env PATH=\${PATH}:/opt/csw/bin:/usr/local/bin",
         Darwin  =>  "/usr/bin/env PATH=\${PATH}:/opt/local/bin:/usr/local/bin",
         default =>  "",
     }
 
-    $git = $operatingsystem ? {
+    $git = $::operatingsystem ? {
         Solaris =>  "$env git",
         Darwin  =>  $macosx_productversion_major ? {
             # On OSX <  10.7, we use git from macports.
@@ -39,7 +39,7 @@ class puppet::unix {
         require     =>  Exec["git clone sysadmin"],
     }
 
-    $puppetrun = $operatingsystem ? {
+    $puppetrun = $::operatingsystem ? {
         Solaris =>  "$env $sysadmindir/puppet/sync_and_run.pl",
         Darwin  =>  "$env $sysadmindir/puppet/sync_and_run.pl | logger -t puppet -p daemon.error",
         default =>  "$sysadmindir/puppet/sync_and_run.pl | logger -t puppet -p daemon.error",
@@ -58,7 +58,7 @@ class puppet::unix {
     }
 
     # On Nokia LAN, fetch the private overlay.
-    if $domain =~ /\.nokia\.com$/ {
+    if $::domain =~ /\.nokia\.com$/ {
         $privatedir = "$sysadmindir/puppet/private"
         exec { "git clone private sysadmin":
             # Note: we cannot use `--branch' option to `git clone' here, because we are not

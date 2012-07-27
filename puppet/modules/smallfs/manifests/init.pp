@@ -1,5 +1,5 @@
 class smallfs {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include smallfs::linux }
         Linux:      { include smallfs::linux }
     }

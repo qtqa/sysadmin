@@ -1,5 +1,5 @@
 class armel_cross {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include armel_cross::ubuntu }
     }
 }

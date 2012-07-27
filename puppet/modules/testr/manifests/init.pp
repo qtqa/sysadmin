@@ -1,5 +1,5 @@
 class testr {
-    case $operatingsystem {
+    case $::operatingsystem {
         # add more as needed
         OpenSuSE:     { include testr::linux }
     }

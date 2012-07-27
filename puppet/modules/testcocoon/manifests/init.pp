@@ -1,5 +1,5 @@
 class testcocoon {
-    case $operatingsystem {
+    case $::operatingsystem {
         Ubuntu:     { include testcocoon::ubuntu }
     }
 }
