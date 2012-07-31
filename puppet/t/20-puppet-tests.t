@@ -115,9 +115,10 @@ which appears to need root permission will be skipped.
 
 use strict;
 use warnings;
+use v5.10;
 
 use Capture::Tiny qw( capture_merged );
-use English;
+use English qw( -no_match_vars );
 use File::Basename;
 use File::Find::Rule;
 use File::Spec::Functions;
@@ -227,10 +228,10 @@ sub test_one_pp_file
         }
 
         my @expected_output;
-        while ($output =~ m{\btest-expect: ([^:\n]*): ([^\n]+)\n}ms) {
+        while ($output =~ m{\btest-expect: ([^:\n]*): ([^\n]+)\n}msp) {
             my $expected = [$1, $2];
             push @expected_output, $expected;
-            is( $output =~ s{\Q$MATCH\E}{}, 1 ) || return;
+            is( $output =~ s{\Q${^MATCH}\E}{}, 1 ) || return;
         }
 
         foreach my $expected (@expected_output) {
