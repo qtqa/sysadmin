@@ -1,8 +1,11 @@
 class pulseagent::unix {
+    $user = $pulseagent::user
+    $group = $pulseagent::group
+
     $homedir = $::operatingsystem ? {
-        Darwin  =>  "/Users/$testuser",
-        Solaris =>  "/export/home/$testuser",
-        default =>  "/home/$testuser",
+        Darwin  =>  "/Users/$user",
+        Solaris =>  "/export/home/$user",
+        default =>  "/home/$user",
     }
     $tar = $::operatingsystem ? {
         Solaris =>  "/usr/sfw/bin/gtar",
@@ -21,21 +24,21 @@ class pulseagent::unix {
     file { "pulseagent directory":
         name    =>  $pulseagent_dir,
         ensure  =>  directory,
-        owner   =>  "$testuser",
-        group   =>  "$testgroup",
+        owner   =>  $user,
+        group   =>  $group,
     }
 
     file { "$homedir/.pulse2-agent":
         ensure  =>  directory,
-        owner   =>  $testuser,
-        group   =>  $testgroup,
+        owner   =>  $user,
+        group   =>  $group,
     }
 
     exec { "install pulseagent":
         subscribe   =>  File["pulseagent directory"],
         # NOTE! tar might use --strip-path or --strip-components, we don't know which in advance.
         # Just try both.
-        command     =>  "/bin/sh -c '$fetch_to_stdout $input/pulse-agent-2.1.26.tar.gz > $homedir/pulse-agent-install.tar.gz && { $tar -xvzf $homedir/pulse-agent-install.tar.gz -C $pulseagent_dir --strip-component 1 || $tar -xvzf $homedir/pulse-agent-install.tar.gz -C $pulseagent_dir --strip-path 1; } && chown -R $testuser:$testgroup $pulseagent_dir'",
+        command     =>  "/bin/sh -c '$fetch_to_stdout $input/pulse-agent-2.1.26.tar.gz > $homedir/pulse-agent-install.tar.gz && { $tar -xvzf $homedir/pulse-agent-install.tar.gz -C $pulseagent_dir --strip-component 1 || $tar -xvzf $homedir/pulse-agent-install.tar.gz -C $pulseagent_dir --strip-path 1; } && chown -R $user:$group $pulseagent_dir'",
         creates     =>  "$homedir/pulse-agent/bin/pulse",
     }
 
@@ -46,14 +49,14 @@ class pulseagent::unix {
             "pulseagent build directory":
                 name    =>  "/build",
                 ensure  =>  directory,
-                owner   =>  $testuser,
-                group   =>  $testgroup,
+                owner   =>  $user,
+                group   =>  $group,
             ;
             "pulseagent configuration":
                 name    =>  "$homedir/.pulse2-agent/config.properties",
                 ensure  =>  present,
-                owner   =>  $testuser,
-                group   =>  $testgroup,
+                owner   =>  $user,
+                group   =>  $group,
                 source  =>  "puppet:///modules/pulseagent/config.properties",
                 mode    =>  0644,
                 require =>  File["$homedir/.pulse2-agent"],
@@ -64,8 +67,8 @@ class pulseagent::unix {
     file { "pulseagent script":
         name    =>  $pulsescript,
         ensure  =>  present,
-        owner   =>  "$testuser",
-        group   =>  "$testgroup",
+        owner   =>  $user,
+        group   =>  $group,
         source  =>  "puppet:///modules/pulseagent/pulse-agent.sh",
         mode    =>  0755,
     }

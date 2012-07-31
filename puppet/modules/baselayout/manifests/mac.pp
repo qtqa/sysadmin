@@ -1,6 +1,6 @@
 class baselayout::mac inherits baselayout::unix {
 
-    if $testuser {
+    if $baselayout::testuser {
         # On Mac, we can't safely create the test user ourselves.
         #
         # The puppet Mac user provider does not seem to set up everything
@@ -13,7 +13,7 @@ class baselayout::mac inherits baselayout::unix {
         # user before we can continue.
 
         $user_exists = generate('/bin/sh', '-c', " \
-            if /bin/test -d /Users/$testuser; then \
+            if /bin/test -d /Users/$baselayout::testuser; then \
                 /bin/echo -n ok;                   \
             else                                   \
                 /bin/echo -n nok;                  \
@@ -23,7 +23,7 @@ class baselayout::mac inherits baselayout::unix {
         if $user_exists == "nok" {
             crit("                                                \
 Sorry, some manual setup must be done before puppet can continue! \
-Please use the GUI to create a user named `$testuser' and enable  \
+Please use the GUI to create a user named `$baselayout::testuser' and enable  \
 automatic login for that user.                                    \
             ")
         }
@@ -74,11 +74,11 @@ automatic login for that user.                                    \
         onlyif  =>  "/bin/sh -c 'softwareupdate --schedule | grep -q -v \"Automatic check is off\"'",
         user    =>  "root",
     }
-    if $testuser {
-        exec { "disable $testuser autoupdates":
+    if $baselayout::testuser {
+        exec { "disable $baselayout::testuser autoupdates":
             command =>  "/usr/sbin/softwareupdate --schedule off",
             onlyif  =>  "/bin/sh -c 'softwareupdate --schedule | grep -q -v \"Automatic check is off\"'",
-            user    =>  "$testuser",
+            user    =>  "$baselayout::testuser",
         }
     }
 
@@ -131,7 +131,7 @@ automatic login for that user.                                    \
         # reboot.  It also potentially screws up the state of autotests, as various QtGui
         # autotests are leaving behind some unknown state here.
         #
-        file { "/Users/$testuser/Library/Saved Application State":
+        file { "/Users/$baselayout::testuser/Library/Saved Application State":
             ensure  =>  directory,  # it's a directory ...
             purge   =>  true,       # which should always be empty ...
             recurse =>  true,       # (recursively) ...

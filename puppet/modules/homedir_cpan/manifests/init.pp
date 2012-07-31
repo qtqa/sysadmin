@@ -2,11 +2,10 @@
 # can easily install cpan modules into a prefix under $HOME/perl5
 # and have all perl scripts find them automatically, without any
 # root permissions required.
-class homedir_cpan {
+class homedir_cpan ($user = $baselayout::testuser) {
     case $::operatingsystem {
         Ubuntu:     { include homedir_cpan::ubuntu }
         Darwin:     { include homedir_cpan::mac }
-        default:    { error("homedir_cpan is not yet implemented for $::operatingsystem") }
     }
 }
 

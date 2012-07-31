@@ -1,13 +1,13 @@
 class baselayout::unix inherits baselayout::base {
-    if $testuser {
+    if $baselayout::testuser {
         $homepath = $::operatingsystem ? {
-            Darwin  =>  "/Users/$testuser",
-            Solaris =>  "/export/home/$testuser",
-            default =>  "/home/$testuser",
+            Darwin  =>  "/Users/$baselayout::testuser",
+            Solaris =>  "/export/home/$baselayout::testuser",
+            default =>  "/home/$baselayout::testuser",
         }
 
         Git::Config {
-            user => $testuser,
+            user => $baselayout::testuser,
         }
 
         git::config {
@@ -18,8 +18,8 @@ class baselayout::unix inherits baselayout::base {
         file { "$homepath/bin":
             ensure  =>  directory,
             mode    =>  0755,
-            owner   =>  $testuser,
-            group   =>  $testgroup,
+            owner   =>  $baselayout::testuser,
+            group   =>  $baselayout::testgroup,
         }
     }
 }

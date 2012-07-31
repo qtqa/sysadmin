@@ -30,8 +30,9 @@ class testusers::ubuntu
         require     => Group["testgroup"],
     }
 
-    # Enables the $testuser ("qt") to run any command as testuser1
+    # Enables the $user (e.g. "qt") to run any command as testuser1
     # or testuser2 without using any password
+    $user = $testusers::user
     file { "/etc/sudoers.d/testusers":
         ensure      =>  present,
         content     =>  template("testusers/testusers.erb"),

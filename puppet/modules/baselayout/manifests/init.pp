@@ -1,7 +1,14 @@
 # For fetching of files too sensitive for any source control
 include secret_file
 
-class baselayout {
+class baselayout (
+    $testuser = '',
+    $testgroup = $::operatingsystem ? {
+        Darwin  =>  "staff",
+        Solaris =>  "other",
+        default =>  "users",
+    }
+) {
     case $::operatingsystem {
         Darwin:     { include baselayout::mac }
         Ubuntu:     { include baselayout::ubuntu }

@@ -6,11 +6,11 @@ class ccache::solaris
         }
     }
 
-    if $testuser {
-        exec { "/bin/sh -c 'echo ''/opt/csw/bin/ccache -M 2G'' | /usr/bin/su - $testuser'":
+    if $ccache::user {
+        exec { "/bin/sh -c 'echo ''/opt/csw/bin/ccache -M 2G'' | /usr/bin/su - $ccache::user'":
         }
 
-        ccache_link {
+        ccache::link {
                 "gcc":     command => "gcc";
                 "g++":     command => "g++";
                 "cc":      command => "cc";

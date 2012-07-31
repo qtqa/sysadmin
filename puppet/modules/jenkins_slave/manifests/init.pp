@@ -1,4 +1,4 @@
-class jenkins_slave ($server, $set_online = true) {
+class jenkins_slave ($user = $baselayout::testuser, $group = $baselayout::group, $server, $set_online = true) {
     include java
     case $::operatingsystem {
         Ubuntu:     { include jenkins_slave::linux }

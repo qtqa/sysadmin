@@ -5,38 +5,38 @@ class baselayout::linux inherits baselayout::unix {
         $use_kde = 1
     }
 
-    if $testuser {
+    if $baselayout::testuser {
 
         if $use_kde {
             include kdesettings
         }
 
-        user { $testuser:
+        user { $baselayout::testuser:
             ensure      =>  present,
             uid         =>  1100,
-            gid         =>  $testgroup,
-            home        =>  "/home/$testuser",
+            gid         =>  $baselayout::testgroup,
+            home        =>  "/home/$baselayout::testuser",
             managehome  =>  true,
         }
     }
 
-    if $testuser {
+    if $baselayout::testuser {
         file {
-            "/home/$testuser":
+            "/home/$baselayout::testuser":
                 ensure  =>  directory,
-                owner   =>  $testuser,
-                group   =>  $testgroup,
+                owner   =>  $baselayout::testuser,
+                group   =>  $baselayout::testgroup,
             ;
-            "/home/$testuser/.config":
+            "/home/$baselayout::testuser/.config":
                 ensure  =>  directory,
-                owner   =>  $testuser,
-                group   =>  $testgroup,
+                owner   =>  $baselayout::testuser,
+                group   =>  $baselayout::testgroup,
             ;
-            "/home/$testuser/.config/autostart":
+            "/home/$baselayout::testuser/.config/autostart":
                 ensure  =>  directory,
-                owner   =>  $testuser,
-                group   =>  $testgroup,
-                require =>  File["/home/$testuser/.config"],
+                owner   =>  $baselayout::testuser,
+                group   =>  $baselayout::testgroup,
+                require =>  File["/home/$baselayout::testuser/.config"],
             ;
         }
     }
@@ -68,7 +68,7 @@ class baselayout::linux inherits baselayout::unix {
         "$ssh":  ensure => installed;
     }
 
-    if $testuser and $use_kde {
+    if $baselayout::testuser and $use_kde {
         package {
             "$kde": ensure => installed;
         }

@@ -10,7 +10,7 @@ class pulseagent::solaris inherits pulseagent::unix {
             ensure  =>  present,
             source  =>  "puppet:///modules/pulseagent/solaris/pulseagent.xml",
         ;
-        "$homedir/svc-pulseagent":
+        "$pulseagent::unix::homedir/svc-pulseagent":
             ensure  =>  present,
             source  =>  "puppet:///modules/pulseagent/solaris/svc-pulseagent",
             mode    =>  0755,
@@ -19,7 +19,7 @@ class pulseagent::solaris inherits pulseagent::unix {
 
     exec { "svccfg import":
         name        =>  "/usr/sbin/svccfg import /var/svc/manifest/site/pulseagent.xml",
-        subscribe   =>  File["/var/svc/manifest/site/pulseagent.xml","$homedir/svc-pulseagent"],
+        subscribe   =>  File["/var/svc/manifest/site/pulseagent.xml","$pulseagent::unix::homedir/svc-pulseagent"],
         refreshonly =>  true,
     }
 

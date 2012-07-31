@@ -1,10 +1,4 @@
 node default {
-    $testgroup = $::operatingsystem ? {
-        Darwin  =>  "staff",
-        Solaris =>  "other",
-        default =>  "users",
-    }
-
     # For hosts where you want to use distcc, set this to the appropriate DISTCC_HOSTS
     # Note: prefer usage of icecream where possible, since that has a scheduler
     $distcc_hosts = [ "localhost" ]
@@ -44,8 +38,7 @@ is run on this host."
 #====================== Mac ===================================================
 
 node 'lion-tester.test.qt-project.org' inherits default {
-    $testuser = "qt"
-    include baselayout
+    class { 'baselayout': testuser => 'qt' }
     include qt_prereqs
     include hosts
     include pulseagent
@@ -68,8 +61,7 @@ node 'lion-tester.test.qt-project.org' inherits default {
 }
 
 node 'snowleopard-tester.test.qt-project.org' inherits default {
-    $testuser = "qt"
-    include baselayout
+    class { 'baselayout': testuser => 'qt' }
     include qt_prereqs
     include hosts
     include pulseagent
@@ -92,8 +84,7 @@ node 'snowleopard-parallels-server.test.qt-project.org' inherits default {
 }
 
 node 'legacy-snowleopard-tester.test.qt-project.org' inherits default {
-    $testuser = "pulseagent"
-    include baselayout
+    class { 'baselayout': testuser => 'pulseagent' }
     include qt_prereqs
     include hosts
     include pulseagent
@@ -105,8 +96,7 @@ node 'legacy-snowleopard-tester.test.qt-project.org' inherits default {
 }
 
 node 'snowleopard-packager.test.qt-project.org' inherits default {
-    $testuser = "pulseagent"
-    include baselayout
+    class { 'baselayout': testuser => 'pulseagent' }
     include qt_prereqs
     include hosts
     include pulseagent
@@ -118,9 +108,8 @@ node 'snowleopard-packager.test.qt-project.org' inherits default {
 
 #====================== Linux =================================================
 node 'linux-tester.test.qt-project.org' inherits default {
-    $testuser = "qt"
+    class { 'baselayout': testuser => 'qt' }
     include puppet
-    include baselayout
     include qt_prereqs
     include hosts
     include sshkeys
@@ -176,8 +165,7 @@ node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project
 #====================== Windows ===============================================
 
 node 'windows7-msvc2010-x86.test.qt-project.org' inherits 'default' {
-    $testuser = "pulse"
-    include baselayout
+    class { 'baselayout': testuser => 'pulse' }
     include sshkeys
     include mesa3d
 }
@@ -247,8 +235,7 @@ node 'solaris-master.test.qt-project.org' inherits default {
 # containers themselves
 node 'solaris-container.test.qt-project.org' inherits default {
     $zone = true
-    $testuser = pulse
-    include baselayout
+    class { 'baselayout': testuser => 'pulse' }
     include pulseagent
     include puppet
     include qadungeon

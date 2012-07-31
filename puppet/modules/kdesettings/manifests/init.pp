@@ -1,56 +1,56 @@
-class kdesettings {
+class kdesettings ($user = $baselayout::testuser, $group = $baselayout::testgroup) {
     File {
-        owner   =>  "$testuser",
-        group   =>  "$testgroup",
+        owner   =>  "$user",
+        group   =>  "$group",
         mode    =>  0644,
     }
     file {
-        "/home/$testuser/.kde":
+        "/home/$user/.kde":
             ensure  =>  directory,
             mode    =>  0755,
         ;
-        "/home/$testuser/.kde/share":
+        "/home/$user/.kde/share":
             ensure  =>  directory,
             mode    =>  0755,
-            require =>  File["/home/$testuser/.kde"],
+            require =>  File["/home/$user/.kde"],
         ;
-        "/home/$testuser/.kde/share/config":
+        "/home/$user/.kde/share/config":
             ensure  =>  directory,
             mode    =>  0755,
-            require =>  File["/home/$testuser/.kde/share"],
+            require =>  File["/home/$user/.kde/share"],
         ;
 
         # Disable session management
-        "/home/$testuser/.kde/share/config/ksmserverrc":
+        "/home/$user/.kde/share/config/ksmserverrc":
             ensure  =>  present,
             source  =>  "puppet:///modules/kdesettings/ksmserverrc",
-            require =>  File["/home/$testuser/.kde/share/config"],
+            require =>  File["/home/$user/.kde/share/config"],
         ;
 
         # Disable screen saver
-        "/home/$testuser/.kde/share/config/kscreensaverrc":
+        "/home/$user/.kde/share/config/kscreensaverrc":
             ensure  =>  present,
             source  =>  "puppet:///modules/kdesettings/kscreensaverrc",
-            require =>  File["/home/$testuser/.kde/share/config"],
+            require =>  File["/home/$user/.kde/share/config"],
         ;
 
         # Disable notification of updates available
-        "/home/$testuser/.kde/share/config/update-notifier-kderc":
+        "/home/$user/.kde/share/config/update-notifier-kderc":
             ensure  =>  present,
             source  =>  "puppet:///modules/kdesettings/update-notifier-kderc",
-            require =>  File["/home/$testuser/.kde/share/config"],
+            require =>  File["/home/$user/.kde/share/config"],
         ;
-        "/home/$testuser/.kde/share/config/KPackageKit":
+        "/home/$user/.kde/share/config/KPackageKit":
             ensure  =>  present,
             source  =>  "puppet:///modules/kdesettings/KPackageKit",
-            require =>  File["/home/$testuser/.kde/share/config"],
+            require =>  File["/home/$user/.kde/share/config"],
         ;
         
         # Disable blanking of display
-        "/home/$testuser/.kde/share/config/powerdevilprofilesrc":
+        "/home/$user/.kde/share/config/powerdevilprofilesrc":
             ensure  =>  present,
             source  =>  "puppet:///modules/kdesettings/powerdevilprofilesrc",
-            require =>  File["/home/$testuser/.kde/share/config"],
+            require =>  File["/home/$user/.kde/share/config"],
         ;
     }
 }

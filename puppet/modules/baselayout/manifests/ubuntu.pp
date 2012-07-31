@@ -41,8 +41,9 @@ class baselayout::ubuntu inherits baselayout::linux {
             ;
         }
 
-        if $testuser {
-            # This kdmrc forces autologin of $testuser
+        if $baselayout::testuser {
+            # This kdmrc forces autologin of $baselayout::testuser
+            $testuser = $baselayout::testuser # for usage within template
             file {
                 "/etc/kde4/kdm/kdmrc":
                     owner   =>  "root",
@@ -74,9 +75,10 @@ class baselayout::ubuntu inherits baselayout::linux {
             ;
         }
 
-        if $testuser {
+        if $baselayout::testuser {
+            $testuser = $baselayout::testuser # for usage within template
             file {
-                # This enables autologin as $testuser
+                # This enables autologin as $baselayout::testuser
                 "/etc/lightdm/lightdm.conf":
                     owner   =>  "root",
                     mode    =>  0444,
@@ -95,19 +97,19 @@ class baselayout::ubuntu inherits baselayout::linux {
                 "disable screensaver lock":
                     command => "/bin/sh -c 'DISPLAY=:0 dconf write /org/gnome/desktop/screensaver/lock-enabled false'",
                     onlyif  => "/bin/sh -c 'test x$(DISPLAY=:0 dconf read /org/gnome/desktop/screensaver/lock-enabled) != xfalse'",
-                    user    => $testuser,
+                    user    => $baselayout::testuser,
                     require => Package["dconf-tools", "ubuntu-desktop"],
                 ;
                 "disable screen off":
                     command => "/bin/sh -c 'DISPLAY=:0 dconf write /org/gnome/desktop/session/idle-delay \"uint32 0\"'",
                     onlyif  => "/bin/sh -c 'test x$(DISPLAY=:0 dconf read /org/gnome/desktop/session/idle-delay) != \"xuint32 0\"'",
-                    user    => $testuser,
+                    user    => $baselayout::testuser,
                     require => Package["dconf-tools", "ubuntu-desktop"],
                 ;
                 "disable remind-reload query":
                     command => "/bin/sh -c 'DISPLAY=:0 dconf write /apps/update-manager/remind-reload false'",
                     onlyif  => "/bin/sh -c 'test x$(DISPLAY=:0 dconf read /apps/update-manager/remind-reload) != xfalse'",
-                    user    => $testuser,
+                    user    => $baselayout::testuser,
                     require => Package["dconf-tools", "ubuntu-desktop"],
                 ;
             }

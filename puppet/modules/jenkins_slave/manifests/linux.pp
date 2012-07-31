@@ -1,8 +1,9 @@
 class jenkins_slave::linux inherits jenkins_slave::base {
+    $user = $jenkins_slave::user
     baselayout::startup { "jenkins-slave":
-        path    =>  "/home/$testuser/jenkins/jenkins-slave.pl",
-        require =>  File["/home/$testuser/jenkins/jenkins-slave.pl"],
-        user    =>  $testuser,
+        path    =>  "/home/$user/jenkins/jenkins-slave.pl",
+        require =>  File["/home/$user/jenkins/jenkins-slave.pl"],
+        user    =>  $user,
     }
 }
 

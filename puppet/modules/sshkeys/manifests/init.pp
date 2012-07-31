@@ -1,20 +1,20 @@
 import "private_sshkeys"
 
-class sshkeys {
+class sshkeys ($user = $baselayout::testuser, $group = $baselayout::testgroup) {
 
-    if $testuser {
+    if $user {
         $homepath = $::operatingsystem ? {
-            Darwin  =>  "/Users/$testuser",
-            Solaris =>  "/export/home/$testuser",
-            windows =>  "C:\\Users\\$testuser",
-            default =>  "/home/$testuser",
+            Darwin  =>  "/Users/$user",
+            Solaris =>  "/export/home/$user",
+            windows =>  "C:\\Users\\$user",
+            default =>  "/home/$user",
         }
 
         $sshdir = "$homepath/.ssh"
 
         File {
-            owner   =>  $testuser,
-            group   =>  $testgroup,
+            owner   =>  $user,
+            group   =>  $group,
         }
 
         file {
@@ -55,15 +55,15 @@ class sshkeys {
             # ssh will refuse to make use of a world-accessible id_rsa
             # (except on Windows - where a mode of 0600 makes the file unmanageable by puppet)
             file { "$sshdir/id_rsa":
-                owner => $testuser,
+                owner => $user,
                 mode => 0600,
                 require => Secret_file["$sshdir/id_rsa"]
             }
 
-            # Let all trusted users (e.g. test farm sysadmins) log into $testuser account
+            # Let all trusted users (e.g. test farm sysadmins) log into $user account
             # (except on Windows - no sshd)
-            trusted_authorized_keys { "authorized_keys for $testuser":
-                user    =>  $testuser,
+            trusted_authorized_keys { "authorized_keys for $user":
+                user    =>  $user,
             }
         }
     }

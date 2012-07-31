@@ -4,12 +4,12 @@ class ccache::linux
         ensure      =>  present,
     }
 
-    if $testuser {
-        exec { "/usr/bin/sudo -u $testuser -H -i /usr/bin/ccache -M 4G":
+    if $ccache::user {
+        exec { "/usr/bin/sudo -u $ccache::user -H -i /usr/bin/ccache -M 4G":
             require     =>  Package["ccache"],
         }
 
-        ccache_link {
+        ccache::link {
                 "gcc":     command => "gcc";
                 "g++":     command => "g++";
                 "cc":      command => "cc";

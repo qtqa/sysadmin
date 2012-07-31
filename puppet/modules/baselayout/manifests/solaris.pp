@@ -14,20 +14,20 @@ define csw_package($ensure) {
 }
 
 class baselayout::solaris inherits baselayout::unix {
-    if $testuser {
-        $homedir = "/export/home/$testuser"
+    if $baselayout::testuser {
+        $homedir = "/export/home/$baselayout::testuser"
 
         file { "$homedir/local.profile":
             ensure      =>  present,
-            owner       =>  $testuser,
-            group       =>  $testgroup,
+            owner       =>  $baselayout::testuser,
+            group       =>  $baselayout::testgroup,
             source      =>  "puppet:///modules/baselayout/solaris/local.profile",
         }
 
         file { "$homedir/.profile":
             ensure      =>  present,
-            owner       =>  $testuser,
-            group       =>  $testgroup,
+            owner       =>  $baselayout::testuser,
+            group       =>  $baselayout::testgroup,
             source      =>  "puppet:///modules/baselayout/solaris/local.profile",
         }
     }

@@ -1,7 +1,7 @@
 class baselayout::windows inherits baselayout::base {
-    if $testuser {
+    if $baselayout::testuser {
         Git::Config {
-            user => $testuser,
+            user => $baselayout::testuser,
         }
 
         git::config {

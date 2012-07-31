@@ -6,17 +6,20 @@ class jenkins_slave::base {
         default  =>  "/work",
     }
 
+    $user = $jenkins_slave::user
+    $group = $jenkins_slave::group
+
     $homedir = $::operatingsystem ? {
-        windows  =>  "c:\\Users\\$testuser",
-        Darwin   =>  "/Users/$testuser",
-        default  =>  "/home/$testuser",
+        windows  =>  "c:\\Users\\$user",
+        Darwin   =>  "/Users/$user",
+        default  =>  "/home/$user",
     }
     $jenkins_slave_dir = "$homedir/jenkins"
 
     if $::operatingsystem != "windows" {
         File {
-            owner    =>  "$testuser",
-            group    =>  "$testgroup",
+            owner    =>  $user,
+            group    =>  $group,
             mode     =>  0755,
         }
     }
@@ -29,8 +32,8 @@ class jenkins_slave::base {
     file { "jenkins slave script":
         name     =>  "$jenkins_slave_dir/jenkins-slave.pl",
         ensure   =>  present,
-        owner    =>  "$testuser",
-        group    =>  "$testgroup",
+        owner    =>  $user,
+        group    =>  $group,
         content  =>  template("jenkins_slave/jenkins-slave.pl.erb"),
         mode     =>  0755,
         require  =>  File["jenkins workspace"],
@@ -44,8 +47,8 @@ class jenkins_slave::base {
     file { "jenkins cli script":
         name     =>  "$jenkins_slave_dir/jenkins-cli.pl",
         ensure   =>  present,
-        owner    =>  "$testuser",
-        group    =>  "$testgroup",
+        owner    =>  $user,
+        group    =>  $group,
         content  =>  template("jenkins_slave/jenkins-cli.pl.erb"),
         mode     =>  0755,
         require  =>  File["jenkins workspace"],

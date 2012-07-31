@@ -7,12 +7,12 @@ class ccache::mac
         ensure      =>  present,
     }
 
-    if $testuser {
-        exec { "/usr/bin/sudo -u $testuser -H -i /opt/local/bin/ccache -M 4G":
+    if $ccache::user {
+        exec { "/usr/bin/sudo -u $ccache::user -H -i /opt/local/bin/ccache -M 4G":
             require     =>  Package["ccache"],
         }
 
-        ccache_link {
+        ccache::link {
                 "gcc":     command => "gcc";
                 "gcc-4.0": command => "gcc-4.0";
                 "gcc-4.2": command => "gcc-4.2";

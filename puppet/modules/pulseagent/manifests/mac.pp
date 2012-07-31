@@ -1,8 +1,9 @@
 class pulseagent::mac inherits pulseagent::unix {
+    $user = $pulseagent::user
     baselayout::startup { "pulseagent":
-        path    =>  "/Users/$testuser/pulse-agent.sh",
-        require =>  File["/Users/$testuser/pulse-agent.sh"],
-        user    =>  $testuser,
+        path    =>  "/Users/$user/pulse-agent.sh",
+        require =>  File["/Users/$user/pulse-agent.sh"],
+        user    =>  $user,
     }
 }
 
