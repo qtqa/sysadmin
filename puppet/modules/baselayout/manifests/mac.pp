@@ -21,7 +21,7 @@ class baselayout::mac inherits baselayout::unix {
         ")
 
         if $user_exists == "nok" {
-            fail("                                                \
+            crit("                                                \
 Sorry, some manual setup must be done before puppet can continue! \
 Please use the GUI to create a user named `$testuser' and enable  \
 automatic login for that user.                                    \
