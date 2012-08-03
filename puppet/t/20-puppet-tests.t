@@ -241,7 +241,7 @@ sub test_one_pp_file
         }
 
         my $no_warnings = 0;
-        while ($output =~ m{\btest-expect-no-warnings: ([^:\n]+)\n}msp) {
+        while ($output =~ m{\btest-expect-no-warnings: ([^\n]+)\n}msp) {
             $no_warnings = $1;
             is( $output =~ s{\Q${^MATCH}\E}{}, 1 ) || return;
         }
