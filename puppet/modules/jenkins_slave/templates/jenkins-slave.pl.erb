@@ -63,9 +63,6 @@ my $JENKINS_SLAVE_JAR_URL = "$JENKINS_SERVER/jnlpJars/slave.jar";
 # Local slave.jar
 my $JENKINS_SLAVE_JAR = catfile( $JENKINS_CWD, 'slave.jar' );
 
-# Log file of last jenkins run
-my $JENKINS_LOG = catfile( $JENKINS_CWD, 'log.txt' );
-
 sub fetch_slave_jar
 {
     if (-e $JENKINS_SLAVE_JAR) {
@@ -96,11 +93,6 @@ sub run_slave_jar
         $jnlp_url,
     );
 
-    if ($WINDOWS) {
-        @cmd = ("@cmd >$JENKINS_LOG 2>&1");
-    } else {
-        @cmd = ("@cmd 2>&1 | tee $JENKINS_LOG | logger -t jenkins");
-    }
     exec( @cmd );
 
     die "exec( @cmd ): $!";
