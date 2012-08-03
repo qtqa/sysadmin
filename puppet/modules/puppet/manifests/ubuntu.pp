@@ -2,7 +2,7 @@ class puppet::ubuntu inherits puppet::unix {
 
     # On Lucid, use backports to get a newer puppet.
     if $::lsbdistcodename == 'lucid' {
-        include ubuntu_backports
+        include apt_backports
 
         file { "/etc/apt/preferences.d/lucid-backports-puppet.conf":
             source => "puppet:///modules/puppet/lucid-backports-puppet.conf"
