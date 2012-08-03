@@ -1,4 +1,4 @@
-define git::config($key = '', $ensure = present, $content = '', $user) {
+define git::config($key = '', $ensure = present, $content = '', $user, $file = '') {
 
     # use $name as the key by default, but allow overriding.
     # note: puppet 2.7 allows '$key = $name' in the git::config parameter
@@ -18,10 +18,14 @@ define git::config($key = '', $ensure = present, $content = '', $user) {
         default => "/usr/bin/git",
     }
 
-    $gitconfig = $::operatingsystem ? {
-        Darwin => "/Users/$user/.gitconfig",
-        windows => "C:\\Users\\$user\\.gitconfig",
-        default => "/home/$user/.gitconfig",
+    # Use $file as the gitconfig file if set
+    $gitconfig = $file ? {
+        '' => $::operatingsystem ? {
+            Darwin => "/Users/$user/.gitconfig",
+            windows => "C:\\Users\\$user\\.gitconfig",
+            default => "/home/$user/.gitconfig",
+        },
+        default => $file
     }
 
     if $::operatingsystem != 'windows' {
@@ -32,7 +36,7 @@ define git::config($key = '', $ensure = present, $content = '', $user) {
     }
 
     if $ensure == absent {
-        exec { "git::config unset $name":
+        exec { "git::config unset $name in $gitconfig":
             command => "$git config --file $gitconfig --unset \"$git_key\"",
             onlyif => "$git config --file $gitconfig \"$git_key\"",
             logoutput => true,
@@ -40,7 +44,7 @@ define git::config($key = '', $ensure = present, $content = '', $user) {
     }
 
     if $ensure == present {
-        exec { "git::config set $name":
+        exec { "git::config set $name in $gitconfig":
             command => "$git config --file $gitconfig \"$git_key\" \"$content\"",
             unless => "$git config --file $gitconfig --get \"$git_key\" \"$content\"",
             logoutput => true,
