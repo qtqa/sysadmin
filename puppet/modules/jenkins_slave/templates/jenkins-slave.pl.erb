@@ -82,6 +82,9 @@ sub fetch_slave_jar
     return;
 }
 
+# Run slave.jar in a loop.
+# Whenever it fails, it will be restarted (possibly with some delay).
+# If it keeps failing for a long time, eventually we give up.
 sub run_slave_jar
 {
     my $jnlp_url = "$JENKINS_SERVER/computer/$JENKINS_SLAVE_NAME/slave-agent.jnlp";
@@ -93,9 +96,50 @@ sub run_slave_jar
         $jnlp_url,
     );
 
-    exec( @cmd );
+    my $INIT_ATTEMPTS = 100;    # how many times we'll try to run the slave
+    my $INIT_SLEEP = 2;         # initial delay between attempts (seconds)
+    my $MAX_SLEEP = 5 * 60;     # maximum delay between attempts (seconds)
+    my $MIN_RUNTIME = 5 * 60;   # minimum expected runtime
 
-    die "exec( @cmd ): $!";
+    my $attempts = $INIT_ATTEMPTS;
+    my $sleep = $INIT_SLEEP;
+
+    while (1) {
+        my $time = time();
+        system( @cmd );
+
+        warn "system( @cmd ): $? $!";
+
+        # If Jenkins was able to run for at least this amount of time, we assume that the slave
+        # was able to connect to the server and work somewhat correctly for a while, so we
+        # don't have some catastrophic error (like network cable permanently unplugged).
+        if (time() - $time > $MIN_RUNTIME) {
+            warn "Resetting timeout and restarting Jenkins";
+            $attempts = $INIT_ATTEMPTS;
+            $sleep = $INIT_SLEEP;
+            next;
+        }
+
+        # If Jenkins crashed quickly, keep retrying to restart it with a growing sleep between
+        # each attempt, eventually giving up.
+        if (--$attempts) {
+            warn "Jenkins aborted rather quickly. Will try again in $sleep seconds; "
+                ."$attempts attempts remaining";
+
+            sleep( $sleep );
+
+            $sleep *= 2;
+            if ($sleep > $MAX_SLEEP) {
+                $sleep = $MAX_SLEEP;
+            }
+
+            next;
+        }
+
+        die "Jenkins repeatedly aborted :(  Giving up after $INIT_ATTEMPTS attempts";
+    }
+
+    return;
 }
 
 # Calculates and returns an environment suitable for using java.
