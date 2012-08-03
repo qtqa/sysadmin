@@ -9,6 +9,13 @@ define baselayout::startup ($user, $path, $arguments='') {
     notice( "startup item created for $user, $path $arguments" )
 }
 
+if $::operatingsystem != 'windows' {
+    exec { "Ensure sudoers.d is enabled":
+        command     => "/bin/true",
+        refreshonly => true
+    }
+}
+
 selftest::expect { 'startup item created':
     output => "startup item created for fakeuser, .*jenkins-slave.pl"
 }
