@@ -5,6 +5,7 @@ class puppet {
         CentOS:     { include puppet::centos }
         SuSE:       { include puppet::unix }
         OpenSuSE:   { include puppet::unix }
+        Debian:     { include puppet::unix }
         Solaris:    { include puppet::solaris }
         Windows:    { include puppet::windows }
     }
