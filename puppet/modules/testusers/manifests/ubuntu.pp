@@ -37,6 +37,7 @@ class testusers::ubuntu
         ensure      =>  present,
         content     =>  template("testusers/testusers.erb"),
         mode        =>  0440,
+        require     =>  Exec["Ensure sudoers.d is enabled"]
     }
 }
 
