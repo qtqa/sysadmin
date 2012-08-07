@@ -19,6 +19,8 @@ class icecc::linux
     service { $icecc_service:
         ensure      =>  running,
         enable      =>  true,
+        hasstatus   =>  false,
+        pattern     =>  "/usr/sbin/iceccd",
     }
 
     file { "/etc/icecc/icecc.conf":
