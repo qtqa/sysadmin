@@ -212,6 +212,24 @@ class jenkins_server::debian inherits jenkins_server
         user => "jenkins",
     }
 
+    git::object_cache { "jenkins git object cache":
+        cache_path => "/var/lib/jenkins/git-objects",
+        git_path => [
+            # default workspace path
+            "/var/lib/jenkins/jobs/*/workspace",
+
+            # custom shorter workspace path used by some jobs
+            "/var/lib/jenkins/ci/*",
+            "/var/lib/jenkins/ci/*/*",
+
+            # other repos, not created by jenkins
+            "/var/lib/jenkins/qtqa",
+        ],
+        require => Package["jenkins"],  # jenkins package creates jenkins user
+        owner => "jenkins",
+        group => "nogroup",
+    }
+
     # ================================= gerrit -> jenkins notify trigger(s) ============
     # environment; warnings and worse go to syslog
     $env = "/usr/bin/env PERL_ANYEVENT_VERBOSE=5 PERL_ANYEVENT_LOG=log=syslog"

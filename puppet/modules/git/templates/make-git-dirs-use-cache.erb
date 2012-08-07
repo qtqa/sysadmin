@@ -1,0 +1,97 @@
+#!/bin/sh
+#############################################################################
+##
+## Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
+## Contact: http://www.qt-project.org/
+##
+## $QT_BEGIN_LICENSE:LGPL$
+## GNU Lesser General Public License Usage
+## This file may be used under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation and
+## appearing in the file LICENSE.LGPL included in the packaging of this
+## file. Please review the following information to ensure the GNU Lesser
+## General Public License version 2.1 requirements will be met:
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## In addition, as a special exception, Nokia gives you certain additional
+## rights. These rights are described in the Nokia Qt LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## GNU General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU General
+## Public License version 3.0 as published by the Free Software Foundation
+## and appearing in the file LICENSE.GPL included in the packaging of this
+## file. Please review the following information to ensure the GNU General
+## Public License version 3.0 requirements will be met:
+## http://www.gnu.org/copyleft/gpl.html.
+##
+## Other Usage
+## Alternatively, this file may be used in accordance with the terms and
+## conditions contained in a signed written agreement between you and Nokia.
+##
+##
+##
+##
+##
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+
+# This script iterates through a list of git directories, fetches their objects
+# into a cache directory (the directory containing this script), and points the
+# directories toward the cache. This can save a lot of space on hosts with many
+# similar git directories.
+
+set -e
+
+# Unset this just in case.
+# Hopefully git is smart enough so that having GIT_ALTERNATE_OBJECT_DIRECTORIES
+# pointing to the current repo is not harmful, but let's be defensive.
+unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+
+CACHEDIR=$(dirname $0)
+CACHEDIR=$(readlink -f $CACHEDIR)
+cd $CACHEDIR
+
+echo "Using cachedir $CACHEDIR"
+
+for dir in \
+    <%=
+        # git_path may be an array or a single path,
+        # and each path may be a glob (expanded by the 'for' in shell) or an
+        # actual path.
+        git_path.respond_to?( 'join' ) ? git_path.join( " \\\n    " ) : git_path
+    %> \
+; do
+    if ! test -d "$dir/.git/objects/info"; then continue; fi
+
+    echo "$dir:"
+    {
+        # Fetch all objects from that repo into this repo.
+        refbase=$(echo $dir | tr --complement '[:alnum:]' '_')
+        git fetch --quiet $dir "+refs/*:refs/$refbase/*"
+
+        # Tell that repo to look at us for objects.
+        # We don't rewrite alternates if someone has already set it to
+        # something else, just in case.
+        GC_OPTIONS="--auto"
+        if ! test -f $dir/.git/objects/info/alternates; then
+            echo $CACHEDIR/objects > $dir/.git/objects/info/alternates
+            echo "alternates set; gc will be forced"
+            GC_OPTIONS=""
+        fi
+
+        # gc, with `auto' (because without `auto' is expensive every time)
+        # Also measure the size before and after, to see the improvement
+        echo -n "Prior to gc: "
+        du -shx $dir/.git
+        git --git-dir=$dir/.git gc --quiet $GC_OPTIONS
+        echo -n "After gc:    "
+        du -shx $dir/.git
+
+    } | sed -r -e 's|^|  |'
+
+    echo ""
+done
+

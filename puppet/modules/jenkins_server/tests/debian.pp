@@ -2,6 +2,15 @@ if $::operatingsystem == 'windows' {
     selftest::skip_all { "jenkins_server is not supported on Windows": }
 }
 
+# mock git::config to avoid "Invalid user: fakeuser" from certain puppet versions
+define git::config(
+    $file = '<default>',
+    $user = '<default>',
+    $content = '<default>',
+    $key = '<default>'
+) {
+}
+
 include jenkins_server
 include jenkins_server::debian
 
