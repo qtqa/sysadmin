@@ -1,4 +1,4 @@
-class ccache::mac
+class ccache::mac inherits ccache::unix
 {
     include macports
 
@@ -8,10 +8,6 @@ class ccache::mac
     }
 
     if $ccache::user {
-        exec { "/usr/bin/sudo -u $ccache::user -H -i /opt/local/bin/ccache -M 4G":
-            require     =>  Package["ccache"],
-        }
-
         ccache::link {
                 "gcc":     command => "gcc";
                 "gcc-4.0": command => "gcc-4.0";

@@ -8,7 +8,7 @@ if $::kernel == 'Linux' {
     file { '/home/fakeuser/bin': }
 
     selftest::expect { '/usr/bin/ccache is run for fakeuser':
-        output => 'Exec\[[^\]]*sudo -u fakeuser[^\]]*/usr/bin/ccache'
+        output => 'Exec\[[^\]]*/usr/bin/ccache'
     }
 
     selftest::expect { 'gcc -> ccache symlink created for fakeuser':
