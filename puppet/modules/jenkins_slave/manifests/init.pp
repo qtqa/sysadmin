@@ -16,7 +16,7 @@ class jenkins_slave ($user = $baselayout::testuser, $group = $baselayout::group,
         }
     }
     if $::operatingsystem == 'Ubuntu' or $::operatingsystem == 'Darwin' {
-        file { "/etc/sudoers.d/$user-nopasswd-reboot":
+        file { "/etc/sudoers.d/${user}-nopasswd-reboot":
             owner    =>  "root",
             mode     =>  0440,
             content  =>  template("jenkins_slave/testuser-nopasswd-reboot.erb"),
