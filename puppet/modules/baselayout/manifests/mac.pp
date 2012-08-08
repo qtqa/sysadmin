@@ -99,6 +99,12 @@ automatic login for that user.                                    \
         require =>  File["/cores"],
     }
 
+    # make sure 'at' jobs can be used
+    service { "com.apple.atrun":
+        ensure => running,
+        enable => true,
+    }
+
     if ($macosx_productversion_major == "10.7") {
 
         # Make sure java is installed (OSX 10.7 only; earlier have it by default)
