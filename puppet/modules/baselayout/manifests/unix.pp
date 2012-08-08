@@ -22,16 +22,26 @@ class baselayout::unix inherits baselayout::base {
             group   =>  $baselayout::testgroup,
         }
 
+        $rootgroup = $::operatingsystem ? {
+            Darwin => 'wheel',
+            default => 'root',
+        }
+
         file { "/etc/sudoers.d":
             ensure  =>  directory,
             mode    =>  0755,
             owner   =>  root,
-            group   =>  root,
+            group   =>  $rootgroup,
+        }
+
+        $grep = $::operatingsystem ? {
+            Darwin => '/usr/bin/grep',
+            default => '/bin/grep',
         }
 
         exec { "Ensure sudoers.d is enabled":
             command => "/bin/sh -c 'echo \"#includedir /etc/sudoers.d\" >> /etc/sudoers'",
-            unless  => "/bin/grep -F '#includedir /etc/sudoers.d' /etc/sudoers",
+            unless  => "$grep -F '#includedir /etc/sudoers.d' /etc/sudoers",
             require => File["/etc/sudoers.d"]
         }
     }
