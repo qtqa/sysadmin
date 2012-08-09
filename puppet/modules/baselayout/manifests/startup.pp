@@ -1,4 +1,9 @@
 # Run a command at startup.
+# $path => path to a command (preferably absolute).
+# $arguments => arguments passed to the command. On Windows, should be a single string;
+#               on other OS, may be a string or an array of strings.
+# $user => user whose session should contain the startup item
+# $terminal => true if a terminal should be displayed (only supported on Linux)
 define baselayout::startup($path, $arguments="", $user, $terminal=false) {
 
     if $::operatingsystem == "windows" {
@@ -22,6 +27,9 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
             require => File[$manage_lnk],
         }
     }
+
+    # workaround for http://projects.puppetlabs.com/issues/4549
+    $shellquote_dummy = shellquote('dummy')
 
     if $::kernel == "Linux" {
         # Uses freedesktop $HOME/.config/autostart, which seems to be supported on

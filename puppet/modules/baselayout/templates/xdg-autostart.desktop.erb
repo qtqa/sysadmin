@@ -1,7 +1,17 @@
 [Desktop Entry]
 Name=<%= name %>
 GenericName=<%= name %>
-Exec=<%= path %> <%= arguments %>
+Exec=<%= path %> <%=
+    # note one additional layer of quoting for backslash characters is required here:
+    #
+    # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+    #   > Note that the general escape rule for values of type string states that the backslash character
+    #   > can be escaped as ("\\") as well and that this escape rule is applied before the quoting rule.
+    #   > As such, to unambiguously represent a literal backslash character in a quoted argument in a
+    #   > desktop entry file requires the use of four successive backslash characters ("\\\\").
+    #
+    scope.function_shellquote([arguments]).gsub(/\\/, '\\0\\0')
+%>
 Terminal=<%= terminal %>
 Type=Application
 StartupNotify=false
