@@ -15,6 +15,13 @@ class baselayout::windows inherits baselayout::base {
         git::config {
             "core.autocrlf": content => "true";
         }
+
+        # avoid screensaver interrupting UI tests
+        registry::value { "screensaver off":
+            key => "HKU\\$baselayout::testuser\\Control Panel\\Desktop",
+            value => "SCRNSAVE.EXE",
+            ensure => absent,
+        }
     }
 }
 
