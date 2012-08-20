@@ -26,6 +26,7 @@ define registry::value(
             path => "C:\\qtqa\\bin\\qtqa-reg.pl",
             ensure => present,
             source => "puppet:///modules/registry/qtqa-reg.pl",
+            mode => 0755,
         }
     }
 
