@@ -343,6 +343,18 @@ sub run_puppet
     return;
 }
 
+sub run_takeown
+{
+    # Use the takeown command to ensure the current user has rights to the puppet
+    # directory (on Windows).
+    #
+    # Errors are not fatal.
+    #
+    system( qw(takeown /F . /R /D Y) );
+
+    return;
+}
+
 sub run
 {
     chdir_or_die( $DIR );
@@ -350,6 +362,10 @@ sub run
     if (-f 'disable_puppet') {
         print "not doing anything because $DIR/disable_puppet exists\n";
         return;
+    }
+
+    if ($WINDOWS) {
+        run_takeown( );
     }
 
     my $facts_from_reverse_dns = 0;
