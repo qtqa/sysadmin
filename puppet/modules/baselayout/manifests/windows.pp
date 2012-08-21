@@ -1,15 +1,67 @@
 class baselayout::windows inherits baselayout::base {
     if $baselayout::testuser {
+        # Create the user:
+        #  - standard home directory
+        #  - in the Administrators group
+        #  - password is equal to username
+        #
+        # Note that the user directory structure (Documents, AppData etc)
+        # are created on Windows after the initial login. Therefore, the
+        # completion of this resource does _not_ guarantee that "C:\Users\<testuser>\AppData"
+        # etc are all existing and usable. The automated reboot is supposed to
+        # achieve that.
+        #
+        user { $baselayout::testuser:
+            ensure => present,
+            managehome => true,
+            home => "C:\\Users\\$baselayout::testuser",
+            groups => "Administrators",
+            password => $baselayout::testuser
+        }
+
+        # We want to automatically reboot and login as the testuser.
+        # However, we give a generous timeout period and helpful message to abort the
+        # shutdown in case somebody is doing something on the machine.
+        exec { "reboot for auto-login":
+            command => "C:\\Windows\\system32\\shutdown.exe /r /t 180 /c \"Automated reboot to log in as $baselayout::testuser. To abort, run: shutdown /a\"",
+            refreshonly => true
+        }
+
+        # Other things here depend on the user
+        Git::Config {
+            user => $baselayout::testuser,
+            require => User[$baselayout::testuser]
+        }
+
+        Tidy { require => User[$baselayout::testuser] }
+        Registry::Value { require => User[$baselayout::testuser] }
+
+        # automatically log on as this user
+        $reg_winlogon_key = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+        registry::value {
+            "autologon enabled":
+                key => $reg_winlogon_key,
+                value => "AutoAdminLogon",
+                data => "1",
+                notify => Exec["reboot for auto-login"],
+                require => Registry::Value["autologon user", "autologon password"];
+            "autologon user":
+                key => $reg_winlogon_key,
+                value => "DefaultUserName",
+                data => $baselayout::testuser;
+            "autologon password":
+                key => $reg_winlogon_key,
+                value => "DefaultPassword",
+                data => $baselayout::testuser;
+        }
+
+
         # clean testuser's temp periodically; if we don't, then nothing will clean
         # up temporary files/directories from crashing/hanging tests
         tidy { "C:\\Users\\$baselayout::testuser\\AppData\\Local\\Temp":
             age => "1w",
             recurse => true,
             rmdirs => true,
-        }
-
-        Git::Config {
-            user => $baselayout::testuser,
         }
 
         git::config {
