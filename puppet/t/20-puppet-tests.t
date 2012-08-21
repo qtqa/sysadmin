@@ -103,6 +103,18 @@ occur during the processing of a manifest:
   quux::config { "test config": }
   selftest::expect_no_warnings { "empty quux::config has no warnings": }
 
+The selftest::skip_all type may be used to skip a test.
+This should be placed as early as possible in the test file.
+For example:
+
+  if $::operatingsystem == 'windows' {
+      selftest::skip_all { "not supported on Windows": }
+  }
+  # ... rest of test goes here
+
+Note that the top-level test .pp file must be entirely parseable - puppet must
+survive at least until the skip_all type is activated.
+
 =head1 PERMISSION PROBLEMS
 
 Typically, puppet is run as root, but clearly that is not desirable for running
@@ -228,9 +240,8 @@ sub test_one_pp_file
             plan skip_all => $skip;
         }
 
-        if (!is( $status, 0, "$filename OK" )) {
-            diag( $output );
-            return;
+        if ($output =~ m{\btest-skip-all: ([^\n]+)\n}ms) {
+            plan skip_all => $1;
         }
 
         my @expected_output;
@@ -260,6 +271,11 @@ sub test_one_pp_file
             my ($name, $pattern) = @{ $expected };
             $name ||= "content matches $pattern";
             like( $output, qr{$pattern}, $name );
+        }
+
+        if (!is( $status, 0, "$filename OK" )) {
+            diag( $output );
+            return;
         }
     };
 
