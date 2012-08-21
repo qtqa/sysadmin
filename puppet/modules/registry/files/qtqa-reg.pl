@@ -44,7 +44,7 @@ qtqa-reg.pl - manage registry values
 
 =head1 SYNOPSIS
 
-  perl qtqa-reg.pl <command> -path Some\Registry\Path [-data "some data"] [-type sometype]
+  perl qtqa-reg.pl <command> -path Some\Registry\Path [-data "some data"] [-type sometype] [-view32 | -view64]
 
 Check, delete or create a registry value.
 
@@ -72,6 +72,25 @@ This should be a string of the form displayed in "regedit", e.g. "REG_SZ" for a 
 The type affects how the given data is parsed.
 For example, "0x00000001" is interpreted as a literal string if the REG_SZ type is used,
 or interpreted as an integer of value 1 if the REG_DWORD type is used.
+
+=item -view32
+
+=item -view64
+
+Force a 32-bit or 64-bit view of the registry.
+
+Passing -view64 to a 32-bit perl will bypass the registry redirector.
+Otherwise, the usage of a 32-bit perl with this script may result in the given path being
+silently redirected; see http://msdn.microsoft.com/en-us/library/windows/desktop/aa384232(v=vs.85).aspx
+for more information.
+
+Generally, the following should be done:
+
+  - pass -view32 when managing values for a 32-bit app
+  - pass -view64 when managing values for a 64-bit app
+  - pass -view64 when managing system-wide values
+
+Has no effect on 32-bit Windows.
 
 =back
 
@@ -104,10 +123,15 @@ Delete the given registry value. -data and -type parameters are ignored.
 use strict;
 use warnings;
 
+use English qw( -no_match_vars );
 use Getopt::Long;
 use Pod::Usage;
-use Win32::TieRegistry( ArrayValues => 1 );
-use Win32API::Registry;
+use Win32::TieRegistry;
+use Win32API::Registry qw( KEY_ALL_ACCESS );
+
+# Win32API::Registry do not currently provide this constant
+use constant KEY_WOW64_64KEY => 0x0100;
+use constant KEY_WOW64_32KEY => 0x0200;
 
 # Given a registry type string (e.g. 'REG_SZ'), returns the integer
 # constant for that string, or dies if the string is not valid.
@@ -128,6 +152,26 @@ sub parse_type
     return $sub->();
 }
 
+# Returns appropriate Access flags for the registry:
+#  - base value for flags is KEY_ALL_ACCESS();
+#  - if 'view32' is set, will force access to 32-bit keys (even if this is 64-bit perl);
+#  - if 'view64' is set, will force access to 64-bit keys (even if this is 32-bit perl)
+sub access
+{
+    my (%args) = @_;
+
+    my $out = KEY_ALL_ACCESS();
+
+    if ($args{ 'view32' }) {
+        $out |= KEY_WOW64_32KEY();
+    }
+    if ($args{ 'view64' }) {
+        $out |= KEY_WOW64_64KEY();
+    }
+
+    return $out;
+}
+
 # Given a path string, returns a hashref of the decomposed paths.
 # Dies on error.
 #
@@ -137,7 +181,7 @@ sub parse_type
 # The returned hashref has the following keys:
 #    key => the 'key' part of the path only (e.g. 'HKEY_CURRENT_USER\Control Panel\Sound')
 #    value => the 'value' part of the path only (e.g. 'Beep')
-#    lookup => a lookup key for the value, usable with Win32::TieRegistry.
+#    full_path => a copy of the input string
 #
 # The abbreviations used by the puppetlabs-registry module are also supported here
 # (e.g. 'HKU' for 'HKEY_USERS').
@@ -212,9 +256,7 @@ sub parse_path
     return {
         key => "$hive\\$key",
         value => $value,
-        # Win32::TieRegistry lookup style; key and value separated
-        # by double-delimiter
-        lookup => "$hive\\$key\\\\$value",
+        full_path => $path,
     };
 }
 
@@ -227,9 +269,12 @@ sub reg_check
     my $data = $args{ data };
     my $type = $args{ type };
 
-    my $lookup = $path->{ lookup };
-    my @got = @{ $Registry->{ $lookup } || [] };
-    @got || die "$lookup does not exist\n";
+    my $registry = Win32::TieRegistry->new( $path->{ key }, { Access => access( %args ) } );
+    $registry || die "$path->{ key } does not exist\n";
+    $registry = $registry->TiedRef();
+    $registry->ArrayValues( 1 );
+    my @got = @{ $registry->{ "\\$path->{ value }" } || [] };
+    @got || die "$path->{ full_path } does not exist\n";
 
     if (defined($data) && $data ne $got[0]) {
         die "have data: '$got[0]', want data: '$data'\n";
@@ -238,7 +283,7 @@ sub reg_check
         die "have type: '$got[1]', want type: '$type'\n";
     }
 
-    print "$lookup looks OK.\n";
+    print "$path->{ full_path } looks OK.\n";
     return;
 }
 
@@ -247,17 +292,18 @@ sub reg_check
 sub reg_delete
 {
     my (%args) = @_;
-    my $lookup = $args{ path }{ lookup };
+    my $path = $args{ path };
+    my $registry = Win32::TieRegistry->new( $path->{ key }, { Access => access( %args ) } )->TiedRef();
 
-    if (not exists $Registry->{ $lookup }) {
-        print "$lookup does not exist - nothing to do.\n";
+    if (not exists $registry->{ "\\$path->{ value }" }) {
+        print "$path->{ full_path } does not exist - nothing to do.\n";
         return;
     }
 
-    $Registry->AllowSave(1) || die "Can't get write access to registry: $!";
-    delete $Registry->{ $lookup };
-    undef $Registry;
-    print "Deleted $lookup.\n";
+    $registry->AllowSave(1) || die "Can't get write access to registry: $EXTENDED_OS_ERROR";
+    delete $registry->{ "\\$path->{ value }" };
+    undef $registry;
+    print "Deleted $path->{ full_path }.\n";
 
     return;
 }
@@ -268,27 +314,29 @@ sub reg_delete
 sub reg_write
 {
     my (%args) = @_;
-    my $lookup = $args{ path }{ lookup };
+    my $path = $args{ path };
     my $data = $args{ data };
     my $type = $args{ type };
 
-    $Registry->AllowSave(1) || die "Can't get write access to registry: $!";
+    my $registry = Win32::TieRegistry->new( q{}, { Access => access( %args ) } )->TiedRef();
+
+    $registry->AllowSave(1) || die "Can't get write access to registry: $EXTENDED_OS_ERROR";
 
     # Note, we must ensure all intermediate keys exist (they cannot be
     # created automatically by a single dereference)
     my $part = q{};
-    while ($args{ path }{ key } =~ m{((?:\\)?[^\\]+)}g) {
+    while ($path->{ key } =~ m{((?:\\)?[^\\]+)}g) {
         $part .= $1;
-        if (! exists $Registry->{ $part }) {
-            $Registry->{ $part } = {};
+        if (! exists $registry->{ $part }) {
+            $registry->{ $part } = {};
             print "Created empty $part\n";
         }
     }
 
-    $Registry->{ $lookup } = [ $data, $type ];
-    undef $Registry;
+    $registry->{ "$path->{ key }\\\\$path->{ value }" } = [ $data, $type ];
+    undef $registry;
 
-    print "Wrote $lookup.\n";
+    print "Wrote $path->{ full_path }.\n";
 
     return;
 }
@@ -305,33 +353,49 @@ sub run
     my $path;
     my $data;
     my $type;
+    my $view32;
+    my $view64;
 
     GetOptions(
         'path=s' => \$path,
         'data=s' => \$data,
         'type=s' => \$type,
+        'view32' => \$view32,
+        'view64' => \$view64,
     );
+
+    if ($view32 && $view64) {
+        die "Error: view32 and view64 options cannot both be specified.\n";
+    }
 
     $path || die "Missing mandatory -path option\n";
     $path = parse_path( $path );
-
-    if ($mode eq 'delete') {
-        return reg_delete( path => $path );
-    }
 
     if ($type) {
         $type = parse_type( $type );
     }
 
+    my %args = (
+        path => $path,
+        data => $data,
+        type => $type,
+        view32 => $view32,
+        view64 => $view64,
+    );
+
+    if ($mode eq 'delete') {
+        return reg_delete( %args );
+    }
+
     if ($mode eq 'check') {
-        return reg_check( path => $path, data => $data, type => $type );
+        return reg_check( %args );
     }
 
     $data || die "Missing mandatory -data option\n";
     $type || die "Missing mandatory -type option\n";
 
     if ($mode eq 'write') {
-        return reg_write( path => $path, data => $data, type => $type );
+        return reg_write( %args );
     }
 
     die "Unknown operation '$mode'\n";

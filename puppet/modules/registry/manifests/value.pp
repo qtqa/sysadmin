@@ -1,11 +1,19 @@
 # Manage a registry value.
 #
 # This type is very similar to registry::value from the puppetlabs-registry module
-# ( https://github.com/puppetlabs/puppetlabs-registry ),
-# with one key difference: HKEY_USERS are supported.
-# This is the primary reason for creation of this module.
-# Hopefully, if puppetlabs-registry gains support for HKEY_USERS, this module can be
-# eliminated (see http://projects.puppetlabs.com/issues/14555).
+# ( https://github.com/puppetlabs/puppetlabs-registry ).
+# It supports two additional features which we need and which the above module doesn't
+# support:
+#
+#  HKEY_USERS - http://projects.puppetlabs.com/issues/14555
+#  mixed 32-bit/64-bit support - http://projects.puppetlabs.com/issues/16056
+#
+# Hopefully, if puppetlabs-registry gains support for the above features, this module
+# can be eliminated.
+#
+# On 64-bit Windows, the 64-bit registry view is accessed by default.  This is appropriate
+# for system-wide values or for values used by 64-bit applications.  Use 'view => 32' to
+# access the 32-bit registry view instead.
 #
 # This type makes use of an external script and probably does not work correctly for
 # parameters which can't be easily quoted (e.g. parameters containing a " character, or
@@ -17,7 +25,11 @@ define registry::value(
     $value,
     $ensure = 'present',
     $data = '',
-    $type = 'string'
+    $type = 'string',
+    $view = $::architecture ? {
+        x64 => 64,
+        default => ''
+    }
 ) {
     $perl = "C:\\Strawberry\\perl\\bin\\perl.exe"
     $script = "C:\\qtqa\\bin\\qtqa-reg.pl"
@@ -44,12 +56,19 @@ define registry::value(
         default  => $type
     }
 
+    # whether we are in 32-bit, 64-bit or native node
+    $view_args = $view ? {
+        32      =>  '-view32',
+        64      =>  '-view64',
+        default =>  ''
+    }
+
     $path = "$key\\$value"
 
-    $check_content_cmd = "$perl $script check -path \"$path\" -data \"$data\" -type \"$real_type\""
-    $check_present_cmd = "$perl $script check -path \"$path\""
-    $write_cmd = "$perl $script write -path \"$path\" -data \"$data\" -type \"$real_type\""
-    $delete_cmd = "$perl $script delete -path \"$path\""
+    $check_content_cmd = "$perl $script check $view_args -path \"$path\" -data \"$data\" -type \"$real_type\""
+    $check_present_cmd = "$perl $script check $view_args -path \"$path\""
+    $write_cmd = "$perl $script write $view_args -path \"$path\" -data \"$data\" -type \"$real_type\""
+    $delete_cmd = "$perl $script delete $view_args -path \"$path\""
 
     case $ensure {
         'absent': {
