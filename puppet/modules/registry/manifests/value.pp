@@ -31,16 +31,10 @@ define registry::value(
         default => ''
     }
 ) {
+    include registry
+
     $perl = "C:\\Strawberry\\perl\\bin\\perl.exe"
-    $script = "C:\\qtqa\\bin\\qtqa-reg.pl"
-    if ! defined(File[$script]) {
-        file { $script:
-            path => "C:\\qtqa\\bin\\qtqa-reg.pl",
-            ensure => present,
-            source => "puppet:///modules/registry/qtqa-reg.pl",
-            mode => 0755,
-        }
-    }
+    $script = $registry::script
 
     Exec { require => File[$script] }
 
