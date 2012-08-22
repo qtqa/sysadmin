@@ -33,60 +33,9 @@ is run on this host."
 
 #====================== Mac ===================================================
 
-node 'lion-tester.test.qt-project.org' inherits default {
-    class { 'baselayout': testuser => 'qt' }
-    include qt_prereqs
-    include hosts
-    include pulseagent
-    include ccache
-    include qadungeon
-    include homedir_cpan
-    include homedir_virtualenv
-
-    # Note: distcc is commented here because the appropriate $hosts parameter
-    # is not known at this level.
-    # To use distcc, in your node definition in private_nodes you should have
-    # something like:
-    #
-    # class { "distcc": hosts => [ "localhost", "host1", "host2", "host3" ] }
-
-    include distccd
-    include puppet
-    include sshkeys
-}
-
-node 'snowleopard-tester.test.qt-project.org' inherits default {
-    class { 'baselayout': testuser => 'qt' }
-    include qt_prereqs
-    include hosts
-    include pulseagent
-    include ccache
-    include qadungeon
-    include homedir_cpan
-    include homedir_virtualenv
-
-    # class { "distcc": hosts => [ "localhost", "host1", "host2", "host3" ] }
-
-    include distccd
-    include puppet
-    include sshkeys
-}
-
 node 'snowleopard-parallels-server.test.qt-project.org' inherits default {
     include puppet
     include distccd
-}
-
-node 'legacy-snowleopard-tester.test.qt-project.org' inherits default {
-    class { 'baselayout': testuser => 'pulseagent' }
-    include qt_prereqs
-    include hosts
-    include pulseagent
-    include ccache
-    #include distcc
-    include distccd
-    include puppet
-    include sshkeys
 }
 
 node 'snowleopard-packager.test.qt-project.org' inherits default {
@@ -100,66 +49,42 @@ node 'snowleopard-packager.test.qt-project.org' inherits default {
     include sshkeys
 }
 
+# These hostnames will soon become deprecated.
+node 'lion-tester.test.qt-project.org' inherits default {
+    include ci_tester
+}
+
+node 'snowleopard-tester.test.qt-project.org' inherits default {
+    include ci_tester
+}
+
+
 #====================== Linux =================================================
+# These hostnames will soon become deprecated.
 node 'linux-tester.test.qt-project.org' inherits default {
-    class { 'baselayout': testuser => 'qt' }
-    include puppet
-    include qt_prereqs
-    include hosts
-    include sshkeys
-    include qadungeon
-    include ccache
-    include crosscompilers
-    include intel_compiler
-    include vmware_tools
-
-    # Allow test machines to install modules from cpan under $HOME/perl5
-    include homedir_cpan
-
-    # Allow test machines to install python modules with pip or easy_install
-    # to $HOME/python26
-    include homedir_virtualenv
-
-    # Provide small filesystem for testing of out-of-space errors
-    include smallfs
+    include ci_tester
 }
 
-node 'ubuntu1004-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    include pulseagent
-    include icecc
-    include testcocoon
-    include testusers
+node 'ubuntu1004-x86.test.qt-project.org' inherits default {
+    include ci_tester
 }
 
-node 'ubuntu1110-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    class { "pulseagent": short_datadir => true }
-    # icecc initialisation delayed until scheduler address is known
-    #include icecc
-    include testcocoon
-    include testusers
+node 'ubuntu1110-x64.test.qt-project.org' inherits default {
+    include ci_tester
 }
 
-node 'ubuntu1110-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    class { "pulseagent": short_datadir => true }
-    include icecc
-    include testcocoon
-    include armel_cross
-    include testusers
+node 'ubuntu1110-x86.test.qt-project.org' inherits default {
+    include ci_tester
 }
 
-node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    class { "pulseagent": short_datadir => true }
-    include icecc
-    include testusers
+node 'ubuntu1204-x64.test.qt-project.org' inherits default {
+    include ci_tester
 }
 
 #====================== Windows ===============================================
-
-node 'windows7-msvc2010-x86.test.qt-project.org' inherits 'default' {
-    class { 'baselayout': testuser => 'pulse' }
-    include qt_prereqs
-    include sshkeys
-    include mesa3d
+# This hostname will soon become deprecated.
+node 'windows7-msvc2010-x86.test.qt-project.org' inherits default {
+    include ci_tester
 }
 
 #====================== Servers ===============================================
