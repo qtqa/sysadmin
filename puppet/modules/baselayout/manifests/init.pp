@@ -7,6 +7,10 @@ class baselayout (
         Darwin  =>  "staff",
         Solaris =>  "other",
         default =>  "users",
+    },
+    $tempdir = $::operatingsystem ? {
+        windows =>  'C:\Windows\Temp',
+        default =>  '/tmp'
     }
 ) {
     case $::operatingsystem {

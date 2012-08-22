@@ -2,7 +2,7 @@ class mesa3d::windows {
     # FIXME: this module is incomplete for 64-bit Windows.
     # It only installs a 32-bit version of the mesa DLL.
 
-    $tempdir = "c:\\temp"
+    $tempdir = $baselayout::tempdir
     $gitdir = $::architecture ? {
         x64 => "C:\\Program Files (x86)\\Git",
         default => "C:\\Program Files\\Git"
@@ -15,10 +15,6 @@ class mesa3d::windows {
     }
     $cmd = "$windows_system32\\cmd.exe"
     $mesa3ddll = "mesa3d_opengl.dll"
-
-    file { $tempdir:
-        ensure => directory,
-    }
 
     exec { prepare_for_opengl32_replace:
         command  =>  "$cmd /C \
