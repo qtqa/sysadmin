@@ -60,7 +60,7 @@ fi
 # Run puppet once.
 # From this point on, all setup of this machine is done via puppet.
 echo "Running puppet..."
-/usr/bin/env PATH=/opt/local/bin:$PATH /var/qtqa/sysadmin/puppet/sync_and_run.sh
+/usr/bin/env PATH=/opt/local/bin:$PATH /var/qtqa/sysadmin/puppet/sync_and_run.pl
 set +x
 echo 'All done :-)'
 echo 'If this host already has an entry in manifests/nodes.pp, nothing needs to be done...'

@@ -51,7 +51,7 @@ fi
 
 # Run puppet once.
 echo "Running puppet..."
-/var/qtqa/sysadmin/puppet/sync_and_run.sh
+/var/qtqa/sysadmin/puppet/sync_and_run.pl
 set +x
 echo 'All done :-)'
 echo 'If this host already has an entry in manifests/nodes.pp, nothing needs to be done...'
