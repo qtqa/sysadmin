@@ -18,8 +18,3 @@ $qtgitreadonly_local = $qtgitreadonly
 # These files are all publicly available but you'll have to host them
 # on your own mirror
 $input = "http://replace-me.example.com/input"
-
-# set this to the address of your icecream scheduler, if you want to
-# use icecream.  Note, you might not have to do this if icecream's
-# automated finding of the scheduler works for you
-$icecc_scheduler_host = ""

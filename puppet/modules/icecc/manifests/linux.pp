@@ -23,6 +23,9 @@ class icecc::linux
         pattern     =>  "/usr/sbin/iceccd",
     }
 
+    # used by template
+    $icecc_scheduler_host = $icecc::scheduler_host
+
     file { "/etc/icecc/icecc.conf":
         ensure      =>  present,
         content     =>  template("icecc/icecc.conf.erb"),

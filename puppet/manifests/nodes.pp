@@ -133,7 +133,7 @@ node 'ubuntu1004-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project
 
 node 'ubuntu1110-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
     class { "pulseagent": short_datadir => true }
-    # icecc initialisation delayed until scheduler address is set
+    # icecc initialisation delayed until scheduler address is known
     #include icecc
     include testcocoon
     include testusers
