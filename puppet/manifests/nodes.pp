@@ -166,6 +166,7 @@ node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project
 
 node 'windows7-msvc2010-x86.test.qt-project.org' inherits 'default' {
     class { 'baselayout': testuser => 'pulse' }
+    include qt_prereqs
     include sshkeys
     include mesa3d
 }
