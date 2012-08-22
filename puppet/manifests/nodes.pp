@@ -138,8 +138,7 @@ node 'ubuntu1004-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project
 }
 
 node 'ubuntu1110-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    $pulseagent_short_datadir = true
-    include pulseagent
+    class { "pulseagent": short_datadir => true }
     # icecc initialisation delayed until scheduler address is set
     #include icecc
     include testcocoon
@@ -147,8 +146,7 @@ node 'ubuntu1110-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project
 }
 
 node 'ubuntu1110-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    $pulseagent_short_datadir = true
-    include pulseagent
+    class { "pulseagent": short_datadir => true }
     include icecc
     include testcocoon
     include armel_cross
@@ -156,8 +154,7 @@ node 'ubuntu1110-x86.test.qt-project.org' inherits 'linux-tester.test.qt-project
 }
 
 node 'ubuntu1204-x64.test.qt-project.org' inherits 'linux-tester.test.qt-project.org' {
-    $pulseagent_short_datadir = true
-    include pulseagent
+    class { "pulseagent": short_datadir => true }
     include icecc
     include testusers
 }

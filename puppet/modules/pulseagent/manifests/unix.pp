@@ -44,7 +44,7 @@ class pulseagent::unix {
 
     $pulsescript = "$homedir/pulse-agent.sh"
 
-    if $pulseagent_short_datadir {
+    if $pulseagent::short_datadir {
         file {
             "pulseagent build directory":
                 name    =>  "/build",
