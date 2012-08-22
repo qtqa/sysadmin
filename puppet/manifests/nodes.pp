@@ -1,8 +1,4 @@
 node default {
-    # For hosts where you want to use distcc, set this to the appropriate DISTCC_HOSTS
-    # Note: prefer usage of icecream where possible, since that has a scheduler
-    $distcc_hosts = [ "localhost" ]
-
     if $::operatingsystem == "Darwin" {
         # Hack for macs to work around http://projects.puppetlabs.com/issues/2331 :
         # On the first run, use the possibly broken `darwinport' provider (so that
@@ -47,13 +43,12 @@ node 'lion-tester.test.qt-project.org' inherits default {
     include homedir_cpan
     include homedir_virtualenv
 
-    # Note: distcc is commented here because it must be set _after_ $distcc_hosts
-    # is set to the correct value - and that value isn't known yet.
+    # Note: distcc is commented here because the appropriate $hosts parameter
+    # is not known at this level.
     # To use distcc, in your node definition in private_nodes you should have
     # something like:
     #
-    # $distcc_hosts = [ "localhost", "host1", "host2", "host3" ]
-    # include distcc
+    # class { "distcc": hosts => [ "localhost", "host1", "host2", "host3" ] }
 
     include distccd
     include puppet
@@ -70,8 +65,7 @@ node 'snowleopard-tester.test.qt-project.org' inherits default {
     include homedir_cpan
     include homedir_virtualenv
 
-    # $distcc_hosts = [ "localhost", "host1", "host2", "host3" ]
-    # include distcc
+    # class { "distcc": hosts => [ "localhost", "host1", "host2", "host3" ] }
 
     include distccd
     include puppet

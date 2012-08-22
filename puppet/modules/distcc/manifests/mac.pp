@@ -1,5 +1,7 @@
 class distcc::mac
 {
+    # used by template
+    $distcc_hosts = $distcc::hosts
     File {
         owner   =>  "root",
         group   =>  "wheel",
