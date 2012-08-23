@@ -238,9 +238,9 @@ node 'solaris-container.test.qt-project.org' inherits default {
 }
 
 #====================== Test servers =========================================
-
+# This hostname will soon become deprecated.
 node 'ci.qt-project.org', 'ci-dev.qt-project.org' inherits default {
-    include jenkins_server
+    include ci_server
 }
 
 #====================== Test machines ========================================
