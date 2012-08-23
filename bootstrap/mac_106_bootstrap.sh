@@ -94,12 +94,12 @@ if ! test -d /var/qtqa/sysadmin; then
     /opt/local/bin/git clone "$REPO" /var/qtqa/sysadmin
 fi
 
+echo "Configuring this node..."
+/usr/bin/env PATH=/opt/local/bin:$PATH /var/qtqa/sysadmin/puppet/nodecfg.pl -interactive
+
 # Run puppet once.
 # From this point on, all setup of this machine is done via puppet.
 echo "Running puppet..."
 /usr/bin/env PATH=/opt/local/bin:$PATH /var/qtqa/sysadmin/puppet/sync_and_run.pl
 set +x
 echo 'All done :-)'
-echo 'If this host already has an entry in manifests/nodes.pp, nothing needs to be done...'
-echo "Otherwise, puppet is ready to go but will not do anything until you add an entry for $(/opt/local/bin/facter fqdn) to manifests/nodes.pp"
-

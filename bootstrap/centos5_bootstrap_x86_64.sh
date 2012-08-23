@@ -50,11 +50,12 @@ if ! test -d /var/qtqa/sysadmin; then
     git clone "$REPO" /var/qtqa/sysadmin
 fi
 
+echo "Configuring this node..."
+/var/qtqa/sysadmin/puppet/nodecfg.pl -interactive
+
 # Run puppet once.
 echo "Running puppet..."
 /var/qtqa/sysadmin/puppet/sync_and_run.pl
 set +x
 echo 'All done :-)'
-echo 'If this host already has an entry in manifests/nodes.pp, nothing needs to be done...'
-echo "Otherwise, puppet is ready to go but will not do anything until you add an entry for $(facter fqdn) to manifests/nodes.pp"
 

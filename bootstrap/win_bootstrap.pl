@@ -125,6 +125,15 @@ sub maybe_git_clone
     return;
 }
 
+sub configure
+{
+    print "Configuring this node...\n";
+
+    system_or_die( 'perl', 'c:\qtqa\sysadmin\puppet\nodecfg.pl', '-interactive' );
+
+    return;
+}
+
 sub run_puppet
 {
     print "Running puppet...\n";
@@ -155,6 +164,7 @@ sub run
     maybe_install_puppet( $puppet_url );
     maybe_git_clone( $repo_url );
 
+    configure( );
     run_puppet( );
 
     print "All done :-)\n";

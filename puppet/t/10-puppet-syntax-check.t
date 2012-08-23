@@ -118,6 +118,7 @@ sub validate_some_pp_files
         'false',
         '--confdir',
         '.',
+        ($OSNAME =~ m{win32}i ? ('--config', 'puppet-win32.conf') : ()),
         # we do _not_ want to use the modulepath from the config file (including private/)
         # because the test of this repository should not depend on the content of some other
         # site-specific repository

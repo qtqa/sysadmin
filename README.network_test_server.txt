@@ -52,9 +52,10 @@ and run it.  e.g.
 # wget http://qt.gitorious.org/qtqa/sysadmin/blobs/raw/master/bootstrap/ubuntu1004_bootstrap.sh \
     && sh ./ubuntu1004_bootstrap.sh git://qt.gitorious.org/qtqa/sysadmin.git
 
-This will install and run puppet.  Since you named the machine qt-test-server
-in the previous step (right?), puppet knows to set up the machine as a network
-test server.
+This will install and run puppet.
+
+An interactive configure script should ask you what type of host you are trying
+to configure.  Select the 'network_test_server' option.
 
 If all went well, you should have seen many entries in syslog about
 puppet setting up various things.  Puppet will now be run periodically

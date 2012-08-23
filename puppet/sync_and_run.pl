@@ -318,14 +318,8 @@ sub run_puppet
             # installations which don't support it.
             'apply',
 
-            # avoid color because puppet on Windows doesn't automatically turn
-            # it off when not at a console
-            '--color=false',
-
-            # On Windows, we need to use ';' instead of ':' in the module path,
-            # which means the entry in $confdir/puppet.conf doesn't
-            # work (or we'd need a different puppet.conf for Windows vs elsewhere)
-            '--modulepath', "$DIR/private/modules;$DIR/modules",
+            # On Windows, we need to use a separate config file
+            '--config', "$DIR/puppet-win32.conf"
         );
     } else {
         push @puppet_command, (

@@ -35,6 +35,49 @@ somehow, and (2) run it.  If you are using some other OS type, read one
 of the bootstrap scripts and follow the basic high-level steps (and maybe
 write up your own bootstrap script as you go :-)
 
+During the bootstrap process, you'll be prompted about the type of host you
+are trying to set up and asked to provide some additional information.
+Here is an example interactive configuration session:
+
+    Select which of the following best describes the purpose of this host:
+
+      (1) network_test_server - Network test server, used for some QtNetwork autotests (qt-test-server.qt-test-net)
+      (2) ci_server - Qt Project CI system server (Jenkins <-> Gerrit integration)
+      (3) ci_tester - Qt Project CI tester, performing Qt compilation and autotests
+
+    ? 3
+    Configuring a node of class 'ci_tester'
+
+    Username of the account used for all testing;
+    this should be an account which is not used for any other
+    activities on this machine.
+      testuser [qt] ?
+
+    Use icecream distributed compilation tool?
+      icecc_enabled [y] ?
+
+      Icecream scheduler hostname; leave empty for autodiscovery,
+      which usually works if the scheduler is on the same LAN and IP broadcast
+      is working.
+        icecc_scheduler_host [] ? icecream-scheduler.example.com
+
+
+    Configuration completed:
+
+      classes:
+        ci_tester:
+          icecc_enabled: true
+          icecc_scheduler_host: icecream-scheduler.example.com
+          testuser: qt
+
+    Save (y/n) [y] ?
+    Configuration saved to nodecfg/10-config.yaml.
+
+The interactive configuration can be repeated if necessary by running
+'nodecfg.pl -interactive'. The output configuration file can be copied or
+shared with other hosts.  See nodecfg/README.txt for more information on
+the configuration file(s).
+
 
 OTHER NOTES
 ===========

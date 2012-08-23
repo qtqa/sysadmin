@@ -48,13 +48,14 @@ fi
 # disable any cdrom sources left over from install
 sed -r -e 's|^deb cdrom:|#deb cdrom:|' -i /etc/apt/sources.list
 
+echo "Configuring this node..."
+/var/qtqa/sysadmin/puppet/nodecfg.pl -interactive
+
 # Run puppet once.
 echo "Running puppet..."
 /var/qtqa/sysadmin/puppet/sync_and_run.pl
 set +x
 echo 'All done :-)'
-echo 'If this host already has an entry in manifests/nodes.pp, nothing needs to be done...'
-echo "Otherwise, puppet is ready to go but will not do anything until you add an entry for $(facter fqdn) to manifests/nodes.pp"
 
 # remove unneeded temporary backports file
 rm -f $BACKPORTS_FILE

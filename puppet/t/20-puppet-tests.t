@@ -208,8 +208,11 @@ sub test_one_pp_file
         '--noop',
         '--confdir',
         '.',
+        ($OSNAME =~ m{win32}i ? ('--config', 'puppet-win32.conf') : ()),
         '--vardir',
         $PUPPET_VAR_DIR,
+        # make sure we don't load any of the node's usual modules; just start as an empty node
+        '--node_terminus', 'plain',
         '--modulepath',
         'modules',
         $filename,
