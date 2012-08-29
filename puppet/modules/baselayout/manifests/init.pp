@@ -13,6 +13,10 @@ class baselayout (
         default =>  '/tmp'
     }
 ) {
+    file { $tempdir:
+        ensure => directory
+    }
+
     case $::operatingsystem {
         Darwin:     { include baselayout::mac }
         Ubuntu:     { include baselayout::ubuntu }
