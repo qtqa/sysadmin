@@ -28,11 +28,11 @@ class cmake::windows(
     exec { "install cmake $version to $path":
 
         command => "$cmd /C \"\
-\"$curl \"$url\" -o \"$tempdir\\cmake-installer.exe\" && \
+$curl \"$url\" -o \"$tempdir\\cmake-installer.exe\" && \
 ( if exist \"$path\" \
   start /D \"$path\" /wait uninstall.exe /S \
   & rd /S /Q \"$path\" ) \
-&& start /wait \"$tempdir\" /S /D=$path\
+&& start \"cmake installer\" /wait \"$tempdir\\cmake-installer.exe\" /S /D=$path\
 \"",
 
         unless => "$cmd /C \"\
