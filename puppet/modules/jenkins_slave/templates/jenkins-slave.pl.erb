@@ -183,12 +183,30 @@ sub env_for_java
 
 sub run
 {
-    chdir( $JENKINS_CWD ) || die "chdir $JENKINS_CWD: $!";
+    # This script runs an infinite loop.
+    # This is the delay between run attempts.
+    my $sleep = 60;
 
-    local %ENV = env_for_java( );
+    print "Entering main loop...\n";
+    while (1) {
+        eval {
+            chdir( $JENKINS_CWD ) || die "chdir $JENKINS_CWD: $!";
 
-    fetch_slave_jar( );
-    run_slave_jar( );
+            local %ENV = env_for_java( );
+
+            fetch_slave_jar( );
+            run_slave_jar( );
+        };
+
+        if ($EVAL_ERROR) {
+            warn "main loop error: $EVAL_ERROR\n";
+        } else {
+            warn "main loop unexpectedly completed\n";
+        }
+
+        warn "Restarting in $sleep seconds...\n";
+        sleep( $sleep );
+    }
 
     return;
 }
