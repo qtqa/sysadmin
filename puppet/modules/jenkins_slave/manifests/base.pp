@@ -1,5 +1,5 @@
 class jenkins_slave::base {
-    $jenkins_slave_name = $::hostname
+    $jenkins_slave_name = $jenkins_slave::slave_name
     $jenkins_server = $jenkins_slave::server
     $jenkins_workdir = $::operatingsystem ? {
         windows  =>  "c:\\work",
