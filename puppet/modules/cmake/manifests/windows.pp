@@ -29,9 +29,10 @@ class cmake::windows(
 
         command => "$cmd /C \"\
 $curl \"$url\" -o \"$tempdir\\cmake-installer.exe\" && \
-( if exist \"$path\" \
-  start /D \"$path\" /wait uninstall.exe /S \
-  & rd /S /Q \"$path\" ) \
+( if exist \"$path\\uninstall.exe\" \
+  start /D \"$path\" /wait uninstall.exe /S ) \
+& ( if exist \"$path\" \
+    rd /S /Q \"$path\" ) \
 && start \"cmake installer\" /wait \"$tempdir\\cmake-installer.exe\" /S /D=$path\
 \"",
 
