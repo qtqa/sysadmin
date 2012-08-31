@@ -16,19 +16,33 @@ fi
 set -e
 set -x
 
-if ! test -e /usr/bin/puppet; then
-    echo Installing puppet...
-    apt-get -y -o DPkg::Options::=--force-confnew install puppet
-else
-    echo puppet is already installed
-fi
-
 if ! test -e /usr/bin/git; then
     echo Installing git...
     apt-get -y -o DPkg::Options::=--force-confnew install git-core
 else
     echo git is already installed
 fi
+
+PUPPETLIST_FILE=/etc/apt/sources.list.d/bootstrap-puppet.list
+if ! test -e $PUPPETLIST_FILE; then
+    echo Setting up bootstrap-puppet.list...
+    echo -e 'deb http://apt.puppetlabs.com/ lucid main\ndeb-src http://apt.puppetlabs.com/ lucid main' > $PUPPETLIST_FILE
+    apt-key adv --keyserver keyserver.ubuntu.com --recv 4BD6EC30
+    apt-get update
+else
+    echo bootstrap-puppet.list already exist
+fi
+
+
+if ! test -e /usr/bin/puppet; then
+    echo Installing puppet...
+    apt-get -y -o DPkg::Options::=--force-confnew install puppet
+    rm -f $PUPPETLIST_FILE
+else
+    echo puppet is already installed
+fi
+
+
 
 if ! test -d /var/qtqa/sysadmin; then
     echo "Grabbing $REPO ..."
