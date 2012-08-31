@@ -62,6 +62,7 @@ use Getopt::Long;
 use IO::Handle;
 use English qw( -no_match_vars );
 use Pod::Usage;
+use Net::Domain qw( hostname );
 use feature 'state';
 
 # directory containing files relating to this script
@@ -86,6 +87,21 @@ my %INTERACTIVE = (
                           .qq{this should be an account which is not used for any other\n}
                           .qq{activities on this machine.},
                     default => 'qt',
+                },
+
+                jenkins_enabled => {
+                    doc => qq{Run a Jenkins slave on this host?},
+                    type => 'bool',
+                    default => 'n',
+                    child => [
+                        jenkins_server => {
+                            doc => qq{Jenkins server URL (e.g. http://jenkins.example.com/)},
+                        },
+                        jenkins_slave_name => {
+                            doc => qq{Name of this Jenkins slave (must be preconfigured on server)},
+                            default => hostname(),
+                        }
+                    ],
                 },
 
                 (($OSNAME =~ m{linux}i) ?

@@ -11,6 +11,10 @@ class ci_tester::params {
         $pulseagent_short_datadir = true
     }
 
+    $jenkins_enabled = false
+    $jenkins_server = undef
+    $jenkins_slave_name = $::hostname
+
     $icecc_enabled = true
     $icecc_scheduler_host = ''
 

@@ -10,6 +10,11 @@ class ci_tester(
     # Use a custom, shorter Pulse agent work dir?
     $pulseagent_short_datadir = $ci_tester::params::pulseagent_short_datadir,
 
+    # Jenkins parameters
+    $jenkins_enabled = $ci_tester::params::jenkins_enabled,
+    $jenkins_server = $ci_tester::params::jenkins_server,
+    $jenkins_slave_name = $ci_tester::params::jenkins_slave_name,
+
     # Use icecream distributed compilation tool?
     $icecc_enabled = $ci_tester::params::icecc_enabled,
 

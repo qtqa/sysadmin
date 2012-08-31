@@ -4,4 +4,11 @@ class ci_tester::base {
     include puppet
     include sshkeys
     include qt_prereqs
+
+    if $ci_tester::jenkins_enabled {
+         class { 'jenkins_slave':
+            server => $ci_tester::jenkins_server,
+            slave_name => $ci_tester::jenkins_slave_name
+         }
+    }
 }
