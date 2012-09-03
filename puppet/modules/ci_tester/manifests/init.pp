@@ -4,6 +4,9 @@ class ci_tester(
     # user account used for all testing
     $testuser = $ci_tester::params::testuser,
 
+    # IP address of qt-test-server network test server
+    $network_test_server_ip = $ci_tester::params::network_test_server_ip,
+
     # Use a Pulse agent?
     $pulseagent_enabled = $ci_tester::params::pulseagent_enabled,
 

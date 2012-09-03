@@ -89,6 +89,13 @@ my %INTERACTIVE = (
                     default => 'qt',
                 },
 
+                network_test_server_ip => {
+                    doc => qq{IPv4 address of the network test server (qt-test-server.qt-test-net) \n}
+                          .qq{to be used while running autotests on this host; leave blank if you don't\n}
+                          .qq{have a server, in which case many network tests will skip},
+                    default => q{},
+                },
+
                 jenkins_enabled => {
                     doc => qq{Run a Jenkins slave on this host?},
                     type => 'bool',

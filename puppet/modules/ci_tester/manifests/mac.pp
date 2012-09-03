@@ -1,5 +1,4 @@
 class ci_tester::mac inherits ci_tester::base {
-    include hosts
     include pulseagent
     include ccache
     include qadungeon

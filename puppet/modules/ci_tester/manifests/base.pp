@@ -3,7 +3,7 @@ class ci_tester::base {
     class { 'baselayout': testuser => $ci_tester::testuser }
     include puppet
     include sshkeys
-    include qt_prereqs
+    class { 'qt_prereqs': network_test_server_ip => $ci_tester::network_test_server_ip }
 
     if $ci_tester::jenkins_enabled {
          class { 'jenkins_slave':
