@@ -4,6 +4,9 @@ class qt_prereqs(
     # cmake is a qt5 prereq
     include cmake
 
+    # for building webkit
+    include ruby
+
     # IP address of the qt-test-server used by QtNetwork and other autotests
     if $network_test_server_ip {
         host { "qt-test-server":
