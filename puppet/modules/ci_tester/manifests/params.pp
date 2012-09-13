@@ -33,4 +33,6 @@ class ci_tester::params {
         $testcocoon_enabled = false
         $armel_cross_enabled = false
     }
+
+    $qt_gerrit_mirror = undef
 }

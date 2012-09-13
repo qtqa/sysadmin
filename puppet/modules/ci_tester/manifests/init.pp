@@ -22,7 +22,10 @@ class ci_tester(
     $icecc_enabled = $ci_tester::params::icecc_enabled,
 
     # icecream scheduler host; empty means autodiscovery
-    $icecc_scheduler_host = $ci_tester::params::icecc_scheduler_host
+    $icecc_scheduler_host = $ci_tester::params::icecc_scheduler_host,
+
+    # local mirror of codereview.qt-project.org
+    $qt_gerrit_mirror = $ci_tester::params::qt_gerrit_mirror
 
 ) inherits ci_tester::params {
     case $::kernel {

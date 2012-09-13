@@ -96,6 +96,16 @@ my %INTERACTIVE = (
                     default => q{},
                 },
 
+                qt_gerrit_mirror => {
+                    doc => qq{Base URL of a local mirror of Qt's gerrit (codereview.qt-project.org). \n}
+                          .qq{This will be used as the 'qt-gerrit-mirror' git alias to speed up git \n}
+                          .qq{operations while testing. \n\n}
+                          .qq{The base URL will have Qt module names appended; for example: \n}
+                          .qq{ "git://git.example.com/" => "git://git.example.com/qt/qtbase" \n\n}
+                          .qq{Leave blank if you don't have a mirror},
+                    default => q{},
+                },
+
                 jenkins_enabled => {
                     doc => qq{Run a Jenkins slave on this host?},
                     type => 'bool',

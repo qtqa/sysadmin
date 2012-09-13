@@ -11,7 +11,8 @@ class baselayout (
     $tempdir = $::operatingsystem ? {
         windows =>  'C:\Windows\Temp',
         default =>  '/tmp'
-    }
+    },
+    $qt_gerrit_mirror = undef
 ) {
     file { $tempdir:
         ensure => directory

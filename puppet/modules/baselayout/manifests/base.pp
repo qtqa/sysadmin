@@ -12,5 +12,9 @@ class baselayout::base {
             "user.name": content => "Qt Continuous Integration System";
             "user.email": content => "qt-info@nokia.com";
         }
+
+        if $baselayout::qt_gerrit_mirror {
+            git::config { "url.$baselayout::qt_gerrit_mirror.insteadof": content => "qt-gerrit-mirror:" }
+        }
     }
 }
