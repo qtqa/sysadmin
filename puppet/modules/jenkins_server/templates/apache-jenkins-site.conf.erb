@@ -8,5 +8,6 @@
         Allow from all
     </Proxy>
     ProxyPreserveHost on
+    ProxyPass /qt-ci/ http://localhost:7181/
     ProxyPass / http://localhost:8080/
 </VirtualHost>
