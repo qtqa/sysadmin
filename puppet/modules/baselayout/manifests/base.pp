@@ -10,7 +10,7 @@ class baselayout::base {
             "qtqa.hardgit.server.qtgitreadonly.primary": content => $qtgitreadonly;
             "qtqa.hardgit.server.qtgitreadonly.mirror-$location": content => $qtgitreadonly_local;
             "user.name": content => "Qt Continuous Integration System";
-            "user.email": content => "qt-info@nokia.com";
+            "user.email": content => "ci-noreply@qt-project.org";
         }
 
         if $baselayout::qt_gerrit_mirror {
