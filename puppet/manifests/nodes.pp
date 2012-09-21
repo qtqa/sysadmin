@@ -124,13 +124,6 @@ node 'testr.test.qt.nokia.com' inherits default {
     include testr
 }
 
-# Note: we match any domain here, rather than just `qt-test-net', because facter
-# refuses to consider `qt-test-net' a valid domain name, since it doesn't contain a dot
-# This hostname will soon become deprecated.
-node /^qt-test-server\./ inherits default {
-    include network_test_server
-}
-
 #====================== Solaris ===============================================
 
 # master nodes (those which have containers)
