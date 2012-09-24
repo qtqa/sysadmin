@@ -238,6 +238,8 @@ sub test_one_pp_file
         }
     }
 
+    my $raw_output = $output;
+
     subtest "$filename OK" => sub {
         if ($skip) {
             plan skip_all => $skip;
@@ -267,7 +269,7 @@ sub test_one_pp_file
 
         if ($no_warnings) {
             local $LIST_SEPARATOR = "\n  ";
-            ok( !@warnings, $no_warnings ) || diag( "warnings:\n  @warnings" );
+            ok( !@warnings, $no_warnings ) || diag( "output:\n  $raw_output" );
         }
 
         foreach my $expected (@expected_output) {
