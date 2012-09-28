@@ -1,7 +1,24 @@
 # Fetch a file which is too secret to be put under any source control.
-# Note: if you only have access to the public version of this module,
-# then your best bet is to manually install all secret_files.
 define secret_file($source) {
-    warning("secret file `$source' is required but I have no way to get it.  Try manually installing an appropriate file at $name")
+    if $input == "" {
+        warning("HTTP input URL is not defined, it needs to be set for secret_file to work")
+    } else {
+        $download_url = "$input/semisecure/$source"
+
+        $fetch = $operatingsystem ? {
+            Darwin  =>  "/usr/bin/curl -o $name $download_url",
+            Solaris =>  "/opt/csw/bin/wget -O $name $download_url",
+            windows => $::architecture ? {
+                x64 => "\"c:\\Program Files (x86)\\Git\\bin\\curl.exe\" -o $name $download_url",
+                default => "\"c:\\Program Files\\Git\\bin\\curl.exe\" -o $name $download_url",
+            },
+            default =>  "/usr/bin/wget -O $name $download_url",
+        }
+
+        exec { "fetch secret file $source":
+            command =>  $fetch,
+            creates =>  $name,
+        }
+    }
 }
 
