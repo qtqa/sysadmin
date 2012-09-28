@@ -234,8 +234,8 @@ class jenkins_server::debian inherits jenkins_server
     # environment; warnings and worse go to syslog
     $env = "/usr/bin/env PERL_ANYEVENT_VERBOSE=5 PERL_ANYEVENT_LOG=log=syslog"
 
-    # start-stop-daemon base cmd
-    $start_stop_daemon = "start-stop-daemon --chuid jenkins:nogroup --background --user jenkins --exec /usr/bin/perl --make-pidfile --startas /bin/sh"
+    # start-stop-daemon base cmd (for /usr/bin/perl)
+    $start_stop_daemon_perl = "start-stop-daemon --chuid jenkins:nogroup --background --user jenkins --exec /usr/bin/perl --make-pidfile --startas /bin/sh"
 
     # script base cmd (--gerrit-url part omitted)
     $sh_args = "exec perl /var/lib/jenkins/qtqa/scripts/jenkins/gerrit-notify-jenkins.pl --jenkins-url http://127.0.0.1:8080/"
@@ -244,15 +244,35 @@ class jenkins_server::debian inherits jenkins_server
     $pidfile_base = "/var/run/gerrit-notify-jenkins"
 
     exec { "gerrit-notify-jenkins for codereview":
-        command => "$env $start_stop_daemon --pidfile $pidfile_base-codereview.pid --start -- -l -c '$sh_args --gerrit-url ssh://qtintegration@codereview.qt-project.org:29418/'",
-        onlyif => "$env $start_stop_daemon --pidfile $pidfile_base-codereview.pid --test --start",
+        command => "$env $start_stop_daemon_perl --pidfile $pidfile_base-codereview.pid --start -- -l -c '$sh_args --gerrit-url ssh://qtintegration@codereview.qt-project.org:29418/'",
+        onlyif => "$env $start_stop_daemon_perl --pidfile $pidfile_base-codereview.pid --test --start",
         require => Cron["update qtqa"],
     }
 
     exec { "gerrit-notify-jenkins for dev-codereview":
-        command => "$env $start_stop_daemon --pidfile $pidfile_base-dev-codereview.pid --start -- -l -c '$sh_args --gerrit-url ssh://qtintegration@dev-codereview.qt-project.org:29418/'",
-        onlyif => "$env $start_stop_daemon --pidfile $pidfile_base-dev-codereview.pid --test --start",
+        command => "$env $start_stop_daemon_perl --pidfile $pidfile_base-dev-codereview.pid --start -- -l -c '$sh_args --gerrit-url ssh://qtintegration@dev-codereview.qt-project.org:29418/'",
+        onlyif => "$env $start_stop_daemon_perl --pidfile $pidfile_base-dev-codereview.pid --test --start",
         require => Cron["update qtqa"],
+    }
+
+    # ============================= port forward for remote API ========================
+    # start-stop-daemon base cmd (for /usr/bin/ssh)
+    $start_stop_daemon_ssh = "start-stop-daemon --chuid jenkins:nogroup --background --user jenkins --exec /usr/bin/ssh --make-pidfile --startas /bin/sh"
+
+    # ssh base cmd (user@hostname omitted)
+    $sh_args_ssh = "exec ssh -oServerAliveInterval=30 -R 7181:127.0.0.1:7181 -N"
+
+    # pid file base
+    $pidfile_base_ssh = "/var/run/ssh-qt-ci-remote-api"
+
+    exec { "ssh fwd for testresults remote API":
+        command => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-testresults.pid --start -- -l -c '$sh_args_ssh qtintegration@testresults.qt-project.org'",
+        onlyif => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-testresults.pid --test --start",
+    }
+
+    exec { "ssh fwd for dev-testresults remote API":
+        command => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-dev-testresults.pid --start -- -l -c '$sh_args_ssh qtintegration@dev-testresults.qt-project.org'",
+        onlyif => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-dev-testresults.pid --test --start",
     }
 
     # ============================= apache2 -> jenkins setup ===========================

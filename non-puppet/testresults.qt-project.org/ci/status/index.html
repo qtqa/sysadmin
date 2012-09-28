@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Qt CI Status</title>
+        <link rel="stylesheet" href="css/ci-status.css" type="text/css">
+    </head>
+    <body>
+      <div id="globalWrapper" class="show_loading_cursor">
+        <div id="header">
+         <div id="p-logo">
+          <h1 id="firstheading">
+            <img src="/img/qt-logo.png" alt="The Qt Project" />
+            Continuous Integration Status
+          </h1>
+         </div>
+        </div>
+
+        <noscript><b>JavaScript is required</b> - sorry, you will have to use a JavaScript-enabled web browser to view this page!</noscript>
+
+        <div id="errorbox"></div>
+
+        <div class="hide_until_load" style="display:none">
+          <h2>Projects:</h2>
+          <p>sort by: <a class="action action_sort_by enabled">name</a> - <a class="action action_sort_by">date</a></p>
+          <div id="statusbox"></div>
+
+          <h2>Log:</h2>
+          <div id="logbox"></div>
+
+          <div id="updatebox">
+            <p><span class="loading" style="display:none">loading... - </span>last updated: <span id="updated_timestamp">never</span> - <a class="action action_refresh">refresh</a></p>
+          </div>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <script src="js/jquery.timeago.js"></script>
+        <script>
+            /* returns value wrapped in the given CSS class */
+            function klass(_klass, value) {
+                var span = $('<span>');
+                span.attr('class', _klass);
+                span.append(value);
+                return span;
+            }
+
+            /* returns an activated timeago timestamp element */
+            function timestamp(when) {
+                return $('<span>', {title: when, "class": "timestamp"}).timeago();
+            }
+
+            /*
+                Returns an expander ([+] / [-]);
+                when clicked, the elements matched by $(selector, ctx) will be toggled.
+            */
+            function expander(selector, ctx) {
+                var out = $('<span class="expander">[+]</span>');
+                out.click(function(e) {
+                    $(selector, ctx).slideToggle();
+                    var target = $(e.target);
+                    if (target.hasClass('expanded')) {
+                        target.removeClass('expanded');
+                        target.empty().append('[+]');
+                    } else {
+                        target.addClass('expanded');
+                        target.empty().append('[–]');
+                    }
+                });
+                return out;
+            }
+
+            /* returns a map of all known qtci_id under the given node */
+            function findKnownIds(node) {
+                var key = 'qtci_id';
+                var out = {};
+                $('[' + key + ']', node).each(
+                    function() {
+                        out[$(this).attr(key)] = true;
+                    }
+                );
+                return out;
+            }
+
+            /*
+                Returns the given value, perhaps wrapped in a <pre> element if it
+                looks like preformatted text (e.g. contains a newline character)
+            */
+            function maybePre(value) {
+                if (value == undefined || value == null) {
+                    return '(null)';
+                }
+                var text = value.toString();
+                if (text.indexOf("\n") != -1) {
+                    var pre = $('<pre>');
+                    pre.append(text);
+                    return pre;
+                }
+                return text;
+            }
+
+            /*
+                Given a javascript object 'o', constructs a "tree" (expandable list of lists)
+                inside of 'into', up to the given depth.
+            */
+            function buildObjectTree(into, o, depth) {
+                if (depth == undefined) {
+                    depth = 5;
+                }
+                var is_array = $.isArray(o);
+
+                var created;
+                var list = $('ul', into).first();
+                if (list.length == 0) {
+                    list = $('ol', into).first();
+                }
+                if (list.length == 0) {
+                    var list_type = is_array ? 'ol' : 'ul';
+                    list = $('<' + list_type + '>');
+                    list.attr('class', 'object_tree');
+                    created = true;
+                }
+
+                if (depth == 0) {
+                    list.append($('<li class="object_tree">(... more data; truncated)</li>'));
+                    return true;
+                }
+
+                var count = 0;
+                for (var key in o) {
+                    if (!o.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    ++count;
+                    var value = o[key];
+                    var li = $('<li class="object_tree">');
+                    if (!is_array) {
+                        li.append(klass('object_key', key));
+                        li.append(': ');
+                    }
+                    if ($.isPlainObject(value) || $.isArray(value)) {
+                        buildObjectTree(li, value, depth-1);
+                        if (!is_array) {
+                            $('> .object_tree', li).hide();
+                            li.prepend(' ');
+                            li.prepend(expander('> .object_tree', li));
+                            li.addClass('expandable');
+                        }
+                    } else {
+                        li.append(maybePre(value));
+                    }
+                    list.append(li);
+                }
+
+                if (count != 0 && created) {
+                    into.append(list);
+                }
+
+                return (count != 0);
+            }
+
+            /* update/show new logs */
+            function showLogs(into, logs) {
+                if (!logs) {
+                    return;
+                }
+
+                var known_ids = findKnownIds(into);
+                for (var key in logs) {
+                    if (!logs.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    var log = logs[key];
+                    var id = log.id;
+                    /* don't mess with any log messages already known */
+                    if (id == undefined || known_ids[id]) {
+                        continue;
+                    }
+
+                    var p = $('<p class="log_message"/>');
+
+                    // split into "[message prefix] and message body" if possible
+                    var message_parts = log.message.split('] ');
+                    if (message_parts.length == 2) {
+                        p.append(klass('message_prefix', message_parts[0] + ']'));
+                        p.append(' ' + message_parts[1]);
+                    } else {
+                        p.append(log.message);
+                    }
+
+                    p.append(' - ');
+                    p.append(timestamp(log.when));
+                    p.attr('qtci_id', id);
+                    p.hide();
+                    p.fadeIn('slow');
+                    into.prepend(p);
+                }
+            }
+
+            /* update/show project state history */
+            function showHistory(into, history) {
+                var ul = $('ul', into).first();
+                if (ul.length == 0) {
+                    ul = $('<ul class="history">');
+                    into.append(ul);
+                }
+
+                var known_ids = findKnownIds(into);
+                for (var key in history) {
+                    if (!history.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    var state = history[key];
+                    var id = state.id;
+                    if (id == undefined || known_ids[id]) {
+                        continue;
+                    }
+
+                    var li = $('<li class="state">' + state.name + " - </li>");
+                    li.append(timestamp(state.when));
+                    li.attr( 'qtci_id', state.id );
+
+                    var stash_div = $('<div class="stash">');
+                    stash_div.hide();
+                    li.addClass('expandable');
+                    li.prepend(' ');
+                    if (buildObjectTree(stash_div, state.stash)) {
+                        li.prepend(expander(stash_div));
+                        li.append(stash_div);
+                    } else {
+                        li.prepend(klass('disabled-expander', '[–]'));
+                    }
+
+                    ul.prepend(li);
+                }
+            }
+
+            /* update/show a project */
+            function showProject(into, project) {
+                var created = false;
+                var row = $('[qtci_project="' + project.name + '"]', into);
+                var stash_div;
+                var history_div;
+                var toplevel;
+
+                if (row.length == 0) {
+                    row = $('<div class="project">');
+                    row.attr( 'qtci_project', project.name );
+                    row.attr( 'qtci_id', project.state.id );
+                    row.hide();
+                    created = true;
+                    toplevel = $('<p>');
+                    toplevel.append(expander('> div', row));
+                    toplevel.append(' <span class="project_state"/>');
+                    stash_div = $('<div class="stash">');
+                    stash_div.hide();
+                    history_div = $('<div class="history">Project history:</div>');
+                    history_div.hide();
+                } else {
+                    if (row.attr( 'qtci_id' ) == project.state.id) {
+                        return; // nothing to be done
+                    }
+                    toplevel = $('p', row).first();
+                    stash_div = $('div.stash', row).first();
+                    // if id changed then stash is invalid
+                    stash_div.empty();
+                    history_div = $('div.history', row).first();
+                }
+
+                $('span.project_state', toplevel)
+                    .empty()
+                    .append(project.name + ": " + project.state.name + " - ")
+                    .append(timestamp(project.state.when));
+
+                buildObjectTree(stash_div, project.state.stash);
+                showHistory(history_div, project.history);
+
+                if (created) {
+                    row.append(toplevel);
+                    row.append(stash_div)
+                    row.append(history_div)
+                    into.append(row);
+                    row.fadeIn('slow');
+                }
+            }
+
+            /*
+                sort helper; given a project node, returns the value which should be used for
+                comparisons against other nodes.
+            */
+            var SORT_BY = 'name';
+            function getSortValue(elem) {
+                if (SORT_BY == 'name') {
+                    return $(elem).attr('qtci_project');
+                }
+                if (SORT_BY == 'date') {
+                    return $('span.timestamp', elem).attr('title');
+                }
+                alert("error: cannot sort by " + SORT_BY);
+            }
+
+            /* Sorts the projects (divs of class "project") within the given container */
+            function sortProjects(container) {
+                var projects = container.children('div.project').toArray();
+                var ascending = (SORT_BY == 'name');
+                projects.sort(function(a,b){
+                    var val_a = getSortValue(a);
+                    var val_b = getSortValue(b);
+                    if (val_a == val_b) {
+                        return 0;
+                    }
+                    var mult = ascending ? 1 : -1;
+                    return mult*((val_a > val_b) ? 1 : -1);
+                });
+                $.each(projects, function(idx,item) { container.append(item); } );
+            }
+
+            /*
+                Show all the data; 'data' is an object returned from /api/json on qt-jenkins-integrator.pl.
+            */
+            function showData(data) {
+                var statusbox = $('#statusbox');
+
+                var updated_timestamp = $('#updated_timestamp');
+                updated_timestamp.empty();
+                updated_timestamp.append( timestamp(data.when) );
+
+                for (var project_name in data.project) {
+                    if (!data.project.hasOwnProperty(project_name)) {
+                        continue;
+                    }
+                    var this_project = data.project[project_name];
+                    this_project.name = project_name;
+                    showProject(statusbox, this_project);
+                }
+
+                sortProjects( statusbox );
+
+                showLogs( $('#logbox'), data.logs );
+            }
+
+            /*
+                Update data.
+                If interval is given, updates every 'interval' milliseconds.
+                Otherwise, does a one-shot update.
+                last_id is maintained as the last known ID; we only fetch
+                data newer than this.
+            */
+            var last_id = 0;
+            function update(interval) {
+                $('.loading').show();
+                $('#globalWrapper').addClass('show_loading_cursor');
+                var url = "http://testresults.qt-project.org/cgi-bin/ci-api";
+                var promise = $.getJSON(url + '?since_id=' + last_id)
+                    .fail(
+                        function(req, text, exception) {
+                            var errorbox = $('#errorbox');
+                            if (exception) {
+                                text = text + "; " + exception.toString();
+                            }
+                            if (req.responseText) {
+                                text = text + "; " + req.responseText;
+                            }
+
+                            errorbox.hide();
+                            errorbox.empty();
+
+                            errorbox.append( 'error fetching data from ' + url + ': ' + text + ' (' );
+                            errorbox.append( timestamp( new Date() ) );
+                            errorbox.append( ')' );
+                            errorbox.fadeIn( 'slow' );
+                        }
+                    )
+                    .done(
+                        function(data) {
+                            $('#errorbox').fadeOut( 'slow' );
+                            if (data.last_id) {
+                                last_id = data.last_id;
+                            }
+                            $('.hide_until_load').fadeIn('slow').attr('class', undefined);
+                            showData( data );
+                        }
+                    )
+                    .always(
+                        function() {
+                            $('.loading').hide();
+                            $('#globalWrapper').removeClass('show_loading_cursor');
+                            if (interval) {
+                                setTimeout( function() { update(interval); }, interval );
+                            }
+                        }
+                    )
+                ;
+            };
+
+            /* Bind a few links */
+
+            $(".action_sort_by").click( function(ev) {
+                var elem = $(ev.target);
+                SORT_BY = elem.text();
+                // all action_sort_by except this one are not enabled
+                $('.action_sort_by').removeClass('enabled');
+                elem.addClass('enabled');
+                sortProjects($('#statusbox'));
+            });
+
+            $(".action_refresh").click( function(){ update() } );
+
+            /* Start initial update, then update once every two minutes */
+            update(1000 * 120);
+        </script>
+      </div> <!-- globalwrapper -->
+    </body>
+</html>
