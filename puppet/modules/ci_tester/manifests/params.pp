@@ -2,11 +2,7 @@ class ci_tester::params {
     $testuser = 'qt'
 
     $network_test_server_ip = undef
-
-    $pulseagent_enabled = $::kernel ? {
-        'windows' => false,
-        default => true
-    }
+    $pulseagent_enabled = false
 
     if ($::operatingsystem == 'Ubuntu') and ($::operatingsystemrelease == '10.04') {
         $pulseagent_short_datadir = false

@@ -2,7 +2,6 @@ class ci_tester::linux inherits ci_tester::base {
     include qadungeon
     include ccache
     include crosscompilers
-    include intel_compiler
     include vmware_tools
 
     # Allow test machines to install modules from cpan under $HOME/perl5
