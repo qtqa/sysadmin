@@ -1,4 +1,5 @@
 class jenkins_slave::linux inherits jenkins_slave::base {
+    package { "libwww-perl": ensure => installed; }
     $user = $jenkins_slave::user
     baselayout::startup { "jenkins-slave":
         path    =>  "/bin/sh",
