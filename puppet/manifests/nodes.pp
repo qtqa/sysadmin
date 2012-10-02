@@ -135,6 +135,3 @@ node 'ci.qt-project.org', 'ci-dev.qt-project.org' inherits default {
 #====================== Test machines ========================================
 
 # The real hostnames of all test machines are maintained in a private file, sorry
-
-# Allow for additional nodes to be declared in a private_nodes module
-import "private_nodes"

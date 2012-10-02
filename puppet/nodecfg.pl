@@ -79,6 +79,32 @@ my $LOG_FILE = catfile( $CFG_DIR, 'nodecfg.log' );
 # Data used for interactive setup.
 # Would be nice to automatically extract these from the manifests (magic comments?)
 my %INTERACTIVE = (
+    parameters => [
+        location => {
+            doc => qq{Location for CI machines.\n}
+                  .qq{The location variable is used to customize certain puppet configurations.\n\n}
+                  .qq{The location is typically something like: "Oslo", "Brisbane" or "Digia". \n\n},
+
+            default => q{},
+        },
+        qtgitreadonly => {
+            doc => qq{Base URL of Qt's git repositories (git://qt.gitorious.org/). \n}
+                  .qq{This will be used as the 'qtgitreadonly' alias for git \n}
+                  .qq{operations while testing. \n\n}
+                  .qq{The base URL will have Qt module names appended; for example: \n}
+                  .qq{ "git://git.example.com/" => "git://git.example.com/qt/qtbase" \n\n},
+            default => 'git://qt.gitorious.org/',
+        },
+        input => {
+            doc => qq{Base HTTP URL where large files are hosted (tarballs etc) \n}
+                  .qq{These files are all publicly available but you'll have to host them \n}
+                  .qq{in your own mirror. \n\n}
+                  .qq{The base HTTP URL can be for example: "http://replace-me.example.com/input". \n\n},
+
+            default => q{},
+        },
+    ],
+
     classes => {
 
         ci_tester => {
@@ -471,6 +497,19 @@ EOF
 
     my %config;
 
+    print_interactive "Configuring global parameters\n";
+
+    $config{ parameters } = {};
+
+    my @globalparams = @{ $INTERACTIVE{ parameters } || [] };
+    while (my ($name, $data) = splice( @globalparams, 0, 2 )) {
+        configure_param(
+            $name,
+            $data,
+            $config{ parameters },
+        );
+    }
+
     # choose a class
     my $class = select_class( \%INTERACTIVE, \%config );
 
@@ -528,7 +567,8 @@ sub run
 
         # Simulate a node which is known, but empty, so that legacy definitions in nodes.pp
         # can still be processed.
-        print "classes:\n";
+        print "classes:\n\n";
+        print "parameters:\n";
     }
     return;
 }
