@@ -25,7 +25,7 @@ class crosscompilers::linux
             directory   =>  "mips-4.4",
         ;
         "powerpc":
-            filename    =>  "freescale-4.4-194-powerpc-linux-gnu-i686-pc-linux-gnu.tar.bz2",
+            filename    =>  "freescale-4.4-196-powerpc-eabi-i686-pc-linux-gnu.tar.bz2",
             directory   =>  "freescale-4.4",
         ;
     }
