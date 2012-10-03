@@ -4,6 +4,6 @@ class cmake::mac {
 
     package { "cmake":
         ensure => installed,
-        provider => $macports_provider
+        provider => 'macports'
     }
 }

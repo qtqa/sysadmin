@@ -4,6 +4,6 @@ class ruby::mac {
 
     package { "ruby":
         ensure => installed,
-        provider => $macports_provider
+        provider => 'macports'
     }
 }

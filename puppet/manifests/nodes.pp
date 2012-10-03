@@ -1,33 +1,4 @@
 node default {
-    if $::operatingsystem == "Darwin" {
-        # Hack for macs to work around http://projects.puppetlabs.com/issues/2331 :
-        # On the first run, use the possibly broken `darwinport' provider (so that
-        # compilation at least can succeed), but warn about it.  The first run
-        # should install the unbroken `macports' provider, which we will then use
-        # at the second run.
-        $macports_rb = "/opt/local/lib/ruby/site_ruby/1.8/puppet/provider/package/macports.rb"
-        $macports_installed = generate('/bin/sh', '-c', "   \
-            if /bin/test -f $macports_rb; then              \
-                /bin/echo -n yes;                           \
-            else                                            \
-                /bin/echo -n no;                            \
-            fi                                              \
-        ")
-
-        if $macports_installed == "yes" {
-            $macports_provider = "macports"
-        }
-        else {
-            $macports_provider = "darwinport"
-            warning(
-"Using `darwinport' provider to install packages. \
-Due to puppet bug http://projects.puppetlabs.com/issues/2331, some packages \
-may not install correctly. This should be resolved the next time puppet \
-is run on this host."
-            )
-        }
-    }
-
     include puppet
 }
 

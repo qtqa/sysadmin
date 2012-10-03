@@ -8,7 +8,7 @@ class homedir_virtualenv::mac {
 
     package { "py26-virtualenv":
         ensure   => installed,
-        provider => $macports_provider,
+        provider => 'macports',
     }
 
     # Make virtualenv-2.6 the default virtualenv by symlinking virtualenv

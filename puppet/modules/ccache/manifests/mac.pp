@@ -3,7 +3,7 @@ class ccache::mac inherits ccache::unix
     include macports
 
     package { "ccache":
-        provider    =>  $macports_provider,
+        provider    =>  'macports',
         ensure      =>  present,
     }
 
