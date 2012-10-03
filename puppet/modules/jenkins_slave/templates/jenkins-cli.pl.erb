@@ -116,9 +116,6 @@ my $JENKINS_SERVER = '<%= jenkins_server %>';
 # Working directory when Jenkins slave.jar is run
 my $JENKINS_CWD = $FindBin::Bin;
 
-# Remote jenkins-cli.jar
-my $JENKINS_CLI_JAR_URL = "$JENKINS_SERVER/jnlpJars/jenkins-cli.jar";
-
 # Local jenkins-cli.jar
 my $JENKINS_CLI_JAR = catfile( $JENKINS_CWD, 'jenkins-cli.jar' );
 
@@ -127,18 +124,20 @@ my $MAX_ATTEMPTS = 10;
 
 sub fetch_cli_jar
 {
+    my ($url) = @_;
+
     if (-e $JENKINS_CLI_JAR) {
         unlink( $JENKINS_CLI_JAR ) || die "unlink $JENKINS_CLI_JAR: $!";
     }
 
     my $ua = LWP::UserAgent->new( );
     my $response = $ua->get(
-        $JENKINS_CLI_JAR_URL,
+        $url,
         ':content_file' => $JENKINS_CLI_JAR,
     );
 
     if (!$response->is_success( )) {
-        die "fetch $JENKINS_CLI_JAR_URL: ".$response->decoded_content( );
+        die "fetch $url: ".$response->decoded_content( );
     }
 
     return;
@@ -180,6 +179,7 @@ sub run_cli
         'man'           => \$man,
         'retry'         => \$retry
     );
+    my $jenkins_cli_url = "$JENKINS_SERVER/jnlpJars/jenkins-cli.jar";
 
     pod2usage(-verbose => 1) if ($help);
     pod2usage(-verbose => 2) if ($man);
@@ -190,7 +190,7 @@ sub run_cli
     local %ENV = env_for_java( );
 
     my $run = sub {
-        fetch_cli_jar( );
+        fetch_cli_jar($jenkins_cli_url);
         run_cli_jar($verbose, @args);
     };
 
