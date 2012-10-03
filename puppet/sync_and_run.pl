@@ -346,19 +346,41 @@ sub run_and_exit
     exit $?;
 }
 
+sub determine_puppet_version
+{
+    my ($puppet_bin) = @_;
+    my $puppet_version_string = qx("$puppet_bin" "--version");
+    if ($? != 0) {
+        die "'$puppet_bin --version' failed\n";
+    }
+    $puppet_version_string =~ /(\d)\.(\d)\.(\d+)/;
+
+    my $puppet_version = {
+        major => $1,
+        minor => $2,
+        build => $3,
+    };
+
+    return $puppet_version;
+}
+
 sub run_puppet
 {
     my @puppet_command = (
         find_puppet( ),
     );
 
+    my $version = determine_puppet_version(@puppet_command);
+    if ($version->{major} >= 3 || $version->{major} >= 2 && $version->{minor} >= 6) {
+        push @puppet_command, (
+            # 'apply' is the command we want; we just don't use it always because
+            # we still have some very old puppet installations which don't support it.
+            'apply'
+        );
+    }
+
     if ($WINDOWS) {
         push @puppet_command, (
-            # 'apply' is the command we want; we just don't use it on platforms
-            # other than Windows because we still have some very old puppet
-            # installations which don't support it.
-            'apply',
-
             # On Windows, we need to use a separate config file
             '--config', "$DIR/puppet-win32.conf"
         );
