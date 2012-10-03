@@ -145,5 +145,23 @@ automatic login for that user.                                    \
             mode    =>  0500,       # and should never be writable
         }
     }
+
+    # On OSX 10.6, we use sudo from macports, because the shipped sudo is too old to understand
+    # the '#includedir' directive, which makes it difficult to install sudoers snippets from puppet.
+    if $::macosx_productversion_major == '10.6' {
+        include macports
+
+        package { "sudo":
+            ensure => installed,
+            provider => 'macports',
+            before => Exec["Ensure sudoers.d is enabled"]
+        }
+
+        # make sure 'sudo' always invokes this sudo
+        file { "/usr/bin/sudo":
+            ensure => "/opt/local/bin/sudo",
+            require => Package["sudo"]
+        }
+    }
 }
 

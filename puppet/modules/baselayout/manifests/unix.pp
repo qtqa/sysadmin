@@ -39,9 +39,15 @@ class baselayout::unix inherits baselayout::base {
             default => '/bin/grep',
         }
 
+        # On OSX 10.6, we use sudo from macports, which uses a different prefix for sudoers configs;
+        # for the sake of convenience, we keep using /etc/sudoers.d
+        $sudoers_prefix = $::macosx_productversion_major ? {
+            '10.6' => "/opt/local",
+            default => ""
+        }
         exec { "Ensure sudoers.d is enabled":
-            command => "/bin/sh -c 'echo \"#includedir /etc/sudoers.d\" >> /etc/sudoers'",
-            unless  => "$grep -F '#includedir /etc/sudoers.d' /etc/sudoers",
+            command => "/bin/sh -c 'echo \"#includedir /etc/sudoers.d\" >> $sudoers_prefix/etc/sudoers'",
+            unless  => "$grep -F '#includedir /etc/sudoers.d' $sudoers_prefix/etc/sudoers",
             require => File["/etc/sudoers.d"]
         }
     }
