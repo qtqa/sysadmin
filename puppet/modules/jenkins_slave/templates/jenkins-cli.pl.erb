@@ -49,7 +49,7 @@ jenkins-cli.pl - Perl wrapper for command line interface for Jenkins server
 
 =head1 USAGE
 
- jenkins-cli.pl [--verbose] [--server <server-url>] -- <arguments>
+ jenkins-cli.pl [--verbose] [--retry] [--server <server-url>] -- <arguments>
 
 =head1 DESCRIPTION
 
@@ -73,6 +73,11 @@ Mandatory.
 
 Optional. URL of the Jenkins server. If not defined, default value
 <%= jenkins_server %> is used.
+
+=item --retry
+
+If given, and the Jenkins CLI command fails, it will be retried a few times
+(with a delay between each attempt).
 
 =item --verbose
 
@@ -116,6 +121,9 @@ my $JENKINS_CLI_JAR_URL = "$JENKINS_SERVER/jnlpJars/jenkins-cli.jar";
 
 # Local jenkins-cli.jar
 my $JENKINS_CLI_JAR = catfile( $JENKINS_CWD, 'jenkins-cli.jar' );
+
+# Maximum attempts to run a command, in --retry mode
+my $MAX_ATTEMPTS = 10;
 
 sub fetch_cli_jar
 {
@@ -163,12 +171,14 @@ sub run_cli
     my $verbose;
     my $help;
     my $man;
+    my $retry;
 
     GetOptionsFromArray(\@args,
         'server=s'      => \$JENKINS_SERVER,
         'verbose'       => \$verbose,
         'help'          => \$help,
         'man'           => \$man,
+        'retry'         => \$retry
     );
 
     pod2usage(-verbose => 1) if ($help);
@@ -179,8 +189,31 @@ sub run_cli
 
     local %ENV = env_for_java( );
 
-    fetch_cli_jar( );
-    run_cli_jar($verbose, @args);
+    my $run = sub {
+        fetch_cli_jar( );
+        run_cli_jar($verbose, @args);
+    };
+
+    if (!$retry) {
+        $run->();
+        return;
+    }
+
+    my $attempt = 0;
+    while (1) {
+        ++$attempt;
+        eval { $run->(); };
+        my $error = $EVAL_ERROR;
+        if (!$error) {
+            return;
+        }
+        if ($attempt >= $MAX_ATTEMPTS) {
+            die "$error\n  ( ... after $MAX_ATTEMPTS repeated attempts)";
+        }
+        my $sleep = 2**$attempt;
+        warn "$error\n  ( ... trying again in $sleep seconds)";
+        sleep( $sleep );
+    }
 
     return;
 }
