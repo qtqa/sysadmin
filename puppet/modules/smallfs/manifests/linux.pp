@@ -9,7 +9,7 @@ class smallfs::linux {
         cwd => $qtqadir,
         creates => $imgfile,
         path => [ "/bin", "/usr/bin", "/sbin" ],
-        command => "
+        command => "/bin/sh -c '
 
     mkdir -p $mountpoint ;
     rm -f $imgfile.tmp &&
@@ -17,7 +17,7 @@ class smallfs::linux {
     yes | mkfs -t ext2 $imgfile.tmp &&
     mv -v $imgfile.tmp $imgfile
 
-        ",
+        '",
         logoutput => true,
     }
 
