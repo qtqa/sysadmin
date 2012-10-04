@@ -2,7 +2,7 @@ class armel_cross::ubuntu
 {
     # Everything depends on this
     Package {
-        require     =>  File["/etc/apt/sources.list.d/armel_cross-qtqa.list"],
+        require     =>  exec["apt-get update for armel_cross-qtqa"],
     }
 
     package {
