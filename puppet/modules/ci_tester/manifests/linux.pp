@@ -31,4 +31,8 @@ class ci_tester::linux inherits ci_tester::base {
     if $ci_tester::testcocoon_enabled {
         include testcocoon
     }
+
+    if $ci_tester::armel_cross_enabled {
+        include armel_cross
+    }
 }
