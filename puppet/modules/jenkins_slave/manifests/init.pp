@@ -1,6 +1,6 @@
 class jenkins_slave (
     $user = $baselayout::testuser,
-    $group = $baselayout::group,
+    $group = $baselayout::testgroup,
     $server,
     $set_online = true,
     $slave_name = $::hostname
