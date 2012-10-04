@@ -1,10 +1,15 @@
-class ccache::mac inherits ccache::unix
+class ccache::mac
 {
     include macports
 
     package { "ccache":
         provider    =>  'macports',
         ensure      =>  present,
+    }
+
+    exec { "/usr/bin/su $ccache::user -c \"/opt/local/bin/ccache -M 4G\" -":
+        unless => "/usr/bin/su $ccache::user -c \"/opt/local/bin/ccache -s | /usr/bin/egrep -q 'max cache size +4\\.0 Gbytes'\" -",
+        require => Package["ccache"],
     }
 
     if $ccache::user {

@@ -2,17 +2,14 @@ class ccache::unix
 {
     if $ccache::user {
         $su = $::operatingsystem ? {
-            Darwin => "/usr/bin/su",
             default => "/bin/su",
         }
 
         $ccache = $::operatingsystem ? {
-            Darwin => "/opt/local/bin/ccache",
             default => "/usr/bin/ccache",
         }
 
         $egrep = $::operatingsystem ? {
-            Darwin => "/usr/bin/egrep",
             default => "/bin/egrep",
         }
 
