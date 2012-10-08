@@ -88,13 +88,6 @@ node 'binaries.test.qt.nokia.com' inherits default {
     include simple_fileserver
 }
 
-# test results server
-node 'testr.test.qt.nokia.com' inherits default {
-    include puppet
-    include sshkeys
-    include testr
-}
-
 #====================== Solaris ===============================================
 
 # master nodes (those which have containers)
