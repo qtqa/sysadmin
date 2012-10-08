@@ -72,6 +72,7 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
             # for xcb qpa backend:
             "libx11-xcb-dev":                    ensure => installed;
+            "libxcb-glx0-dev":                   ensure => installed;
             "$libxcb_icccm_dev":                 ensure => installed;
             "libxcb-image0-dev":                 ensure => installed;
             "libxcb-keysyms1-dev":               ensure => installed;
