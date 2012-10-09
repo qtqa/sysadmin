@@ -51,19 +51,20 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         if $::lsbmajdistrelease >= 11 {
             package {
                 "libegl1-mesa-dev":                  ensure => installed;
-                "libgl1-mesa-dev":                   ensure => installed;
                 "libgles1-mesa-dev":                 ensure => installed;
                 "libgles2-mesa-dev":                 ensure => installed;
-                "libxrender-dev":                    ensure => installed;
 
                 # for qtwayland
                 "libwayland-dev":                    ensure => installed;
-                "libxcomposite-dev":                 ensure => installed;
-                "libffi-dev":                        ensure => installed;
             }
         }
 
         package {
+            "libgl1-mesa-dev":                   ensure => installed;
+            "libxrender-dev":                    ensure => installed;
+            "libxcomposite-dev":                 ensure => installed;
+            "libffi-dev":                        ensure => installed;
+
             "libgstreamer-plugins-base0.10-dev": ensure => installed;
             "libdbus-1-dev":                     ensure => installed;
             "libssl-dev":                        ensure => installed;
