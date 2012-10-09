@@ -24,6 +24,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         "libasound2-dev":   ensure => installed;
         "libbluetooth-dev": ensure => installed;
 
+        # for QtWidgets
+        "libxext-dev":      ensure => installed;
+
         # for some input drivers
         "libudev-dev":      ensure => installed;
 
