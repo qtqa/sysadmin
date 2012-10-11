@@ -8,7 +8,9 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
     # newer macs get it from xcode
     if ( $macosx_productversion_major == "10.5" ) or ( $macosx_productversion_major == "10.6" ) {
         package {
-            "git-core":     ensure => present;
+            "git-core":          ensure => present;
+            "perl5":             ensure => present;
+            "p5-libwww-perl":    ensure => present;
         }
     }
 
