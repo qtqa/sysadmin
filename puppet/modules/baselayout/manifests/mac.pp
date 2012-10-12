@@ -82,6 +82,17 @@ automatic login for that user.                                    \
         }
     }
 
+    exec { "disable system sleep timer":
+        command =>  "/usr/bin/pmset sleep 0",
+        unless  =>  "/bin/sh -c '/usr/bin/pmset -g | /usr/bin/egrep -q '[[:space:]]sleep[[:space:]]+0''",
+        user    =>  "root",
+    }
+    exec { "enable autorestart after power failure":
+        command =>  "/usr/bin/pmset autorestart 1",
+        unless  =>  "/bin/sh -c '/usr/bin/pmset -g | /usr/bin/egrep -q '[[:space:]]autorestart[[:space:]]+1''",
+        user    =>  "root",
+    }
+
     # Allow core dumps to work on Mac; see Technical Note TN2124 for details.
     # /cores must exist and be writable by an unprivileged user ...
     file { "/cores":
