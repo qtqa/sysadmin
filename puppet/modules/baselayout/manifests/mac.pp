@@ -93,6 +93,14 @@ automatic login for that user.                                    \
         user    =>  "root",
     }
 
+    if $baselayout::testuser {
+        exec { "disable $baselayout::testuser screensaver":
+            command =>  "/usr/bin/defaults -currentHost write com.apple.screensaver idleTime 0",
+            unless  =>  "/bin/sh -c '/usr/bin/defaults -currentHost read com.apple.screensaver idleTime | /usr/bin/grep -q '^0$''",
+            user    =>  "$baselayout::testuser",
+        }
+    }
+
     # Allow core dumps to work on Mac; see Technical Note TN2124 for details.
     # /cores must exist and be writable by an unprivileged user ...
     file { "/cores":
