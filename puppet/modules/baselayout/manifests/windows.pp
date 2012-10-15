@@ -103,5 +103,14 @@ class baselayout::windows inherits baselayout::base {
         type => 'dword',
         data => '0x00000000'
     }
+
+    # by default, Windows will pop up interactive crash dialogs, which blocks test suite
+    # execution if any test crashes; disable it
+    registry::value { "avoid interactive crash dialogs":
+        key => 'HKLM\Software\Microsoft\Windows\Windows Error Reporting',
+        value => 'ForceQueue',
+        type => 'dword',
+        data => '0x00000001'
+    }
 }
 
