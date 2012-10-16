@@ -9,9 +9,12 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
     if ( $macosx_productversion_major == "10.5" ) or ( $macosx_productversion_major == "10.6" ) {
         package {
             "git-core":          ensure => present;
-            "perl5":             ensure => present;
-            "p5-libwww-perl":    ensure => present;
         }
+    }
+
+    package {
+        "perl5":             ensure => present;
+        "p5-libwww-perl":    ensure => present;
     }
 
     # 10.6: Re-enable LCD font smoothing for some monitors
