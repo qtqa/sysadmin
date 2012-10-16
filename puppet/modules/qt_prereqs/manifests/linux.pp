@@ -50,6 +50,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
         if $::lsbmajdistrelease >= 11 {
             package {
+                # for accessibility
+                "libatspi2.0-dev":                   ensure => installed;
+
                 "libegl1-mesa-dev":                  ensure => installed;
                 "libgles1-mesa-dev":                 ensure => installed;
                 "libgles2-mesa-dev":                 ensure => installed;
