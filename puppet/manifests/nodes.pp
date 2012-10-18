@@ -112,7 +112,6 @@ node 'solaris-container.test.qt-project.org' inherits default {
     class { 'baselayout': testuser => 'pulse' }
     include pulseagent
     include puppet
-    include qadungeon
     include ccache
     include sshkeys
     include qt_prereqs

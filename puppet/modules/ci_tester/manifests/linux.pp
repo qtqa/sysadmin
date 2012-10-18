@@ -1,5 +1,4 @@
 class ci_tester::linux inherits ci_tester::base {
-    include qadungeon
     include ccache
     include crosscompilers
     include vmware_tools
