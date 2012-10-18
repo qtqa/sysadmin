@@ -7,12 +7,6 @@ class ci_tester(
     # IP address of qt-test-server network test server
     $network_test_server_ip = $ci_tester::params::network_test_server_ip,
 
-    # Use a Pulse agent?
-    $pulseagent_enabled = $ci_tester::params::pulseagent_enabled,
-
-    # Use a custom, shorter Pulse agent work dir?
-    $pulseagent_short_datadir = $ci_tester::params::pulseagent_short_datadir,
-
     # Jenkins parameters
     $jenkins_enabled = $ci_tester::params::jenkins_enabled,
     $jenkins_server = $ci_tester::params::jenkins_server,

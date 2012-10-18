@@ -2,14 +2,6 @@ class ci_tester::params {
     $testuser = 'qt'
 
     $network_test_server_ip = undef
-    $pulseagent_enabled = false
-
-    if ($::operatingsystem == 'Ubuntu') and ($::operatingsystemrelease == '10.04') {
-        $pulseagent_short_datadir = false
-    } else {
-        $pulseagent_short_datadir = true
-    }
-
     $jenkins_enabled = false
     $jenkins_server = undef
     $jenkins_slave_name = $::hostname

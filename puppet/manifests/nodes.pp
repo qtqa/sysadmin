@@ -13,7 +13,6 @@ node 'snowleopard-packager.test.qt-project.org' inherits default {
     class { 'baselayout': testuser => 'pulseagent' }
     include qt_prereqs
     include hosts
-    include pulseagent
     include ccache
     include qadungeon
     include puppet
@@ -60,27 +59,6 @@ node 'windows7-msvc2010-x86.test.qt-project.org' inherits default {
 
 #====================== Servers ===============================================
 
-node 'pulse.test.qt.nokia.com' inherits default {
-    # disable git cache because multiple gits will be running concurrently
-    $disable_git_cache = true
-
-    include vmware_tools
-    include baselayout
-    include sshkeys
-    include pulseserver
-    include pulseserver_qadungeon
-
-    include puppet
-}
-
-node 'integrator.test.qt.nokia.com' inherits default {
-    include baselayout
-    include sshkeys
-
-    include puppet
-    include qtintegration
-}
-
 # simple file server
 node 'binaries.test.qt.nokia.com' inherits default {
     include puppet
@@ -100,7 +78,7 @@ node 'solaris-master.test.qt-project.org' inherits default {
 
     # Note that only the master can install packages;
     # that's why the master has qt_prereqs even though it doesn't do builds in
-    # Pulse.  Also, this is useful anyway because people manually do builds on
+    # CI.  Also, this is useful anyway because people manually do builds on
     # the master sometimes.
     include qt_prereqs
     include hosts
@@ -110,7 +88,6 @@ node 'solaris-master.test.qt-project.org' inherits default {
 node 'solaris-container.test.qt-project.org' inherits default {
     $zone = true
     class { 'baselayout': testuser => 'pulse' }
-    include pulseagent
     include puppet
     include ccache
     include sshkeys

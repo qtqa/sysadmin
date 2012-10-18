@@ -1,6 +1,0 @@
-# Redirect all requests received on lighttpd port to port 8080.
-# This is a simple way of allowing Pulse server to be accessed by port 80
-# without having to run as root or mess around with xinetd or iptables
-# wrappers.
-url.redirect               = ( "^(.*)$" => "http://<%= fqdn %>:8080$1" )
-

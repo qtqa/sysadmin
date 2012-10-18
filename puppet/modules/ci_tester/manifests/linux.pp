@@ -15,12 +15,6 @@ class ci_tester::linux inherits ci_tester::base {
 
     include testusers
 
-    if $ci_tester::pulseagent_enabled {
-        class { "pulseagent":
-            short_datadir => $ci_tester::pulseagent_short_datadir
-        }
-    }
-
     if $ci_tester::icecc_enabled {
         class { "icecc":
             scheduler_host => $ci_tester::icecc_scheduler_host

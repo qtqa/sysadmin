@@ -1,7 +1,0 @@
-#!/bin/sh
-# production version of the log publish hook.
-# Note, ssh username must be configured in ~/.ssh/config manually
-exec $HOME/bin/publish_log_hook \
-    --ssh-dest-host testresults.qt-project.org \
-    --ssh-dest-path /var/www/testresults/ci \
-    "$@"
