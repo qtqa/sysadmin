@@ -14,3 +14,11 @@ ReadmeName /include/ci-fancy-index-footer.html
     AddEncoding gzip .gz
     AddCharset utf-8 .gz
 </FilesMatch>
+
+<FilesMatch "\.json\.gz$">
+    # Same applies for gzipped json, but it's a different mime type.
+    SetEnv no-gzip 1
+    AddType application/json .gz
+    AddEncoding gzip .gz
+    AddCharset utf-8 .gz
+</FilesMatch>
