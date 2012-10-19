@@ -1,5 +1,5 @@
 class distcc(
-    $hosts = ['localhost']
+    $hosts = "localhost"
 ) {
     case $::operatingsystem {
         Darwin:     { include distcc::mac }

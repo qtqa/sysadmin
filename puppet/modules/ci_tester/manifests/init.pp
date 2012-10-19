@@ -19,7 +19,9 @@ class ci_tester(
     $icecc_scheduler_host = $ci_tester::params::icecc_scheduler_host,
 
     # local mirror of codereview.qt-project.org
-    $qt_gerrit_mirror = $ci_tester::params::qt_gerrit_mirror
+    $qt_gerrit_mirror = $ci_tester::params::qt_gerrit_mirror,
+
+    $distcc_hosts = $ci_tester::params::distcc_hosts
 
 ) inherits ci_tester::params {
     case $::kernel {
