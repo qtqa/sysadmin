@@ -4,6 +4,10 @@ class baselayout::ubuntu inherits baselayout::linux {
     # This logic only applies to Ubuntu 10.04, where we use KDE.
     #
     if $::lsbmajdistrelease < 11 {
+        package {
+            "libgtk2.0-dev":   ensure => installed;
+        }
+
         file {
             "/etc/X11/default-display-manager":
                 owner   =>  "root",
