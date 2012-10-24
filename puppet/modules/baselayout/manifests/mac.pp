@@ -92,6 +92,11 @@ automatic login for that user.                                    \
         unless  =>  "/bin/sh -c '/usr/bin/pmset -g | /usr/bin/egrep -q '[[:space:]]autorestart[[:space:]]+1''",
         user    =>  "root",
     }
+    exec { "disable display sleep timer":
+        command =>  "/usr/bin/pmset displaysleep 0",
+        unless  =>  "/bin/sh -c '/usr/bin/pmset -g | /usr/bin/egrep -q '[[:space:]]displaysleep[[:space:]]+0''",
+        user    =>  "root",
+    }
 
     if $baselayout::testuser {
         exec { "disable $baselayout::testuser screensaver":
