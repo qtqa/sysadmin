@@ -72,7 +72,7 @@ define windows::exe_package(
     if $url {
         $safename = regsubst($name, "[^a-zA-Z0-9]", "-", "G")
         $real_install_binary = "$tempdir\\$safename-installer.exe"
-        $fetch_cmd = "$curl \"$url\" -o \"$real_install_binary\" &&"
+        $fetch_cmd = "$curl \"$url\" -L -o \"$real_install_binary\" &&"
     } else {
         $real_install_binary = $install_binary
         $fetch_cmd = ""
