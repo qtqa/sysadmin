@@ -19,43 +19,6 @@ node 'snowleopard-packager.test.qt-project.org' inherits default {
     include sshkeys
 }
 
-# These hostnames will soon become deprecated.
-node 'lion-tester.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-node 'snowleopard-tester.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-
-#====================== Linux =================================================
-# These hostnames will soon become deprecated.
-node 'linux-tester.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-node 'ubuntu1004-x86.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-node 'ubuntu1110-x64.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-node 'ubuntu1110-x86.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-node 'ubuntu1204-x64.test.qt-project.org' inherits default {
-    include ci_tester
-}
-
-#====================== Windows ===============================================
-# This hostname will soon become deprecated.
-node 'windows7-msvc2010-x86.test.qt-project.org' inherits default {
-    include ci_tester
-}
 
 #====================== Servers ===============================================
 
@@ -93,12 +56,6 @@ node 'solaris-container.test.qt-project.org' inherits default {
     include sshkeys
     include qt_prereqs
     include hosts
-}
-
-#====================== Test servers =========================================
-# This hostname will soon become deprecated.
-node 'ci.qt-project.org', 'ci-dev.qt-project.org' inherits default {
-    include ci_server
 }
 
 #====================== Test machines ========================================
