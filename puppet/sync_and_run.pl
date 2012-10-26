@@ -436,9 +436,7 @@ sub run
         modify_env_from_rdns( \%ENV );
     }
 
-    for my $gitdir ($DIR, "$DIR/private") {
-        update_git_dir( $gitdir );
-    }
+    update_git_dir( $DIR );
 
     run_puppet( );
 

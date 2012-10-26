@@ -56,24 +56,4 @@ class puppet::windows {
             \
         "
     }
-
-    # On Nokia LAN, fetch the private overlay.
-    if $::domain =~ /\.nokia\.com\b/ {
-        $privatedir = "$sysadmindir\\puppet\\private"
-        exec { "git clone private sysadmin":
-            # Note: we cannot use `--branch' option to `git clone' here, because we are not
-            # guaranteed to have new enough git everywhere :-(
-            command     =>  "$cmd /C \
-    \
-    rd /S /Q $privatedir & \
-    git clone git://scm.dev.nokia.troll.no/qa-dungeon/sysadmin.git $privatedir && \
-    cd $privatedir && \
-    git checkout -b private origin/private && \
-    echo 1 > .git\\PUPPET_CHECKOUT_COMPLETE \
-    \
-            ",
-            require     =>  File[$sysadmindir],
-            creates     =>  "$privatedir/.git/PUPPET_CHECKOUT_COMPLETE",
-        }
-    }
 }
