@@ -22,21 +22,11 @@ class puppet::unix {
     $qtqadir = "/var/qtqa"
     $sysadmindir = "$qtqadir/sysadmin"
 
-    file { $qtqadir:
-        ensure  =>  directory,
-    }
-
-    # NOTE: if you do not have access to scm.dev.nokia.troll.no (e.g. you are
-    # not on Nokia LAN), then perform this step manually, using the repo that
-    # you _do_ have access to
-    exec { "git clone sysadmin":
-        command     =>  "$git clone git://scm.dev.nokia.troll.no/qa-dungeon/sysadmin.git $sysadmindir",
-        require     =>  File[$qtqadir],
-        creates     =>  "$sysadmindir/puppet",
-    }
-
-    file { $sysadmindir:
-        require     =>  Exec["git clone sysadmin"],
+    file {
+        $qtqadir:
+            ensure  =>  directory;
+        $sysadmindir:
+            ensure  =>  directory;
     }
 
     $puppetrun = $::operatingsystem ? {
