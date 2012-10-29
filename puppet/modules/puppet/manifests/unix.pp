@@ -3,7 +3,7 @@ class puppet::unix {
     # added to PATH
     $env = $::operatingsystem ? {
         Solaris =>  "/usr/bin/env PATH=\${PATH}:/opt/csw/bin:/usr/local/bin",
-        Darwin  =>  "/usr/bin/env PATH=\${PATH}:/opt/local/bin:/usr/local/bin",
+        Darwin  =>  "/usr/bin/env PATH=/opt/local/bin:/usr/local/bin:\${PATH}",
         default =>  "",
     }
 
