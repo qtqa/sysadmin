@@ -1,5 +1,4 @@
 # Install (or uninstall, reinstall) zip package
-include sevenzip
 
 define windows::zip_package(
 
@@ -35,6 +34,8 @@ define windows::zip_package(
     # case the zip is downloaded
     $zip_archive = undef
 ) {
+    include sevenzip
+
     $msysbin = $::architecture ? {
         x64     => 'c:\Program Files (x86)\Git\bin',
         default => 'c:\Program Files\Git\bin'
@@ -71,6 +72,7 @@ $fetch_cmd \
 \"",
 
         logoutput => true,
-        timeout => 3600
+        timeout => 3600,
+        require => Class['sevenzip']
     }
 }
