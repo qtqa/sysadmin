@@ -106,6 +106,12 @@ automatic login for that user.                                    \
         }
     }
 
+    exec { "set correct locale":
+        command =>  "/usr/bin/defaults write -g AppleLocale en_US",
+        unless  =>  "/bin/sh -c '/usr/bin/defaults read -g AppleLocale | /usr/bin/grep -q 'en_US''",
+        user    =>  "root",
+    }
+
     # Allow core dumps to work on Mac; see Technical Note TN2124 for details.
     # /cores must exist and be writable by an unprivileged user ...
     file { "/cores":
