@@ -184,7 +184,7 @@ class jenkins_server::debian inherits jenkins_server
     }
 
     # generate a warning each time we are run until this key is set up.
-    $pubkey = 'AAAAB3NzaC1yc2EAAAABIwAAAQEAyjPYlQyr2HIvREjuTk3kqY7vLGa6C66F8ykChSw7tEtEUFC6vFByrmL8AiaWrLaEuHXsh1adsoOjwxi7UVBJML05kGXo0B6HyVhM+2NuixyBTQQrQUZaWX56aWnSlDKfJacVEVQZlXwk2bpDX9wbpJ5yr/b95rnOz327eU1cscReJT4GZ79lOMtYdMUYssh6s9DEBDPl3iqELhTDMOaWpXihqrVrbI9PWngo1muQKfBTeTuTk9/fLFI+BwXRv6iqmI5DdWbmEfQqeGDgBfh6XR2Wz6GjRQX2IHZIPeT9VxgSohKX41F4qjeYGwOY2iSFwFviiy+hugAJMuJR3lMzUQ=='
+    $pubkey = 'AAAAB3NzaC1yc2EAAAADAQABAAABAQCx2Xb8YE0AMFF/BEODFQgxVZmJdR5rTukX5PwDweJLik3YUCl9Ja6DMgBCSjuJWSPNlFnJoAUQXE2J/zOcp0RK9n1m1nVcraw5kuHDrnocuL6e+e9OHyBaYMoBFo7VYZgg/pBEuwL1Spn+KYFP60gbZm5aQw81t/jcwrVn60YtbGypsNzLd97knY7eamBEhId9B4CVF79/deUa+SoNiZ46hO7mNtXmTiJBPc4ilsm3Fy99sO5VSY/wJTsiltRWaWxnJrS2Ww29VfPzJksAo4c5S6gBnOLPIs/TLMwYSCEbUnwn/NPE3WGG/psvhy0X1Y/Acjtl/inxhoOVIF1yt+2J'
 
     exec { "warn about jenkins ssh key":
         command => "/bin/echo 'WARNING: manual installation of Jenkins ssh key is required, matching public key: $pubkey'",
