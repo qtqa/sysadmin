@@ -58,6 +58,11 @@ define windows::zip_package(
         $fetch_cmd = ""
     }
 
+    $real_version_expression = $version_expression ? {
+        undef => "\\b$version\\b",
+        default => $version_expression
+    }
+
     exec { "install $name $version to $path":
 
         command => "$cmd /C \"\
