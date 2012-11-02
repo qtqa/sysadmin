@@ -48,16 +48,21 @@
 REPO="$1"
 if [ "x$REPO" = "x" ]; then
     {
-        echo "Usage: $(basename $0) git://some/git/repo"
+        echo "Usage: $(basename $0) git://some/git/repo [http://some/input/location]"
         echo ""
         echo "Set up this machine to be managed using the puppet config in the given"
-        echo "git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin.git)"
+        echo "git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin.git) and optional"
+        echo "http location for downloads (e.g., http://ci-files01-hki.ci.local/input/mac)"
     } 1>&2
     exit 2
 fi
 
+INPUT="$2"
+if [ "x$INPUT" = "x" ]; then
+   INPUT=http://ci-files01-hki.ci.local/input/mac
+fi
+
 WORKDIR=$HOME/bootstrap_tmp
-INPUT=http://bq-qastore.apac.nokia.com/public/input/mac
 
 set -e
 #set -x
@@ -68,8 +73,12 @@ cd $WORKDIR
 # Ensures xcode is installed.
 # xcode is required for using macports.
 if ! gcc -v > /dev/null 2>&1; then
-    echo install xcode first 1>&2
-    exit 2
+    echo Installing xcode...
+    curl $INPUT/installxcode_421_lion.dmg -o xcode.dmg
+    hdiutil attach ./xcode.dmg
+    installer -pkg /Volumes/Install\ Xcode/InstallXcodeLion.pkg -target /
+    hdiutil detach /Volumes/Install\ Xcode
+    installer -pkg /Applications/Install\ Xcode.app/Contents/Resources/Xcode.mpkg -target /
 else
     echo xcode is already installed
 fi
@@ -77,8 +86,9 @@ fi
 # Ensures macports is installed.
 # macports is required for installing puppet.
 if ! test -e /opt/local/bin/port; then
-    echo install macports first 1>&2
-    exit 2
+    curl $INPUT/MacPorts-2.1.2-10.7-Lion.pkg -o macports.pkg
+    installer -pkg ./macports.pkg -target /
+    /opt/local/bin/port -v selfupdate
 else
     echo macports is already installed
 fi
@@ -89,6 +99,22 @@ if ! test -e /opt/local/bin/puppet; then
     /opt/local/bin/port install puppet
 else
     echo puppet is already installed
+fi
+
+# Ensures git is installed.
+if ! test -e /opt/local/bin/git; then
+    echo Installing git...
+    /opt/local/bin/port install git-core
+else
+    echo git is already installed
+fi
+
+# Ensures perl is installed.
+if ! test -e /opt/local/bin/perl; then
+    echo Installing perl...
+    /opt/local/bin/port install perl5
+else
+    echo perl is already installed
 fi
 
 if ! test -d /var/qtqa/sysadmin; then
