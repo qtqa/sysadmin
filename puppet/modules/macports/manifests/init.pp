@@ -15,9 +15,9 @@ class macports {
     #*
     # Put macports apps into PATH by default
     #*
-    file { "/etc/paths.d/macports":
+    file { "/etc/profile.d/macports.sh":
         ensure  =>  present,
-        content =>  "/opt/local/bin",
+        source  =>  "puppet:///modules/macports/macports.sh",
     }
 }
 
