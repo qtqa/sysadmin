@@ -112,5 +112,11 @@ class baselayout::windows inherits baselayout::base {
         type => 'dword',
         data => '0x00000001'
     }
+
+    # disable indexing service, which may lock files when indexing
+    service { "WSearch":
+        ensure => 'stopped',
+        enable => false,
+    }
 }
 
