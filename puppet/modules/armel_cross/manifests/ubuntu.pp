@@ -9,6 +9,7 @@ class armel_cross::ubuntu
         "mesa-dev-armel-cross":     ensure => '7.11.2-0qtqa7';          # for QtGui
         "openssl-dev-armel-cross":  ensure => '1.0.0e-0qtqa1';          # for QtNetwork
         "libedit-dev-armel-cross":  ensure => '2.11-20080614-2.2qtqa5'; # for QtJsonDb
+        "libicu-dev-armel-cross":   ensure => '49.1.2-0qtqa1';          # for QtWebkit
     }
 
     package { "g++-arm-linux-gnueabi":
