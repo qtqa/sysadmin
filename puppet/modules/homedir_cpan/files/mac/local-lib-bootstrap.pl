@@ -121,8 +121,8 @@ sub main
 
     chdir( $tempdir ) || die "chdir $tempdir: $!";
 
-    print "Downloading $URL to $tempdir/$TARBALL ...\n";
-    fetch( $URL, "$tempdir/$TARBALL" );
+    print "Downloading $URL to $TARBALL ...\n";
+    fetch( $URL, "$TARBALL" );
 
     print "Extracting and building ...\n";
     system_or_die( 'tar', '-xvzf', $TARBALL );

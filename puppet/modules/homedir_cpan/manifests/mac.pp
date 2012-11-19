@@ -1,4 +1,8 @@
 class homedir_cpan::mac {
+    # Include qt_prereqs because Package["p5-libwww-perl"] is defined there
+    # and puppet tests require that module have direct includes for dependencies
+    include qt_prereqs
+
     $home = "/Users/$homedir_cpan::user"
 
     # Details about the local::lib version we'll install
@@ -26,15 +30,13 @@ class homedir_cpan::mac {
         }
 
         exec { "install local::lib for $homedir_cpan::user":
-            command     => "/usr/bin/sudo -u $homedir_cpan::user -H -i /bin/sh -c '
-
-    $LOCALLIB_BOOTSTRAP $LOCALLIB_VERSION >>$LOCALLIB_LOG 2>&1 && touch $LOCALLIB_MARKER
-
-            '",
-
+            command     => "/usr/bin/sudo -u $homedir_cpan::user -H -i /bin/sh -c '$LOCALLIB_BOOTSTRAP $LOCALLIB_VERSION >>$LOCALLIB_LOG 2>&1 && touch $LOCALLIB_MARKER'",
             creates     => $LOCALLIB_MARKER,
             logoutput   => true,
-            require     => File[ $LOCALLIB_BOOTSTRAP ],
+            require     => [
+                File[ $LOCALLIB_BOOTSTRAP ],
+                Package["p5-libwww-perl"],
+            ],
         }
     }
 }
