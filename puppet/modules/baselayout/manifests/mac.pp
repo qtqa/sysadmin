@@ -135,12 +135,12 @@ automatic login for that user.                                    \
         enable => true,
     }
 
-    if ($macosx_productversion_major == "10.7") {
+    if ($macosx_productversion_major >= "10.7") {
 
         # Make sure java is installed (OSX 10.7 only; earlier have it by default)
-        $javadmg = "JavaForMacOSX10.7.dmg"
-        $javavol = "/Volumes/Java for Mac OS X 10.7"
-        $javapkg = "$javavol/JavaForMacOSX10.7.pkg"
+        $javadmg = "JavaForOSX.dmg"
+        $javavol = "/Volumes/Java for OS X 2012-006"
+        $javapkg = "$javavol/JavaForOSX.pkg"
 
         exec { "install java":
             # note, initial detach is in case the volume was mounted from a previous attempt
