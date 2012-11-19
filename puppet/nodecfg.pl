@@ -149,6 +149,12 @@ my %INTERACTIVE = (
                     ],
                 },
 
+                vmware_enabled => {
+                    doc => qq{This host is VMWare virtual machine?},
+                    type => 'bool',
+                    default => 'y',
+                },
+
                 (($OSNAME =~ m{linux}i) ?
                     (icecc_enabled => {
                         doc => 'Use icecream distributed compilation tool?',

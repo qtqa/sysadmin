@@ -7,6 +7,11 @@ class ci_tester::base {
     include puppet
     include sshkeys
     include icu4c
+
+    if $ci_tester::vmware_enabled {
+        include vmware_deployment
+    }
+
     class { 'qt_prereqs': network_test_server_ip => $ci_tester::network_test_server_ip }
 
     if $ci_tester::jenkins_enabled {

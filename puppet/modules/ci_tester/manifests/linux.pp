@@ -1,7 +1,10 @@
 class ci_tester::linux inherits ci_tester::base {
     include ccache
     include crosscompilers
-    include vmware_tools
+
+    if $ci_tester::vmware_enabled {
+        include vmware_tools
+    }
 
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan

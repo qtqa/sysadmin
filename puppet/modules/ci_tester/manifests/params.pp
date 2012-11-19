@@ -6,6 +6,8 @@ class ci_tester::params {
     $jenkins_server = undef
     $jenkins_slave_name = $::hostname
 
+    $vmware_enabled = true
+
     $icecc_enabled = true
     $icecc_scheduler_host = ''
 

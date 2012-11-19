@@ -12,6 +12,9 @@ class ci_tester(
     $jenkins_server = $ci_tester::params::jenkins_server,
     $jenkins_slave_name = $ci_tester::params::jenkins_slave_name,
 
+    # Deploy VMWare related modules as well?
+    $vmware_enabled = $ci_tester::params::vmware_enabled,
+
     # Use icecream distributed compilation tool?
     $icecc_enabled = $ci_tester::params::icecc_enabled,
 
