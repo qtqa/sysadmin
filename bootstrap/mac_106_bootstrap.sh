@@ -51,13 +51,20 @@ if [ "x$REPO" = "x" ]; then
         echo "Usage: $(basename $0) git://some/git/repo"
         echo ""
         echo "Set up this machine to be managed using the puppet config in the given"
-        echo "git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin.git)"
+        echo "git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin.git) and optional"
+        echo "http location for downloads (e.g., http://ci-files01-hki.ci.local/input/mac)"
     } 1>&2
     exit 2
 fi
 
+INPUT="$2"
+if [ "x$INPUT" = "x" ]; then
+   INPUT=http://ci-files01-hki.ci.local/input/mac
+fi
+
 WORKDIR=$HOME/bootstrap_tmp
-INPUT=http://bq-qastore.apac.nokia.com/public/input/mac
+OS_VERSION=$(/usr/bin/sw_vers -productVersion)
+INSTALLER_UDPATE=$(pkgutil --pkgs | grep "softwareinstallerupdate.1.0")
 
 set -e
 #set -x
@@ -65,14 +72,28 @@ set -e
 mkdir -p $WORKDIR
 cd $WORKDIR
 
+# Ensures Apple Software Installer Update 1.0 is installed.
+# Required for XCode installation at least on OS X 10.6.8
+if [ $OS_VERSION = "10.6.8" ] && [ "x$INSTALLER_UDPATE" = "x" ]; then
+    echo Installing 'Apple Software Installer Update 1.0'...
+    curl $INPUT/AppleSoftwareInstallerUpdate.dmg -o installerUpdate.dmg
+    hdiutil attach ./installerUpdate.dmg
+    installer -pkg /Volumes/Apple\ Software\ Installer\ Update/AppleSoftwareInstallerUpdate.pkg -target /
+    hdiutil detach /Volumes/Apple\ Software\ Installer\ Update
+    shutdown -r +1  "Rebooting to finish InstallerUpdate. Run the script again after reboot to complete installations."
+    exit 1
+else
+    echo InstallerUpdate is already installed
+fi
+
 # Ensures xcode is installed.
 # xcode is required for using macports.
 if ! gcc -v > /dev/null 2>&1; then
     echo Installing xcode...
-    curl $INPUT/xcode3210a432.dmg -o xcode.dmg
+    curl $INPUT/xcode_3.2.6_and_ios_sdk_4.3.dmg -o xcode.dmg
     hdiutil attach ./xcode.dmg
-    installer -pkg /Volumes/Xcode/Xcode.mpkg -target /
-    hdiutil detach /Volumes/Xcode/
+    installer -pkg /Volumes/Xcode\ and\ iOS\ SDK/Xcode\ and\ iOS\ SDK.mpkg -target /
+    hdiutil detach /Volumes/Xcode\ and\ iOS\ SDK
 else
     echo xcode is already installed
 fi
@@ -81,31 +102,12 @@ fi
 # macports is required for installing puppet.
 if ! test -e /opt/local/bin/port; then
     echo Installing macports...
-    curl $INPUT/MacPorts-1.8.2-10.6-SnowLeopard.dmg -o macports.dmg
-    hdiutil attach ./macports.dmg
-    installer -pkg /Volumes/MacPorts-1.8.2/MacPorts-1.8.2.pkg -target /
-    hdiutil detach /Volumes/MacPorts-1.8.2
-
-    cat >/opt/local/etc/macports/sources.conf <<EOF
-rsync://rsync.macports.org/release/ports/ [default]
-EOF
-
+    curl $INPUT/MacPorts-2.1.2-10.6-SnowLeopard.pkg -o macports.pkg
+    installer -pkg ./macports.pkg -target /
+    /opt/local/bin/port -v selfupdate
     /opt/local/bin/port sync
 else
     echo macports is already installed
-fi
-
-# Ensures java development headers are installed.
-# This used to be a part of OSX, but now has to be installed separately,
-# and it is needed by some software in macports.
-# See https://trac.macports.org/ticket/26939
-if ! test -e /System/Library/Frameworks/JavaVM.framework/Headers/jni.h; then
-    curl $INPUT/javadeveloper_10.6_10m3261.dmg -o javadev.dmg
-    hdiutil attach ./javadev.dmg
-    installer -pkg "/Volumes/Java Developer/JavaDeveloper.pkg" -target /
-    hdiutil detach "/Volumes/Java Developer"
-else
-    echo Java development headers are already installed
 fi
 
 # Ensures puppet is installed.
@@ -116,6 +118,7 @@ else
     echo puppet is already installed
 fi
 
+# Encures git is installed
 if ! test -e /opt/local/bin/git; then
     echo Installing git...
     # git was renamed to git-core in macports; allow for either name
@@ -126,6 +129,14 @@ if ! test -e /opt/local/bin/git; then
     fi
 else
     echo git is already installed
+fi
+
+# Ensure perl is installed
+if ! test -e /opt/local/bin/perl; then
+    echo Installing perl...
+    /opt/local/bin/port install perl5
+else
+    echo perl is already installed
 fi
 
 if ! test -d /var/qtqa/sysadmin; then
