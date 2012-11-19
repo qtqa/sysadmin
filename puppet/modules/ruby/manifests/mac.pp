@@ -1,6 +1,6 @@
 class ruby::mac {
     # Use ruby from macports
-    include macports
+    require macports
 
     package { "ruby":
         ensure => installed,

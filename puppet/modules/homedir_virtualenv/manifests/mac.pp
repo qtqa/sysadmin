@@ -1,5 +1,5 @@
 class homedir_virtualenv::mac {
-    include macports
+    require macports
 
     file { "/etc/profile.d/virtualenv-python.sh":
         ensure  =>  present,

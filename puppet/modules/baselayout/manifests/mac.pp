@@ -47,7 +47,7 @@ automatic login for that user.                                    \
             source  =>  "puppet:///modules/baselayout/mac/profile.d/99homepath.sh",
             require =>  File["/etc/profile.d"],
         ;
-        
+
         "/etc/syslog.conf":
             ensure      =>  present,
             source      =>  "puppet:///modules/baselayout/mac/syslog.conf",
@@ -184,7 +184,8 @@ automatic login for that user.                                    \
         package { "sudo":
             ensure => installed,
             provider => 'macports',
-            before => Exec["Ensure sudoers.d is enabled"]
+            before => Exec["Ensure sudoers.d is enabled"],
+            require => Exec["Sync macport trees"],
         }
 
         # make sure 'sudo' always invokes this sudo

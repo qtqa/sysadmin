@@ -1,6 +1,6 @@
 class ccache::mac
 {
-    include macports
+    require macports
 
     package { "ccache":
         provider    =>  'macports',

@@ -1,6 +1,6 @@
 class cmake::mac {
     # Use cmake from macports
-    include macports
+    require macports
 
     package { "cmake":
         ensure => installed,

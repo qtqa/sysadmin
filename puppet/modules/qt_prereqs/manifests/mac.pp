@@ -1,5 +1,5 @@
 class qt_prereqs::mac inherits qt_prereqs::unix {
-    include macports
+    require macports
 
     # Ensure some packages via macports.
     Package { provider => 'macports' }
