@@ -1,5 +1,7 @@
 # Install (or uninstall, reinstall) zip package
-
+#
+# Major caveat: $path must be unique for installed package, because uninstallation is simply done as 'rd /S /Q $path'
+# For example: Even your archive contains folder 'perl', you still should install to $path such as "c:\perl"
 define windows::zip_package(
 
     # URL of the .zip archive to be downloaded and installed;
@@ -52,7 +54,7 @@ define windows::zip_package(
     if $url {
         $safename = regsubst($name, "[^a-zA-Z0-9]", "-", "G")
         $real_zip_archive = "$tempdir\\$safename-archive.zip "
-        $fetch_cmd = "$curl \"$url\" -o \"$real_zip_archive\" &&"
+        $fetch_cmd = "$curl \"$url\" -L -o \"$real_zip_archive\" &&"
     } else {
         $real_zip_archive = $zip_archive
         $fetch_cmd = ""
