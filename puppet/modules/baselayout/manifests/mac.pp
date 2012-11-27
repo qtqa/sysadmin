@@ -193,5 +193,23 @@ automatic login for that user.                                    \
             require => Package["sudo"]
         }
     }
+
+    $screenresolutionpkg = "screenresolution.pkg"
+    exec { "install screenresolution":
+        command     =>  "/bin/sh -c '
+
+                curl -O \"$input/mac/$screenresolutionpkg\"         &&
+                installer -pkg \"$screenresolutionpkg\" -target /   &&
+                rm -f \"./$screenresolutionpkg\"
+
+            '",
+            creates     =>  "/usr/local/bin/screenresolution",
+    }
+    exec { "change screen resolution":
+        command     => "/usr/local/bin/screenresolution set 1280x1024x32@0",
+        unless      => "/bin/sh -c '/usr/local/bin/screenresolution get 2>&1 | /usr/bin/grep -q '1280x1024''",
+        user        => root,
+        require     => Exec["install screenresolution"],
+    }
 }
 
