@@ -55,18 +55,19 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
         }
 
         exec { "$name login item":
-            command => "/usr/bin/sudo -u $user /bin/sh -c \" \
+            command => "/usr/bin/osascript -e \
                         \
-                        defaults write loginwindow AutoLaunchedApplicationDictionary -array-add \
-                        '<dict><key>Hide</key><false/><key>Path</key><string>/Users/$user/startup-$name.command</string></dict>' \
+                        'tell app \"System Events\" to make login item at end with properties \
+                        {path:\"/Users/$user/startup-$name.command\", hidden:false, name:\"startup-$name.command\"}' \
                         \
-            \"",
-            unless  => "/usr/bin/sudo -u $user /bin/sh -c \" \
+            ",
+            unless  => "/usr/bin/osascript -e \
                         \
-                        defaults read loginwindow AutoLaunchedApplicationDictionary | grep -q /Users/$user/startup-$name.command
+                        'tell app \"System Events\" to get the name of every login item' | grep -q startup-$name.command \
                         \
-            \"",
+            ",
             logoutput => true,
+            user => $user,
             require => File["/Users/$user/startup-$name.command"],
         }
     }
