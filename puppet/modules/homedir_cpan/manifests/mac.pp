@@ -30,7 +30,7 @@ class homedir_cpan::mac {
         }
 
         exec { "install local::lib for $homedir_cpan::user":
-            command     => "/usr/bin/sudo -u $homedir_cpan::user -H -i /bin/sh -c '$LOCALLIB_BOOTSTRAP $LOCALLIB_VERSION >>$LOCALLIB_LOG 2>&1 && touch $LOCALLIB_MARKER'",
+            command     => "/usr/bin/sudo -u $homedir_cpan::user -H -i /bin/sh -c '\"$LOCALLIB_BOOTSTRAP $LOCALLIB_VERSION >>$LOCALLIB_LOG 2>&1\" && touch $LOCALLIB_MARKER'",
             creates     => $LOCALLIB_MARKER,
             logoutput   => true,
             require     => [
