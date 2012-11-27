@@ -104,12 +104,11 @@ automatic login for that user.                                    \
             unless  =>  "/bin/sh -c '/usr/bin/defaults -currentHost read com.apple.screensaver idleTime | /usr/bin/grep -q '^0$''",
             user    =>  "$baselayout::testuser",
         }
-    }
-
-    exec { "set correct locale":
-        command =>  "/usr/bin/defaults write -g AppleLocale en_US",
-        unless  =>  "/bin/sh -c '/usr/bin/defaults read -g AppleLocale | /usr/bin/grep -q 'en_US''",
-        user    =>  "root",
+        exec { "set correct locale":
+            command =>  "/usr/bin/defaults write -g AppleLocale en_US",
+            unless  =>  "/bin/sh -c '/usr/bin/defaults read -g AppleLocale | /usr/bin/grep -q 'en_US''",
+            user    =>  "$baselayout::testuser",
+        }
     }
 
     # Allow core dumps to work on Mac; see Technical Note TN2124 for details.
