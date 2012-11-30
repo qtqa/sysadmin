@@ -4,10 +4,8 @@ class strawberryperl::windows(
     $version = '5.14.2.1',
     $path = 'C:\strawberry'
 ) {
-    $bits = $::architecture ? {
-        x64 => "64bit",
-        default => "32bit"
-    }
+    # 64-bit perl fails to compile AnyEvent CPAN module -> Let's use 32-bit perl for now also on 64-bit host
+    $bits = "32bit"
 
     # installer file URL
     $url = "http://strawberry-perl.googlecode.com/files/strawberry-perl-${version}-${$bits}.msi"
