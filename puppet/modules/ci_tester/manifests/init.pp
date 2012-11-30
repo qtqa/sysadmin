@@ -24,6 +24,9 @@ class ci_tester(
     # local mirror of codereview.qt-project.org
     $qt_gerrit_mirror = $ci_tester::params::qt_gerrit_mirror,
 
+    # Use distcc distributed compilation tool?
+    $distcc_enabled = $ci_tester::params::distcc_enabled,
+
     $distcc_hosts = $ci_tester::params::distcc_hosts
 
 ) inherits ci_tester::params {

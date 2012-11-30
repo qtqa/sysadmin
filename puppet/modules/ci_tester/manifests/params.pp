@@ -11,6 +11,7 @@ class ci_tester::params {
     $icecc_enabled = true
     $icecc_scheduler_host = ''
 
+    $distcc_enabled = true
     $distcc_hosts = 'localhost'
 
     if ($::operatingsystem == 'Ubuntu') and ($::operatingsystemrelease == '11.10') {
