@@ -179,7 +179,7 @@ my %INTERACTIVE = (
                         default => 'y',
                         type => 'bool',
                         child => [
-                            (distcc_hosts => {
+                            distcc_hosts => {
                                 doc => qq{Distcc host specification; used for distributed compilation. \n}
                                       .qq{List of whitespace separated hostnames and other distcc specific options. \n}
                                       .qq{e.g., --randomize ci-mac-mini-01 ci-mac-mini-02 ci-mac-mini-03},
