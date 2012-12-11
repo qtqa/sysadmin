@@ -197,6 +197,10 @@ my %INTERACTIVE = (
             doc => "Qt Project CI system server (Jenkins <-> Gerrit integration)"
         },
 
+        packaging_server => {
+            doc => "Qt Project packaging server"
+        },
+
         network_test_server => {
             doc => "Network test server, used for some QtNetwork autotests (qt-test-server.qt-test-net)"
         },

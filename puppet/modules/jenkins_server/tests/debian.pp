@@ -1,5 +1,5 @@
-if $::operatingsystem == 'windows' {
-    selftest::skip_all { "jenkins_server is not supported on Windows": }
+if $::operatingsystem == 'windows' or $::operatingsystem == 'darwin' {
+    selftest::skip_all { "jenkins_server is not supported on Windows or Mac": }
 }
 
 # mock git::config to avoid "Invalid user: fakeuser" from certain puppet versions
