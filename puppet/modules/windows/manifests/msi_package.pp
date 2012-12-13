@@ -73,7 +73,8 @@ $fetch_cmd \
   start \"uninstall\" /wait msiexec /x \"$path\\uninstaller_for_puppet.msi\" $uninstall_flags ) \
 & ( if exist \"$path\" \
     rd /S /Q \"$path\" ) \
- && start \"install\" /wait msiexec /i \"$real_install_package\" $install_flags $install_properties\
+ && start \"install\" /wait msiexec /i \"$real_install_package\" $install_flags $install_properties \
+ && copy \"$real_install_package\" \"$path\\uninstaller_for_puppet.msi\" \
  \"",
 
         unless => "$cmd /C \"\
@@ -83,12 +84,5 @@ $fetch_cmd \
         logoutput => true,
         timeout => 3600
 
-    }
-
-    # copy installer under target path to be able to uninstall with msiexec
-    file { "$path\\uninstaller_for_puppet.msi":
-            source  =>  "file:///$real_install_package",
-            require =>  Exec["install $name $version to $path"],
-        ;
     }
 }
