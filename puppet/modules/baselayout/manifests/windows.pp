@@ -118,5 +118,29 @@ class baselayout::windows inherits baselayout::base {
         ensure => 'stopped',
         enable => false,
     }
+
+    # Start desktop mode on Windows 8 boot
+    if ($kernelmajversion >= "6.2") {
+        $desktopswitcher = 'c:\utils\SendDesktop.scf'
+
+        # Make sure utility to launch desktop mode is installed in Windows 8
+        file {
+            "$desktopswitcher":
+                source  => "puppet:///modules/baselayout/windows/SendDesktop.scf",
+                ensure  => present,
+                mode    => 0755,
+            ;
+        }
+
+        # Run utility when $baselayout::testuser is logged on
+        baselayout::startup { "Switch to desktop mode":
+            path    => $desktopswitcher,
+            user    => $baselayout::testuser,
+            require => [
+                File[$desktopswitcher],
+                User[$baselayout::testuser],
+            ],
+        }
+    }
 }
 

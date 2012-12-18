@@ -1,0 +1,5 @@
+[Shell]
+Command=2
+IconFile=%SystemRoot%\System32\imageres.dll,105
+[Taskbar]
+Command=ToggleDesktop
