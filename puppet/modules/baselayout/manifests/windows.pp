@@ -142,5 +142,13 @@ class baselayout::windows inherits baselayout::base {
             ],
         }
     }
+
+    # Disable UAC
+    registry::value { "Disable UAC":
+        key => 'HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System',
+        value => 'EnableLUA',
+        type => 'dword',
+        data => '0x00000000'
+    }
 }
 
