@@ -100,14 +100,12 @@ automatic login for that user.                                    \
 
     if $baselayout::testuser {
         exec { "disable $baselayout::testuser screensaver":
-            command =>  "/usr/bin/defaults -currentHost write com.apple.screensaver idleTime 0",
-            unless  =>  "/bin/sh -c '/usr/bin/defaults -currentHost read com.apple.screensaver idleTime | /usr/bin/grep -q '^0$''",
-            user    =>  "$baselayout::testuser",
+            command =>  "/usr/bin/su - $baselayout::testuser -c \"/usr/bin/defaults -currentHost write com.apple.screensaver idleTime 0\"",
+            unless  =>  "/usr/bin/su - $baselayout::testuser -c \"/usr/bin/defaults -currentHost read com.apple.screensaver idleTime | /usr/bin/grep -q '^0$'\"",
         }
         exec { "set correct locale":
-            command =>  "/usr/bin/defaults write -g AppleLocale en_US",
-            unless  =>  "/bin/sh -c '/usr/bin/defaults read -g AppleLocale | /usr/bin/grep -q 'en_US''",
-            user    =>  "$baselayout::testuser",
+            command =>  "/usr/bin/su - $baselayout::testuser -c \"/usr/bin/defaults write -g AppleLocale en_US\"",
+            unless  =>  "/usr/bin/su - $baselayout::testuser -c \"/usr/bin/defaults read -g AppleLocale | /usr/bin/grep -q 'en_US'\"",
         }
     }
 
