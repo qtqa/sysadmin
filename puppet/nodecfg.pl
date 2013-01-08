@@ -75,41 +75,8 @@ my $INTERACTIVE_CFG_FILE = catfile( $CFG_DIR, '10-config.yaml' );
 
 # log file (overwritten at each run)
 my $LOG_FILE = catfile( $CFG_DIR, 'nodecfg.log' );
-
-# Data used for interactive setup.
-# Would be nice to automatically extract these from the manifests (magic comments?)
-my %INTERACTIVE = (
-    parameters => [
-        location => {
-            doc => qq{Location for CI machines.\n}
-                  .qq{The location variable is used to customize certain puppet configurations.\n\n}
-                  .qq{The location is typically something like: "Oslo", "Brisbane" or "Digia". \n\n},
-
-            default => q{},
-        },
-        qtgitreadonly => {
-            doc => qq{Base URL of Qt's git repositories (git://qt.gitorious.org/). \n}
-                  .qq{This will be used as the 'qtgitreadonly' alias for git \n}
-                  .qq{operations while testing. \n\n}
-                  .qq{The base URL will have Qt module names appended; for example: \n}
-                  .qq{ "git://git.example.com/" => "git://git.example.com/qt/qtbase" \n\n},
-            default => 'git://qt.gitorious.org/',
-        },
-        input => {
-            doc => qq{Base HTTP URL where large files are hosted (tarballs etc) \n}
-                  .qq{These files are all publicly available but you'll have to host them \n}
-                  .qq{in your own mirror. \n\n}
-                  .qq{The base HTTP URL can be for example: "http://replace-me.example.com/input". \n\n},
-
-            default => q{},
-        },
-    ],
-
-    classes => {
-
-        ci_tester => {
-            doc => 'Qt Project CI tester, performing Qt compilation and autotests',
-            parameters => [
+my $PARAMETERS_FOR_TESTER = (
+          [
                 testuser => {
                     doc => qq{Username of the account used for all testing; \n}
                           .qq{this should be an account which is not used for any other\n}
@@ -191,6 +158,46 @@ my %INTERACTIVE = (
                     ()
                 ),
             ],
+);
+# Data used for interactive setup.
+# Would be nice to automatically extract these from the manifests (magic comments?)
+my %INTERACTIVE = (
+    parameters => [
+        location => {
+            doc => qq{Location for CI machines.\n}
+                  .qq{The location variable is used to customize certain puppet configurations.\n\n}
+                  .qq{The location is typically something like: "Oslo", "Brisbane" or "Digia". \n\n},
+
+            default => q{},
+        },
+        qtgitreadonly => {
+            doc => qq{Base URL of Qt's git repositories (git://qt.gitorious.org/). \n}
+                  .qq{This will be used as the 'qtgitreadonly' alias for git \n}
+                  .qq{operations while testing. \n\n}
+                  .qq{The base URL will have Qt module names appended; for example: \n}
+                  .qq{ "git://git.example.com/" => "git://git.example.com/qt/qtbase" \n\n},
+            default => 'git://qt.gitorious.org/',
+        },
+        input => {
+            doc => qq{Base HTTP URL where large files are hosted (tarballs etc) \n}
+                  .qq{These files are all publicly available but you'll have to host them \n}
+                  .qq{in your own mirror. \n\n}
+                  .qq{The base HTTP URL can be for example: "http://replace-me.example.com/input". \n\n},
+
+            default => q{},
+        },
+    ],
+
+    classes => {
+
+        ci_tester => {
+            doc => 'Qt Project CI tester, performing Qt compilation and autotests',
+            parameters => $PARAMETERS_FOR_TESTER
+        },
+
+        packaging_tester => {
+            doc => 'Qt Project Packaging tester, performing Qt compilation and autotests',
+            parameters => $PARAMETERS_FOR_TESTER
         },
 
         ci_server => {
