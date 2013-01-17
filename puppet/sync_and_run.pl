@@ -166,7 +166,7 @@ sub find_primary_fqdn
         $output =~ m{
             (?:
                 # unix style
-                # 113.136.30.172.in-addr.arpa     name = bq-menoetius.apac.nokia.com.
+                # 113.136.30.172.in-addr.arpa     name = bq-menoetius.example.com.
                 \Qin-addr.arpa\E
                 \s+
                 name
@@ -180,7 +180,7 @@ sub find_primary_fqdn
             |
             (?:
                 # windows style
-                # Name:    bq-menoetius.apac.nokia.com
+                # Name:    bq-menoetius.example.com
                 Name:
                 \s+
                 (?<name>[^\s]+)
@@ -285,7 +285,7 @@ sub modify_env_from_rdns
         return;
     }
 
-    # 'bq-menoetius.apac.nokia.com' => ('bq-menoetius', 'apac.nokia.com')
+    # 'bq-menoetius.example.com' => ('bq-menoetius', 'example.com')
     my ($hostname, $domain) = split( /\./, $fqdn, 2 );
 
     $env->{ FACTER_hostname } = $hostname;
