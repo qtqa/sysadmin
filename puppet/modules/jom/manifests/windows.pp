@@ -1,7 +1,7 @@
 # Downloads the given $version of jom from qt-project.org and installs to the specified $path.
 # If a different jom version is already installed there, it is uninstalled first.
 class jom::windows(
-    $version = '1.0.6',
+    $version = '1.0.13',
     $path = 'C:\utils\jom'
 ) {
     # Jom zip package name has always two digits in build number portion(e.g. jom_1_0_06.zip)
