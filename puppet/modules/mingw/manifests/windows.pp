@@ -14,12 +14,16 @@ class mingw::windows(
     $exceptions = 'sjlj',
 
     # installed revision
-    $revision = 'rev1'
+    $revision = 'rev8'
 ) {
     $bits = $::architecture ? {
         x64 => "64",
         default => "32"
     }
+
+    # Match revision, match with both 'r8' and 'rev8' style patterns.
+    # Just for checking if correct revision is already installed.
+    $match_revision = regsubst($revision, 'rev', 'r(ev)?')
 
     # installer file URL
     $url = "http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/${version}/${bits}-bit/threads-${threading}/${exceptions}/x${bits}-${version}-release-${threading}-${exceptions}-${revision}.7z"
@@ -27,6 +31,8 @@ class mingw::windows(
     windows::zip_package { "mingw":
         url => $url,
         version => $version,
+        version_flags => "-print-search-dirs",
+        version_expression => "x${bits}-${version}(-release)?-${threading}-${exceptions}-${match_revision}",
         path => $path,
         binary => "$path\\mingw\\bin\\g++.exe"
     }
