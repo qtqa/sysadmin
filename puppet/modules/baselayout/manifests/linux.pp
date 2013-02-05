@@ -79,6 +79,21 @@ class baselayout::linux inherits baselayout::unix {
         enable      =>  true,
         require     =>  Package[$ssh],
     }
+
+    exec { "stop avahi-daemon":
+        command => "/usr/sbin/service avahi-daemon stop",
+        refreshonly => true,
+    }
+
+    # Disable avahi-daemon
+    file {
+        "/etc/init/avahi-daemon.conf":
+            ensure  =>  present,
+            source  =>  "puppet:///modules/baselayout/linux/etc/init/avahi-daemon.conf",
+            notify => Exec["stop avahi-daemon"],
+    }
+
+
 }
 
 # deprecated wrapper for baselayout::startup
