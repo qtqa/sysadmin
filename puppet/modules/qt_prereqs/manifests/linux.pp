@@ -39,6 +39,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         # for krazy:
         "libxml-writer-perl": ensure => installed;
         "libtie-ixhash-perl": ensure => installed;
+
+        # for android:
+        "openjdk-6-jdk": ensure => installed;
     }
 
     if $::operatingsystem == "Ubuntu" {
