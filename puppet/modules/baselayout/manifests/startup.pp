@@ -55,17 +55,17 @@ define baselayout::startup($path, $arguments="", $user, $terminal=false) {
         }
 
         exec { "$name login item":
-            command => "/usr/bin/su - $user -c \"/usr/bin/osascript -e \
+            command => "/usr/bin/su - $user -c /usr/bin/osascript -e \
                         \
                         'tell app \"System Events\" to make login item at end with properties \
                         {path:\"/Users/$user/startup-$name.command\", hidden:false, name:\"startup-$name.command\"}' \
                         \
-            \"",
-            unless  => "/usr/bin/su - $user -c \"/usr/bin/osascript -e \
+            ",
+            unless  => "/usr/bin/su - $user -c /usr/bin/osascript -e \
                         \
                         'tell app \"System Events\" to get the name of every login item' | grep -q startup-$name.command \
                         \
-            \"",
+            ",
             logoutput => true,
             require => File["/Users/$user/startup-$name.command"],
         }
