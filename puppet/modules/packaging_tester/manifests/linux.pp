@@ -6,6 +6,11 @@ class packaging_tester::linux inherits packaging_tester::base {
         include vmware_tools
     }
 
+    package {
+        # for configure test cases
+        "expect":             ensure => installed;
+    }
+
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan
 

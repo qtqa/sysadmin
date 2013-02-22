@@ -5,7 +5,7 @@ class packaging_tester(
     $testuser = $packaging_tester::params::testuser,
 
     # IP address of qt-test-server network test server
-    # $network_test_server_ip = $packaging_tester::params::network_test_server_ip,
+    $network_test_server_ip = $packaging_tester::params::network_test_server_ip,
 
     # Jenkins parameters
     $jenkins_enabled = $packaging_tester::params::jenkins_enabled,
