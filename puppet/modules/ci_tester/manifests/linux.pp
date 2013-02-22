@@ -1,9 +1,15 @@
 class ci_tester::linux inherits ci_tester::base {
     include ccache
     include crosscompilers
+    include android
 
     if $ci_tester::vmware_enabled {
         include vmware_tools
+    }
+
+    package {
+        # for android:
+        "openjdk-6-jdk": ensure => installed;
     }
 
     # Allow test machines to install modules from cpan under $HOME/perl5
