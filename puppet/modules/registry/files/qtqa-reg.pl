@@ -129,7 +129,7 @@ use English qw( -no_match_vars );
 use Getopt::Long;
 use Pod::Usage;
 use Win32::TieRegistry;
-use Win32API::Registry qw( KEY_ALL_ACCESS );
+use Win32API::Registry qw( KEY_ALL_ACCESS regLastError);
 
 # Win32API::Registry do not currently provide this constant
 use constant KEY_WOW64_64KEY => 0x0100;
@@ -272,7 +272,7 @@ sub reg_check
     my $type = $args{ type };
 
     my $registry = Win32::TieRegistry->new( $path->{ key }, { Access => access( %args ) } );
-    $registry || die "$path->{ key } does not exist\n";
+    $registry || die regLastError();
     $registry = $registry->TiedRef();
     $registry->ArrayValues( 1 );
     my @got = @{ $registry->{ "\\$path->{ value }" } || [] };
