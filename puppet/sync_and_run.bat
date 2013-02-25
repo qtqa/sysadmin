@@ -40,12 +40,23 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 @echo off
+setlocal
 rem Poor man's logging.
 rem Until we can investigate proper integration with some Windows log
 rem service (if that makes sense at all), we just make sure the
 rem last_puppet_run.txt file will hold the output from the most recent
 rem puppet run.
+
+set STRAWBERRY_ROOT=c:\utils\strawberryperl_portable
+
+set PERL5LIB=
+set PERL_LOCAL_LIB_ROOT=
+set PERL_MB_OPT=
+set PERL_MM_OPT=
+
+path=%STRAWBERRY_ROOT%\c\bin;%STRAWBERRY_ROOT%\perl\site\bin;%STRAWBERRY_ROOT%\perl\bin;%PATH%
 set PUPPET_LOG=%~dp0last_puppet_run.txt
 date /T >"%PUPPET_LOG%"
 time /T >>"%PUPPET_LOG%"
 perl "%~dp0sync_and_run.pl" --facts-from-reverse-dns >>"%PUPPET_LOG%" 2>&1
+endlocal
