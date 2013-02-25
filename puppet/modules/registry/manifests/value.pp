@@ -33,7 +33,7 @@ define registry::value(
 ) {
     include registry
 
-    $perl = "C:\\Strawberry\\perl\\bin\\perl.exe"
+    $perl = "C:\\utils\\strawberryperl_portable\\perl\\bin\\perl.exe"
     $script = $registry::script
 
     Exec { require => File[$script] }
