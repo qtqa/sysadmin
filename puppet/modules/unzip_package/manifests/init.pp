@@ -73,16 +73,18 @@ define unzip_package(
         $cmd = 'C:\Windows\system32\cmd.exe /C'
         $remove = "(if exist \"$path\" rd /S /Q \"$path\")"
         $unzip = "start \"install\" /wait C:\\utils\\sevenzip\\7z.exe $unzip_flags \"$real_zip_archive\""
+        $unless_cmd = "$cmd \"$binary $version_flags | $grep -E \"$real_version_expression\"\""
     }
     else {
         $cmd = "/bin/sh -c"
         $remove = "(if [ -e $path ]; then rm -fr $path; fi)"
         $unzip = "7z $unzip_flags $real_zip_archive"
+        $unless_cmd = "$cmd '$binary $version_flags | $grep -E \"$real_version_expression\"'"
     }
 
     exec { "install $name $version to $path":
         command => "$cmd \"$fetch_cmd && $remove && $unzip\"",
-        unless => "$cmd $binary $version_flags | $grep -E \"$real_version_expression\"",
+        unless => "$unless_cmd",
         logoutput => true,
         timeout => 3600,
         require => Class['sevenzip']
