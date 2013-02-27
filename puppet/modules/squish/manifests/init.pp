@@ -21,8 +21,8 @@ class squish(
         }
         Ubuntu: {
             $pkg_name = $::architecture ? {
-                x86_64 => "squish-4.3-20130114-1424-qt500-linux64",
-                default => "squish-4.3-20130114-1424-qt500-linux32"
+                i386 => "squish-4.3-20130114-1424-qt500-linux32",
+                default => "squish-4.3-20130114-1424-qt500-linux64",
             }
             $binary = "${path}/squish/bin/squishserver"
         }
@@ -47,17 +47,22 @@ class squish(
     }
 
     # Rename squish package name as 'squish' so the path to squish won´t change after version update
+    # Add squish_env.sh to set environment variables
     if $::operatingsystem == 'windows' {
         exec { "rename $pkg_name to squish":
             command => "C:\\Windows\\system32\\cmd.exe /C \"rename ${path}\\${pkg_name} squish\"",
             refreshonly => true
-       }
+        }
     }
     else {
         exec { "rename $pkg_name to squish":
             command => "/bin/sh -c \"mv ${path}/${pkg_name} ${path}/squish\"",
             refreshonly => true
-       }
+        }
+        file { "/etc/profile.d/squish_env.sh":
+            ensure  =>  present,
+            content => "SQUISH_LICENSEKEY_DIR=/opt/squish\nexport SQUISH_LICENSEKEY_DIR\nPATH=\"/opt/squish/squish/bin:\$PATH\"\nexport PATH"
+        }
     }
 
     # Download squish license
