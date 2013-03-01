@@ -5,4 +5,5 @@ class packaging_tester::windows inherits packaging_tester::base {
     include openssl
     include strawberryperl
     include jom
+    include dependencywalker
 }
