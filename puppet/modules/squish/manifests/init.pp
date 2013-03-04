@@ -61,7 +61,7 @@ class squish(
         }
         file { "/etc/profile.d/squish_env.sh":
             ensure  =>  present,
-            content => "SQUISH_LICENSEKEY_DIR=/opt/squish\nexport SQUISH_LICENSEKEY_DIR\nPATH=\"/opt/squish/squish/bin:\$PATH\"\nexport PATH"
+            content  => template("squish/squish_env.sh.erb"),
         }
     }
 
