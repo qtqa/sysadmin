@@ -7,6 +7,7 @@ class android::linux
 
     file { "$target":
         ensure  =>  directory,
+        recurse =>  true,
         owner   =>  root,
         group   =>  users,
         mode    =>  0755,
@@ -19,6 +20,7 @@ class android::linux
                 && wget $url/${filename} -O - | tar -C $target -$options \
                 && mv ${target}/${directory} ${generic_dir} \
                 && echo $filename > ${generic_dir}/version.txt \
+                && chown -R $testuser: $generic_dir \
                 && (if [ $generic_dir == $target/sdk ]; then ${generic_dir}/tools/android update sdk --no-ui; fi)'",
             unless => "/bin/bash -c '\
                 grep \"$filename\" ${generic_dir}/version.txt'",
