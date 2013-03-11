@@ -66,12 +66,33 @@ our @EXPORT = qw(
     find_puppet
 );
 
+$SIG{'INT'} = sub { END };
+
+my $LOCKFILE = "./sync_and_run.lck";
+my $LOCKFILEHANDLE;
+my $SECOND_INSTANCE = 0;
+
 our $DIR = abs_path( $FindBin::Bin );
 our $CACHEDIR = catfile( $DIR, 'cache' );
 our $WINDOWS = ($OSNAME =~ m{win32}i);
 
 # Avoid any usage of the git_mirror.pl from within puppet
 local $ENV{ HARDGIT_SKIP } = 1;
+
+sub create_lockfile {
+    my $lockf = shift;
+
+    if (-e $lockf) {
+        open ($LOCKFILEHANDLE,"<$lockf") or die "Unable to open file $lockf: $!\n";
+        my $runpid = <$LOCKFILEHANDLE>;
+        print "Already running (PID: $runpid).\n";
+        $SECOND_INSTANCE = 1;
+        exit 1;
+    }
+    open ($LOCKFILEHANDLE, ">$lockf") or die "Unable to open file $lockf: $!\n";
+    print $LOCKFILEHANDLE $$;
+    close $LOCKFILEHANDLE;
+}
 
 sub chdir_or_die
 {
@@ -335,13 +356,7 @@ sub run_and_exit
 {
     my (@cmd) = @_;
 
-    if (!$WINDOWS) {
-        exec @cmd;
-        die "exec @cmd: $!";
-    }
-
-    # On Windows, we avoid exec because it effectively "detaches" (gets a new
-    # PID and, if run from a console, returns control to the console).
+    print (+ @cmd);
     system( @cmd );
     exit $?;
 }
@@ -416,6 +431,8 @@ sub run
 {
     chdir_or_die( $DIR );
 
+    create_lockfile ($LOCKFILE);
+
     if (-f 'disable_puppet') {
         print "not doing anything because $DIR/disable_puppet exists\n";
         return;
@@ -444,5 +461,9 @@ sub run
 }
 
 run( ) unless caller;
+
+END {
+    unlink $LOCKFILE if (!$SECOND_INSTANCE);
+}
 1;
 
