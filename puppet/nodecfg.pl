@@ -186,6 +186,19 @@ my %INTERACTIVE = (
 
             default => q{},
         },
+        email => {
+            doc => qq{E-mail address where scripts run on this client node can send \n}
+                  .qq{notifications in case of errors. \n\n}
+                  .qq{The address can be for example: "nodes-in-ci\@mail.com". \n\n},
+
+            default => q{},
+        },
+        smtp => {
+            doc => qq{SMTP server address which this client node can use to send e-mails. \n\n}
+                  .qq{The address can be for example: "smtp.mail.com". \n\n},
+
+            default => q{},
+        },
     ],
 
     classes => {
