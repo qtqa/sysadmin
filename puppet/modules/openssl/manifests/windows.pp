@@ -3,7 +3,7 @@
 #
 # Note installing OpenSSL has dependency to VCRedist package which is not currently managed by puppet
 class openssl::windows(
-    $version = '1.0.1e',
+    $version = '1.0.1f',
     $path = 'C:\openssl'
 ) {
     # Version number with underscores, for example '0_9_8x'
