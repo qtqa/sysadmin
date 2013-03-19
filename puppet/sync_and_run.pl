@@ -55,9 +55,18 @@ use Cwd qw( abs_path );
 use English qw( -no_match_vars );
 use File::Path qw( mkpath );
 use File::Spec::Functions;
+use File::stat;
 use FindBin;
 use Getopt::Long;
 use IO::Socket::INET;
+use Time::Piece;
+use Time::Seconds;
+use POSIX;
+
+if ($^O =~ m/mswin32/i) {
+    require Win32::Process;
+    Win32::Process->import;
+}
 
 # export a few things so that autotests can find and run puppet without
 # duplicating our code
@@ -71,6 +80,7 @@ $SIG{'INT'} = sub { END };
 my $LOCKFILE = "./sync_and_run.lck";
 my $LOCKFILEHANDLE;
 my $SECOND_INSTANCE = 0;
+my $MAXLOCKOUTTIME = 90;
 
 our $DIR = abs_path( $FindBin::Bin );
 our $CACHEDIR = catfile( $DIR, 'cache' );
@@ -83,11 +93,29 @@ sub create_lockfile {
     my $lockf = shift;
 
     if (-e $lockf) {
+        my $fs = stat ($lockf);
+        my $locktime = (localtime) - (localtime $fs->mtime());
         open ($LOCKFILEHANDLE,"<$lockf") or die "Unable to open file $lockf: $!\n";
         my $runpid = <$LOCKFILEHANDLE>;
-        print "Already running (PID: $runpid).\n";
-        $SECOND_INSTANCE = 1;
-        exit 1;
+
+        if ($locktime->minutes > $MAXLOCKOUTTIME) {
+            print "$lockf in place, but it's modification time exceeds "
+                 ."\$MAXLOCKOUTTIME. Killing process and removing lock.\n";
+            if ($^O =~ m/mswin32/i) {
+                my $exitcode = 0;
+                Win32::Process::KillProcess($runpid, $exitcode);
+                print "Process terminated with exitcode \"$exitcode\"\n";
+            } else {
+                my $cnt = kill (-9, $runpid);
+                print "Signal sent to $cnt process(es)\n";
+            }
+            #remove lock file after process has been killed
+            unlink ($lockf);
+        } else {
+            print "Already running (PID: $runpid).\n";
+            $SECOND_INSTANCE = 1;
+            exit 1;
+        }
     }
     open ($LOCKFILEHANDLE, ">$lockf") or die "Unable to open file $lockf: $!\n";
     print $LOCKFILEHANDLE $$;
