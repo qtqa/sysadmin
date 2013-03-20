@@ -10,5 +10,6 @@ class ci_tester::windows inherits ci_tester::base {
     if ($kernelmajversion >= "6.1") {
         # WinCE build is performed only on Windows 7 with MSVC2008
         include wince_powervr_sdk
+        include wince_sdk_config
     }
 }
