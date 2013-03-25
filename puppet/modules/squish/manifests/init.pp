@@ -58,6 +58,10 @@ class squish {
             }
         }
         Darwin: {
+            exec { "Enable Accessibility API":
+                command => "/bin/sh -c \"touch /private/var/db/.AccessibilityAPIEnabled\"",
+            }
+
             squish_install {
                 "package":
                     pkg_name => "squish-4.3-20130114-1508-qt500-macx86_64-gcc4.0",
