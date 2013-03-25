@@ -1,9 +1,15 @@
 class packaging_tester::linux inherits packaging_tester::base {
     include ccache
     include crosscompilers
+    include android
 
     if $packaging_tester::vmware_enabled {
         include vmware_tools
+    }
+
+    package {
+        # for android:
+        "openjdk-6-jdk": ensure => installed;
     }
 
     package {
