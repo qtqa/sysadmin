@@ -62,6 +62,15 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             }
         }
 
+        if $::lsbmajdistrelease == 12 {
+            package {
+                # for android's tests
+                "lib32ncurses5":                     ensure => installed;
+                "lib32stdc++6":                      ensure => installed;
+            }
+        }
+
+
         package {
             "libgl1-mesa-dev":                   ensure => installed;
             "libxrender-dev":                    ensure => installed;
