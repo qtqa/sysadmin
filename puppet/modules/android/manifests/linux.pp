@@ -12,6 +12,17 @@ class android::linux
         mode    =>  0755,
     }
 
+    # Environment variable ANDROID_NDK_HOST depend on nodes architecture
+    $ndk_host = $::architecture ? {
+        i386    => "linux-x86",
+        default => "linux-x86_64",
+        }
+
+    file { "/etc/profile.d/android_env.sh":
+        ensure  => present,
+        content => template("android/android_env.sh.erb"),
+        }
+
     define android_install($filename,$directory,$options,$generic_dir,$target,$url) {
         exec { "install $filename to ${target}/${directory}":
             command =>  "/bin/bash -c '\
