@@ -1,6 +1,7 @@
 class sevenzip {
     case $::kernel {
-        windows: { include sevenzip::windows }
-        Darwin:  { include sevenzip::mac }
+        windows: { require sevenzip::windows }
+        Darwin:  { require sevenzip::mac }
+        Linux:   { require sevenzip::linux }
     }
 }

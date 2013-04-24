@@ -10,17 +10,11 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
         default     =>  "git",
     }
 
-    $sevenzip = $::operatingsystem ? {
-        Ubuntu      =>  "p7zip-full",
-        default     =>  "p7zip",
-    }
-
     package {
         "$git":             ensure => installed;
         "$gstreamer":       ensure => installed;
         "chrpath":          ensure => installed;
         "lsb":              ensure => installed;
-        "$sevenzip":        ensure => installed;
         "libasound2-dev":   ensure => installed;
         "libbluetooth-dev": ensure => installed;
 

@@ -47,7 +47,7 @@ define unzip_package(
         $msysbin = $::architecture ? {
             x64     => 'c:\Program Files (x86)\Git\bin',
             default => 'c:\Program Files\Git\bin'
-            }
+        }
         $curl = "\"$msysbin\\curl.exe\""
         $grep = "\"$msysbin\\grep.exe\""
     } else {
@@ -88,5 +88,5 @@ define unzip_package(
         logoutput => true,
         timeout => 3600,
         require => Class['sevenzip']
-    }
+        }
 }
