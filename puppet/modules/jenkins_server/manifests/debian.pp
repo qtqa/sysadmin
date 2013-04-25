@@ -51,6 +51,7 @@ class jenkins_server::debian inherits jenkins_server
         "next-build-number":;       # allow manual set of build numbers
         "postbuildscript":;         # CI post-build task
         "preSCMbuildstep":;         # CI pre-build task
+        "project-health-report":;   # shows how many build failed, and which testcases are the top breakers
         "run-condition":;           # conditional-buildstep prereq
         "timestamper":;             # timestamps in build logs
         "token-macro":;             # expand macros in various places
