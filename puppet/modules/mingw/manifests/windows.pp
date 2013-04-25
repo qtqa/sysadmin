@@ -1,7 +1,7 @@
 # Downloads the given version of mingw from sourceforge.net and installs to the specified $path.
 # If a different mingw version is already installed there, it is uninstalled first.
 class mingw::windows(
-    $version = '4.8.0',
+    $version = '4.7.2',
     $path = 'C:\mingw',
 
     # Additional options for installed MinGW version, See also: http://qt-project.org/wiki/MinGW-64-bit
@@ -10,14 +10,11 @@ class mingw::windows(
     # either 'posix' or 'win32', we use 'posix' since it is more popular
     $threading = 'posix',
 
-    # either 'sjlj' or 'dwarf' (32bit) and 'seh' (64bit), default we use 'dwarf' because it's faster
-    $exceptions = $::architecture ? {
-        x64 => "seh",
-        default => "dwarf",
-    },
+    # either 'sjlj' or 'dwarf', we use 'sjlj' since it is more popular
+    $exceptions = 'sjlj',
 
     # installed revision
-    $revision = 'rev2'
+    $revision = 'rev8'
 ) {
     $bits = $::architecture ? {
         x64 => "64",
