@@ -114,6 +114,9 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             "libmysqlclient-dev":                ensure => installed;
             "libgd2-xpm-dev":                    ensure => installed;
 
+            # needed to test sql plugins (QTBUG-29974)
+            "libpq-dev":                         ensure => installed;
+
             # this is used by the CI system python classes, and needed
             # to run the CI selftests correctly
             "sqlite3":                           ensure => installed;
