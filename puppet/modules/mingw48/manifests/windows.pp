@@ -29,6 +29,6 @@ class mingw48::windows(
         version_flags => "-print-search-dirs",
         version_expression => "x32-${version}(-release)?-${threading}-${exceptions}-${match_revision}",
         path => $path,
-        binary => "$path\\mingw\\bin\\g++.exe"
+        binary => "$path\\mingw32\\bin\\g++.exe"
     }
 }
