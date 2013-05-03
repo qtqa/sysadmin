@@ -8,7 +8,7 @@ class network_test_server::linux::danted {
         $dante_deb = $architecture ? {
             i386    =>  'dante-server_1.1.14-2_i386.deb',
             x86_64  =>  'dante-server_1.1.14-2_ia64.deb',
-            default =>  error("architecture $architecture is not supported!"),
+            default =>  err("architecture $architecture is not supported!"),
         }
 
         exec { "fetch old dante-server":

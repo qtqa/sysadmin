@@ -13,7 +13,7 @@ class homedir_virtualenv {
     case $::operatingsystem {
         Ubuntu:     { include homedir_virtualenv::ubuntu }
         Darwin:     { include homedir_virtualenv::mac }
-        default:    { error("homedir_virtualenv is not yet implemented for $::operatingsystem") }
+        default:    { err("homedir_virtualenv is not yet implemented for $::operatingsystem") }
     }
 }
 
