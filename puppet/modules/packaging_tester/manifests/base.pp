@@ -8,6 +8,7 @@ class packaging_tester::base {
     include sshkeys
     include icu4c
     include squish
+    include squish_quick2
 
     if $packaging_tester::vmware_enabled {
         include vmware_deployment
