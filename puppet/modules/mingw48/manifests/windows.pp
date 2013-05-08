@@ -2,6 +2,7 @@
 
 class mingw48::windows(
     $version = '4.8.0',
+    $altversion = '480',
     $path = 'C:\mingw48',
 
     # Additional options for installed MinGW version, See also: http://qt-project.org/wiki/MinGW-64-bit
@@ -27,7 +28,7 @@ class mingw48::windows(
         url => $url,
         version => $version,
         version_flags => "-print-search-dirs",
-        version_expression => "x32-${version}(-release)?-${threading}-${exceptions}-${match_revision}",
+        version_expression => "x32-${altversion}(-release)?-${threading}-${exceptions}-${match_revision}",
         path => $path,
         binary => "$path\\mingw32\\bin\\g++.exe"
     }
