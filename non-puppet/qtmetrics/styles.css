@@ -1,0 +1,282 @@
+/****************************************************************************
+##
+## Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+## Contact: http://www.qt-project.org/legal
+##
+## This file is part of the Qt Metrics web portal.
+##
+## $QT_BEGIN_LICENSE:LGPL$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and Digia.  For licensing terms and
+## conditions see http://qt.digia.com/licensing.  For further information
+## use the contact form at http://qt.digia.com/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 as published by the Free Software
+## Foundation and appearing in the file LICENSE.LGPL included in the
+## packaging of this file.  Please review the following information to
+## ensure the GNU Lesser General Public License version 2.1 requirements
+## will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## In addition, as a special exception, Digia gives you certain additional
+## rights.  These rights are described in the Digia Qt LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## GNU General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU
+## General Public License version 3.0 as published by the Free Software
+## Foundation and appearing in the file LICENSE.GPL included in the
+## packaging of this file.  Please review the following information to
+## ensure the GNU General Public License version 3.0 requirements will be
+## met: http://www.gnu.org/copyleft/gpl.html.
+##
+##
+## $QT_END_LICENSE$
+##
+****************************************************************************/
+
+/* Color codes used:
+    - main green color: #44a51c (Qt green)
+    - body background: #ededed
+*/
+
+body
+{
+    background: #ededed;
+}
+
+#container
+{
+    width: 980px;
+    margin: auto;                       /* to place the stuff horizontally to the middle */
+    position: relative;
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    font-size: 12px;
+/*  border: 1px solid blue;             /* for testing the divs */
+}
+
+#header
+{
+    text-align:left;
+    clear: both;
+    height: 100px;
+    width: 100%;
+    padding-left: 10px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+#headerImg
+{
+    text-align:left;
+    float: left;
+    height: 80px;
+    width: 80px;
+    margin-top: 10px;
+    margin-left: 10px;
+    background-image: url('images/Qt_master_logo_CMYK_noback.gif');
+    background-repeat: no-repeat;
+}
+
+#headerNavi
+{
+    float: left;
+}
+
+#headerTitle
+{
+    text-align:left;
+    float: left;
+    height: 40px;
+    margin-top: 10px;
+    margin-left: 10px;
+    color: #44a51c;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+#menu
+{
+    margin-top: 65px;
+}
+
+.active
+{
+    height: 20px;
+    width: 125px;
+    float: left;
+    margin-left: 10px;
+    padding-top: 3px;
+    text-align: center;
+    font-weight: bold;
+    background: #44a51c;
+    border: 1px solid #44a51c;
+}
+
+.inactive
+{
+    height: 20px;
+    width: 125px;
+    float: left;
+    margin-left: 10px;
+    padding-top: 3px;
+    text-align: center;
+    font-weight: bold;
+    background: #fff;
+    border: 1px solid #44a51c;
+}
+
+.active a:link,
+.inactive a:link
+{
+    text-decoration: none;
+    color: #000;
+}
+.active a:visited,
+.inactive a:visited
+{
+    text-decoration: none;
+    color: #000;
+}
+.active a:hover
+{
+    text-decoration: none;
+    color: #000;
+}
+.inactive a:hover
+{
+    text-decoration: none;
+    color: #44a51c;
+}
+.active a:active,
+.inactive a:active
+{
+    text-decoration: none;
+    color: #000;
+}
+
+#footer
+{
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    clear: both;
+    margin-top: 10px;
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-bottom: 20px;
+    font-size: 12px;
+    color: #404044;
+}
+
+#filters
+{
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    float: left;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+#filterButtons
+{
+    margin-top: -5px;
+    padding-right: 50px;
+    float: right;
+    width: 300px;                    /* Set close to width of one button (see below) if you want to place buttons one above each other */
+}
+
+button
+{
+    width: 120px;
+}
+
+select
+{
+    margin-right: 20px;
+}
+
+td
+{
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.fontColorBlack
+{
+    color:black;
+}
+
+.fontColorGreen
+{
+    color:green;
+}
+
+.fontColorRed
+{
+    color:red;
+    font-weight:bold;
+}
+
+.historyTable
+{
+    font-size: 11px;
+}
+
+.tableSingleBorder
+{
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.tableCellBackgroundTitle
+{
+    background-color: #44a51c;
+}
+
+.tableCellBackgroundGreen
+{
+    background-color: #73B873;
+}
+
+.tableCellBackgroundRed
+{
+    background-color: #FF4D4D;
+}
+
+.tableCellCentered
+{
+    text-align: center;
+}
+
+.metricArea
+{
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    float: left;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+.elapdedTime
+{
+    font-size: 10px;
+}
+
+.elapdedTime ul
+{
+    list-style-type: none;
+}
