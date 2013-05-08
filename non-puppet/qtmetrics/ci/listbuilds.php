@@ -108,16 +108,25 @@ if ($numberOfRows>0) {
     echo "</tr>";
     echo "<tr>";
     echo "<td class=\"tableSingleBorder\"><b>Build</b></td>";
-    for ($i=0; $i<$printedBuildCount; $i++)                                 // Loop to print Build numbers
-        echo '<td class="tableCellCentered">' . $arrayBuildNumbers[$i] . '</td>';
-
-                if ($conf == "All")
-                    $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-                        . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
-                else
-                    $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-                        . '/' . $conf . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
-
+    for ($i=0; $i<$printedBuildCount; $i++) {                                 // Loop to print Build numbers
+                $buildstring = $arrayBuildNumbers[$i];                        // Create the link url to build directory...
+                if ($arrayBuildNumbers[$i] < 10000)
+                    $buildstring = '0' . $arrayBuildNumbers[$i];
+                if ($arrayBuildNumbers[$i] < 1000)
+                    $buildstring = '00' . $arrayBuildNumbers[$i];
+                if ($arrayBuildNumbers[$i] < 100)
+                    $buildstring = '000' . $arrayBuildNumbers[$i];
+                if ($arrayBuildNumbers[$i] < 10)
+                    $buildstring = '0000' . $arrayBuildNumbers[$i];
+        if ($conf == "All")
+            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
+                . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+        else
+            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
+            . '/' . $conf . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+        echo '<td class="tableCellCentered">' . $buildLink . '</td>';
+//        echo '<td class="tableCellCentered">' . $arrayBuildNumbers[$i] . '</td>';
+    }
     echo "</tr>";
     echo "</table>";
 } else {

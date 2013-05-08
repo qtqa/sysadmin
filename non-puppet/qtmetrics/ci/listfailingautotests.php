@@ -128,13 +128,13 @@ for ($i=0; $i<$numberOfRows; $i++) {                                          //
             if ($resultRow[DBCOLUMNTESTBUILD] >= $arrayProjectBuildScopeMins[$projectKey]) {   // If autotest is within the Build number scope for the Project
                 $arrayProjectBuildCounts[$projectKey]++;                                       // -> Increase the Project specific count
                 $buildstring = $resultRow[DBCOLUMNTESTBUILD];                 // Create the link url to build directory...
-                if ($latestBuild < 10000)
+                if ($resultRow[DBCOLUMNTESTBUILD] < 10000)
                     $buildstring = '0' . $resultRow[DBCOLUMNTESTBUILD];
-                if ($latestBuild < 1000)
+                if ($resultRow[DBCOLUMNTESTBUILD] < 1000)
                     $buildstring = '00' . $resultRow[DBCOLUMNTESTBUILD];
-                if ($latestBuild < 100)
+                if ($resultRow[DBCOLUMNTESTBUILD] < 100)
                     $buildstring = '000' . $resultRow[DBCOLUMNTESTBUILD];
-                if ($latestBuild < 10)
+                if ($resultRow[DBCOLUMNTESTBUILD] < 10)
                     $buildstring = '0000' . $resultRow[DBCOLUMNTESTBUILD];
                 if ($conf == "All")
                     $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
