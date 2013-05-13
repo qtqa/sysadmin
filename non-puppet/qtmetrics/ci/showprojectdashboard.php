@@ -72,31 +72,9 @@ if ($project == "All" AND $conf == "All") {
     echo '<b>PROJECT DASHBOARD:</b> Select Project<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         /* Show list of Projects (from the session variable that was saved for the filters */
-        $i = 0;
-        echo "<table>";
-        foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
-            echo "<tr>";
-            echo '<td><a href="javascript:void(0);" onclick="filterProject(\'' . $value . '\')">' . $value . '</a></td>';
-            echo '<td>Latest Build: ' . $_SESSION['arrayProjectBuildLatest'][$key] . '</td>';
-            $fontColorClass = "fontColorBlack";
-            if ($_SESSION['arrayProjectBuildLatestResult'][$key] == "SUCCESS")
-                $fontColorClass = "fontColorGreen";
-            if ($_SESSION['arrayProjectBuildLatestResult'][$key] == "FAILURE")
-                $fontColorClass = "fontColorRed";
-            echo '<td class="' . $fontColorClass . '">' . $_SESSION['arrayProjectBuildLatestResult'][$key] . '<td>';
-            echo "</tr>";
-            $i++;
-            if ($i > 12 AND !isset($_SESSION['projectDashboardShowFullList'])) {                                  // List cut mode: By default show only n items in the list to leave room for possible other metrics boxes
-                break;
-            }
-        }
-        echo "</table>";
-        if (!isset($_SESSION['projectDashboardShowFullList'])) {
-            echo '<br/><a href="javascript:void(0);" onclick="clearFilters()">Show full list...</a><br/><br/>';   // List cut mode: If only first n items shown, add a link to see all
-            $_SESSION['projectDashboardShowFullList'] = TRUE;                                                     // List cut mode: After refreshing the metrics box, show all items instead (set below to return the default 'cut mode')
-        }
+        require('listprojects.php');
     } else {
-        echo '<br/>(Data not ready , please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
 }
 
@@ -123,7 +101,7 @@ if ($project <> "All" AND $conf == "All") {
         $projectFilter = " AND project=\"$project\"";
         require('listfailingautotests.php');
     } else {
-        echo '<br/>(Data not ready , please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
     if (isset($_SESSION['projectDashboardShowFullList']))                                                         // List cut mode: After diving to next level, set back to default mode when viewing the list next time
         unset($_SESSION['projectDashboardShowFullList']);
@@ -151,7 +129,7 @@ if ($project <> "All" AND $conf <> "All") {
             echo "<br/>Configuration $conf not built for $project<br/>";
         }
     } else {
-        echo '<br/>(Data not ready , please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
     if (isset($_SESSION['projectDashboardShowFullList']))                                                // List cut mode: After diving to next level, set back to default mode when viewing the list next time
         unset($_SESSION['projectDashboardShowFullList']);

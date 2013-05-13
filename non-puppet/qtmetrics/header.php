@@ -46,7 +46,7 @@
 </div>
 <div id="headerNavi">
 <div id="headerTitle">
-Qt Metrics (demo)
+Qt Metrics (pilot)
 </div>
 <?php include "menu.php";?>
 </div>

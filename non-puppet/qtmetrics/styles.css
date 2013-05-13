@@ -170,7 +170,7 @@ body
     padding-top: 20px;
     padding-left: 10px;
     padding-bottom: 20px;
-    font-size: 12px;
+    font-size: 10px;
     color: #404044;
 }
 
@@ -195,6 +195,19 @@ body
     width: 300px;                    /* Set close to width of one button (see below) if you want to place buttons one above each other */
 }
 
+#filterFields label                                       /* This can be used to align all filter fields to start at same 'column' */
+{
+    display:block;
+    width: 90px;
+    float:left;
+    padding-top: 5px;
+}
+
+#filterFields select                                     /* This can be used to set all filter fields with same width */
+{
+    width: 400px;
+}
+
 button
 {
     width: 120px;
@@ -203,6 +216,17 @@ button
 select
 {
     margin-right: 20px;
+}
+
+table
+{
+   border-collapse:collapse;
+}
+
+th
+{
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 td
@@ -216,39 +240,53 @@ td
     color:black;
 }
 
-.fontColorGreen
+.fontColorGreen                                                         /* This can be used to highlight successful results */
 {
     color:green;
 }
 
-.fontColorRed
+.fontColorRed                                                             /* This can be used to highlight failed results */
 {
     color:red;
     font-weight:bold;
 }
 
-.historyTable
+.fontSmall
 {
     font-size: 11px;
 }
 
 .tableSingleBorder
 {
-    border-collapse: collapse;
     border: 1px solid black;
+}
+
+.tableBottomBorder
+{
+    border-bottom: 1px solid black;
+}
+
+.tableLeftBorder
+{
+    border-left: 1px solid black;
+}
+
+.tableBackgroundColored                                         /* This can be used to highlight every other row in lists for better readability */
+{
+    background-color: #FBFBFB;
 }
 
 .tableCellBackgroundTitle
 {
-    background-color: #44a51c;
+    background-color: #44A51C;
 }
 
-.tableCellBackgroundGreen
+.tableCellBackgroundGreen                                     /* This can be used to highlight successful results */
 {
     background-color: #73B873;
 }
 
-.tableCellBackgroundRed
+.tableCellBackgroundRed                                         /* This can be used to highlight failed results */
 {
     background-color: #FF4D4D;
 }

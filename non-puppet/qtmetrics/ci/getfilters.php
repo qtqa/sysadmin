@@ -61,15 +61,19 @@ include "getconfvalues.php";
 <button onclick="reloadFilters()">Reload</button>
 </div>
 <br/><br/>
+<div id="filterFields">
 <form name="form">
-Project: <select name="project" id="project" onchange="filterProject(this.value)">
+<label>Project:</label>
+<select name="project" id="project" onchange="filterProject(this.value)">
 <?php
     echo "<option value=\"All\">All</option>";
     foreach ($_SESSION['arrayProjectName'] as $key=>$value)
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
-Configuration: <select name="conf" id="conf" onchange="filterConf(this.value)">
+<br/>
+<label>Configuration:</label>
+<select name="conf" id="conf" onchange="filterConf(this.value)">
 <?php
     echo "<option value=\"All\">All</option>";
     foreach ($_SESSION['arrayConfName'] as $key=>$value)
@@ -77,3 +81,4 @@ Configuration: <select name="conf" id="conf" onchange="filterConf(this.value)">
 ?>
 </select>
 </form>
+</div>

@@ -42,10 +42,6 @@
 ?>
 
 <div id="footer">
-<b>Juha Sippola 2013 / Demo version v0.9 7-May-2013</b><br/>
-Page may be changed without further notice.<br/>
-This is not a final solution, instead it's used to demonstrate a PHP-Ajax-MySQL implementation.<br/>
-Actual data used where available (extract from
-<a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
-on 22-Apr-2013)
+<b>Juha Sippola 2013 / Pilot version v0.10 12-May-2013</b><br/>
+Based on live data from <a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
 </div>

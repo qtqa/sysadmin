@@ -78,7 +78,7 @@ $timeRead = microtime(true);
 $arrayBuildNumbers = array();
 echo '<b>Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
 if ($numberOfRows>0) {
-    echo "<table class=\"historyTable tableSingleBorder\">";
+    echo "<table class=\"fontSmall tableSingleBorder\">";
     echo "<tr class=\"tableSingleBorder\">";
     echo "<td class=\"tableSingleBorder\"><b>Result</b></td>";
     $printedBuildCount = 0;
@@ -125,7 +125,6 @@ if ($numberOfRows>0) {
             $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
             . '/' . $conf . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
         echo '<td class="tableCellCentered">' . $buildLink . '</td>';
-//        echo '<td class="tableCellCentered">' . $arrayBuildNumbers[$i] . '</td>';
     }
     echo "</tr>";
     echo "</table>";

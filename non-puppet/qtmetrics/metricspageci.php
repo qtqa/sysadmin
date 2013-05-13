@@ -159,18 +159,23 @@ session_start();
         <!-- (NOTE: The layout should remain same here and in getfilters.php because complete value lists are loaded here via Ajax) -->
         <div id="filters">
         <b>FILTERS:</b><br/><br/>
+        <div id="filterFields">
         <form name="form">
-        Project: <select name="project" id="project" onchange="filterProject(this.value)">
+        <label>Project:</label>
+        <select name="project" id="project" onchange="filterProject(this.value)">
         <?php
             echo "<option value=\"All\">Loading... </option>";
         ?>
         </select>
-        Configuration: <select name="conf" id="conf" onchange="filterConf(this.value)">
+        <br/>
+        <label>Configuration:</label>
+        <select name="conf" id="conf" onchange="filterConf(this.value)">
         <?php
             echo "<option value=\"All\">Loading... </option>";
         ?>
         </select>
         </form>
+        </div>     <!-- end of filterFields -->
         </div>     <!-- end of filters -->
 
         <!-- Metrics boxes -->
