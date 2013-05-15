@@ -4,7 +4,8 @@ class java::windows(
     $version = '1.7.0_17',
     # url version is needed because url path will be changed after every java release (e.g 7u17-b02 or 6u43-b01)
     $url_version = '7u17-b02',
-    $path = "C:\\Program Files\\Java"
+    $path = "C:\\Program Files\\Java",
+    $jre_cookie = "gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjre7-downloads-1880261.html"
 ) {
     $os_bits = $::architecture ? {
         x64 => "x64",
@@ -45,7 +46,7 @@ class java::windows(
 
     $install_flags = "/s /v\"/passive /norestart AUTOUPDATECHECK=0 IEXPLORER=1 JAVAUPDATE=0 JU=0 EULA=1\""
 
-    $fetch_cmd = "\"${msysbin}\\curl.exe\" \"$url\" -L -o \"${install_package}\""
+    $fetch_cmd = "\"${msysbin}\\curl.exe\" -L --cookie $jre_cookie \"$url\" -o \"${install_package}\""
 
     # Set product code to environment variables.
     $set_pcode_env_cmd = "set /p pcode=<\"$path\\ProductCode.txt\""
