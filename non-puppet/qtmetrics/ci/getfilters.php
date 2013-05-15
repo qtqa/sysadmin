@@ -51,6 +51,7 @@ include(__DIR__.'/../commondefinitions.php');
 // Read values from database to session variables (so these are updated only once per session)
 include "getprojectvalues.php";
 include "getconfvalues.php";
+include "getautotestvalues.php";
 ?>
 
 <!-- Filters -->
@@ -77,6 +78,15 @@ include "getconfvalues.php";
 <?php
     echo "<option value=\"All\">All</option>";
     foreach ($_SESSION['arrayConfName'] as $key=>$value)
+        echo "<option value=\"$value\">$value</option>";
+?>
+</select>
+<br/>
+<label>Autotest:</label>
+<select name="autotest" id="autotest" onchange="filterAutotest(this.value)">
+<?php
+    echo "<option value=\"All\">All</option>";
+    foreach ($_SESSION['arrayAutotestName'] as $key=>$value)
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>

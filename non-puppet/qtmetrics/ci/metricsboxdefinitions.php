@@ -46,9 +46,10 @@
 $arrayMetricsBoxesCI = array (
     // Metrics boxes will appear in the order defined below
     //
-    //        File path and name                    Applied filters: All,Project,Configuration
-    //        ------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"        ,"Project,Configuration"                ),
+    //        File path and name                    Applied filters: All,Project,Configuration,Autotest
+    //        ------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"        ,"Project,Configuration"                            ),
+    array(    "ci/showfailinginsignautotests.php"  ,"Autotest"                                         ),
 );
 
 ?>

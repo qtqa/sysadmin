@@ -61,7 +61,7 @@ function createFilterRequestObject()
 }
 
 /* Request metric data (e.g. from database) */
-function getMetricData(metricId, filepath, project, conf)
+function getMetricData(metricId, filepath, project, conf, autotest)
 {
     document.getElementById("metricsBox"+metricId).innerHTML = "Loading...";
     if (project == "") {
@@ -70,7 +70,7 @@ function getMetricData(metricId, filepath, project, conf)
     }
 
     createMetricRequestObject(metricId);
-    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf,true);
+    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest,true);
     metricRequest[metricId].send();
 
     metricRequest[metricId].onreadystatechange = function(index)

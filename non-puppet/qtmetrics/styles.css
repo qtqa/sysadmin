@@ -40,17 +40,15 @@
 ****************************************************************************/
 
 /* Color codes used:
-    - main green color: #44a51c (Qt green)
-    - body background: #ededed
+    - main green color: #44A51C (Qt green; RGB = R:68, G:165, B:28)
+    - body background:  #EDEDED
 */
 
-body
-{
-    background: #ededed;
+body {
+    background: #EDEDED;
 }
 
-#container
-{
+#container {
     width: 980px;
     margin: auto;                       /* to place the stuff horizontally to the middle */
     position: relative;
@@ -59,8 +57,7 @@ body
 /*  border: 1px solid blue;             /* for testing the divs */
 }
 
-#header
-{
+#header {
     text-align:left;
     clear: both;
     height: 100px;
@@ -71,8 +68,7 @@ body
     box-shadow: 5px 5px 5px #888888;
 }
 
-#headerImg
-{
+#headerImg {
     text-align:left;
     float: left;
     height: 80px;
@@ -83,13 +79,11 @@ body
     background-repeat: no-repeat;
 }
 
-#headerNavi
-{
+#headerNavi {
     float: left;
 }
 
-#headerTitle
-{
+#headerTitle {
     text-align:left;
     float: left;
     height: 40px;
@@ -100,13 +94,11 @@ body
     font-weight: bold;
 }
 
-#menu
-{
+#menu {
     margin-top: 65px;
 }
 
-.active
-{
+.active {
     height: 20px;
     width: 125px;
     float: left;
@@ -118,8 +110,7 @@ body
     border: 1px solid #44a51c;
 }
 
-.inactive
-{
+.inactive {
     height: 20px;
     width: 125px;
     float: left;
@@ -132,36 +123,30 @@ body
 }
 
 .active a:link,
-.inactive a:link
-{
+.inactive a:link {
     text-decoration: none;
     color: #000;
 }
 .active a:visited,
-.inactive a:visited
-{
+.inactive a:visited {
     text-decoration: none;
     color: #000;
 }
-.active a:hover
-{
+.active a:hover {
     text-decoration: none;
     color: #000;
 }
-.inactive a:hover
-{
+.inactive a:hover {
     text-decoration: none;
     color: #44a51c;
 }
 .active a:active,
-.inactive a:active
-{
+.inactive a:active {
     text-decoration: none;
     color: #000;
 }
 
-#footer
-{
+#footer {
     width: 100%;
     height: 40px;
     text-align: center;
@@ -174,8 +159,7 @@ body
     color: #404044;
 }
 
-#filters
-{
+#filters {
     width: 100%;
     margin-top: 10px;
     padding-top: 10px;
@@ -187,117 +171,100 @@ body
     box-shadow: 5px 5px 5px #888888;
 }
 
-#filterButtons
-{
+#filterButtons {
     margin-top: -5px;
     padding-right: 50px;
     float: right;
-    width: 300px;                    /* Set close to width of one button (see below) if you want to place buttons one above each other */
+    width: 300px;                          /* Set close to width of one button (see below) if you want to place buttons one above each other */
 }
 
-#filterFields label                                       /* This can be used to align all filter fields to start at same 'column' */
-{
+#filterFields label {                        /* This can be used to align all filter fields to start at same 'column' */
     display:block;
     width: 90px;
     float:left;
     padding-top: 5px;
 }
 
-#filterFields select                                     /* This can be used to set all filter fields with same width */
-{
+#filterFields select {                       /* This can be used to set all filter fields with same width */
     width: 400px;
 }
 
-button
-{
+button {
     width: 120px;
 }
 
-select
-{
+select {
     margin-right: 20px;
 }
 
-table
-{
+table {
    border-collapse:collapse;
 }
 
-th
-{
+th {
     padding-left: 5px;
     padding-right: 5px;
 }
 
-td
-{
+td {
     padding-left: 3px;
     padding-right: 3px;
 }
 
-.fontColorBlack
-{
+.fontColorBlack {
     color:black;
 }
 
-.fontColorGreen                                                         /* This can be used to highlight successful results */
-{
+.fontColorGrey{
+    color:grey;
+}
+
+.fontColorGreen {                          /* This can be used to highlight successful results */
     color:green;
 }
 
-.fontColorRed                                                             /* This can be used to highlight failed results */
-{
+.fontColorRed {                            /* This can be used to highlight failed results */
     color:red;
     font-weight:bold;
 }
 
-.fontSmall
-{
+.fontSmall {
     font-size: 11px;
 }
 
-.tableSingleBorder
-{
+.tableSingleBorder {
     border: 1px solid black;
 }
 
-.tableBottomBorder
-{
+.tableBottomBorder {
     border-bottom: 1px solid black;
 }
 
-.tableLeftBorder
-{
+.tableLeftBorder {
     border-left: 1px solid black;
 }
 
-.tableBackgroundColored                                         /* This can be used to highlight every other row in lists for better readability */
-{
+.tableBackgroundColored {                  /* This can be used to highlight every other row in lists for better readability */
     background-color: #FBFBFB;
 }
 
-.tableCellBackgroundTitle
-{
+.tableCellBackgroundTitle {
     background-color: #44A51C;
 }
 
-.tableCellBackgroundGreen                                     /* This can be used to highlight successful results */
-{
+.tableCellBackgroundGreen  {                /* This can be used to highlight successful results */
     background-color: #73B873;
 }
 
-.tableCellBackgroundRed                                         /* This can be used to highlight failed results */
-{
+.tableCellBackgroundRed  {                  /* This can be used to highlight failed results */
     background-color: #FF4D4D;
 }
 
-.tableCellCentered
-{
+.tableCellCentered {
     text-align: center;
 }
 
-.metricArea
-{
+.metricArea {
     width: 100%;
     margin-top: 10px;
     padding-top: 10px;
@@ -309,12 +276,41 @@ td
     box-shadow: 5px 5px 5px #888888;
 }
 
-.elapdedTime
-{
+.elapdedTime {
     font-size: 10px;
 }
 
-.elapdedTime ul
-{
+.elapdedTime ul {
     list-style-type: none;
+}
+
+span.popupMessage {
+    border-bottom: thin dotted;
+}
+
+span.popupMessage:hover {
+    text-decoration: none;
+    background: #FFFFFF;
+    z-index: 100;
+}
+
+span.popupMessage span {
+    text-align: left;
+    position: absolute;
+    left: -9999px;
+    margin: 20px 0px 0px 0px;
+    padding: 3px 3px 3px 3px;
+    border-style: solid;
+    border-color: #44A51C;
+    border-width:1px;
+    box-shadow: 2px 2px 2px #888888;
+    z-index: 100;
+}
+
+span.popupMessage:hover span {
+    left: 2%;
+    background: #FFFFFF;
+    margin: 20px 0px 0px 180px;
+    width: 450px;
+    z-index:100;
 }

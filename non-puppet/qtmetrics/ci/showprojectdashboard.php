@@ -49,7 +49,7 @@ session_start();
 $timeStart = microtime(true);
 $project = $_GET["project"];
 $conf = $_GET["conf"];
-$conf = str_replace("g  ","g++",$conf);           // Parameter passing destroys string "++", e.g. "linux-g++-32_Ubuntu_10.04_x86" -> "linux-g  -32_Ubuntu_10.04_x86"
+$conf = str_replace("g  ","g++",$conf);     // Problem: Parameter passing (with GET method in URL) destroys the string "++", e.g. "linux-g++-32_Ubuntu_10.04_x86" -> "linux-g  -32_Ubuntu_10.04_x86"
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');
@@ -83,7 +83,7 @@ if ($project == "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf == "All") {
-    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearFilters()">Select Project</a> -> ' . $project . '<br/><br/>';
+    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> ' . $project . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         $projectFilter = "";
         $confFilter = "";
@@ -112,7 +112,7 @@ if ($project <> "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf <> "All") {
-    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearFilters()">Select Project</a> -> <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf . '<br/><br/>';
+    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         /* Show general data */
         $projectFilter = " project=\"$project\"";

@@ -127,14 +127,14 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
 
     echo "</tr>";
     $i++;
-    if ($i > 12 AND !isset($_SESSION['projectDashboardShowFullList'])) {                                  // List cut mode: By default show only n items in the list to leave room for possible other metrics boxes
+    if ($i > 12 AND !isset($_SESSION['projectDashboardShowFullList'])) {                                         // List cut mode: By default show only n items in the list to leave room for possible other metrics boxes
         break;
     }
 }
 echo "</table>";
 if (!isset($_SESSION['projectDashboardShowFullList'])) {
-    echo '<br/><a href="javascript:void(0);" onclick="clearFilters()">Show full list...</a><br/><br/>';   // List cut mode: If only first n items shown, add a link to see all
-    $_SESSION['projectDashboardShowFullList'] = TRUE;                                                     // List cut mode: After refreshing the metrics box, show all items instead (set below to return the default 'cut mode')
+    echo '<br/><a href="javascript:void(0);" onclick="clearProjectFilters()">Show full list...</a><br/><br/>';   // List cut mode: If only first n items shown, add a link to see all
+    $_SESSION['projectDashboardShowFullList'] = TRUE;                                                            // List cut mode: After refreshing the metrics box, show all items instead (set below to return the default 'cut mode')
 }
 
 ?>

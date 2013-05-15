@@ -41,7 +41,44 @@
 #############################################################################
 ?>
 
-<div id="footer">
-<b>Juha Sippola 2013 / Pilot version v0.11 15-May-2013</b><br/>
-Based on live data from <a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
-</div>
+<?php
+
+// (Note: session started in getfilters.php)
+
+/* Get list of project values to session variable xxx (if not done already) */
+if(!isset($_SESSION['arrayAutotestName'])) {
+    /* Connect to the server */
+    require(__DIR__.'/../connect.php');
+
+    /* Read all Autotest values from database */
+    $sql = "SELECT DISTINCT name FROM test ORDER BY name";
+    if ($useMysqli) {
+        $result = mysqli_query($conn, $sql);
+        $numberOfRows = mysqli_num_rows($result);
+    } else {
+        $selectdb="USE $db";
+        $result = mysql_query($selectdb) or die (mysql_error());
+        $result = mysql_query($sql) or die (mysql_error());
+        $numberOfRows = mysql_num_rows($result);
+    }
+
+    /* Store Configuration values to session variable (ref. http://www.phpriot.com/articles/intro-php-sessions/7) */
+    $arrayAutotestName = array();
+    for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop the Autotests
+        if ($useMysqli)
+            $resultRow = mysqli_fetch_row($result);
+        else
+            $resultRow = mysql_fetch_row($result);
+        $arrayAutotestName[] = $resultRow[0];
+    }
+    $_SESSION['arrayAutotestName'] = $arrayAutotestName;
+
+    if ($useMysqli)
+        mysqli_free_result($result);        // Free result set
+
+    /* Close connection to the server */
+    require(__DIR__.'/../connectionclose.php');
+
+}
+
+?>

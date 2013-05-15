@@ -62,11 +62,11 @@ session_start();
         function showAll()
         {
             getFilters("filters", "ci/getfilters.php");
-            showMetricsBoxes("All","All");
+            showMetricsBoxes("All","All","All");
         }
 
         /* Update all metrics boxes */
-        function showMetricsBoxes(project,conf)
+        function showMetricsBoxes(project,conf,autotest)
         {
             var i;
             var file;
@@ -76,7 +76,7 @@ session_start();
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                getMetricData(i, file, project, conf);
+                getMetricData(i, file, project, conf, autotest);
             <?php
             }
             ?>
@@ -99,7 +99,7 @@ session_start();
                 file = "<?php echo $filepath ?>";
                 filter = "<?php echo $filters ?>";
                 if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)   // Check if this filter should update the metrics box
-                    getMetricData(i, file, value, document.getElementById("conf").value);
+                    getMetricData(i, file, value, document.getElementById("conf").value, document.getElementById("autotest").value);
             <?php
             }
             ?>
@@ -122,17 +122,48 @@ session_start();
                 file = "<?php echo $filepath ?>";
                 filter = "<?php echo $filters ?>";
                 if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)    // Check if this filter should update the metrics box
-                    getMetricData(i, file, document.getElementById("project").value, value);
+                    getMetricData(i, file, document.getElementById("project").value, value, document.getElementById("autotest").value);
             <?php
             }
             ?>
         }
 
-        /* Set filters to "All" */
+        /* Update those metrics boxes that are applied to this filter */
+        function filterAutotest(value)
+        {
+            var i;
+            var file;
+            var filter;
+            var thisFilter = "Autotest";
+            document.getElementById("autotest").value = value;   // Save filtered value
+            <?php
+            foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
+                $filepath = $arrayMetricsBoxesCI[$key][0];
+                $filters = $arrayMetricsBoxesCI[$key][1];
+            ?>
+                i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
+                file = "<?php echo $filepath ?>";
+                filter = "<?php echo $filters ?>";
+                if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)    // Check if this filter should update the metrics box
+                    getMetricData(i, file, document.getElementById("project").value, document.getElementById("conf").value, value);
+            <?php
+            }
+            ?>
+        }
+
+        /* Set all filters to "All" */
         function clearFilters()
         {
-        filterProject("All");
-        filterConf("All");
+            filterProject("All");
+            filterConf("All");
+            filterAutotest("All");
+        }
+
+        /* Set Project filters to "All" */
+        function clearProjectFilters()
+        {
+            filterProject("All");
+            filterConf("All");
         }
 
         /* Clear session variables and reload the page */
@@ -170,6 +201,13 @@ session_start();
         <br/>
         <label>Configuration:</label>
         <select name="conf" id="conf" onchange="filterConf(this.value)">
+        <?php
+            echo "<option value=\"All\">Loading... </option>";
+        ?>
+        </select>
+        <br/>
+        <label>Autotest:</label>
+        <select name="autotest" id="autotest" onchange="filterAutotest(this.value)">
         <?php
             echo "<option value=\"All\">Loading... </option>";
         ?>
