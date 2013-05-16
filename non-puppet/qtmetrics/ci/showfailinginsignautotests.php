@@ -99,6 +99,9 @@ if ($autotest == "All") {
         foreach($arrayFailingAutotests as $key => $value) {
             $autotestCount++;
         }
+        $arrayProjectName = $_SESSION['arrayProjectName'];
+        $arrayProjectBuildLatest = $_SESSION['arrayProjectBuildLatest'];
+        $arrayProjectBuildScopeMin = $_SESSION['arrayProjectBuildScopeMin'];
 
         /* Get number of Projects for each autotest in latest Build */
         $arrayFailingAutotestsProjectCountLatestBuild = array();
@@ -107,7 +110,7 @@ if ($autotest == "All") {
         foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
             $sql = "SELECT DISTINCT name
                     FROM test
-                    WHERE project=\"$arrayProjectName[$k]\" AND build_number=$arrayProjectBuildLatest[$k]  AND insignificant=1";
+                    WHERE project=\"$arrayProjectName[$k]\" AND build_number=$arrayProjectBuildLatest[$k] AND insignificant=1";
             if ($useMysqli) {
                 $result = mysqli_query($conn, $sql);
                 $numberOfRows = mysqli_num_rows($result);
@@ -143,7 +146,7 @@ if ($autotest == "All") {
         foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
             $sql = "SELECT name, cfg
                     FROM test
-                    WHERE project=\"$arrayProjectName[$k]\" AND build_number=$arrayProjectBuildLatest[$k]  AND insignificant=1
+                    WHERE project=\"$arrayProjectName[$k]\" AND build_number=$arrayProjectBuildLatest[$k] AND insignificant=1
                     ORDER BY name";
             if ($useMysqli) {
                 $result = mysqli_query($conn, $sql);
@@ -182,7 +185,7 @@ if ($autotest == "All") {
         foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
             $sql = "SELECT DISTINCT name
                     FROM test
-                    WHERE project=\"$arrayProjectName[$k]\" AND build_number>$arrayProjectBuildScopeMin[$k]  AND insignificant=1";
+                    WHERE project=\"$arrayProjectName[$k]\" AND build_number>$arrayProjectBuildScopeMin[$k] AND insignificant=1";
             if ($useMysqli) {
                 $result = mysqli_query($conn, $sql);
                 $numberOfRows = mysqli_num_rows($result);
@@ -219,7 +222,7 @@ if ($autotest == "All") {
         foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
             $sql = "SELECT name, cfg
                     FROM test
-                    WHERE project=\"$arrayProjectName[$k]\" AND build_number>$arrayProjectBuildScopeMin[$k]  AND insignificant=1
+                    WHERE project=\"$arrayProjectName[$k]\" AND build_number>$arrayProjectBuildScopeMin[$k] AND insignificant=1
                     ORDER BY name";
             if ($useMysqli) {
                 $result = mysqli_query($conn, $sql);

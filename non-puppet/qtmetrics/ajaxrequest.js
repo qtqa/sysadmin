@@ -112,5 +112,7 @@ function showFilters(div)
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {
         var response = filterRequest.responseText;
         document.getElementById(div).innerHTML = response;
+        loadMetricsboxes();
+        return;
     }
 }

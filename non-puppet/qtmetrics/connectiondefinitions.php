@@ -44,7 +44,7 @@
 <?php
 
 /* Select MySQL API. For more details, see http://php.net/manual/en/mysqlinfo.api.choosing.php */
-$useMysqli = FALSE;                     // Set TRUE for mysqli extension or FALSE for old mysql extension
+$useMysqli = TRUE;                      // Set TRUE for mysqli extension or FALSE for old mysql extension
 
 /* Select connection type. The 'normal connection will be closed as soon as the script ends */
 $usePersistentConnection = TRUE;        // Set TRUE for persistent connection or FALSE for 'normal'

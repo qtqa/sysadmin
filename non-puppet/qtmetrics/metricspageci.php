@@ -59,9 +59,13 @@ session_start();
     <script>
 
         /* Get all filter values and show all metrics boxes */
-        function showAll()
+        function loadAll()
         {
-            getFilters("filters", "ci/getfilters.php");
+            getFilters("filters", "ci/getfilters.php");          // Metrics boxes to be loaded after filters are ready (see getFilters and showFilters)
+        }
+
+        function loadMetricsboxes()                              // Called after filters are ready (from showFilters)
+        {
             showMetricsBoxes("All","All","All");
         }
 
@@ -181,7 +185,7 @@ session_start();
     </head>
 
     <!-- Initially show all data -->
-    <body onload="showAll()">
+    <body onload="loadAll()">
         <div id="container">
         <?php include "commondefinitions.php";?>
         <?php include "header.php";?>
