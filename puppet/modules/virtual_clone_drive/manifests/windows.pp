@@ -20,11 +20,14 @@ class virtual_clone_drive::windows(
     # fetch command
     $fetch_cmd = "\"${msysbin}\\curl.exe\" $url -L -o \"${tempdir}\\setupvirtualclonedrive.exe\""
 
+    # Kill Daemon task before uninstalling
+    $taskkill = "taskkill /IM VCDDaemon.exe"
+
     # These files need to be removed before uninstall. Deleting 'ExecuteWithUAC.exe' makes uninstall conflict
     $remove_files = "del \"${path}\\ExecuteWithUAC.exe\" && del \"${path}\\version.txt\""
 
     # This will uninstall VCD.
-    $uninstall_cmd = "(if exist \"${path}\\VCDDaemon.exe\" $remove_files && \"${path}\\vcd-uninst.exe\" /S)"
+    $uninstall_cmd = "(if exist \"${path}\\VCDDaemon.exe\" $taskkill && $remove_files && \"${path}\\vcd-uninst.exe\" /S)"
 
     # This will install VCD. VCD will be automatically instaled to $path
     $install_cmd = "${tempdir}\\SetupVirtualCloneDrive.exe /S /A /A"
