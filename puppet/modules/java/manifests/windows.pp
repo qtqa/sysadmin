@@ -1,11 +1,11 @@
 # Downloads the given $version of Java and installs to the specified $path.
 # If a different Java version is already installed there, it is uninstalled first.
 class java::windows(
-    $version = '1.7.0_17',
-    # url version is needed because url path will be changed after every java release (e.g 7u17-b02 or 6u43-b01)
-    $url_version = '7u17-b02',
-    $path = "C:\\Program Files\\Java",
-    $jre_cookie = "gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjre7-downloads-1880261.html"
+    # url version is needed because url path will be changed after every java release (e.g 7u17-b02 or 6u43-b01). When not using $input in $url!
+    # $url_version = '7u7',
+    # $jre_cookie = "gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjre7-downloads-1880261.html"
+    $version = '1.7.0_7',
+    $path = "C:\\Program Files\\Java"
 ) {
     $os_bits = $::architecture ? {
         x64 => "x64",
@@ -26,7 +26,10 @@ class java::windows(
     $package_version = "${version_min}u${version_update}"
 
     # installer file URL
-    $url = "http://download.oracle.com/otn-pub/java/jdk/${url_version}/jre-${package_version}-windows-${os_bits}.exe"
+    # $url = "http://download.oracle.com/otn-pub/java/jdk/${url_version}/jre-${package_version}-windows-${os_bits}.exe"
+
+    # Input url
+    $url = "$input/windows/jre-$package_version-windows-$os_bits.exe"
 
     # Build portion of version number with two digits (e.g. '07')
     $version_update2 = sprintf('%02d', $version_update)
@@ -46,7 +49,8 @@ class java::windows(
 
     $install_flags = "/s /v\"/passive /norestart AUTOUPDATECHECK=0 IEXPLORER=1 JAVAUPDATE=0 JU=0 EULA=1\""
 
-    $fetch_cmd = "\"${msysbin}\\curl.exe\" -L --cookie $jre_cookie \"$url\" -o \"${install_package}\""
+    # "--cookie $jre_cookie" this need to be add to the fetch command when not using $input in URL
+    $fetch_cmd = "\"${msysbin}\\curl.exe\" \"$url\" -L -o \"${install_package}\""
 
     # Set product code to environment variables.
     $set_pcode_env_cmd = "set /p pcode=<\"$path\\ProductCode.txt\""
@@ -55,10 +59,10 @@ class java::windows(
     $kill_java = "taskkill /f /im java.exe"
 
     # Uninstall command will uninstall the java using product code which was saved after installation.
-    $uninstall_cmd = "( if exist \"$path\\ProductCode.txt\" $set_pcode_env_cmd && $kill_java && start \"uninstall\" /wait msiexec /QB /x !pcode! )"
+    $uninstall_cmd = "( if exist \"$path\\ProductCode.txt\" $set_pcode_env_cmd) && $kill_java && start \"uninstall\" /wait msiexec /QB /x !pcode!"
 
     # Java folder will be removed which in this case includes old ProductCode.txt.
-    $remove_path = "(if exist \"$path\" rd /S /Q \"$path\")"
+    $remove_ProductCode = "(if exist \"$path\\ProductCode.txt\" del \"$path\\ProductCode.txt\")"
 
     # Directory where java will be installed
     $install_path = "${path}\\jre${version_min}"
@@ -71,9 +75,9 @@ class java::windows(
 
     $binary = "${install_path}\\bin\\java.exe"
 
-    exec { "install $name $version to $path":
+    exec { "install $name $version to $path $url C:\\Windows\\system32\\cmd.exe /V:ON /C \"$fetch_cmd && $uninstall_cmd & $remove_ProductCode && $install_cmd & $product_code \"":
 
-        command   => "C:\\Windows\\system32\\cmd.exe /V:ON /C \"$fetch_cmd && $uninstall_cmd & ( $remove_path ) && mkdir \"$path\" && $install_cmd && $product_code \"",
+        command   => "C:\\Windows\\system32\\cmd.exe /V:ON /C \"$fetch_cmd && $uninstall_cmd & $remove_ProductCode && $install_cmd & $product_code \"",
         unless    => "C:\\Windows\\system32\\cmd.exe /C \"\"$binary\" -version 2>&1 | \"${msysbin}\\grep.exe\" -E \"$version_expression\"\"",
         logoutput => true,
         timeout   => 3600
