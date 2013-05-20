@@ -41,8 +41,8 @@ class android::linux
 
     android_install {
         "ndk":
-            filename    =>  "ndk/android-ndk-r8d-linux-x86.tar.bz2",
-            directory   =>  "android-ndk-r8d",
+            filename    =>  "ndk/android-ndk-r8e-${ndk_host}.tar.bz2",
+            directory   =>  "android-ndk-r8e",
             options     =>  "xj",
             target      =>  "$target",
             url         =>  "$url",
