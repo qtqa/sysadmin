@@ -1,7 +1,7 @@
 # Downloads the given $version of cmake from cmake.org and installs to the specified $path.
 # If a different cmake version is already installed there, it is uninstalled first.
 class cmake::windows(
-    $version = '2.8.9',
+    $version = '2.8.11',
     $path = 'C:\CMake'
 ) {
     # first two portions of version number (e.g. '2.8')
