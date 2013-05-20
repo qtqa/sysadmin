@@ -51,10 +51,11 @@ if(!isset($_SESSION['arrayProjectName'])) {
     require(__DIR__.'/../connect.php');
 
     /* Step 1: Read all Project values from database ... */
-    $sql="SELECT project, MAX(build_number), result FROM ci GROUP BY project ORDER BY project;";
+    $sql="SELECT project, MAX(build_number)
+          FROM ci
+          GROUP BY project ORDER BY project;";
     define("DBCOLUMNCIPROJECT", 0);
     define("DBCOLUMNCIBUILDNUMBER", 1);
-    define("DBCOLUMNCIRESULT", 2);
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -64,7 +65,6 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result = mysql_query($sql) or die (mysql_error());
         $numberOfRows = mysql_num_rows($result);
     }
-
     /* ... and store to session variable */
     $arrayProjectName = array();
     $arrayProjectBuildLatest = array();
@@ -84,8 +84,15 @@ if(!isset($_SESSION['arrayProjectName'])) {
 
     /* Step 2: Read the result of latest Build for each Project from the database (all must be read separately) */
     $arrayProjectBuildLatestResult = array();
+    $arrayProjectBuildLatestTimestamp = array();
+    $arrayProjectBuildLatestDuration = array();
+    define("DBCOLUMNCIPROJECT", 0);
+    define("DBCOLUMNCIBUILDNUMBER", 1);
+    define("DBCOLUMNCIRESULT", 2);
+    define("DBCOLUMNCITIMESTAMP", 3);
+    define("DBCOLUMNCIDURATION", 4);
     for ($i=0; $i<$numberOfRows; $i++) {                                             // Loop the Projects
-        $sql = "SELECT project, build_number, result
+        $sql = "SELECT project, build_number, result, timestamp, duration
                 FROM ci
                 WHERE project=\"$arrayProjectName[$i]\" AND build_number=$arrayProjectBuildLatest[$i];";        // Will return only one row
         if ($useMysqli) {
@@ -97,7 +104,9 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $result2 = mysql_query($sql) or die (mysql_error());
             $resultRow2 = mysql_fetch_row($result2);
         }
-        $arrayProjectBuildLatestResult[] = $resultRow2[DBCOLUMNCIRESULT];             // Build result
+        $arrayProjectBuildLatestResult[] = $resultRow2[DBCOLUMNCIRESULT];
+        $arrayProjectBuildLatestTimestamp[] = $resultRow2[DBCOLUMNCITIMESTAMP];
+        $arrayProjectBuildLatestDuration[] = $resultRow2[DBCOLUMNCIDURATION];
     }
 
     /* Step 3: Read the number of successful, failed and all Builds for each Project from the database (all must be read separately) */
@@ -171,12 +180,22 @@ if(!isset($_SESSION['arrayProjectName'])) {
         }
     }
 
-    /* Step 5: Read the number of Confs (plus force success and insignificant in the future) for each Project from the database (all must be read separately) */
+    /* Step 5: Read the number of Confs (including force success and insignificant) for each Project from the database (all must be read separately) */
     $arrayProjectBuildLatestConfCount = array();
+    $arrayProjectBuildLatestConfCountForceSuccess = array();
+    $arrayProjectBuildLatestConfCountInsignificant = array();
     for ($i=0; $i<$numberOfRows; $i++) {                                             // Loop the Projects
-        $sql = "SELECT 'Total', COUNT(cfg) AS 'count'
+        $sql = "SELECT 'forcesuccess', COUNT(cfg) AS 'count'
                 FROM cfg
-                WHERE project=\"$arrayProjectName[$i]\" AND build_number=$arrayProjectBuildLatest[$i]";       // Will return one row (more to be added...)
+                WHERE project=\"$arrayProjectName[$i]\" AND build_number=$arrayProjectBuildLatest[$i] AND forcesuccess=1
+                UNION
+                SELECT 'insignificant', COUNT(cfg) AS 'count'
+                FROM cfg
+                WHERE project=\"$arrayProjectName[$i]\" AND build_number=$arrayProjectBuildLatest[$i] AND insignificant=1
+                UNION
+                SELECT 'Total', COUNT(cfg) AS 'count'
+                FROM cfg
+                WHERE project=\"$arrayProjectName[$i]\" AND build_number=$arrayProjectBuildLatest[$i]";
         if ($useMysqli) {
             $result2 = mysqli_query($conn, $sql);
             $numberOfRows2 = mysqli_num_rows($result2);
@@ -186,12 +205,18 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $result2 = mysql_query($sql) or die (mysql_error());
             $numberOfRows2 = mysql_num_rows($result2);
         }
-        for ($j=0; $j<$numberOfRows2; $j++) {                                        // Loop the Confs
+        for ($j=0; $j<$numberOfRows2; $j++) {                                        // Loop the counts
             if ($useMysqli)
                 $resultRow2 = mysqli_fetch_row($result2);
             else
                 $resultRow2 = mysql_fetch_row($result2);
-            $arrayProjectBuildLatestConfCount[] = $resultRow2[1];
+
+            if ($resultRow2[0] == "forcesuccess")
+                $arrayProjectBuildLatestConfCountForceSuccess[] = $resultRow2[1];
+            if ($resultRow2[0] == "insignificant")
+                $arrayProjectBuildLatestConfCountInsignificant[] = $resultRow2[1];
+            if ($resultRow2[0] == "Total")
+                $arrayProjectBuildLatestConfCount[] = $resultRow2[1];
         }
     }
 
@@ -199,6 +224,8 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $_SESSION['arrayProjectName'] = $arrayProjectName;
     $_SESSION['arrayProjectBuildLatest'] = $arrayProjectBuildLatest;
     $_SESSION['arrayProjectBuildLatestResult'] = $arrayProjectBuildLatestResult;
+    $_SESSION['arrayProjectBuildLatestTimestamp'] = $arrayProjectBuildLatestTimestamp;
+    $_SESSION['arrayProjectBuildLatestDuration'] = $arrayProjectBuildLatestDuration;
     $_SESSION['arrayProjectBuildScopeMin'] = $arrayProjectBuildScopeMin;
     $_SESSION['arrayProjectBuildCount'] = $arrayProjectBuildCount;
     $_SESSION['arrayProjectBuildCountSuccess'] = $arrayProjectBuildCountSuccess;
@@ -206,6 +233,8 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $_SESSION['arrayProjectBuildLatestSignificantCount'] = $arrayProjectBuildLatestSignificantCount;
     $_SESSION['arrayProjectBuildLatestInsignificantCount'] = $arrayProjectBuildLatestInsignificantCount;
     $_SESSION['arrayProjectBuildLatestConfCount'] = $arrayProjectBuildLatestConfCount;
+    $_SESSION['arrayProjectBuildLatestConfCountForceSuccess'] = $arrayProjectBuildLatestConfCountForceSuccess;
+    $_SESSION['arrayProjectBuildLatestConfCountInsignificant'] = $arrayProjectBuildLatestConfCountInsignificant;
 
     if ($useMysqli) {
         mysqli_free_result($result);                                                 // Free result set

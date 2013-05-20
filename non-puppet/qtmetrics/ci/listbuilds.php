@@ -52,19 +52,20 @@
 
 /* Read data from database */
 if ($project<>"All" AND $conf=="All") {                                       // Print Project Builds
-    $sql = "SELECT build_number,result
+    $sql = "SELECT build_number,result, timestamp
             FROM ci
             WHERE $projectFilter
             ORDER BY build_number";
 }
 if ($project<>"All" AND $conf<>"All") {                                       // Print Configuration Builds
-    $sql = "SELECT build_number,result
+    $sql = "SELECT build_number,result, timestamp
             FROM cfg
             WHERE $projectFilter $confFilter
             ORDER BY build_number";
 }
 define("DBCOLUMNBUILD", 0);
 define("DBCOLUMNRESULT", 1);
+define("DBCOLUMNTIMESTAMP", 2);
 if ($useMysqli) {
     $result = mysqli_query($conn, $sql);
     $numberOfRows = mysqli_num_rows($result);
@@ -73,16 +74,12 @@ if ($useMysqli) {
     $numberOfRows = mysql_num_rows($result);
 }
 $timeRead = microtime(true);
-
-/* Print the data */
-$arrayBuildNumbers = array();
-echo '<b>Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+$arrayBuildNumbersRow = array();
+$arrayBuildDatesRow = array();
+$arrayBuildResultsRow = array();
 if ($numberOfRows>0) {
-    echo "<table class=\"fontSmall tableSingleBorder\">";
-    echo "<tr class=\"tableSingleBorder\">";
-    echo "<td class=\"tableSingleBorder\"><b>Result</b></td>";
     $printedBuildCount = 0;
-    for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop to print Build results
+    for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop the Builds
         $printThisBuild = FALSE;
         if ($useMysqli)
             $resultRow = mysqli_fetch_row($result);
@@ -95,45 +92,77 @@ if ($numberOfRows>0) {
             $printThisBuild = TRUE;
         }
         if ($printThisBuild) {
+
+            /* Build number */
+            $buildstring = $resultRow[DBCOLUMNBUILD];                       // Create the link url to build directory...
+            if ($resultRow[DBCOLUMNBUILD] < 10000)
+                $buildstring = '0' . $resultRow[DBCOLUMNBUILD];
+            if ($resultRow[DBCOLUMNBUILD] < 1000)
+                $buildstring = '00' . $resultRow[DBCOLUMNBUILD];
+            if ($resultRow[DBCOLUMNBUILD] < 100)
+                $buildstring = '000' . $resultRow[DBCOLUMNBUILD];
+            if ($resultRow[DBCOLUMNBUILD] < 10)
+                $buildstring = '0000' . $resultRow[DBCOLUMNBUILD];
+            if ($conf == "All") {
+                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
+                    . '" target="_blank">' . $resultRow[DBCOLUMNBUILD] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+            } else {
+                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
+                    . '/' . $conf . '" target="_blank">' . $resultRow[DBCOLUMNBUILD] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+            }
+            $arrayBuildNumbersRow[] = '<td class="tableCellCentered">' . $buildLink . '</td>';
+
+            /* Build date */
+            $date = strstr($resultRow[DBCOLUMNTIMESTAMP], ' ', TRUE);       // 'yyyy-mm-dd hh:mm:ss' -> 'yyyy-mm-dd'
+            $date = strstr($date, '-', FALSE);                              // 'yyyy-mm-dd' -> '-mm-dd'
+            $date = substr($date,1);                                        // '-mm-dd' -> 'mm-dd'
+            $arrayBuildDatesRow[] = '<td class="tableCellCentered">' . $date . '</td>';
+
+            /* Build result */
             $cellColor = '<td class="tableSingleBorder">';
             if ($resultRow[DBCOLUMNRESULT] == "SUCCESS")
                 $cellColor = '<td class="tableSingleBorder tableCellBackgroundGreen">';
             if ($resultRow[DBCOLUMNRESULT] == "FAILURE")
                 $cellColor = '<td class="tableSingleBorder tableCellBackgroundRed">';
-            echo $cellColor . $resultRow[DBCOLUMNRESULT] . '</td>';
-            $arrayBuildNumbers[] = $resultRow[DBCOLUMNBUILD];
+            $arrayBuildResultsRow[] = $cellColor . $resultRow[DBCOLUMNRESULT] . '</td>';
             $printedBuildCount++;
         }
     }
-    echo "</tr>";
-    echo "<tr>";
-    echo "<td class=\"tableSingleBorder\"><b>Build</b></td>";
-    for ($i=0; $i<$printedBuildCount; $i++) {                                 // Loop to print Build numbers
-                $buildstring = $arrayBuildNumbers[$i];                        // Create the link url to build directory...
-                if ($arrayBuildNumbers[$i] < 10000)
-                    $buildstring = '0' . $arrayBuildNumbers[$i];
-                if ($arrayBuildNumbers[$i] < 1000)
-                    $buildstring = '00' . $arrayBuildNumbers[$i];
-                if ($arrayBuildNumbers[$i] < 100)
-                    $buildstring = '000' . $arrayBuildNumbers[$i];
-                if ($arrayBuildNumbers[$i] < 10)
-                    $buildstring = '0000' . $arrayBuildNumbers[$i];
-        if ($conf == "All")
-            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-                . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
-        else
-            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-            . '/' . $conf . '" target="_blank">' . $arrayBuildNumbers[$i] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
-        echo '<td class="tableCellCentered">' . $buildLink . '</td>';
-    }
-    echo "</tr>";
-    echo "</table>";
-} else {
-    echo "(no items)<br/>";
 }
 
 if ($useMysqli)
     mysqli_free_result($result);                                            // Free result set
+
+/* Print the data */
+echo '<b>Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+if ($printedBuildCount > 0) {
+    echo "<table class=\"fontSmall tableSingleBorder\">";
+
+    /* Build number */
+    echo "<tr>";
+    echo "<td class=\"tableSingleBorder\"><b>Build</b></td>";
+    for ($i=0; $i<$printedBuildCount; $i++)
+        echo $arrayBuildNumbersRow[$i];
+    echo "</tr>";
+
+    /* Build date */
+    echo "<tr>";
+    echo "<td class=\"tableSingleBorder\"><b>Date</b></td>";
+    for ($i=0; $i<$printedBuildCount; $i++)
+        echo $arrayBuildDatesRow[$i];
+    echo "</tr>";
+
+    /* Build result */
+    echo "<tr class=\"tableSingleBorder\">";
+    echo "<td class=\"tableSingleBorder\"><b>Result</b></td>";
+    for ($i=0; $i<$printedBuildCount; $i++)
+        echo $arrayBuildResultsRow[$i];
+    echo "</tr>";
+
+    echo "</table>";
+} else {
+    echo "(no items)<br/>";
+}
 
 /* Elapsed time */
 $timeEnd = microtime(true);

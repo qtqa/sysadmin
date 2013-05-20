@@ -44,18 +44,22 @@
 <?php
 
 /* Number of items in top lists */
-define("TOPLISTSIZE", 5);
+define("TOPLISTSIZE", 10);
 
 /* Number of items in build history graph */
-define("HISTORYBUILDCOUNT", 15);                // Number of builds to be shown in Project and Configuration build history graphs
+define("HISTORYBUILDCOUNT", 20);                // Number of builds to be shown in Project and Configuration build history graphs
                                                 // (for consistency it may be reasonable to set this same as AUTOTEST_LATESTBUILDCOUNT)
 
 /* Number of items in top failed autotests */
-define("AUTOTEST_LATESTBUILDCOUNT", 15);        // Number of latest builds to be checked for each Project
+define("AUTOTEST_LATESTBUILDCOUNT", 20);        // Number of latest builds to be checked for each Project
 define("AUTOTEST_PROJECTCOUNT", 10);            // Number of Projects to be shown in list
 define("AUTOTEST_CONFIGURATIONCOUNT", 10);      // Number of Configurations to be shown in list
 
 /* Log file paths */
 define("LOGFILEPATHCI", "http://testresults.qt-project.org/ci/");
+
+/* Flag display tags (e.g. for Configuration force success) */
+define("FLAGON", "Yes");
+define("FLAGOFF", "-");
 
 ?>

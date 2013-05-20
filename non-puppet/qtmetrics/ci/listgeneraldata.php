@@ -57,6 +57,8 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     if ($value == $project) {
         $latestBuild = $_SESSION['arrayProjectBuildLatest'][$key];
         $latestBuildResult = $_SESSION['arrayProjectBuildLatestResult'][$key];
+        $latestBuildTimestamp = $_SESSION['arrayProjectBuildLatestTimestamp'][$key];
+        $latestBuildDuration = $_SESSION['arrayProjectBuildLatestDuration'][$key];
     }
 }
 $buildstring = $latestBuild;
@@ -81,7 +83,8 @@ if ($conf == "All") {
     if ($latestBuildResult == "FAILURE")
         $fontColorClass = "fontColorRed";
     echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-    echo "<tr><td>Build Date: </td><td>(data not available)</td></tr>";
+    echo "<tr><td>Build Date: </td><td>$latestBuildTimestamp</td></tr>";
+    echo "<tr><td>Build Duration: </td><td>$latestBuildDuration</td></tr>";
     echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
         . '/build_' . $buildstring . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
         // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/log.txt.gz
@@ -90,13 +93,14 @@ if ($conf == "All") {
 
 /* Configuration data */
 else {
-    $sql = "SELECT cfg,result,project,build_number
+    $sql = "SELECT result, timestamp, duration, forcesuccess, insignificant
             FROM cfg
             WHERE $projectFilter $confFilter AND build_number=$latestBuild";
-    define("DBCOLUMNCFGCFG", 0);
-    define("DBCOLUMNCFGRESULT", 1);
-    define("DBCOLUMNCFGPROJECT", 2);
-    define("DBCOLUMNCFGBUILD", 3);
+    define("DBCOLUMNCFGRESULT", 0);
+    define("DBCOLUMNCFGTIMESTAMP", 1);
+    define("DBCOLUMNCFGDURATION", 2);
+    define("DBCOLUMNCFGFORCESUCCESS", 3);
+    define("DBCOLUMNCFGINSIGNIFICANT", 4);
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -110,6 +114,10 @@ else {
         else
             $resultRow = mysql_fetch_row($result);
         $latestBuildResult = $resultRow[DBCOLUMNCFGRESULT];
+        $latestBuildTimestamp = $resultRow[DBCOLUMNCFGTIMESTAMP];
+        $latestBuildDuration = $resultRow[DBCOLUMNCFGDURATION];
+        $latestBuildForceSuccess = $resultRow[DBCOLUMNCFGFORCESUCCESS];
+        $latestBuildInsignificant = $resultRow[DBCOLUMNCFGINSIGNIFICANT];
         $projectConfValid = TRUE;
         echo "<table>";
         echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
@@ -120,9 +128,17 @@ else {
             $fontColorClass = "fontColorGreen";
         if ($latestBuildResult == "FAILURE")
             $fontColorClass = "fontColorRed";
-        echo '<tr><td>Latest Conf Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-        echo "<tr><td>Build Date: </td><td>(data not available)</td></tr>";
-        echo "<tr><td>Force Success: </td><td>(data not available)</td></tr>";
+        echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
+        echo "<tr><td>Build Date: </td><td>$latestBuildTimestamp</td></tr>";
+        echo "<tr><td>Build Duration: </td><td>$latestBuildDuration</td></tr>";
+        if ($latestBuildForceSuccess == 1)
+            echo '<tr><td>Force Success: </td><td>' . FLAGON . '</td></tr>';
+        else
+            echo '<tr><td>Force Success: </td><td>' . FLAGOFF . '</td></tr>';
+        if ($latestBuildInsignificant == 1)
+            echo '<tr><td>Insignificant: </td><td>' . FLAGON . '</td></tr>';
+        else
+            echo '<tr><td>Insignificant: </td><td>' . FLAGOFF . '</td></tr>';
         echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
             . '/build_' . $buildstring . '/' . $conf . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
             // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86/log.txt.gz
