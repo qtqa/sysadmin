@@ -91,18 +91,22 @@ session_start();
         {
             var i;
             var file;
-            var filter;
+            var appliedFilter;
+            var clearFilter;
             var thisFilter = "Project";
             document.getElementById("project").value = value;    // Save filtered value
             <?php
             foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
                 $filepath = $arrayMetricsBoxesCI[$key][0];
-                $filters = $arrayMetricsBoxesCI[$key][1];
+                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
+                $clearFilters = $arrayMetricsBoxesCI[$key][2];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                filter = "<?php echo $filters ?>";
-                if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)   // Check if this filter should update the metrics box
+                appliedFilter = "-<?php echo $appliedFilters ?>";
+                clearFilter = "-<?php echo $clearFilters ?>";
+                checkClearFilter(appliedFilter, clearFilter, thisFilter);
+                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)   // Check if this filter should update the metrics box
                     getMetricData(i, file, value, document.getElementById("conf").value, document.getElementById("autotest").value);
             <?php
             }
@@ -114,18 +118,22 @@ session_start();
         {
             var i;
             var file;
-            var filter;
+            var appliedFilter;
+            var clearFilter;
             var thisFilter = "Conf";
             document.getElementById("conf").value = value;       // Save filtered value
             <?php
             foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
                 $filepath = $arrayMetricsBoxesCI[$key][0];
-                $filters = $arrayMetricsBoxesCI[$key][1];
+                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
+                $clearFilters = $arrayMetricsBoxesCI[$key][2];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                filter = "<?php echo $filters ?>";
-                if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)    // Check if this filter should update the metrics box
+                appliedFilter = "-<?php echo $appliedFilters ?>";
+                clearFilter = "-<?php echo $clearFilters ?>";
+                checkClearFilter(appliedFilter, clearFilter, thisFilter);
+                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)    // Check if this filter should update the metrics box
                     getMetricData(i, file, document.getElementById("project").value, value, document.getElementById("autotest").value);
             <?php
             }
@@ -137,22 +145,49 @@ session_start();
         {
             var i;
             var file;
-            var filter;
+            var appliedFilter;
+            var clearFilter;
             var thisFilter = "Autotest";
             document.getElementById("autotest").value = value;   // Save filtered value
             <?php
             foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
                 $filepath = $arrayMetricsBoxesCI[$key][0];
-                $filters = $arrayMetricsBoxesCI[$key][1];
+                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
+                $clearFilters = $arrayMetricsBoxesCI[$key][2];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                filter = "<?php echo $filters ?>";
-                if (filter.search(thisFilter) >= 0 || filter.search("All") >= 0)    // Check if this filter should update the metrics box
+                appliedFilter = "-<?php echo $appliedFilters ?>";
+                clearFilter = "-<?php echo $clearFilters ?>";
+                checkClearFilter(appliedFilter, clearFilter, thisFilter);
+                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)    // Check if this filter should update the metrics box
                     getMetricData(i, file, document.getElementById("project").value, document.getElementById("conf").value, value);
             <?php
             }
             ?>
+        }
+
+        /* Check and clear filters on other filter changes (used with nested metrics boxes to get to 1st level) */
+        function checkClearFilter(applied, clear, filter)
+        {
+            if (clear.search("Project") >= 0 && filter != "Project") {
+                if (applied.search("Conf") >= 0)
+                    document.getElementById("project").value = "All";
+                if (applied.search("Autotest") >= 0)
+                    document.getElementById("project").value = "All";
+            }
+            if (clear.search("Conf") >= 0 && filter != "Conf") {
+                if (applied.search("Project") >= 0)
+                    document.getElementById("conf").value = "All";
+                if (applied.search("Autotest") >= 0)
+                    document.getElementById("conf").value = "All";
+            }
+            if (clear.search("Autotest") >= 0 && filter != "Autotest") {
+                if (applied.search("Project") >= 0)
+                    document.getElementById("autotest").value = "All";
+                if (applied.search("Conf") >= 0)
+                    document.getElementById("autotest").value = "All";
+            }
         }
 
         /* Set all filters to "All" */

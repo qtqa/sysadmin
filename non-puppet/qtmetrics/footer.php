@@ -42,6 +42,6 @@
 ?>
 
 <div id="footer">
-<b>Juha Sippola 2013 / Pilot version v0.12 20-May-2013</b><br/>
+<b>Juha Sippola 2013 / Pilot version v0.13 22-May-2013</b><br/>
 Based on live data from <a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
 </div>

@@ -58,7 +58,7 @@ include "getautotestvalues.php";
 <!-- (NOTE: The layout should remain same here and in metricspageci.php) -->
 <b>FILTERS:</b>
 <div id="filterButtons">
-<button onclick="showAll()">Clear selections</button>
+<button onclick="loadAll()">Clear selections</button>
 <button onclick="reloadFilters()">Reload</button>
 </div>
 <br/><br/>

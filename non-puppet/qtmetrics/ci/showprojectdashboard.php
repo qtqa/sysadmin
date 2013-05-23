@@ -139,8 +139,10 @@ if ($project <> "All" AND $conf <> "All") {
 /* Project not selected when Configuration selected            */
 /************************************************************/
 
-if ($project == "All" AND $conf <> "All")
+if ($project == "All" AND $conf <> "All") {
+    echo '<b>PROJECT DASHBOARD:</b><br/><br/>';
     echo "<br/>(Please select a project...)<br/><br/>";
+}
 
 /* Close connection to the server */
 require(__DIR__.'/../connectionclose.php');

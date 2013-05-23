@@ -204,11 +204,13 @@ table {
 th {
     padding-left: 7px;
     padding-right: 7px;
+    vertical-align: top;
 }
 
 td {
     padding-left: 4px;
     padding-right: 4px;
+    vertical-align: top;
 }
 
 .fontColorBlack {
@@ -304,13 +306,15 @@ span.popupMessage {
     border-bottom: thin dotted;
 }
 
-span.popupMessage:hover {
+span.popupMessage:hover,
+span.popupMessageImg:hover {
     text-decoration: none;
     background: #FFFFFF;
     z-index: 100;
 }
 
-span.popupMessage span {
+span.popupMessage span,
+span.popupMessageImg span {
     text-align: left;
     position: absolute;
     left: -9999px;
@@ -319,14 +323,16 @@ span.popupMessage span {
     border-style: solid;
     border-color: #44A51C;
     border-width:1px;
+    border-radius: 3px;
     box-shadow: 2px 2px 2px #888888;
     z-index: 100;
 }
 
-span.popupMessage:hover span {
+span.popupMessage:hover span,
+span.popupMessageImg:hover span {
     left: 2%;
     background: #FFFFFF;
-    margin: 20px 0px 0px 180px;
+    margin: 20px 0px 0px 80px;             /* Left margin (the last value) can be used to adjust the message box horizontally */
     width: 450px;
     z-index:100;
 }
