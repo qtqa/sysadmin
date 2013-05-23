@@ -12,6 +12,16 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
         }
     }
 
+    if ( $macosx_productversion_major == "10.7" ) {
+        package {
+            "mysql55":           ensure => present;
+        }
+         file { "/etc/profile.d/mysql_env.sh":
+             ensure   =>  present,
+             content  => template("qt_prereqs/mysql_env.sh.erb"),
+            }
+    }
+
     package {
         "perl5":             ensure => present;
         "p5-libwww-perl":    ensure => present;
