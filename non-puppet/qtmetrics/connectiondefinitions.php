@@ -56,6 +56,6 @@ $passwd = 'r-kl_DsS';
 $db = 'qt';
 
 /* Disable MySQL and other error messages (to prevent e.g. MySQL connection settings to be displayed in case of a connection failure) */
-$disableErrorMessages = FALSE;          // Set TRUE when using target live server or FALSE in development environment
+$disableErrorMessages = TRUE;           // Set TRUE when using target live server or FALSE in development environment
 
 ?>

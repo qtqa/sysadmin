@@ -49,6 +49,7 @@
     // $project
     // $projectFilter
     // $confFilter
+    // $showElapsedTime
     // $timeStart
     // $timeConnect
 
@@ -85,10 +86,12 @@ if ($useMysqli) {
 /* Print the data */
 if ($numberOfRows > 0) {
 
+    echo '<b>Configurations</b><br>';
+
     /* Titles */
     echo '<table class="fontSmall">';
     echo '<tr>';
-    echo '<th class="tableCellAlignLeft">Configurations</th>';
+    echo '<th></th>';
     echo '<th colspan="5" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
     echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS</th>';
     echo '</tr>';
@@ -238,15 +241,19 @@ if ($useMysqli)
     mysqli_free_result($result);                                            // Free result set
 
 /* Elapsed time */
-$timeEnd = microtime(true);
-$timeDbConnect = round($timeConnect - $timeStart, 2);
-$timeDbRead = round($timeRead - $timeConnect, 2);
-$timeCalc = round($timeEnd - $timeRead, 2);
-$time = round($timeEnd - $timeStart, 2);
-echo "<div class=\"elapdedTime\">";
-echo "<ul><li>";
-echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
-echo "</li></ul>";
-echo "</div>";
+if ($showElapsedTime) {
+    $timeEnd = microtime(true);
+    $timeDbConnect = round($timeConnect - $timeStart, 2);
+    $timeDbRead = round($timeRead - $timeConnect, 2);
+    $timeCalc = round($timeEnd - $timeRead, 2);
+    $time = round($timeEnd - $timeStart, 2);
+    echo "<div class=\"elapdedTime\">";
+    echo "<ul><li>";
+    echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
+    echo "</li></ul>";
+    echo "</div>";
+} else {
+    echo "<br>";
+}
 
 ?>

@@ -64,6 +64,9 @@ if ($useMysqli) {
     $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
 }
 
+/* Set to show or hide elapsed time printing */
+$showElapsedTime = FALSE;                   // Set TRUE to show elapsed database and calculation times for each list in Project dashboard
+
 /************************************************************/
 /* NESTED LEVEL 1: No filtering done (default view)         */
 /************************************************************/

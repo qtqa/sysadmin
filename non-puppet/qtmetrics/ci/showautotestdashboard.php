@@ -71,6 +71,14 @@ if ($useMysqli) {
     $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
 }
 
+/* Check the latest Build number for the Project */
+if ($project <> "All") {
+    foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
+        if ($project == $projectValue)
+            $latestProjectBuild = $_SESSION['arrayProjectBuildLatest'][$projectKey];
+    }
+}
+
 /*************************************************************/
 /* NESTED LEVEL 1: No autotest filtering done (default view) */
 /*************************************************************/
@@ -273,6 +281,8 @@ if ($autotest == "All") {
                 echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
             if ($conf <> "All")
                 echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
+            if ($project <> "All")
+                echo '<tr><td>Latest Build:</td><td class="tableCellBackgroundTitle">' . $latestProjectBuild . '</td></tr>';
             if ($totalCount == 0) {
                 echo '<tr><td><br></td></tr>';                                  // Empty row
                 echo '<tr><td></td><td>Not any Failed Autotests</td></tr>';
@@ -405,12 +415,17 @@ if ($autotest <> "All") {
             if ($autotest == $value) {
                 echo '<table>';
 
-                /* Autotest name */
+                /* Autotest name, and Project and Configuration (if filtered) */
                 echo '<tr><td>Autotest: </td><td class="tableCellBackgroundTitle">' . $autotest . '</td></tr>';
                 if ($project <> "All")
                     echo '<tr><td>Project: </td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
                 if ($conf <> "All")
                     echo '<tr><td>Configuration: </td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
+                if ($project <> "All")
+                    echo '<tr><td>Latest Build:</td><td class="tableCellBackgroundTitle">' . $latestProjectBuild . '</td></tr>';
+                echo '<tr><td><br></td></tr>';                                  // Empty row
+
+                echo '<tr><td colspan="3"><b>Projects and Configurations (their latest Build) by failure category</b></td></tr>';
                 echo '<tr><td><br></td></tr>';                                  // Empty row
 
                 /* Significant Autotests in blocking Configuration */

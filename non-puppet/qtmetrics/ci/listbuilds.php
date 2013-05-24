@@ -47,6 +47,7 @@
     // $projectFilter
     // $confFilter
     // $latestBuild        (in listgeneraldata.php)
+    // $showElapsedTime
     // $timeStart
     // $timeConnect
 
@@ -165,15 +166,19 @@ if ($printedBuildCount > 0) {
 }
 
 /* Elapsed time */
-$timeEnd = microtime(true);
-$timeDbConnect = round($timeConnect - $timeStart, 2);
-$timeDbRead = round($timeRead - $timeConnect, 2);
-$timeCalc = round($timeEnd - $timeRead, 2);
-$time = round($timeEnd - $timeStart, 2);
-echo "<div class=\"elapdedTime\">";
-echo "<ul><li>";
-echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
-echo "</li></ul>";
-echo "</div>";
+if ($showElapsedTime) {
+    $timeEnd = microtime(true);
+    $timeDbConnect = round($timeConnect - $timeStart, 2);
+    $timeDbRead = round($timeRead - $timeConnect, 2);
+    $timeCalc = round($timeEnd - $timeRead, 2);
+    $time = round($timeEnd - $timeStart, 2);
+    echo "<div class=\"elapdedTime\">";
+    echo "<ul><li>";
+    echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
+    echo "</li></ul>";
+    echo "</div>";
+} else {
+    echo "<br>";
+}
 
 ?>

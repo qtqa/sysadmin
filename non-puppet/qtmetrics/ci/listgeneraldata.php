@@ -145,5 +145,6 @@ else {
         echo "</table><br/>";
     }
 }
+echo "<br>";
 
 ?>
