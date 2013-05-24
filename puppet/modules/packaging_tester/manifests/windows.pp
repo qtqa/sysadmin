@@ -8,4 +8,5 @@ class packaging_tester::windows inherits packaging_tester::base {
     include jom
     include dependencywalker
     include virtual_clone_drive
+    include postgresql
 }
