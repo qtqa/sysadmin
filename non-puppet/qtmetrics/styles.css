@@ -182,11 +182,12 @@ body {
     display:block;
     width: 90px;
     float:left;
-    padding-top: 5px;
+    margin-top: 4px;                       /* This can be used to align the filter title vertically against the selection box */
 }
 
 #filterFields select {                       /* This can be used to set all filter fields with same width */
     width: 400px;
+    margin-top: 3px;
 }
 
 button {

@@ -41,7 +41,21 @@
 #############################################################################
 ?>
 
-<div id="footer">
-<b>Juha Sippola 2013 / Pilot version v0.15 27-May-2013</b><br/>
-Based on live data from <a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
-</div>
+<?php
+
+/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412) */
+function createBuildNumberString($buildNumber)
+{
+    $buildString = $buildNumber;
+    if ($buildNumber < 10000)
+        $buildString = '0' . $buildNumber;
+    if ($buildNumber < 1000)
+        $buildString = '00' . $buildNumber;
+    if ($buildNumber < 100)
+        $buildString = '000' . $buildNumber;
+    if ($buildNumber < 10)
+        $buildString = '0000' . $buildNumber;
+    return $buildString;
+}
+
+?>

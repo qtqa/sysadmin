@@ -63,18 +63,14 @@ if ($project <> "All") {
     }
     $buildFilter = " AND build_number=$build";
 }
-$sql = "SELECT cfg, project, build_number, result, timestamp, duration, forcesuccess, insignificant
+$sql = "SELECT cfg, result, forcesuccess, insignificant
         FROM cfg
         WHERE $projectFilter $buildFilter $confFilter
         ORDER BY result,cfg";
-define("DBCOLUMNCFGCFG", 0);
-define("DBCOLUMNCFGPROJECT", 1);
-define("DBCOLUMNCFGBUILD", 2);
-define("DBCOLUMNCFGRESULT", 3);
-define("DBCOLUMNCFGTIMESTAMP", 4);
-define("DBCOLUMNCFGDURATION", 5);
-define("DBCOLUMNCFGFORCESUCCESS", 6);
-define("DBCOLUMNCFGINSIGNIFICANT", 7);
+$dbColumnCfgCfg = 0;
+$dbColumnCfgResult = 1;
+$dbColumnCfgForceSuccess = 2;
+$dbColumnCfgInsignificant = 3;
 if ($useMysqli) {
     $result = mysqli_query($conn, $sql);
     $numberOfRows = mysqli_num_rows($result);
@@ -123,24 +119,24 @@ if ($numberOfRows > 0) {
             echo '<tr class="tableBackgroundColored">';
 
        /* Configuration name */
-        $confName = $resultRow[DBCOLUMNCFGCFG];
+        $confName = $resultRow[$dbColumnCfgCfg];
         echo '<td><a href="javascript:void(0);" onclick="filterConf(\'' . $confName
             . '\')">' . $confName . '</a></td>';
 
         /* Latest Build result */
         $fontColorClass = "fontColorBlack";
-        if ($resultRow[DBCOLUMNCFGRESULT] == "SUCCESS")
+        if ($resultRow[$dbColumnCfgResult] == "SUCCESS")
             $fontColorClass = "fontColorGreen";
-        if ($resultRow[DBCOLUMNCFGRESULT] == "FAILURE")
+        if ($resultRow[$dbColumnCfgResult] == "FAILURE")
             $fontColorClass = "fontColorRed";
-        echo '<td class="tableLeftBorder ' . $fontColorClass . '">' . $resultRow[DBCOLUMNCFGRESULT] . '</td>';
+        echo '<td class="tableLeftBorder ' . $fontColorClass . '">' . $resultRow[$dbColumnCfgResult] . '</td>';
 
         /* Force success and Insignificant */
-        if ($resultRow[DBCOLUMNCFGFORCESUCCESS] == 1)
+        if ($resultRow[$dbColumnCfgForceSuccess] == 1)
             echo '<td class="tableCellCentered">' . FLAGON . '</td>';
         else
             echo '<td class="tableCellCentered">' . FLAGOFF . '</td>';
-        if ($resultRow[DBCOLUMNCFGINSIGNIFICANT] == 1)
+        if ($resultRow[$dbColumnCfgInsignificant] == 1)
             echo '<td class="tableCellCentered">' . FLAGON . '</td>';
         else
             echo '<td class="tableCellCentered">' . FLAGOFF . '</td>';

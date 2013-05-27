@@ -129,16 +129,8 @@ for ($i=0; $i<$numberOfRows; $i++) {                                          //
         if ($resultRow[$dbColumnTestCfg] == $value) {                         // If the Configuration for this Autotest is a blocking one
             $autotestConfCount++;                                             // STEP 2: Save data for the Autotest
             $failedAutotestCount++;
-            $buildstring = $resultRow[$dbColumnTestBuild];                    // Create the link url to build directory...
-            if ($resultRow[$dbColumnTestBuild] < 10000)
-                $buildstring = '0' . $resultRow[$dbColumnTestBuild];
-            if ($resultRow[$dbColumnTestBuild] < 1000)
-                $buildstring = '00' . $resultRow[$dbColumnTestBuild];
-            if ($resultRow[$dbColumnTestBuild] < 100)
-                $buildstring = '000' . $resultRow[$dbColumnTestBuild];
-            if ($resultRow[$dbColumnTestBuild] < 10)
-                $buildstring = '0000' . $resultRow[$dbColumnTestBuild];
-            $link = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
+            $buildNumberString = createBuildNumberString($resultRow[$dbColumnTestBuild]); // Create the link url to build directory...
+            $link = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
                 . '/' . $resultRow[$dbColumnTestCfg] . '" target="_blank">' . $resultRow[$dbColumnTestCfg] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
             $arrayAutotestConfLinks[$j] = $arrayAutotestConfLinks[$j] . ', ' . $link;
         }
@@ -155,21 +147,21 @@ if ($failedAutotestCount > 0) {
     echo '<table class="fontSmall">';
     echo '<tr>';
     echo '<th></th>';
-    echo '<th colspan="5" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
+    echo '<th class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
     echo '</tr>';
     echo '<tr class="tableBottomBorder">';
     echo '<td></td>';
     echo '<td class="tableSideBorder">List of Configurations (link to testresults directory)</td>';
     echo '</tr>';
     $j = 0;
-    for ($i=0; $i<$failedAutotestCount; $i++) {                               // Loop to print autotests
-        if ($arrayAutotestTotals[$i] > 0) {
+    foreach($arrayAutotestNames as $key => $value) {                          // Loop to print autotests
+        if ($arrayAutotestTotals[$key] > 0) {
             if ($j % 2 == 0)
                 echo '<tr>';
             else
                 echo '<tr class="tableBackgroundColored">';
-            echo '<td>'. $arrayAutotestNames[$i] . '</td>';
-            echo '<td class="tableSideBorder">'. substr($arrayAutotestConfLinks[$i],2) . '</td>';     // Skip leading ", "
+            echo '<td>'. $arrayAutotestNames[$key] . '</td>';
+            echo '<td class="tableSideBorder">'. substr($arrayAutotestConfLinks[$key],2) . '</td>';     // Skip leading ", "
             echo "</tr>";
             $j++;
         }

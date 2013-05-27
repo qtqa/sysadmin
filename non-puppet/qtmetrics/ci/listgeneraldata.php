@@ -61,15 +61,7 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
         $latestBuildDuration = $_SESSION['arrayProjectBuildLatestDuration'][$key];
     }
 }
-$buildstring = $latestBuild;
-if ($latestBuild < 10000)
-    $buildstring = '0' . $latestBuild;
-if ($latestBuild < 1000)
-    $buildstring = '00' . $latestBuild;
-if ($latestBuild < 100)
-    $buildstring = '000' . $latestBuild;
-if ($latestBuild < 10)
-    $buildstring = '0000' . $latestBuild;
+$buildNumberString = createBuildNumberString($latestBuild);
 $projectConfValid = FALSE;               // Can be used to identify if Configuration is available for the latest Project Build (later in other listxxx.php files)
 
 /* Project data */
@@ -86,7 +78,7 @@ if ($conf == "All") {
     echo "<tr><td>Build Date: </td><td>$latestBuildTimestamp</td></tr>";
     echo "<tr><td>Build Duration: </td><td>$latestBuildDuration</td></tr>";
     echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
-        . '/build_' . $buildstring . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
+        . '/build_' . $buildNumberString . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
         // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/log.txt.gz
     echo "</table><br/>";
 }
@@ -96,11 +88,11 @@ else {
     $sql = "SELECT result, timestamp, duration, forcesuccess, insignificant
             FROM cfg
             WHERE $projectFilter $confFilter AND build_number=$latestBuild";
-    define("DBCOLUMNCFGRESULT", 0);
-    define("DBCOLUMNCFGTIMESTAMP", 1);
-    define("DBCOLUMNCFGDURATION", 2);
-    define("DBCOLUMNCFGFORCESUCCESS", 3);
-    define("DBCOLUMNCFGINSIGNIFICANT", 4);
+    $dbColumnCfgResult = 0;
+    $dbColumnCfgTimestamp = 1;
+    $dbColumnCfgDuration = 2;
+    $dbColumnCfgForceSuccess = 3;
+    $dbColumnCfgInsignificant = 4;
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -108,16 +100,16 @@ else {
         $result = mysql_query($sql) or die (mysql_error());
         $numberOfRows = mysql_num_rows($result);
     }
-    if ($numberOfRows > 0) {                                   // Should be only one match
+    if ($numberOfRows > 0) {                                        // Should be only one match
         if ($useMysqli)
             $resultRow = mysqli_fetch_row($result);
         else
             $resultRow = mysql_fetch_row($result);
-        $latestBuildResult = $resultRow[DBCOLUMNCFGRESULT];
-        $latestBuildTimestamp = $resultRow[DBCOLUMNCFGTIMESTAMP];
-        $latestBuildDuration = $resultRow[DBCOLUMNCFGDURATION];
-        $latestBuildForceSuccess = $resultRow[DBCOLUMNCFGFORCESUCCESS];
-        $latestBuildInsignificant = $resultRow[DBCOLUMNCFGINSIGNIFICANT];
+        $latestBuildResult = $resultRow[$dbColumnCfgResult];
+        $latestBuildTimestamp = $resultRow[$dbColumnCfgTimestamp];
+        $latestBuildDuration = $resultRow[$dbColumnCfgDuration];
+        $latestBuildForceSuccess = $resultRow[$dbColumnCfgForceSuccess];
+        $latestBuildInsignificant = $resultRow[$dbColumnCfgInsignificant];
         $projectConfValid = TRUE;
         echo "<table>";
         echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
@@ -140,7 +132,7 @@ else {
         else
             echo '<tr><td>Insignificant: </td><td>' . FLAGOFF . '</td></tr>';
         echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
-            . '/build_' . $buildstring . '/' . $conf . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
+            . '/build_' . $buildNumberString . '/' . $conf . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
             // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86/log.txt.gz
         echo "</table><br/>";
     }

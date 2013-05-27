@@ -132,8 +132,8 @@ if ($autotest == "All") {
                     FROM cfg
                     WHERE project=\"$arrayProjectName[$projectCounter]\"
                         AND build_number=$arrayProjectBuildLatest[$projectCounter]";  // Find Configurations for the Project
-            define("DBCOLUMNCFGNAME", 0);
-            define("DBCOLUMNCFGINSIGNIFICANT", 1);
+            $dbColumnCfgCfg = 0;
+            $dbColumnCfgInsignificant = 1;
             if ($useMysqli) {
                 $result = mysqli_query($conn, $sql);
                 $numberOfRows = mysqli_num_rows($result);
@@ -148,7 +148,7 @@ if ($autotest == "All") {
                     $resultRow = mysqli_fetch_row($result);
                 else
                     $resultRow = mysql_fetch_row($result);
-                $confName = $resultRow[DBCOLUMNCFGNAME];
+                $confName = $resultRow[$dbColumnCfgCfg];
 
                 /* When Configuration filtered, show only the related Configuration data */
                 if ($conf <> "All")
@@ -162,8 +162,8 @@ if ($autotest == "All") {
                         WHERE project=\"$arrayProjectName[$projectCounter]\"
                             AND build_number=$arrayProjectBuildLatest[$projectCounter]
                             AND cfg=\"$confName\"";                                   // Find the Autotests for each Configuration
-                define("DBCOLUMNTESTNAME", 0);
-                define("DBCOLUMNTESTINSIGNIFICANT", 1);
+                $dbColumnTestName = 0;
+                $dbColumnTestInsignificant = 1;
                 if ($useMysqli) {
                     $result2 = mysqli_query($conn, $sql);
                     $numberOfRows2 = mysqli_num_rows($result2);
@@ -178,73 +178,73 @@ if ($autotest == "All") {
                         $resultRow2 = mysqli_fetch_row($result2);
                     else
                         $resultRow2 = mysql_fetch_row($result2);
-                    if ($resultRow[DBCOLUMNCFGINSIGNIFICANT] == 0) {                  // Check the Autotest failing category
-                        if ($resultRow2[DBCOLUMNTESTINSIGNIFICANT] == 0) {
+                    if ($resultRow[$dbColumnCfgInsignificant] == 0) {                 // Check the Autotest failing category
+                        if ($resultRow2[$dbColumnTestInsignificant] == 0) {
                             $autotestFailureCategory = SIGNAUTOTESTBLOCKINGCONF;
                         } else {
                             $autotestFailureCategory = INSIGNAUTOTESTBLOCKINGCONF;
                         }
                     } else {
-                        if ($resultRow2[DBCOLUMNTESTINSIGNIFICANT] == 0) {
+                        if ($resultRow2[$dbColumnTestInsignificant] == 0) {
                             $autotestFailureCategory = SIGNAUTOTESTINSIGNCONF;
                         } else {
                             $autotestFailureCategory = INSIGNAUTOTESTINSIGNCONF;
                         }
                     }
                     for ($k=0; $k<$autotestCount; $k++) {                             // Loop all the Autotests to find the ones for this Project Configuration
-                        if ($arrayFailingAutotestNames[$k] == $resultRow2[DBCOLUMNTESTNAME]) {
+                        if ($arrayFailingAutotestNames[$k] == $resultRow2[$dbColumnTestName]) {
                             switch ($autotestFailureCategory) {
                                 case SIGNAUTOTESTBLOCKINGCONF:
-                                    if (!strpos($arrayFailingSignAutotestBlockingConfNames[$k],$resultRow[DBCOLUMNCFGNAME])) {   // Each Conf to be listed only once
+                                    if (!strpos($arrayFailingSignAutotestBlockingConfNames[$k],$resultRow[$dbColumnCfgCfg])) {   // Each Conf to be listed only once
                                         $arrayFailingSignAutotestBlockingConfCount[$k]++;
                                         $totalCount++;
                                         $arrayFailingSignAutotestBlockingConfNames[$k]
-                                            = $arrayFailingSignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[DBCOLUMNCFGNAME];
+                                            = $arrayFailingSignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                         if ($arrayFailingSignAutotestBlockingConfCount[$k] > $maxCount)
                                             $maxCount = $arrayFailingSignAutotestBlockingConfCount[$k];
                                     }
                                     $arrayFailingSignAutotestBlockingConfProjects[$k]
                                         = $arrayFailingSignAutotestBlockingConfProjects[$k] . '<br>'
-                                        . $projectValue . ' (' . $resultRow[DBCOLUMNCFGNAME] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                        . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
                                     break;
                                 case SIGNAUTOTESTINSIGNCONF:
-                                    if (!strpos($arrayFailingSignAutotestInsignConfNames[$k],$resultRow[DBCOLUMNCFGNAME])) {     // Each Conf to be listed only once
+                                    if (!strpos($arrayFailingSignAutotestInsignConfNames[$k],$resultRow[$dbColumnCfgCfg])) {     // Each Conf to be listed only once
                                         $arrayFailingSignAutotestInsignConfCount[$k]++;
                                         $totalCount++;
                                         $arrayFailingSignAutotestInsignConfNames[$k]
-                                            = $arrayFailingSignAutotestInsignConfNames[$k] . '<br>' . $resultRow[DBCOLUMNCFGNAME];
+                                            = $arrayFailingSignAutotestInsignConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                         if ($arrayFailingSignAutotestInsignConfCount[$k] > $maxCount)
                                             $maxCount = $arrayFailingSignAutotestInsignConfCount[$k];
                                     }
                                     $arrayFailingSignAutotestInsignConfProjects[$k]
                                         = $arrayFailingSignAutotestInsignConfProjects[$k] . '<br>'
-                                        . $projectValue . ' (' . $resultRow[DBCOLUMNCFGNAME] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                        . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
                                     break;
                                 case INSIGNAUTOTESTBLOCKINGCONF:
-                                    if (!strpos($arrayFailingInsignAutotestBlockingConfNames[$k],$resultRow[DBCOLUMNCFGNAME])) { // Each Conf to be listed only once
+                                    if (!strpos($arrayFailingInsignAutotestBlockingConfNames[$k],$resultRow[$dbColumnCfgCfg])) { // Each Conf to be listed only once
                                         $arrayFailingInsignAutotestBlockingConfCount[$k]++;
                                         $totalCount++;
                                         $arrayFailingInsignAutotestBlockingConfNames[$k]
-                                            = $arrayFailingInsignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[DBCOLUMNCFGNAME];
+                                            = $arrayFailingInsignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                         if ($arrayFailingInsignAutotestBlockingConfCount[$k] > $maxCount)
                                             $maxCount = $arrayFailingInsignAutotestBlockingConfCount[$k];
                                     }
                                     $arrayFailingInsignAutotestBlockingConfProjects[$k]
                                         = $arrayFailingInsignAutotestBlockingConfProjects[$k] . '<br>'
-                                        . $projectValue . ' (' . $resultRow[DBCOLUMNCFGNAME] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                        . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
                                     break;
                                 case INSIGNAUTOTESTINSIGNCONF:
-                                    if (!strpos($arrayFailingInsignAutotestInsignConfNames[$k],$resultRow[DBCOLUMNCFGNAME])) {   // Each Conf to be listed only once
+                                    if (!strpos($arrayFailingInsignAutotestInsignConfNames[$k],$resultRow[$dbColumnCfgCfg])) {   // Each Conf to be listed only once
                                         $arrayFailingInsignAutotestInsignConfCount[$k]++;
                                         $totalCount++;
                                         $arrayFailingInsignAutotestInsignConfNames[$k]
-                                            = $arrayFailingInsignAutotestInsignConfNames[$k] . '<br>' . $resultRow[DBCOLUMNCFGNAME];
+                                            = $arrayFailingInsignAutotestInsignConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                         if ($arrayFailingInsignAutotestInsignConfCount[$k] > $maxCount)
                                             $maxCount = $arrayFailingInsignAutotestInsignConfCount[$k];
                                     }
                                     $arrayFailingInsignAutotestInsignConfProjects[$k]
                                         = $arrayFailingInsignAutotestInsignConfProjects[$k] . '<br>'
-                                        . $projectValue . ' (' . $resultRow[DBCOLUMNCFGNAME] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                        . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
                                     break;
                             }
                             break;                                                    // Match found, skip the rest

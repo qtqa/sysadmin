@@ -54,8 +54,8 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $sql="SELECT project, MAX(build_number)
           FROM ci
           GROUP BY project ORDER BY project;";
-    define("DBCOLUMNCIPROJECT", 0);
-    define("DBCOLUMNCIBUILDNUMBER", 1);
+    $dbColumnCiProject = 0;
+    $dbColumnCiBuildNumber = 1;
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -74,10 +74,10 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $resultRow = mysqli_fetch_row($result);
         else
             $resultRow = mysql_fetch_row($result);
-        $arrayProjectName[] = $resultRow[DBCOLUMNCIPROJECT];                         // Project name
-        $arrayProjectBuildLatest[] = $resultRow[DBCOLUMNCIBUILDNUMBER];              // Latest Build number for the Project
-        if ($resultRow[DBCOLUMNCIBUILDNUMBER] - AUTOTEST_LATESTBUILDCOUNT > 0)
-            $arrayProjectBuildScopeMin[] = $resultRow[DBCOLUMNCIBUILDNUMBER] - AUTOTEST_LATESTBUILDCOUNT + 1;   // First Build number in metrics scope
+        $arrayProjectName[] = $resultRow[$dbColumnCiProject];                        // Project name
+        $arrayProjectBuildLatest[] = $resultRow[$dbColumnCiBuildNumber];             // Latest Build number for the Project
+        if ($resultRow[$dbColumnCiBuildNumber] - AUTOTEST_LATESTBUILDCOUNT > 0)
+            $arrayProjectBuildScopeMin[] = $resultRow[$dbColumnCiBuildNumber] - AUTOTEST_LATESTBUILDCOUNT + 1;   // First Build number in metrics scope
         else
             $arrayProjectBuildScopeMin[] = 1;                                        // Less builds than the scope count
     }
@@ -86,11 +86,11 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $arrayProjectBuildLatestResult = array();
     $arrayProjectBuildLatestTimestamp = array();
     $arrayProjectBuildLatestDuration = array();
-    define("DBCOLUMNCIPROJECT", 0);
-    define("DBCOLUMNCIBUILDNUMBER", 1);
-    define("DBCOLUMNCIRESULT", 2);
-    define("DBCOLUMNCITIMESTAMP", 3);
-    define("DBCOLUMNCIDURATION", 4);
+    $dbColumnCiProject = 0;
+    $dbColumnCiBuildNumber = 1;
+    $dbColumnCiResult = 2;
+    $dbColumnCiTimestamp = 3;
+    $dbColumnCiDuration = 4;
     for ($i=0; $i<$numberOfRows; $i++) {                                             // Loop the Projects
         $sql = "SELECT project, build_number, result, timestamp, duration
                 FROM ci
@@ -104,9 +104,9 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $result2 = mysql_query($sql) or die (mysql_error());
             $resultRow2 = mysql_fetch_row($result2);
         }
-        $arrayProjectBuildLatestResult[] = $resultRow2[DBCOLUMNCIRESULT];
-        $arrayProjectBuildLatestTimestamp[] = $resultRow2[DBCOLUMNCITIMESTAMP];
-        $arrayProjectBuildLatestDuration[] = $resultRow2[DBCOLUMNCIDURATION];
+        $arrayProjectBuildLatestResult[] = $resultRow2[$dbColumnCiResult];
+        $arrayProjectBuildLatestTimestamp[] = $resultRow2[$dbColumnCiTimestamp];
+        $arrayProjectBuildLatestDuration[] = $resultRow2[$dbColumnCiDuration];
     }
 
     /* Step 3: Read the number of successful, failed and all Builds for each Project from the database (all must be read separately) */

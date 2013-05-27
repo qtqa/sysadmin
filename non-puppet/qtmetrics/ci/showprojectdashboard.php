@@ -46,6 +46,8 @@ session_start();
 ?>
 
 <?php
+include "functions.php";
+
 $timeStart = microtime(true);
 $project = $_GET["project"];
 $conf = $_GET["conf"];

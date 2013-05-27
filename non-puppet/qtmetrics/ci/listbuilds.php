@@ -53,20 +53,20 @@
 
 /* Read data from database */
 if ($project<>"All" AND $conf=="All") {                                       // Print Project Builds
-    $sql = "SELECT build_number,result, timestamp
+    $sql = "SELECT build_number, result, timestamp
             FROM ci
             WHERE $projectFilter
             ORDER BY build_number";
 }
 if ($project<>"All" AND $conf<>"All") {                                       // Print Configuration Builds
-    $sql = "SELECT build_number,result, timestamp
+    $sql = "SELECT build_number, result, timestamp
             FROM cfg
             WHERE $projectFilter $confFilter
             ORDER BY build_number";
 }
-define("DBCOLUMNBUILD", 0);
-define("DBCOLUMNRESULT", 1);
-define("DBCOLUMNTIMESTAMP", 2);
+$dbColumnBuildNumber = 0;
+$dbColumnResult = 1;
+$dbColumnTimestamp = 2;
 if ($useMysqli) {
     $result = mysqli_query($conn, $sql);
     $numberOfRows = mysqli_num_rows($result);
@@ -87,7 +87,7 @@ if ($numberOfRows>0) {
         else
             $resultRow = mysql_fetch_row($result);
         if ($numberOfRows > HISTORYBUILDCOUNT) {                            // Limit number of Builds printed (the last n ones)
-            if ($resultRow[DBCOLUMNBUILD] > $latestBuild - HISTORYBUILDCOUNT)
+            if ($resultRow[$dbColumnBuildNumber] > $latestBuild - HISTORYBUILDCOUNT)
                 $printThisBuild = TRUE;
         } else {
             $printThisBuild = TRUE;
@@ -95,37 +95,29 @@ if ($numberOfRows>0) {
         if ($printThisBuild) {
 
             /* Build number */
-            $buildstring = $resultRow[DBCOLUMNBUILD];                       // Create the link url to build directory...
-            if ($resultRow[DBCOLUMNBUILD] < 10000)
-                $buildstring = '0' . $resultRow[DBCOLUMNBUILD];
-            if ($resultRow[DBCOLUMNBUILD] < 1000)
-                $buildstring = '00' . $resultRow[DBCOLUMNBUILD];
-            if ($resultRow[DBCOLUMNBUILD] < 100)
-                $buildstring = '000' . $resultRow[DBCOLUMNBUILD];
-            if ($resultRow[DBCOLUMNBUILD] < 10)
-                $buildstring = '0000' . $resultRow[DBCOLUMNBUILD];
+            $buildNumberString = createBuildNumberString($resultRow[$dbColumnBuildNumber]); // Create the link url to build directory...
             if ($conf == "All") {
-                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-                    . '" target="_blank">' . $resultRow[DBCOLUMNBUILD] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
+                    . '" target="_blank">' . $resultRow[$dbColumnBuildNumber] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
             } else {
-                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildstring
-                    . '/' . $conf . '" target="_blank">' . $resultRow[DBCOLUMNBUILD] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
+                    . '/' . $conf . '" target="_blank">' . $resultRow[$dbColumnBuildNumber] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
             }
             $arrayBuildNumbersRow[] = '<td class="tableCellCentered">' . $buildLink . '</td>';
 
             /* Build date */
-            $date = strstr($resultRow[DBCOLUMNTIMESTAMP], ' ', TRUE);       // 'yyyy-mm-dd hh:mm:ss' -> 'yyyy-mm-dd'
+            $date = strstr($resultRow[$dbColumnTimestamp], ' ', TRUE);      // 'yyyy-mm-dd hh:mm:ss' -> 'yyyy-mm-dd'
             $date = strstr($date, '-', FALSE);                              // 'yyyy-mm-dd' -> '-mm-dd'
             $date = substr($date,1);                                        // '-mm-dd' -> 'mm-dd'
             $arrayBuildDatesRow[] = '<td class="tableCellCentered">' . $date . '</td>';
 
             /* Build result */
             $cellColor = '<td class="tableSingleBorder">';
-            if ($resultRow[DBCOLUMNRESULT] == "SUCCESS")
+            if ($resultRow[$dbColumnResult] == "SUCCESS")
                 $cellColor = '<td class="tableSingleBorder tableCellBackgroundGreen">';
-            if ($resultRow[DBCOLUMNRESULT] == "FAILURE")
+            if ($resultRow[$dbColumnResult] == "FAILURE")
                 $cellColor = '<td class="tableSingleBorder tableCellBackgroundRed">';
-            $arrayBuildResultsRow[] = $cellColor . $resultRow[DBCOLUMNRESULT] . '</td>';
+            $arrayBuildResultsRow[] = $cellColor . $resultRow[$dbColumnResult] . '</td>';
             $printedBuildCount++;
         }
     }
