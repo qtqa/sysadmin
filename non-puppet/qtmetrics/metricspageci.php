@@ -258,7 +258,7 @@ session_start();
         <!-- Metrics boxes -->
         <?php
         foreach ($arrayMetricsBoxesCI as $key=>$value)
-            echo "<div id=\"metricsBox$key\" class=\"metricArea\">Loading...</div>";
+            echo "<div id=\"metricsBox$key\" class=\"metricArea\"><img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...</div>";   // Div content when initially opening the page before Ajax call
         ?>
 
         <?php include "footer.php";?>

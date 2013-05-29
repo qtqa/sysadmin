@@ -63,7 +63,7 @@ function createFilterRequestObject()
 /* Request metric data (e.g. from database) */
 function getMetricData(metricId, filepath, project, conf, autotest)
 {
-    document.getElementById("metricsBox"+metricId).innerHTML = "Loading...";
+    document.getElementById("metricsBox"+metricId).innerHTML = "<img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...";    // Div content during the Ajax call
     if (project == "") {
       document.getElementById("metricsBox"+metricId).innerHTML = "";
       return;
