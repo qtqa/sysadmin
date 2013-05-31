@@ -214,6 +214,13 @@ session_start();
             window.location.reload(true);
         }
 
+        /* open a new window for a message file (html) */
+        function showMessageWindow(messageFile)
+        {
+            myWindow=window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100')
+            myWindow.focus()
+        }
+
     </script>
 
         <title>Qt Metrics</title>

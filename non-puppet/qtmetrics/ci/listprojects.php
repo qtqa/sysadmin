@@ -73,7 +73,7 @@ echo '<td class="tableLeftBorder tableCellCentered">Force success</td>';
 echo '<td class="tableCellCentered">Insignificant</td>';
 echo '<td class="tableCellCentered">Total</td>';
 echo '<td class="tableLeftBorder tableCellCentered">Failed</td>';
-echo '<td class="tableCellCentered">Successed</td>';
+echo '<td class="tableCellCentered">Successful</td>';
 echo '<td class="tableRightBorder tableCellCentered">Total</td>';
 echo '</tr>';
 foreach ($_SESSION['arrayProjectName'] as $key=>$value) {

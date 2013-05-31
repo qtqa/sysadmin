@@ -74,6 +74,7 @@ $showElapsedTime = FALSE;                   // Set TRUE to show elapsed database
 /************************************************************/
 
 if ($project == "All" AND $conf == "All") {
+    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel1.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> Select Project<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         /* Show list of Projects (from the session variable that was saved for the filters */
@@ -88,6 +89,7 @@ if ($project == "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf == "All") {
+    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel2.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> ' . $project . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         $projectFilter = "";
@@ -117,6 +119,7 @@ if ($project <> "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf <> "All") {
+    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel3.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         /* Show general data */

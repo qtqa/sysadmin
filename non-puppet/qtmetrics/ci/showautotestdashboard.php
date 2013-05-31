@@ -84,6 +84,7 @@ if ($project <> "All") {
 /*************************************************************/
 
 if ($autotest == "All") {
+    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgautotestdashboardlevel1.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>AUTOTEST DASHBOARD:</b> Select Autotest<br/><br/>';
     if(isset($_SESSION['arrayAutotestName'])) {
 
@@ -297,7 +298,9 @@ if ($autotest == "All") {
             echo '<table class="fontSmall">';
             echo '<tr>';
             echo '<th></th>';
-            echo '<th colspan="4" class="tableBottomBorder tableSideBorder">LATEST BUILD BY FAILURE CATEGORY</th>';
+            echo '<th colspan="4" class="tableBottomBorder tableSideBorder">LATEST BUILD BY
+                  <a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')"> FAILURE CATEGORY</a>
+                  </th>';
             echo '</tr>';
             echo '<tr>';
             echo '<th></th>';
@@ -305,20 +308,7 @@ if ($autotest == "All") {
             echo '<th colspan="2" class="tableBottomBorder tableSideBorder">Failed Insignificant Autotests</th>';
             echo '</tr>';
             echo '<tr class="tableBottomBorder">';
-            echo '<td class="tableCellAlignRight">
-                  <span class="popupMessageImg"><img src="images/info.png" alt="info">
-                      <span><b>FAILURE CATEGORY DESCRIPTIONS:</b><br><br>
-                            <b>1) Failed Significant Autotests in Blocking CI Configurations</b><br><br>
-                               These autotests or code under test should be fixed to make CI more stable and to improve CI throughput.<br><br>
-                            <b>2) Failed Significant Autotests in Insignificant CI Configurations</b><br><br>
-                               These autotests or code under test should be fixed; or the failed autotests should be marked individually
-                               insignificant for relevant configurations to be able to improve CI coverage.<br><br>
-                            <b>3) Failed Insignificant Autotests in Blocking CI Configurations</b><br><br>
-                               These autotests or code under test should be fixed to improve CI coverage.<br><br>
-                            <b>4) Failed Insignificant Autotests in Insignificant CI Configurations</b><br><br>
-                               You should first aim to make the CI configuration blocking by fixing 2) and then 3).<br>&nbsp
-                      </span>
-                  </span></td>';
+            echo '<td></td>';
             echo '<td class="tableLeftBorder tableCellCentered">1) Blocking<br>Confs</td>';
             echo '<td class="tableCellCentered">2) Insignificant<br>Confs</td>';
             echo '<td class="tableLeftBorder tableCellCentered">3) Blocking<br>Confs</td>';
@@ -408,6 +398,7 @@ if ($autotest == "All") {
 /*************************************************************/
 
 if ($autotest <> "All") {
+    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgautotestdashboardlevel2.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>AUTOTEST DASHBOARD:</b> <a href="javascript:void(0);" onclick="filterAutotest(\'All\')">Select Autotest</a> -> ' . $autotest . '<br/><br/>';
     if(isset($_SESSION['arrayAutotestName'])) {
         $i = 0;
@@ -425,7 +416,9 @@ if ($autotest <> "All") {
                     echo '<tr><td>Latest Build:</td><td class="tableCellBackgroundTitle">' . $latestProjectBuild . '</td></tr>';
                 echo '<tr><td><br></td></tr>';                                  // Empty row
 
-                echo '<tr><td colspan="3"><b>Projects and Configurations (their latest Build) by failure category</b></td></tr>';
+                echo '<tr><td colspan="3"><b>Projects and Configurations (their latest Build) by
+                      <a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')"> failure category</a></b>
+                      </td></tr>';
                 echo '<tr><td><br></td></tr>';                                  // Empty row
 
                 /* Significant Autotests in blocking Configuration */

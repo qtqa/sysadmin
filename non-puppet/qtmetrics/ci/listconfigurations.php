@@ -105,7 +105,7 @@ if ($numberOfRows > 0) {
     echo '<td class="tableLeftBorder tableCellCentered">Significant</td>';
     echo '<td class="tableCellCentered">Insignificant</td>';
     echo '<td class="tableLeftBorder tableCellCentered">Failed</td>';
-    echo '<td class="tableCellCentered">Successed</td>';
+    echo '<td class="tableCellCentered">Successful</td>';
     echo '<td class="tableRightBorder tableCellCentered">Total</td>';
     echo '</tr>';
     for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop to print Confs

@@ -199,7 +199,7 @@ select {
 }
 
 table {
-   border-collapse:collapse;
+    border-collapse:collapse;
 }
 
 th {
@@ -323,7 +323,7 @@ span.popupMessageImg span {
     padding: 3px 3px 3px 3px;
     border-style: solid;
     border-color: #44A51C;
-    border-width:1px;
+    border-width: 1px;
     border-radius: 3px;
     box-shadow: 2px 2px 2px #888888;
     z-index: 100;
@@ -336,4 +336,47 @@ span.popupMessageImg:hover span {
     margin: 20px 0px 0px 80px;             /* Left margin (the last value) can be used to adjust the message box horizontally */
     width: 450px;
     z-index:100;
+}
+
+.messageWindow {
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    font-size: 12px;
+    background: #FFFFFF;
+}
+
+img {
+    border: 0px;
+}
+
+.imgLink img:link {
+    text-decoration: none;
+}
+
+.imgLink img:visited {
+    text-decoration: none;
+}
+
+.imgLink img:hover {
+    -ms-transform: scale(1.05);
+    -webkit-transform: scale(1.05);
+    transform: scale(1.05);
+}
+
+.imgLink img:active {
+    text-decoration: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    color: #44a51c;
+}
+a:active {
+text-decoration: none;
 }
