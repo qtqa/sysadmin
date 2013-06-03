@@ -46,8 +46,11 @@
 </div>
 <div id="headerNavi">
 <div id="headerTitle">
-Qt Metrics (pilot)
+Qt Metrics
 </div>
 <?php include "menu.php";?>
+</div>
+<div id="headerLinks">
+<a href="http://qt-project.org" target="_blank">qt-project.org</a>
 </div>
 </div>

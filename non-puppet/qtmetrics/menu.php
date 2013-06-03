@@ -46,8 +46,9 @@
 <!--Main menu-->
 
 <div class="active"><a href="metricspageci.php">CI Metrics</a></div>
-<div class="inactive"><a href="#">Autotest Metrics</a></div>
-<div class="inactive"><a href="#">RTA Metrics</a></div>
-<div class="inactive"><a href="#">Coverage Metrics</a></div>
+
+<!--Inactive menu items would appear like this:
+<div class="inactive"><a href="metricspagenew.php">New Metrics</a></div>
+-->
 
 </div>

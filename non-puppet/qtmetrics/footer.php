@@ -42,6 +42,7 @@
 ?>
 
 <div id="footer">
-<b>Juha Sippola 2013 / Pilot version v0.18 3-Jun-2013</b><br/>
-Based on live data from <a href="http://testresults.qt-project.org/ci/" target="_blank">http://testresults.qt-project.org/ci/</a>
+<b>Report builder v1.0 3-Jun-2013</b><br/>
+Description, guidance and support:<br/>
+<a href="http://qt-project.org/wiki/Qt_Metrics_Page_Description" target="_blank">http://qt-project.org/wiki/Qt_Metrics_Page_Description</a>
 </div>

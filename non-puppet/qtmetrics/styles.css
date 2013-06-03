@@ -94,6 +94,21 @@ body {
     font-weight: bold;
 }
 
+#headerLinks {
+    text-align:left;
+    float: right;
+    margin-top: 10px;
+    margin-right: 20px;
+}
+
+#headerLinks a:link,
+#headerLinks a:hover,
+#headerLinks a:visited,
+#headerLinks a:active {
+    text-decoration: none;
+    color: #44a51c;
+}
+
 #menu {
     margin-top: 65px;
 }
