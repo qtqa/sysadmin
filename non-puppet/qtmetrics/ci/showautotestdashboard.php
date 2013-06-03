@@ -53,10 +53,6 @@ $conf = $_GET["conf"];
 // -> parameter is here 'returned' to its original value
 $conf = str_replace("g  ","g++",$conf);
 $autotest = $_GET["autotest"];
-// Problem: Problem: Parameter passing (with GET method in URL) does not work with text 'ftp' or 'http' (autotest names 'tst_qftp' and 'tst_qhttp')
-// -> parameter is here 'decoded' ('encoded' in sending at the bottom part of this file)
-$autotest = str_replace("ft-endoded-p","ftp",$autotest);
-$autotest = str_replace("htt-endoded-p","http",$autotest);
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');
@@ -330,12 +326,7 @@ if ($autotest == "All") {
                                 echo '<tr class="tableBackgroundColored">';
 
                             /* Autotest name */
-                            $parameter = $arrayFailingAutotestNames[$i];
-                            // Problem: Problem: Parameter passing (with GET method in URL) does not work with text 'ftp' or 'http' (autotest names 'tst_qftp' and 'tst_qhttp')
-                            // -> parameter is here 'encoded' and then 'decoded' when receiving (at the top of this file)
-                            $parameter = str_replace("ftp","ft-endoded-p",$parameter);
-                            $parameter = str_replace("http","htt-endoded-p",$parameter);
-                            echo '<td><a href="javascript:void(0);" onclick="filterAutotest(\'' . $parameter . '\')">' . $arrayFailingAutotestNames[$i] . '</a></td>';
+                            echo '<td><a href="javascript:void(0);" onclick="filterAutotest(\'' . $arrayFailingAutotestNames[$i] . '\')">' . $arrayFailingAutotestNames[$i] . '</a></td>';
 
                             /* Significant Autotests in blocking Configuration (with names as a popup) */
                             if ($arrayFailingSignAutotestBlockingConfCount[$i] > 0)
