@@ -1,6 +1,8 @@
 class packaging_tester::mac inherits packaging_tester::base {
     include ccache
     include homedir_cpan
+    # Install CPAN modules needed outside building
+    include cpan
     include homedir_virtualenv
 
     if $packaging_tester::distcc_enabled {

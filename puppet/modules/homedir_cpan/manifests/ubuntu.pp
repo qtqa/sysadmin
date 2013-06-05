@@ -1,4 +1,4 @@
-class homedir_cpan::ubuntu inherits homedir_cpan::linux {
+class homedir_cpan::ubuntu {
     package {
         # Need gcc to build CPAN modules
         "gcc":                  ensure  =>  installed;

@@ -14,6 +14,8 @@ class packaging_tester::linux inherits packaging_tester::base {
 
     # Allow test machines to install modules from cpan under $HOME/perl5
     include homedir_cpan
+    # Install CPAN modules needed outside building
+    include cpan
 
     # Allow test machines to install python modules with pip or easy_install
     # to $HOME/python26
