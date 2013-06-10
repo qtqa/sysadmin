@@ -54,15 +54,18 @@ include "getconfvalues.php";
 include "getautotestvalues.php";
 ?>
 
-<!-- Filters -->
-<!-- (NOTE: The layout should remain same here and in metricspageci.php) -->
+<div id="filterTitle">
 <b>FILTERS:</b>
+</div>
+
 <div id="filterButtons">
 <button onclick="loadAll()">Clear selections</button>
 <button onclick="reloadFilters()">Reload</button>
 </div>
-<br/><br/>
+
 <div id="filterFields">
+
+<div id="filterFieldsLeft">
 <form name="form">
 <label>Project:</label>
 <select name="project" id="project" onchange="filterProject(this.value)">
@@ -90,5 +93,10 @@ include "getautotestvalues.php";
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
+</div>
+
+<div id="filterFieldsRight">
+</div>
 </form>
+
 </div>

@@ -88,6 +88,7 @@ function showMetricData(metricId)
     if (metricRequest[metricId].readyState == 4 && metricRequest[metricId].status == 200) {
         var response = metricRequest[metricId].responseText;
         document.getElementById("metricsBox"+metricId).innerHTML = response;
+        loadDatabaseStatus();                                         // Load the database status after first metrics box is ready, or every time a metrics box is updated
     }
 }
 
@@ -112,7 +113,32 @@ function showFilters(div)
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {
         var response = filterRequest.responseText;
         document.getElementById(div).innerHTML = response;
-        loadMetricsboxes();
+        loadMetricsboxes();                                           // When filters are ready, load the metrics boxes next
+        return;
+    }
+}
+
+/* Request database status (from database) */
+function getDatabaseStatus(div, filepath, timeOffset)
+{
+    createFilterRequestObject();
+    filterRequest.open("GET",filepath+"?timeoffset="+timeOffset,true);
+    filterRequest.send();
+    filterRequest.onreadystatechange = function(index)
+    {
+        return function()
+        {
+            showDatabaseStatus(index);
+        };
+    } (div);
+}
+
+/* Show database status in the related div */
+function showDatabaseStatus(div)
+{
+    if (filterRequest.readyState == 4 && filterRequest.status == 200) {
+        var response = filterRequest.responseText;
+        document.getElementById(div).innerHTML = response;
         return;
     }
 }

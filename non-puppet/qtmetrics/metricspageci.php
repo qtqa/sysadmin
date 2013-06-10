@@ -58,15 +58,22 @@ session_start();
 
     <script>
 
-        /* Get all filter values and show all metrics boxes */
+        /* Load all filter values */
         function loadAll()
         {
             getFilters("filters", "ci/getfilters.php");          // Metrics boxes to be loaded after filters are ready (see getFilters and showFilters)
         }
 
+        /* Load all metrics boxes */
         function loadMetricsboxes()                              // Called after filters are ready (from showFilters)
         {
             showMetricsBoxes("All","All","All");
+        }
+
+        /* Load database status */
+        function loadDatabaseStatus()                            // Called after first metrics box is ready, or every time a metrics box is updated (from showFilters)
+        {
+            getDatabaseStatus("databaseStatus", "ci/getdatabasestatus.php", getTimeOffset());    // Time offset passed to show the session time and database update time with the same 'timezone'
         }
 
         /* Update all metrics boxes */
@@ -214,11 +221,36 @@ session_start();
             window.location.reload(true);
         }
 
-        /* open a new window for a message file (html) */
+        /* Open a new window for a message file (html) */
         function showMessageWindow(messageFile)
         {
             myWindow=window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100')
             myWindow.focus()
+        }
+
+        /* Get time offset between current time and the GMT/UTC (returned in format "GMT+0300") */
+        function getTimeOffset()
+        {
+            var visitorTime = new Date();                                        // User client time
+            var visitorTimeString = visitorTime.toString();                      // e.g. "Fri Jun 07 2013 12:49:38 GMT+0000 (Morocco Standard Time)" or "Fri Jun 07 2013 12:49:38 GMT+0300 (FLE Standard Time)"
+            visitorTimeString = visitorTimeString.replace("UTC ","UTC+0000 ");   // in IE: "Fri Jun 07 12:49:38 UTC 2013" or ...
+            visitorTimeString = visitorTimeString.replace("UTC","GMT");          //    ... "Fri Jun 07 12:49:38 UTC+0300 2013"
+            var timeOffset;
+            var i = visitorTimeString.search("GMT");
+            if (i > 0) {
+                timeOffset = visitorTimeString.substr(i,8);                      // "GMT+0300" (here also the xx:30 and xx:45 timezones include)
+            } else {                                                             // For US timezones the timezone name used instead of "UTC" in IE
+                offsetHour = -1 * visitorTime.getTimezoneOffset() / 60;          // Create the string based on getTimezoneOffset
+                if (offsetHour > 9)
+                    timeOffset = "GMT+" + offsetHour + "00"
+                if (offsetHour >= 0 && offsetHour >= 9)
+                    timeOffset = "GMT+0" + offsetHour + "00"
+                if (offsetHour >= -9 && offsetHour < 0)
+                    timeOffset = "GMT-0" + Math.abs(offsetHour) + "00"
+                if (offsetHour < -9)
+                    timeOffset = "GMT-" + Math.abs(offsetHour) + "00"
+            }
+            return timeOffset;
         }
 
     </script>
@@ -232,35 +264,18 @@ session_start();
         <?php include "commondefinitions.php";?>
         <?php include "header.php";?>
 
-        <!-- Filters -->
-        <!-- (NOTE: The layout should remain same here and in getfilters.php because complete value lists are loaded here via Ajax) -->
+        <!-- Filters (loaded with Ajax call) -->
         <div id="filters">
         <b>FILTERS:</b><br/><br/>
-        <div id="filterFields">
-        <form name="form">
-        <label>Project:</label>
-        <select name="project" id="project" onchange="filterProject(this.value)">
-        <?php
-            echo "<option value=\"All\">Loading... </option>";
-        ?>
-        </select>
-        <br/>
-        <label>Configuration:</label>
-        <select name="conf" id="conf" onchange="filterConf(this.value)">
-        <?php
-            echo "<option value=\"All\">Loading... </option>";
-        ?>
-        </select>
-        <br/>
-        <label>Autotest:</label>
-        <select name="autotest" id="autotest" onchange="filterAutotest(this.value)">
-        <?php
-            echo "<option value=\"All\">Loading... </option>";
-        ?>
-        </select>
-        </form>
-        </div>     <!-- end of filterFields -->
-        </div>     <!-- end of filters -->
+        <img src="images/ajax-loader.gif" alt="loading"> Loading...<br/>
+        </div>
+
+        <!-- Database status (loaded with Ajax call) -->
+        <div id="databaseStatus">
+        <b>Welcome</b><br/><br/>
+        Loading data for your session.<br/><br/>
+        If not ready in one minute, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a>...
+        </div>
 
         <!-- Metrics boxes -->
         <?php

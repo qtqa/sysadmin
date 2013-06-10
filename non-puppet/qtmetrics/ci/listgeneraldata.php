@@ -75,8 +75,8 @@ if ($conf == "All") {
     if ($latestBuildResult == "FAILURE")
         $fontColorClass = "fontColorRed";
     echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-    echo "<tr><td>Build Date: </td><td>$latestBuildTimestamp</td></tr>";
-    echo "<tr><td>Build Duration: </td><td>$latestBuildDuration</td></tr>";
+    echo '<tr><td>Build Time: </td><td>' . $latestBuildTimestamp . ' (GMT)</td></tr>';
+    echo '<tr><td>Build Duration: </td><td>' . $latestBuildDuration . '</td></tr>';
     echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
         . '/build_' . $buildNumberString . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
         // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/log.txt.gz
@@ -121,8 +121,8 @@ else {
         if ($latestBuildResult == "FAILURE")
             $fontColorClass = "fontColorRed";
         echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-        echo "<tr><td>Build Date: </td><td>$latestBuildTimestamp</td></tr>";
-        echo "<tr><td>Build Duration: </td><td>$latestBuildDuration</td></tr>";
+        echo '<tr><td>Build Time: </td><td>' . $latestBuildTimestamp . ' (GMT)</td></tr>';
+        echo '<tr><td>Build Duration: </td><td>' . $latestBuildDuration . '</td></tr>';
         if ($latestBuildForceSuccess == 1)
             echo '<tr><td>Force Success: </td><td>' . FLAGON . '</td></tr>';
         else

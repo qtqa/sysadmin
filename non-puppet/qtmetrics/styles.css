@@ -161,6 +161,72 @@ body {
     color: #000;
 }
 
+#filters,
+#databaseStatus,
+.metricArea {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+#filters {
+    width: 940px;
+    min-height: 110px;
+    float: left;
+}
+
+#databaseStatus {
+    width: 180px;
+    min-height: 110px;
+    float: right;
+    margin-right: -10px;
+    padding-right: 10px;
+}
+
+.metricArea {
+    width: 100%;
+    float: left;
+}
+
+#filterTitle {
+    float: left;
+}
+
+#filterButtons {
+    margin-top: -5px;
+    padding-left: 100px;
+    float: left;
+    width: 300px;                          /* Set close to width of one button (see below) if you want to place buttons one above each other */
+}
+
+#filterFields {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    float: left;
+    clear: both;
+}
+
+#filterFields label {                        /* This can be used to align all filter fields to start at same 'column' */
+    display:block;
+    width: 90px;
+    float:left;
+    margin-top: 4px;                       /* This can be used to align the filter title vertically against the selection box */
+}
+
+#filterFields select {                       /* This can be used to set all filter fields with same width */
+    width: 400px;                          /* Note: This must be adjusted when adding filters to the right hand side as well (works with 2*350px) */
+    margin-top: 3px;
+}
+
+#filterFieldsLeft,
+#filterFieldsRight {
+    float: left;
+}
+
 #footer {
     width: 100%;
     height: 40px;
@@ -172,37 +238,6 @@ body {
     padding-bottom: 20px;
     font-size: 10px;
     color: #404044;
-}
-
-#filters {
-    width: 100%;
-    margin-top: 10px;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-bottom: 10px;
-    float: left;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 5px 5px 5px #888888;
-}
-
-#filterButtons {
-    margin-top: -5px;
-    padding-right: 50px;
-    float: right;
-    width: 300px;                          /* Set close to width of one button (see below) if you want to place buttons one above each other */
-}
-
-#filterFields label {                        /* This can be used to align all filter fields to start at same 'column' */
-    display:block;
-    width: 90px;
-    float:left;
-    margin-top: 4px;                       /* This can be used to align the filter title vertically against the selection box */
-}
-
-#filterFields select {                       /* This can be used to set all filter fields with same width */
-    width: 400px;
-    margin-top: 3px;
 }
 
 button {
@@ -296,18 +331,6 @@ td {
 
 .tableCellAlignRight {
     text-align: right;
-}
-
-.metricArea {
-    width: 100%;
-    margin-top: 10px;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-bottom: 10px;
-    float: left;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 5px 5px 5px #888888;
 }
 
 .elapdedTime {

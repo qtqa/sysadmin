@@ -58,4 +58,38 @@ function createBuildNumberString($buildNumber)
     return $buildString;
 }
 
+/* Converts UTC time to local time based on time offset
+   Input:  $time is in UTC in format "Y-m-d H:i:s" e.g. "2013-06-07 04:02:06",
+           $offset is e.g. "GMT+0300" or "GMT+0000" or "GMT-0600"
+   Output: in UTC in format without the seconds (to save display space) "Y-m-d H:i" e.g. "2013-06-07 07:02" */
+function getLocalTime($time, $offset)
+{
+    date_default_timezone_set('UTC');
+    $originalTimestamp = strtotime($time . ' UTC');
+    $offsetSign = substr($offset, 3, 1);
+    $offsetHour = intval(substr($offset, 4, 2));
+    $offsetMinute = intval(substr($offset, 6, 2));
+
+    if ($offsetSign == "-") {
+        $modifiedTimestamp = mktime(
+            intval(date("H",$originalTimestamp)) - $offsetHour,
+            intval(date("i",$originalTimestamp)) - $offsetMinute,
+            intval(date("s",$originalTimestamp)),
+            intval(date("m",$originalTimestamp)),
+            intval(date("d",$originalTimestamp)),
+            intval(date("Y",$originalTimestamp)));
+    } else {
+        $modifiedTimestamp = mktime(
+            intval(date("H",$originalTimestamp)) + $offsetHour,
+            intval(date("i",$originalTimestamp)) + $offsetMinute,
+            intval(date("s",$originalTimestamp)),
+            intval(date("m",$originalTimestamp)),
+            intval(date("d",$originalTimestamp)),
+            intval(date("Y",$originalTimestamp)));
+    }
+
+    $local = date("Y-m-d H:i", $modifiedTimestamp);
+    return $local;
+}
+
 ?>
