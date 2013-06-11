@@ -88,7 +88,7 @@ function showMetricData(metricId)
     if (metricRequest[metricId].readyState == 4 && metricRequest[metricId].status == 200) {
         var response = metricRequest[metricId].responseText;
         document.getElementById("metricsBox"+metricId).innerHTML = response;
-        loadDatabaseStatus();                                         // Load the database status after first metrics box is ready, or every time a metrics box is updated
+        loadDatabaseStatus(0);                                        // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
     }
 }
 
@@ -118,11 +118,26 @@ function showFilters(div)
     }
 }
 
-/* Request database status (from database) */
-function getDatabaseStatus(div, filepath, timeOffset)
+/* Request database status (initial loading of the page) */
+function getDatabaseStatusInitial(div, filepath, initial, timeOffset)
 {
     createFilterRequestObject();
-    filterRequest.open("GET",filepath+"?timeoffset="+timeOffset,true);
+    filterRequest.open("GET",filepath+"?initial="+initial+"&timeoffset="+timeOffset,true);
+    filterRequest.send();
+    filterRequest.onreadystatechange = function(index)
+    {
+        return function()
+        {
+            showDatabaseStatusInitial(index);
+        };
+    } (div);
+}
+
+/* Request database status (normal use of the page) */
+function getDatabaseStatus(div, filepath, initial, timeOffset)
+{
+    createFilterRequestObject();
+    filterRequest.open("GET",filepath+"?initial="+initial+"&timeoffset="+timeOffset,true);
     filterRequest.send();
     filterRequest.onreadystatechange = function(index)
     {
@@ -133,7 +148,18 @@ function getDatabaseStatus(div, filepath, timeOffset)
     } (div);
 }
 
-/* Show database status in the related div */
+/* Show database status in the related div (initial loading of the page) */
+function showDatabaseStatusInitial(div)
+{
+    if (filterRequest.readyState == 4 && filterRequest.status == 200) {
+        var response = filterRequest.responseText;
+        document.getElementById(div).innerHTML = response;
+        getFilters("filters", "ci/getfilters.php");                   // Continue to load the filters next (initial loading of the page)
+        return;
+    }
+}
+
+/* Show database status in the related div (normal use of the page) */
 function showDatabaseStatus(div)
 {
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {

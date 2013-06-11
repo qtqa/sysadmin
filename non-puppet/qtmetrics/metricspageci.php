@@ -61,19 +61,22 @@ session_start();
         /* Load all filter values */
         function loadAll()
         {
-            getFilters("filters", "ci/getfilters.php");          // Metrics boxes to be loaded after filters are ready (see getFilters and showFilters)
+            loadDatabaseStatus(1);                               // Boxes are loaded synchoronously: Database status (initial loading with welcome text = 'true') -> Filters -> Metrics boxes -> Database status (normal use with session and database status = 'false')
+        }
+
+        /* Load database status */
+        function loadDatabaseStatus(initial)                     // Called first in page loading, and every time a metrics box is updated (from showMetricData)
+        {
+            if (initial == 1)
+                getDatabaseStatusInitial("databaseStatus", "ci/getdatabasestatus.php", initial, getTimeOffset());  // Time offset passed to show the session time and database update time with the same 'timezone'
+            else
+                getDatabaseStatus("databaseStatus", "ci/getdatabasestatus.php", initial, getTimeOffset());         // Time offset passed to show the session time and database update time with the same 'timezone'
         }
 
         /* Load all metrics boxes */
         function loadMetricsboxes()                              // Called after filters are ready (from showFilters)
         {
             showMetricsBoxes("All","All","All");
-        }
-
-        /* Load database status */
-        function loadDatabaseStatus()                            // Called after first metrics box is ready, or every time a metrics box is updated (from showFilters)
-        {
-            getDatabaseStatus("databaseStatus", "ci/getdatabasestatus.php", getTimeOffset());    // Time offset passed to show the session time and database update time with the same 'timezone'
         }
 
         /* Update all metrics boxes */
@@ -272,9 +275,7 @@ session_start();
 
         <!-- Database status (loaded with Ajax call) -->
         <div id="databaseStatus">
-        <b>Welcome</b><br/><br/>
-        Loading data for your session.<br/><br/>
-        If not ready in one minute, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a>...
+        <b>Welcome</b>
         </div>
 
         <!-- Metrics boxes -->

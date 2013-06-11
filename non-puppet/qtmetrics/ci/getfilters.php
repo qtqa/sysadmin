@@ -59,7 +59,7 @@ include "getautotestvalues.php";
 </div>
 
 <div id="filterButtons">
-<button onclick="loadAll()">Clear selections</button>
+<button onclick="clearFilters()">Clear selections</button>
 <button onclick="reloadFilters()">Reload</button>
 </div>
 
