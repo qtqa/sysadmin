@@ -9,6 +9,7 @@ class ci_tester::windows inherits ci_tester::base {
     include jom
     include virtual_clone_drive
     include postgresql
+    include mysql
 
     if ($kernelmajversion >= "6.1") {
         # WinCE build is performed only on Windows 7 with MSVC2008

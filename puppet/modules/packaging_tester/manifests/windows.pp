@@ -9,4 +9,5 @@ class packaging_tester::windows inherits packaging_tester::base {
     include dependencywalker
     include virtual_clone_drive
     include postgresql
+    include mysql
 }
