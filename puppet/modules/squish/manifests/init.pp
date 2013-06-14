@@ -19,29 +19,39 @@ class squish {
         subscribe => File["${path}"],
     }
 
-    # Squish have separate packages for x86 and x64 architectures in Windows 7 and Ubuntu
+    # Squish have separate packages for x86 and x64 architectures in Windows 7, Windows 8 and Ubuntu
+    $msvc11_pkg_name = $::architecture ? {
+        x64     => "squish-5.0.0-qt50x-win64-msvc11",
+        default => "squish-5.0.0-qt50x-win32-msvc11",
+    }
+
+    $mingw_pkg_name = "squish-5.0.0-qt50x-win32-mingw"
+
     $msvc10_pkg_name = $::architecture ? {
-        x64     => "squish-4.3-20130123-1456-qt50x-win64-msvc10",
-        default => "squish-4.3-20130114-1424-qt500-win32-msvc10",
+        x64     => "squish-5.0-20130612-1216-qt50x-win64-msvc10",
+        default => "squish-5.0-20130612-1026-qt50x-win32-msvc10",
     }
+
     $ubuntu_pkg_name = $::architecture ? {
-        i386    => "squish-4.3-20130114-1424-qt500-linux32",
-        default => "squish-4.3-20130114-1424-qt500-linux64",
+        i386    => "squish-5.0.0-qt50x-linux32",
+        default => "squish-5.0.0-qt50x-linux64",
     }
+
+    $darwin_pkg_name = "squish-5.0.0-qt50x-macx86_64"
 
     case $::operatingsystem {
         windows: {
             if ($kernelmajversion == "6.2") {
                 squish_install {
                     "msvc11":
-                        pkg_name => "squish-4.3-20130304-1448-qt50x-win64-msvc11",
+                        pkg_name => "$msvc11_pkg_name",
                         path     => "$path",
                     }
             }
             else {
                 squish_install {
                     "mingw":
-                        pkg_name => "squish-4.3-20130308-1254-qt50x-win32-mingw",
+                        pkg_name => "$mingw_pkg_name",
                         path     => "$path",
                     ;
                     "msvc10":
@@ -64,7 +74,7 @@ class squish {
 
             squish_install {
                 "package":
-                    pkg_name => "squish-4.3-20130114-1508-qt500-macx86_64-gcc4.0",
+                    pkg_name => "$darwin_pkg_name",
                     path     => "$path",
             }
         }
@@ -73,9 +83,9 @@ class squish {
     define squish_install ($path,$pkg_name) {
 
         $binary      = "\"${path}/${name}/bin/squishserver\""
-        $base_url    = 'http://download.froglogic.com/snapshots'
-        $version     = '4.3'
+        $version     = '5.0.0'
         $unzip_flags = "x -o$path"
+        $base_url    = "$input/squish"
 
         unzip_package { "$name":
             url         => "${base_url}/${pkg_name}.zip",
