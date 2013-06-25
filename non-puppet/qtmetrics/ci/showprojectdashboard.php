@@ -52,6 +52,8 @@ $timeStart = microtime(true);
 $project = $_GET["project"];
 $conf = $_GET["conf"];
 $conf = str_replace("g  ","g++",$conf);     // Problem: Parameter passing (with GET method in URL) destroys the string "++", e.g. "linux-g++-32_Ubuntu_10.04_x86" -> "linux-g  -32_Ubuntu_10.04_x86"
+$timescaleType = $_GET["tstype"];
+$timescaleValue = $_GET["tsvalue"];
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');
@@ -66,9 +68,6 @@ if ($useMysqli) {
     $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
 }
 
-/* Set to show or hide elapsed time printing */
-$showElapsedTime = FALSE;                   // Set TRUE to show elapsed database and calculation times for each list in Project dashboard
-
 /************************************************************/
 /* NESTED LEVEL 1: No filtering done (default view)         */
 /************************************************************/
@@ -77,10 +76,21 @@ if ($project == "All" AND $conf == "All") {
     echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel1.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> Select Project<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
+
+        /* Print the used filters */
+        if ($timescaleType <> "All") {
+            echo '<table>';
+            if ($timescaleType == "Since")
+                echo '<tr><td>Since:</td><td class="tableCellBackgroundTitle">' . $timescaleValue . '</td></tr>';
+            echo '</table>';
+            echo '<br>';
+        }
+
         /* Show list of Projects (from the session variable that was saved for the filters */
         require('listprojects.php');
+
     } else {
-        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
 }
 
@@ -108,7 +118,7 @@ if ($project <> "All" AND $conf == "All") {
         $projectFilter = " AND project=\"$project\"";
         require('listfailingautotests.php');
     } else {
-        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
     if (isset($_SESSION['projectDashboardShowFullList']))                                                         // List cut mode: After diving to next level, set back to default mode when viewing the list next time
         unset($_SESSION['projectDashboardShowFullList']);
@@ -137,7 +147,7 @@ if ($project <> "All" AND $conf <> "All") {
             echo "<br/>Configuration $conf not built for $project<br/>";
         }
     } else {
-        echo '<br/>Filter values not ready, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+        echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
     if (isset($_SESSION['projectDashboardShowFullList']))                                                // List cut mode: After diving to next level, set back to default mode when viewing the list next time
         unset($_SESSION['projectDashboardShowFullList']);

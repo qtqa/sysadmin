@@ -49,9 +49,13 @@ session_start();
 include(__DIR__.'/../commondefinitions.php');
 
 // Read values from database to session variables (so these are updated only once per session)
+$timeStart = microtime(true);
 include "getprojectvalues.php";
+$timeProjectValues = microtime(true);
 include "getconfvalues.php";
+$timeConfValues = microtime(true);
 include "getautotestvalues.php";
+$timeAutotestValues = microtime(true);
 ?>
 
 <div id="filterTitle">
@@ -94,9 +98,51 @@ include "getautotestvalues.php";
 ?>
 </select>
 </div>
+<div id="filterFieldsMiddle">
+<label>Timescale:</label>
+<select name="timescale" id="timescale" onchange="filterTimescale(this.value)">
+    <option value="All">All</option>
+    <option value="Since">Since a date</option>
+</select>
+</div>
+</form>
 
 <div id="filterFieldsRight">
+<form name="date" id="date">
+<label>Since date:</label>
+<?php
+/* Date picker calendar from http://www.triconsole.com/php/calendar_datepicker.php */
+require_once(__DIR__.'/../calendar/classes/tc_calendar.php');         // Get class into the page
+$myCalendar = new tc_calendar("since", true, false);                  // Instantiate class and set properties ("since" = element id, 'true' + 'false' = date picker with no input box)
+    $myCalendar->setIcon('calendar/images/iconCalendar.gif');         // (directory under the directory of this Ajax file; this is why the image directory exists here)
+    $myCalendar->setDate(substr($_SESSION['maxBuildDate'], 8, 2), substr($_SESSION['maxBuildDate'], 5, 2), substr($_SESSION['maxBuildDate'], 0, 4));   // Last build date as a default value
+    $myCalendar->setPath('calendar/');                                // (relative from the main directory)
+    $myCalendar->setYearInterval(2012, 2015);
+    $myCalendar->dateAllow($_SESSION['minBuildDate'], $_SESSION['maxBuildDate']);  // Allows only the build dates that are available in the database
+    $myCalendar->setDateFormat('Y-m-d');
+    $myCalendar->showWeeks(true);
+    $myCalendar->startDate(1);
+    $myCalendar->setAlignment('left', 'bottom');
+    $myCalendar->setOnChange('filterTimescale("Since")');
+    $myCalendar->writeScript();                                       // Write the calendar to the screen
+?>
 </div>
 </form>
 
 </div>
+
+<?php
+/* Elapsed time */
+if ($showElapsedTime) {
+    $timeEnd = microtime(true);
+    $time1 = round($timeProjectValues - $timeStart, 2);
+    $time2 = round($timeConfValues - $timeProjectValues, 2);
+    $time3 = round($timeAutotestValues - $timeConfValues, 2);
+    $time = round($timeEnd - $timeStart, 2);
+    echo "<div class=\"elapdedTime\">";
+    echo "<ul><li>";
+    echo "Total time: $time s (project values: $time1 s, conf values: $time2 s, autotest values: $time3 s)";
+    echo "</li></ul>";
+    echo "</div>";
+}
+?>

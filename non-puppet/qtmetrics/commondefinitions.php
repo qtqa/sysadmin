@@ -62,4 +62,7 @@ define("LOGFILEPATHCI", "http://testresults.qt-project.org/ci/");
 define("FLAGON", "Yes");
 define("FLAGOFF", "-");
 
+/* Set to show or hide elapsed time printing (for testing purposes) */
+$showElapsedTime = FALSE;                       // Set TRUE to show elapsed database and calculation times (different implementations in different boxes)
+
 ?>

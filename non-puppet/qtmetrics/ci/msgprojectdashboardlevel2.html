@@ -31,7 +31,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration</td>
+        <td class="tableSingleBorder">Project, Configuration, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -43,7 +43,8 @@
                                       <b>Build history:</b> Showing a few last Project builds with date, result and link to source build results directory (no calculation)<br>
                                       <b>Configurations:</b> Showing the Configuration build result and tagging (force success, significance)
                                          and count of failed Autotests by significance for the latest build,
-                                         and the count and ratio of failed and successful builds compared to total for each Configuration.<br>
+                                         and the count and ratio of failed and successful builds compared to total for each Configuration
+                                         (either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date).<br>
                                          <i>Note: The sum of failed and successful builds may not match with the total because, in case some already running Configuration build fails, the possibly waiting builds are cancelled (seen with result "undef" in the list).</i><br>
                                       <b>Failed Autotests:</b> Showing the list of failed significant Autotests in blocking Configurations i.e. the ones that caused the Project build failure (combined list of related failed Autotests from each Configuration build).
         </td>

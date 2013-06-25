@@ -49,6 +49,8 @@
     // $_SESSION['arrayProjectBuildLatestResult']
     // $project
     // $conf
+    // $timescaleType
+    // $timescaleValue
     // $projectFilter
     // $confFilter
 
@@ -68,7 +70,9 @@ $projectConfValid = FALSE;               // Can be used to identify if Configura
 if ($conf == "All") {
     echo "<table>";
     echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
-    echo "<tr><td>Latest Build: </td><td class=\"tableCellBackgroundTitle\">$latestBuild</td></tr>";
+    if ($timescaleType == "Since")
+        echo '<tr><td>Since:</td><td class="tableCellBackgroundTitle">' . $timescaleValue . '</td></tr>';
+    echo "<tr><td>Latest Build: </td><td>$latestBuild</td></tr>";
     $fontColorClass = "fontColorBlack";
     if ($latestBuildResult == "SUCCESS")
         $fontColorClass = "fontColorGreen";
@@ -114,7 +118,8 @@ else {
         echo "<table>";
         echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
         echo "<tr><td>Configuration: </td><td class=\"tableCellBackgroundTitle\">$conf</td></tr>";
-        echo "<tr><td>Latest Build: </td><td class=\"tableCellBackgroundTitle\">$latestBuild</td></tr>";
+        // Note: Timescale filter not shown here because it does not affect this view
+        echo "<tr><td>Latest Build: </td><td>$latestBuild</td></tr>";
         $fontColorClass = "fontColorBlack";
         if ($latestBuildResult == "SUCCESS")
             $fontColorClass = "fontColorGreen";

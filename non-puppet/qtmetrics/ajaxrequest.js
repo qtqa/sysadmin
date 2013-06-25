@@ -61,7 +61,7 @@ function createFilterRequestObject()
 }
 
 /* Request metric data (e.g. from database) */
-function getMetricData(metricId, filepath, project, conf, autotest)
+function getMetricData(metricId, filepath, project, conf, autotest, timescaleType, timescaleValue)
 {
     document.getElementById("metricsBox"+metricId).innerHTML = "<img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...";    // Div content during the Ajax call
     if (project == "") {
@@ -70,7 +70,7 @@ function getMetricData(metricId, filepath, project, conf, autotest)
     }
 
     createMetricRequestObject(metricId);
-    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest,true);
+    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest+"&tstype="+timescaleType+"&tsvalue="+timescaleValue,true);
     metricRequest[metricId].send();
 
     metricRequest[metricId].onreadystatechange = function(index)

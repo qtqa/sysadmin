@@ -31,7 +31,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration</td>
+        <td class="tableSingleBorder">Project, Configuration, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -42,7 +42,8 @@
         <td class="tableSingleBorder"><b>In latest build:</b> Showing ID, result and date of build,
                                          the count of failed Autotests (by their significance tagging),
                                          and the count of Configurations (by their force success and significance tagging compared to total) for each Project<br>
-                                      <b>In all builds:</b> Showing the count and ratio of failed and successful builds compared to total for each Project
+                                      <b>In all builds:</b> Showing the count and ratio of failed and successful builds compared to total for each Project.
+                                         Calculated either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date.
         </td>
         </tr>
         <tr>

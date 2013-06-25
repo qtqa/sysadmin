@@ -57,6 +57,8 @@ body {
 /*  border: 1px solid blue;             /* for testing the divs */
 }
 
+/*** Header ***/
+
 #header {
     text-align:left;
     clear: both;
@@ -108,6 +110,8 @@ body {
     text-decoration: none;
     color: #44a51c;
 }
+
+/*** Main menu ***/
 
 #menu {
     margin-top: 65px;
@@ -161,36 +165,40 @@ body {
     color: #000;
 }
 
+/*** The content boxes ***/
+
 #filters,
 #databaseStatus,
-.metricArea {
+.metricArea {                               /* Common definitions for all boxes */
     margin-top: 10px;
     padding-top: 10px;
-    padding-left: 10px;
     padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     background: #fff;
     border-radius: 5px;
     box-shadow: 5px 5px 5px #888888;
 }
 
-#filters {
-    width: 940px;
+#filters {                                  /* Filter box specific definitions */
+    width: 930px;
     min-height: 110px;
     float: left;
 }
 
-#databaseStatus {
+#databaseStatus {                           /* Database status box specific definitions */
     width: 180px;
     min-height: 110px;
     float: right;
     margin-right: -10px;
-    padding-right: 10px;
 }
 
-.metricArea {
-    width: 100%;
+.metricArea {                               /* Metrics box specific definitions */
+    width: 1142px;                          /* Container width 1152px - padding-right 10px */
     float: left;
 }
+
+/*** Filters ***/
 
 #filterTitle {
     float: left;
@@ -218,35 +226,50 @@ body {
 }
 
 #filterFields select {                       /* This can be used to set all filter fields with same width */
-    width: 400px;                          /* Note: This must be adjusted when adding filters to the right hand side as well (works with 2*350px) */
+    width: 350px;                          /* Note: This must be adjusted when adding filters to the right hand side as well (works with 2*350px) */
     margin-top: 3px;
 }
 
 #filterFieldsLeft,
+#filterFieldsMiddle,
 #filterFieldsRight {
     float: left;
 }
 
-#footer {
-    width: 100%;
-    height: 40px;
-    text-align: center;
-    clear: both;
-    margin-top: 10px;
-    padding-top: 20px;
-    padding-left: 10px;
-    padding-bottom: 20px;
-    font-size: 10px;
-    color: #404044;
+#filterFieldsMiddle label,
+#filterFieldsRight label {                   /* Title text width of middle and right filter area (overwrite the common definitions for #filterFields label) */
+    width: 70px;
+}
+
+#filterFieldsMiddle select,
+#filterFieldsRight select {                  /* Selection box width of middle and right filter area (overwrite the common definitions for #filterFields select) */
+    width: 120px;
+}
+
+#filterFieldsRight span {                   /* Adjust calendar date selection box vertically */
+    margin-top: 3px;
+}
+
+#filterFieldsRight img {                    /* Adjust calendar icon vertically */
+    margin-top: 6px;
+}
+
+.date-tccontainer {                        /* Overwrite calendar CSS definitions to adjust the colors of date selection box with other selection boxes */
+    border: 1px solid #959595;
+    background-color: white;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+select {
+    margin-right: 20px;
 }
 
 button {
     width: 120px;
 }
 
-select {
-    margin-right: 20px;
-}
+/*** Metrics box content using tables ***/
 
 table {
     border-collapse:collapse;
@@ -268,7 +291,7 @@ td {
     color:black;
 }
 
-.fontColorGrey{
+.fontColorGrey {
     color:grey;
 }
 
@@ -287,6 +310,10 @@ td {
 
 .tableSingleBorder {
     border: 1px solid black;
+}
+
+.tableTopBorder {
+    border-top: 1px solid black;
 }
 
 .tableBottomBorder {
@@ -333,13 +360,18 @@ td {
     text-align: right;
 }
 
+/*** Elapsed time print in metrics boxes ***/
+
 .elapdedTime {
     font-size: 10px;
+    clear: both;
 }
 
 .elapdedTime ul {
     list-style-type: none;
 }
+
+/*** Mouse over popup message (from http://www.scientificpsychic.com/etc/css-mouseover.html) ***/
 
 span.popupMessage {
     border-bottom: thin dotted;
@@ -376,11 +408,15 @@ span.popupMessageImg:hover span {
     z-index:100;
 }
 
+/*** Message window ***/
+
 .messageWindow {
     font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
     font-size: 12px;
     background: #FFFFFF;
 }
+
+/*** Images and image links ***/
 
 img {
     border: 0px;
@@ -404,6 +440,8 @@ img {
     text-decoration: none;
 }
 
+/*** Text links ***/
+
 a:link {
     text-decoration: none;
 }
@@ -417,4 +455,19 @@ a:hover {
 }
 a:active {
 text-decoration: none;
+}
+
+/*** Footer ***/
+
+#footer {
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    clear: both;
+    margin-top: 10px;
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-bottom: 20px;
+    font-size: 10px;
+    color: #404044;
 }

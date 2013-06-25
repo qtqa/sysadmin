@@ -50,7 +50,7 @@ if(!isset($_SESSION['arrayProjectName'])) {
     /* Connect to the server */
     require(__DIR__.'/../connect.php');
 
-    /* Step 1: Read all Project values from database ... */
+    /* Step 1: Read name, latest Build number and Autotest result counting min/max scope for each Project */
     $sql="SELECT project, MAX(build_number)
           FROM ci
           GROUP BY project ORDER BY project;";
@@ -65,7 +65,6 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result = mysql_query($sql) or die (mysql_error());
         $numberOfRows = mysql_num_rows($result);
     }
-    /* ... and store to session variable */
     $arrayProjectName = array();
     $arrayProjectBuildLatest = array();
     $arrayProjectBuildScopeMin = array();
@@ -220,6 +219,21 @@ if(!isset($_SESSION['arrayProjectName'])) {
         }
     }
 
+    /* Step 6: Read the min and max dates */
+    $sql="SELECT MIN(timestamp), MAX(timestamp)
+          FROM ci;";
+    if ($useMysqli) {
+        $result = mysqli_query($conn, $sql);
+        $resultRow = mysqli_fetch_row($result);
+    } else {
+        $selectdb="USE $db";
+        $result = mysql_query($selectdb) or die (mysql_error());
+        $result = mysql_query($sql) or die (mysql_error());
+        $resultRow = mysql_fetch_row($result);
+    }
+    $minBuildDate = substr($resultRow[0], 0, 10);
+    $maxBuildDate = substr($resultRow[1], 0, 10);
+
     /* Save session variables */
     $_SESSION['arrayProjectName'] = $arrayProjectName;
     $_SESSION['arrayProjectBuildLatest'] = $arrayProjectBuildLatest;
@@ -235,6 +249,8 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $_SESSION['arrayProjectBuildLatestConfCount'] = $arrayProjectBuildLatestConfCount;
     $_SESSION['arrayProjectBuildLatestConfCountForceSuccess'] = $arrayProjectBuildLatestConfCountForceSuccess;
     $_SESSION['arrayProjectBuildLatestConfCountInsignificant'] = $arrayProjectBuildLatestConfCountInsignificant;
+    $_SESSION['minBuildDate'] = $minBuildDate;
+    $_SESSION['maxBuildDate'] = $maxBuildDate;
 
     if ($useMysqli) {
         mysqli_free_result($result);                                                 // Free result set

@@ -127,7 +127,10 @@ if ($useMysqli)
     mysqli_free_result($result);                                            // Free result set
 
 /* Print the data */
-echo '<b>Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+if ($project<>"All" AND $conf=="All")
+    echo '<b>Project Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+if ($project<>"All" AND $conf<>"All")
+    echo '<b>Configuration Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
 if ($printedBuildCount > 0) {
     echo "<table class=\"fontSmall tableSingleBorder\">";
 

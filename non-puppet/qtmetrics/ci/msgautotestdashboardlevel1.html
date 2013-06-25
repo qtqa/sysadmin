@@ -31,7 +31,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration, Autotest</td>
+        <td class="tableSingleBorder">Project, Configuration, Autotest, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -39,7 +39,10 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
-        <td class="tableSingleBorder"><b>In latest builds:</b> Counting number of failures in each Configuration (and Project) in Project specific latest build for each Autotest (by failure category)</td>
+        <td class="tableSingleBorder"><b>In latest builds:</b> Counting the number of failures in each Configuration (and Project) in Project specific latest build for each Autotest (by failure category)<br>
+                                      <b>In all builds:</b> Counting the total number of failures in each Configuration (and Project) in all builds for each Autotest.
+                                         Calculated either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date.
+                                         <i>Note: This is calculated only when a Project or Configuration, or the Timescale, is filtered.</i></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
