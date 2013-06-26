@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="../styles.css" />
+        <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
+        <title>Qt Metrics Information</title>
+    </head>
+
+    <body class="messageWindow">
+        <img src="../images/info.png" alt="info"><br><br>
+
+        <!-- The message or content to be shown on new window -->
+        <p><b><u>AUTOTEST RESULT HISTORY NOTATION:</u></b></p>
+        <table>
+        <tr><td><br/><b>Result:</b></td><td></td></tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundRedDark"><b>123</b></td>
+        <td>The Autotest resulted a <b>blocking failure</b> in this Build (significant Autotest in blocking Configuration)</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundRed">123</td>
+        <td>The Autotest resulted a <b>significant failure</b> in this Build (significant Autotest in insignificant Configuration; regardless of the Build result)</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundRedLight">123</td>
+        <td>The Autotest resulted an <b>insignificant failure</b> in this Build (insignificant Autotest; regardless of the Build result)</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundGreen">123</td>
+        <td>The Autotest resulted <b>success</b> in this Build (the Build was successful)</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered">123</td>
+        <td>Autotest result is <b>unknown</b> (the Build was cancelled, aborted or it failed due to build script failure or due to failure of some other Autotest)</td>
+        </tr>
+        <tr><td><br/><b>Timescale:</b></td><td></td></tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered"><a href="#">link</a></td>
+        <td>The related Build was done <b>within</b> the filtered Timescale, or Timescale not filtered; <br/>the link opens the related Build log file; for any Autotest result</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered fontColorGrey">grey</td>
+        <td>The related Build was done <b>before</b> the filtered Timescale; for any Autotest result</td>
+        </tr>
+        </table>
+        <!-- End of message -->
+
+        <br><br>
+        <button type="button" onclick="window.open('', '_self', ''); window.close();">Close</button>
+        <br><br>
+
+    </body>
+</html>

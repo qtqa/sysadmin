@@ -344,8 +344,16 @@ td {
     background-color: #73B873;
 }
 
+.tableCellBackgroundRedDark  {             /* This can be used to highlight failed results (most severe) */
+    background-color: #990000;
+}
+
 .tableCellBackgroundRed  {                  /* This can be used to highlight failed results */
     background-color: #FF4D4D;
+}
+
+.tableCellBackgroundRedLight  {             /* This can be used to highlight failed results (least severe) */
+    background-color: #FFC285;
 }
 
 .tableCellCentered {
