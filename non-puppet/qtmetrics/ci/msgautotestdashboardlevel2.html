@@ -23,7 +23,9 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Question</th>
-        <td class="tableSingleBorder">In which Configurations and Projects the Autotest is failing</td>
+        <td class="tableSingleBorder">In which Configurations and Projects the Autotest is failing, and how often.<br>
+                                      In which Configuration builds the failing Autotest is blocking the build.<br>
+                                      Is the Autotest failing constantly in build history.</td>
         </tr>
         <tr><td>&nbsp;</td><td></td></tr>
         <tr>
@@ -31,19 +33,22 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration, Autotest</td>
+        <td class="tableSingleBorder">Project, Configuration, Autotest, Timescale (in build history only)</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
-        <td class="tableSingleBorder">List of Configurations and Projects the Autotest is failing by failure category</td>
+        <td class="tableSingleBorder">List of Configurations and Projects the Autotest is failing by failure category, both for the latest build and for the last n builds.
+                                      <i>For result history table, see the linked notation description.</i></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
-        <td class="tableSingleBorder"><b>In latest builds:</b> Counting number of failures in each Configuration (and Project) in Project specific latest build for each Autotest (by failure category)</td>
+        <td class="tableSingleBorder"><b>Latest builds:</b> Counting the number of failures in each Configuration (and Project) in Project specific latest build for each Autotest (by failure category).<br>
+                                      <b>Result history:</b> Calculating the result, or the failure category in case of failure, in each Project Configuration build based on the Autotest failure and significance, and build result and significance.</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
-        <td class="tableSingleBorder">Higher number of Configurations indicates a need for analysis</td>
+        <td class="tableSingleBorder">Higher number of Configurations indicates a need for analysis.<br>
+                                      Repeating failures, especially the blocking ones, require corrective actions. <i>See the Failure category description for action details.</i></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Target value</th>
@@ -58,8 +63,10 @@
         <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration<br>
                                       <b>Build number:</b> several per Project (numeric 1 to n; number is Project specific)<br>
                                       <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86)<br>
+                                      <b>Configuration build result:</b> SUCCESS/FAILURE/ABORTED/undef ("undef" means the build was cancelled before it was even started because some other Configuration build failed and caused the whole Project build failure)<br>
                                       <b>Configuration significance:</b> blocked/insignificant Configurations (if Configuration is tagged as "insignificant" the build will not fail even though some significant Autotests would fail)<br>
                                       <b>Autotest name:</b> several per Configuration (e.g. tst_qftp)<br>
+                                      <b>Autotest result:</b> name in the list indicates a failure (i.e. the passed ones are not listed)<br>
                                       <b>Autotest significance:</b> Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)
         </td>
         </tr>

@@ -61,18 +61,19 @@ function createFilterRequestObject()
 }
 
 /* Request metric data (e.g. from database) */
-function getMetricData(metricId, filepath, project, conf, autotest, timescaleType, timescaleValue)
+function getMetricData(metricId, filepath, project, conf, autotest, timescaleType, timescaleValue, sortBy)
 {
     document.getElementById("metricsBox"+metricId).innerHTML = "<img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...";    // Div content during the Ajax call
     if (project == "") {
-      document.getElementById("metricsBox"+metricId).innerHTML = "";
-      return;
+        document.getElementById("metricsBox"+metricId).innerHTML = "";
+        return;
     }
-
+    if (typeof sortBy == "undefined")                                 // sortBy is optional, set 0 as a default
+        var sortBy = 0;
     createMetricRequestObject(metricId);
-    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest+"&tstype="+timescaleType+"&tsvalue="+timescaleValue,true);
+    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest+"&tstype="
+                                      +timescaleType+"&tsvalue="+timescaleValue+"&sort="+sortBy,true);
     metricRequest[metricId].send();
-
     metricRequest[metricId].onreadystatechange = function(index)
     {
         return function()

@@ -379,6 +379,33 @@ td {
     list-style-type: none;
 }
 
+
+td a {
+    width: 100%;
+    display: block;
+}
+
+td.sortField a:link {
+    text-decoration: none;
+    color: #000;
+}
+
+td.sortField a:visited {
+    text-decoration: none;
+    color: #000;
+}
+
+td.sortField a:hover {
+    text-decoration: none;
+    color: #44A51C;
+}
+
+td.sortField a:active {
+    text-decoration: none;
+    color: #000;
+}
+
+
 /*** Mouse over popup message (from http://www.scientificpsychic.com/etc/css-mouseover.html) ***/
 
 span.popupMessage {
@@ -459,10 +486,11 @@ a:visited {
 }
 
 a:hover {
-    color: #44a51c;
+    color: #44A51C;
 }
+
 a:active {
-text-decoration: none;
+    text-decoration: none;
 }
 
 /*** Footer ***/

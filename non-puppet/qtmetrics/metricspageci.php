@@ -174,9 +174,11 @@ session_start();
         }
 
         /* Update those metrics boxes that are applied to this filter */
-        function filterAutotest(value)
+        function filterAutotest(value, sortBy)
         {
             document.getElementById("autotest").value = value;   // Save filtered value
+            if (typeof sortBy == "undefined")                                    // sortBy is optional, set 0 as a default
+                var sortBy = 0;
             var i;
             var file;
             var appliedFilter;
@@ -204,7 +206,8 @@ session_start();
                                            document.getElementById("conf").value,
                                            value,
                                            timescaleType,
-                                           timescaleValue);
+                                           timescaleValue,
+                                           sortBy);
             <?php
             }
             ?>

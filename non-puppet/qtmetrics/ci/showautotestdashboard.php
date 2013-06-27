@@ -58,6 +58,20 @@ $conf = str_replace("g  ","g++",$conf);
 $autotest = $_GET["autotest"];
 $timescaleType = $_GET["tstype"];
 $timescaleValue = $_GET["tsvalue"];
+$sortBy = $_GET["sort"];
+
+/* Sort field definitions */
+define("AUTOTESTSORTBYNOTSET", 0);
+define("AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF", 1);
+define("AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONF", 2);
+define("AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONF", 3);
+define("AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONF", 4);
+define("AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONFALL", 5);
+define("AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONFALL", 6);
+define("AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONFALL", 7);
+define("AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONFALL", 8);
+if ($sortBy == AUTOTESTSORTBYNOTSET)
+    $sortBy = AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF;                                 // Default if not set
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');
@@ -307,7 +321,7 @@ if ($autotest == "All") {
         $arrayFailingInsignAutotestInsignConfCountAll = array();
 
         $allAutotestsFromDb = 0;
-        $allAutotestsCounted = 0;
+        $allAutotestsCount = 0;
         $printAllBuildsData = FALSE;
         if ($project <> "All" OR $conf <> "All" OR $timescaleType <> "All")
             $printAllBuildsData = TRUE;                                               // All Builds data printed only when a Project, Configuration or Timescale filtered (database/server performance issue with huge data amount)
@@ -371,18 +385,27 @@ if ($autotest == "All") {
                         switch ($autotestFailureCategory) {
                             case SIGNAUTOTESTBLOCKINGCONF:
                                     $arrayFailingSignAutotestBlockingConfCountAll[$k]++;
+                                    // When sorted by this field increase the maxCount for sorting (optimized the sorting loop count); same for all cases below
+                                    if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONFALL AND $arrayFailingSignAutotestBlockingConfCountAll[$k] > $maxCount)
+                                        $maxCount = $arrayFailingSignAutotestBlockingConfCountAll[$k];
                                 break;
                             case SIGNAUTOTESTINSIGNCONF:
                                     $arrayFailingSignAutotestInsignConfCountAll[$k]++;
+                                    if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONFALL AND $arrayFailingSignAutotestInsignConfCountAll[$k] > $maxCount)
+                                        $maxCount = $arrayFailingSignAutotestInsignConfCountAll[$k];
                                 break;
                             case INSIGNAUTOTESTBLOCKINGCONF:
                                     $arrayFailingInsignAutotestBlockingConfCountAll[$k]++;
+                                    if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONFALL AND $arrayFailingInsignAutotestBlockingConfCountAll[$k] > $maxCount)
+                                        $maxCount = $arrayFailingInsignAutotestBlockingConfCountAll[$k];
                                 break;
                             case INSIGNAUTOTESTINSIGNCONF:
                                     $arrayFailingInsignAutotestInsignConfCountAll[$k]++;
+                                    if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONFALL AND $arrayFailingInsignAutotestInsignConfCountAll[$k] > $maxCount)
+                                        $maxCount = $arrayFailingInsignAutotestInsignConfCountAll[$k];
                                 break;
                         }
-                        $allAutotestsCounted++;
+                        $allAutotestsCount++;
                         break;                                                        // Match found, skip the rest
                     }
                 }
@@ -404,23 +427,27 @@ if ($autotest == "All") {
                 echo '<tr><td>Since:</td><td class="tableCellBackgroundTitle">' . $timescaleValue . '</td></tr>';
             if ($project <> "All")
                 echo '<tr><td>Latest Build:</td><td>' . $latestProjectBuild . '</td></tr>';
-            if ($latestAutotests + $allAutotestsCounted == 0) {
+            if ($latestAutotests + $allAutotestsCount == 0) {
                 echo '<tr><td><br></td><td><br></td></tr>';                           // Empty row (2 columns)
-                echo '<tr><td></td><td>Not any Failed Autotests</td></tr>';
+                if ($timescaleType == "All")
+                    echo '<tr><td></td><td>Not any Failed Autotests</td></tr>';
+                if ($timescaleType == "Since")
+                    echo '<tr><td></td><td>Not any Failed Autotests since ' . $timescaleValue . '</td></tr>';
             }
             echo '</table>';
             echo '<br>';
         }
 
-        if ($latestAutotests + $allAutotestsCounted > 0) {                            // List only if something to list (info of 'not any' printed above)
+        if ($latestAutotests + $allAutotestsCount > 0) {                              // List only if something to list (info of 'not any' printed above)
 
             /* Print the titles */
             echo '<table class="fontSmall">';
             echo '<tr>';
             echo '<th></th>';
-            echo '<th colspan="4" class="tableBottomBorder tableSideBorder">LATEST BUILD BY
-                  <a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')"> FAILURE CATEGORY</a>
-                  </th>';
+            if ($timescaleType == "All")
+                echo '<th colspan="4" class="tableBottomBorder tableSideBorder">LATEST BUILD (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
+            if ($timescaleType == "Since")
+                echo '<th colspan="4" class="tableBottomBorder tableSideBorder">LATEST BUILD SINCE ' . $timescaleValue . '</th>';
             if ($printAllBuildsData) {
                 if ($timescaleType == "All")
                     echo '<th colspan="4" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
@@ -438,16 +465,64 @@ if ($autotest == "All") {
             }
             echo '</tr>';
             echo '<tr class="tableBottomBorder">';
-            echo '<td></td>';
-            echo '<td class="tableLeftBorder tableCellCentered">1) Blocking<br>Confs</td>';
-            echo '<td class="tableCellCentered">2) Insignificant<br>Confs</td>';
-            echo '<td class="tableLeftBorder tableCellCentered">3) Blocking<br>Confs</td>';
-            echo '<td class="tableRightBorder tableCellCentered">4) Insignificant<br>Confs</td>';
+            echo '<th class="tableCellAlignRight"><a href="javascript:void(0);" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')"> Failure category</a></th>';
+            echo '<td class="sortField tableLeftBorder tableCellCentered tableCellBackgroundRedDark">';
+            if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF)
+                echo '1) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';          // Identify selected sorting
+            else
+                echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF . ')">
+                      1) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+            echo '</td>';
+            echo '<td class="sortField tableRightBorder tableCellCentered tableCellBackgroundRed">';
+            if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONF)
+                echo '2) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';     // Identify selected sorting
+            else
+                echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONF . ')">
+                      2) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+            echo '</td>';
+            echo '<td class="sortField tableLeftBorder tableCellCentered tableCellBackgroundRedLight">';
+            if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONF)
+                echo '3) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';          // Identify selected sorting
+            else
+                echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONF . ')">
+                      3) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+            echo '</td>';
+            echo '<td class="sortField tableRightBorder tableCellCentered tableCellBackgroundRedLight">';
+            if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONF)
+                echo '4) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';     // Identify selected sorting
+            else
+                echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONF . ')">
+                      4) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+            echo '</td>';
             if ($printAllBuildsData) {
-                echo '<td class="tableLeftBorder tableCellCentered">1) Blocking<br>Confs</td>';
-                echo '<td class="tableCellCentered">2) Insignificant<br>Confs</td>';
-                echo '<td class="tableLeftBorder tableCellCentered">3) Blocking<br>Confs</td>';
-                echo '<td class="tableRightBorder tableCellCentered">4) Insignificant<br>Confs</td>';
+                echo '<td class="sortField tableLeftBorder tableCellCentered tableCellBackgroundRedDark">';
+                if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONFALL)
+                    echo '1) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';          // Identify selected sorting
+                else
+                    echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONFALL . ')">
+                          1) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+                echo '</td>';
+                echo '<td class="sortField tableRightBorder tableCellCentered tableCellBackgroundRed">';
+                if ($sortBy == AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONFALL)
+                    echo '2) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';     // Identify selected sorting
+                else
+                    echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONFALL . ')">
+                          2) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+                echo '</td>';
+                echo '<td class="sortField tableLeftBorder tableCellCentered tableCellBackgroundRedLight">';
+                if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONFALL)
+                    echo '3) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';          // Identify selected sorting
+                else
+                    echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONFALL . ')">
+                          3) Blocking<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+                echo '</td>';
+                echo '<td class="sortField tableRightBorder tableCellCentered tableCellBackgroundRedLight">';
+                if ($sortBy == AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONFALL)
+                    echo '4) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&diams;</b>';     // Identify selected sorting
+                else
+                    echo '<a href="javascript:void(0);" onclick="filterAutotest(\'All\',' . AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONFALL . ')">
+                          4) Insignificant<br>Confs&nbsp;&nbsp;&nbsp;<b>&raquo;</b></a>';
+                echo '</td>';
             }
             echo '</tr>';
 
@@ -456,7 +531,33 @@ if ($autotest == "All") {
             $listCutMode = FALSE;
             for ($countOrder=$maxCount; $countOrder>=0; $countOrder--) {                   // Sort the list by looping from the highest count
                 for ($i=0; $i<$autotestCount; $i++) {                                      // Loop the Autotests
-                    if ($arrayFailingSignAutotestBlockingConfCount[$i] == $countOrder) {   // Fixed sorting based on significant Autotests in blocking Configuration
+                    switch ($sortBy) {                                                     // Check the next value to print in sorting
+                        case AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF:
+                            $sortFieldValue = $arrayFailingSignAutotestBlockingConfCount[$i];
+                            break;
+                        case AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONF:
+                            $sortFieldValue = $arrayFailingSignAutotestInsignConfCount[$i];
+                            break;
+                        case AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONF:
+                            $sortFieldValue = $arrayFailingInsignAutotestBlockingConfCount[$i];
+                            break;
+                        case AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONF:
+                            $sortFieldValue = $arrayFailingInsignAutotestInsignConfCount[$i];
+                            break;
+                        case AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONFALL:
+                            $sortFieldValue = $arrayFailingSignAutotestBlockingConfCountAll[$i];
+                            break;
+                        case AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONFALL:
+                            $sortFieldValue = $arrayFailingSignAutotestInsignConfCountAll[$i];
+                            break;
+                        case AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONFALL:
+                            $sortFieldValue = $arrayFailingInsignAutotestBlockingConfCountAll[$i];
+                            break;
+                        case AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONFALL:
+                            $sortFieldValue = $arrayFailingInsignAutotestInsignConfCountAll[$i];
+                            break;
+                    }
+                    if ($sortFieldValue == $countOrder) {                                  // Print the ones that are next in the sorting order
                         if ($arrayFailingSignAutotestBlockingConfCount[$i]
                             + $arrayFailingSignAutotestInsignConfCount[$i]
                             + $arrayFailingInsignAutotestBlockingConfCount[$i]
@@ -612,7 +713,7 @@ if ($autotest == "All") {
         echo "Total time: $time s (database connect time: $timeDbConnect s;
               for latest builds: $projectCounter projects checked, longest project calculation $timeDuration s, $latestAutotests autotests checked";
         if ($printAllBuildsData)
-            echo "; for all builds: $allAutotestsCounted found from $allAutotestsFromDb in $timeAll s)";
+            echo "; for all builds: $allAutotestsCount found from $allAutotestsFromDb in $timeAll s)";
         else
             echo ")";
         echo "</li></ul>";
@@ -717,7 +818,7 @@ if ($autotest <> "All") {
 
                 /* Latest Build title */
                 echo '<br/><b>Projects and Configurations (their latest Build) by
-                      <a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')">failure category</a>
+                      <a href="javascript:void(0);" onclick="showMessageWindow(\'ci/msgfailuredescription.html\')">failure category</a>
                       </b><br/><br/>';
                 echo '<table>';
 
@@ -801,12 +902,11 @@ if ($autotest <> "All") {
                 echo '<tr class="tableCellAlignLeft">';
                 echo '<th class="tableBottomBorder">Project</th>';
                 echo '<th class="tableBottomBorder">Configuration</th>';
-                echo '<td colspan="' . HISTORYBUILDCOUNT . '" class="tableBottomBorder tableSideBorder">
-                      <b>Results in Builds</b>';
+                echo '<th colspan="' . HISTORYBUILDCOUNT . '" class="tableBottomBorder tableSideBorder">Results in Builds';
                 if ($timescaleType == "Since")
                     echo ' (since ' . $timescaleValue . ')';
-                echo ' - see <a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgautotestresultdescription.html\')">notation</a>';
-                echo '</td>';
+                echo ' - see <a href="javascript:void(0);" onclick="showMessageWindow(\'ci/msgautotestresultdescription.html\')">notation</a>';
+                echo '</th>';
                 echo '</tr>';
                 $arrayProjectBuildLatest = $_SESSION['arrayProjectBuildLatest'];
                 $k = 0;

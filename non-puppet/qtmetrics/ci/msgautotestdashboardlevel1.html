@@ -35,7 +35,8 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
-        <td class="tableSingleBorder">List of failing Autotests by failure category</td>
+        <td class="tableSingleBorder">List of failing Autotests by failure category<br>
+                                      <i>Tip: You can sort the list by clicking the desired column title.</i></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
@@ -63,6 +64,7 @@
                                       <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86)<br>
                                       <b>Configuration significance:</b> number of blocked/insignificant Configurations (if Configuration is tagged as "insignificant" the build will not fail even though some significant Autotests would fail)<br>
                                       <b>Autotest name:</b> several per Configuration (e.g. tst_qftp)<br>
+                                      <b>Autotest result:</b> name in the list indicates a failure (i.e. the passed ones are not listed)<br>
                                       <b>Autotest significance:</b> number of failed Autotests with tagging Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)
         </td>
         </tr>
