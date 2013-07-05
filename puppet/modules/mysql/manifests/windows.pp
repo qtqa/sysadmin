@@ -23,11 +23,14 @@ class mysql::windows(
         url     => $url,
         version => $version,
         path    => $path,
-        binary  => "$path\\mysql\\bin\\mysql.exe"
+        binary  => "$path\\mysql\\bin\\mysql.exe",
+        notify  => Exec["rename $pkg_name as mysql"],
     }
 
     exec { "rename $pkg_name as mysql":
-        command   => "C:\\Windows\\system32\\cmd.exe /C \"rename ${path}\\${pkg_name} mysql\"",
-        subscribe => Unzip_package["mysql"]
+        command     => "C:\\Windows\\system32\\cmd.exe /C \"rename ${path}\\${pkg_name} mysql\"",
+        creates     => "${path}\\mysql",
+        subscribe   => Unzip_package["mysql"],
+        refreshonly => true
     }
 }
