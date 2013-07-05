@@ -9,9 +9,14 @@ class wince_sdk_config::windows {
         default => 'c:\Program Files\Microsoft Visual Studio 9.0\VC\vcpackages\WCE.VCPlatform.config'
     }
 
-    file { "$config":
-        source  => "puppet:///modules/wince_sdk_config/windows/WCE.VCPlatform.config",
-        ensure  => present,
-        mode    => 0755,
+    # Wince only run on win 7
+    if ($kernelmajversion == "6.1") {
+        if ($::architecture == "x86") {
+            file { "$config":
+                source  => "puppet:///modules/wince_sdk_config/windows/WCE.VCPlatform.config",
+                ensure  => present,
+                mode    => 0755,
+            }
+        }
     }
 }
