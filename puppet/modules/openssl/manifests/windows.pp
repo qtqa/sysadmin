@@ -15,7 +15,7 @@ class openssl::windows(
     }
 
     # installer file URL
-    $url = "http://slproweb.com/download/Win${bits}OpenSSL-${version_underscore}.exe"
+    $url = "$input/windows/Win${bits}OpenSSL-${version_underscore}.exe"
 
     windows::exe_package { "openssl":
         url => $url,
