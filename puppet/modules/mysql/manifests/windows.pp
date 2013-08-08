@@ -9,15 +9,11 @@ class mysql::windows(
         default => "32"
     }
 
-    # First two digits of the $version are in the url (e.g. .../MySQL-5.6/...)
-    $regexp = '^(\d+)\.(\d+)\.(\d+)$'
-    $url_version_number = regsubst($version, $regexp, '\1.\2')
-
     # Package name after unzipping
     $pkg_name = "mysql-${version}-win${os_bits}"
 
     # installer file URL
-    $url = "http://dev.mysql.com/get/Downloads/MySQL-${url_version_number}/${pkg_name}.zip/from/http://cdn.mysql.com/"
+    $url = "${input}/windows/${pkg_name}"
 
     unzip_package { "mysql":
         url     => $url,
