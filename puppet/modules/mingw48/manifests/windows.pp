@@ -15,7 +15,7 @@ class mingw48::windows(
     $exceptions = 'dwarf',
 
     # installed revision
-    $revision = 'rev1'
+    $revision = 'rev2'
 ){
     # Match revision, match with both 'r8' and 'rev8' style patterns.
     # Just for checking if correct revision is already installed.
