@@ -33,8 +33,8 @@ class squish {
     }
 
     $ubuntu_pkg_name = $::architecture ? {
-        i386    => "squish-5.0.0-qt50x-linux32",
-        default => "squish-5.0.0-qt50x-linux64",
+        i386    => "squish-5.0.1-qt51x-linux32",
+        default => "squish-5.0.1-qt51x-linux64",
     }
 
     $darwin_pkg_name = "squish-5.0.0-qt50x-macx86_64"
@@ -46,6 +46,7 @@ class squish {
                     "msvc11":
                         pkg_name => "$msvc11_pkg_name",
                         path     => "$path",
+                        version  =>"5.0.0",
                     }
             }
             else {
@@ -53,10 +54,12 @@ class squish {
                     "mingw":
                         pkg_name => "$mingw_pkg_name",
                         path     => "$path",
+                        version  =>"5.0.0",
                     ;
                     "msvc10":
                         pkg_name => "$msvc10_pkg_name",
                         path     => "$path",
+                        version  =>"5.0.0",
                 }
             }
         }
@@ -65,6 +68,7 @@ class squish {
                 "package":
                     pkg_name => "$ubuntu_pkg_name",
                     path     => "$path",
+                    version  =>"5.0.1",
             }
         }
         Darwin: {
@@ -76,14 +80,14 @@ class squish {
                 "package":
                     pkg_name => "$darwin_pkg_name",
                     path     => "$path",
+                    version  =>"5.0.0",
             }
         }
     }
 
-    define squish_install ($path,$pkg_name) {
+    define squish_install ($path,$pkg_name,$version) {
 
         $binary      = "\"${path}/${name}/bin/squishserver\""
-        $version     = '5.0.0'
         $unzip_flags = "x -o$path"
         $base_url    = "$input/squish"
 
