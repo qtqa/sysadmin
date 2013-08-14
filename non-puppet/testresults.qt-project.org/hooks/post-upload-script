@@ -1,0 +1,6 @@
+#!/bin/bash
+logfile=testparser.log
+date >>~/$logfile
+cmd="nice -n 10 /usr/bin/perl /var/www/testresults/qtmetrics/testparser.pl $1"
+echo + $cmd
+$cmd >>~/$logfile 2>&1 &
