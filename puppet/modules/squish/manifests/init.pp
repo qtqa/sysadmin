@@ -21,15 +21,15 @@ class squish {
 
     # Squish have separate packages for x86 and x64 architectures in Windows 7, Windows 8 and Ubuntu
     $msvc11_pkg_name = $::architecture ? {
-        x64     => "squish-5.0.0-qt50x-win64-msvc11",
-        default => "squish-5.0.0-qt50x-win32-msvc11",
+        x64     => "squish-5.0.1-qt51x-win64-msvc11",
+        default => "squish-5.0.1-qt51x-win32-msvc11",
     }
 
-    $mingw_pkg_name = "squish-5.0.0-qt50x-win32-mingw"
+    $mingw_pkg_name = "squish-5.0.1-qt51x-win32-mingw_gcc48_posix_dwarf"
 
     $msvc10_pkg_name = $::architecture ? {
-        x64     => "squish-5.0-20130612-1216-qt50x-win64-msvc10",
-        default => "squish-5.0-20130612-1026-qt50x-win32-msvc10",
+        x64     => "squish-5.0.1-qt51x-win64-msvc10",
+        default => "squish-5.0.1-qt51x-win32-msvc10",
     }
 
     $ubuntu_pkg_name = $::architecture ? {
@@ -37,7 +37,7 @@ class squish {
         default => "squish-5.0.1-qt51x-linux64",
     }
 
-    $darwin_pkg_name = "squish-5.0.0-qt50x-macx86_64"
+    $darwin_pkg_name = "squish-5.0.1-qt51x-macx86_64"
 
     case $::operatingsystem {
         windows: {
@@ -46,7 +46,7 @@ class squish {
                     "msvc11":
                         pkg_name => "$msvc11_pkg_name",
                         path     => "$path",
-                        version  =>"5.0.0",
+                        version  => "5.0.1",
                     }
             }
             else {
@@ -54,12 +54,12 @@ class squish {
                     "mingw":
                         pkg_name => "$mingw_pkg_name",
                         path     => "$path",
-                        version  =>"5.0.0",
+                        version  => "5.0.1",
                     ;
                     "msvc10":
                         pkg_name => "$msvc10_pkg_name",
                         path     => "$path",
-                        version  =>"5.0.0",
+                        version  => "5.0.1",
                 }
             }
         }
@@ -68,7 +68,7 @@ class squish {
                 "package":
                     pkg_name => "$ubuntu_pkg_name",
                     path     => "$path",
-                    version  =>"5.0.1",
+                    version  => "5.0.1",
             }
         }
         Darwin: {
@@ -80,7 +80,7 @@ class squish {
                 "package":
                     pkg_name => "$darwin_pkg_name",
                     path     => "$path",
-                    version  =>"5.0.0",
+                    version  => "5.0.1",
             }
         }
     }
