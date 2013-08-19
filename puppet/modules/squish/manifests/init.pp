@@ -41,7 +41,7 @@ class squish {
 
     case $::operatingsystem {
         windows: {
-            if ($kernelmajversion == "6.2") {
+            if ($kernelmajversion >= "6.2") {
                 squish_install {
                     "msvc11":
                         pkg_name => "$msvc11_pkg_name",
