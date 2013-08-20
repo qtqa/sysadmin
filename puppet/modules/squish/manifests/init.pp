@@ -21,8 +21,13 @@ class squish {
 
     # Squish have separate packages for x86 and x64 architectures in Windows 7, Windows 8 and Ubuntu
     $msvc11_pkg_name = $::architecture ? {
-        x64     => "squish-5.0.1-qt51x-win64-msvc11",
+        x64     => "squish-5.0.2-qt51x-win64-msvc11",
         default => "squish-5.0.1-qt51x-win32-msvc11",
+    }
+
+    $msvc11_version = $::architecture ? {
+        x64     => "5.0.2",
+        default => "5.0.1",
     }
 
     $mingw_pkg_name = "squish-5.0.1-qt51x-win32-mingw_gcc48_posix_dwarf"
@@ -46,7 +51,7 @@ class squish {
                     "msvc11":
                         pkg_name => "$msvc11_pkg_name",
                         path     => "$path",
-                        version  => "5.0.1",
+                        version  => "$msvc11_version",
                     }
             }
             else {
