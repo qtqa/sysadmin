@@ -6,6 +6,7 @@ class ci_tester::base {
     }
     include puppet
     include sshkeys
+    include enginio
     include icu4c
 
     if $ci_tester::vmware_enabled {
