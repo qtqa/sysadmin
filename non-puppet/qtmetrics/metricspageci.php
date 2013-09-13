@@ -108,7 +108,7 @@ session_start();
             var appliedFilter;
             var clearFilter;
             var thisFilter = "Project";
-            var timescaleType = document.getElementById("timescale").value       // Type: All/In/Since
+            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
             var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
             if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
                 timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
@@ -145,7 +145,7 @@ session_start();
             var appliedFilter;
             var clearFilter;
             var thisFilter = "Conf";
-            var timescaleType = document.getElementById("timescale").value       // Type: All/In/Since
+            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
             var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
             if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
                 timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
@@ -184,7 +184,7 @@ session_start();
             var appliedFilter;
             var clearFilter;
             var thisFilter = "Autotest";
-            var timescaleType = document.getElementById("timescale").value       // Type: All/In/Since
+            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
             var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
             if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
                 timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
@@ -222,7 +222,7 @@ session_start();
             var appliedFilter;
             var clearFilter;
             var thisFilter = "Timescale";
-            var timescaleType = document.getElementById("timescale").value       // Type: All/In/Since
+            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
             var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
             if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
                 timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
@@ -323,8 +323,8 @@ session_start();
         /* Open a new window for a message file (html) */
         function showMessageWindow(messageFile)
         {
-            myWindow=window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100')
-            myWindow.focus()
+            myWindow=window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100');
+            myWindow.focus();
         }
 
         /* Get time offset between current time and the GMT/UTC (returned in format "GMT+0300") */
@@ -341,13 +341,13 @@ session_start();
             } else {                                                             // For US timezones the timezone name used instead of "UTC" in IE
                 offsetHour = -1 * visitorTime.getTimezoneOffset() / 60;          // Create the string based on getTimezoneOffset
                 if (offsetHour > 9)
-                    timeOffset = "GMT+" + offsetHour + "00"
+                    timeOffset = "GMT+" + offsetHour + "00";
                 if (offsetHour >= 0 && offsetHour >= 9)
-                    timeOffset = "GMT+0" + offsetHour + "00"
+                    timeOffset = "GMT+0" + offsetHour + "00";
                 if (offsetHour >= -9 && offsetHour < 0)
-                    timeOffset = "GMT-0" + Math.abs(offsetHour) + "00"
+                    timeOffset = "GMT-0" + Math.abs(offsetHour) + "00";
                 if (offsetHour < -9)
-                    timeOffset = "GMT-" + Math.abs(offsetHour) + "00"
+                    timeOffset = "GMT-" + Math.abs(offsetHour) + "00";
             }
             return timeOffset;
         }
