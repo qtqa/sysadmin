@@ -70,6 +70,9 @@ function getMetricData(metricId, filepath, project, conf, autotest, timescaleTyp
     }
     if (typeof sortBy == "undefined")                                 // sortBy is optional, set 0 as a default
         var sortBy = 0;
+    project = encodeURIComponent(project);                            // Encode the parameters to follow correct URL encoding (e.g. possible "+" characters)
+    conf = encodeURIComponent(conf);                                  // -,,-
+    autotest = encodeURIComponent(autotest);                          // -,,-
     createMetricRequestObject(metricId);
     metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest+"&tstype="
                                       +timescaleType+"&tsvalue="+timescaleValue+"&sort="+sortBy,true);

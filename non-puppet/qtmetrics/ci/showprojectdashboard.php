@@ -50,8 +50,9 @@ include "functions.php";
 
 $timeStart = microtime(true);
 $project = $_GET["project"];
+$project = rawurldecode($project);            // Decode the encoded parameter (encoding in ajaxrequest.js)
 $conf = $_GET["conf"];
-$conf = str_replace("g  ","g++",$conf);     // Problem: Parameter passing (with GET method in URL) destroys the string "++", e.g. "linux-g++-32_Ubuntu_10.04_x86" -> "linux-g  -32_Ubuntu_10.04_x86"
+$conf = rawurldecode($conf);                  // Decode the encoded parameter (encoding in ajaxrequest.js)
 $timescaleType = $_GET["tstype"];
 $timescaleValue = $_GET["tsvalue"];
 
