@@ -63,6 +63,14 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
 
                 # for qtwayland
                 "libwayland-dev":                    ensure => installed;
+
+                # for qtwebengine
+                "libpci-dev":                        ensure => installed;
+                "libnss3-dev":                       ensure => installed;
+                "libgtk2.0-dev":                     ensure => installed;
+                "libgcrypt11-dev":                   ensure => installed;
+                "libgnome-keyring-dev":              ensure => installed;
+                "libxtst-dev":                       ensure => installed;
             }
         }
 
