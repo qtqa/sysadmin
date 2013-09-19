@@ -36,10 +36,20 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
     }
 
     if $::operatingsystem == "Ubuntu" {
+        if $location == "Digia" {
+            if $::domain == "ci.local" {
+                $libxcb_icccm_dev = $::lsbmajdistrelease ? {
+                    10          =>  "libxcb-icccm1-dev",
+                    default     =>  "libxcb-icccm4-dev",
+                }
 
-        $libxcb_icccm_dev = $::lsbmajdistrelease ? {
-            10          =>  "libxcb-icccm1-dev",
-            default     =>  "libxcb-icccm4-dev",
+                package {
+                    "$libxcb_icccm_dev":                 ensure => installed;
+
+                    # optional dependency for QLocale
+                    "libicu-dev":                        ensure => installed;
+                }
+            }
         }
 
         if $::lsbmajdistrelease >= 11 {
@@ -83,7 +93,6 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # for xcb qpa backend:
             "libx11-xcb-dev":                    ensure => installed;
             "libxcb-glx0-dev":                   ensure => installed;
-            "$libxcb_icccm_dev":                 ensure => installed;
             "libxcb-image0-dev":                 ensure => installed;
             "libxcb-keysyms1-dev":               ensure => installed;
             "libxcb-shm0-dev":                   ensure => installed;
@@ -124,9 +133,6 @@ class qt_prereqs::linux inherits qt_prereqs::unix {
             # needed by some client tool
             "libbz2-dev":                        ensure => installed;
             "libedit-dev":                       ensure => installed;
-
-            # optional dependency for QLocale
-            "libicu-dev":                        ensure => installed;
         }
     }
 
