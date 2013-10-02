@@ -33,16 +33,7 @@ class baselayout::windows inherits baselayout::base {
             require => User[$baselayout::testuser]
         }
 
-        # Tidy commented out until it can ignore files that are read-only
-        # own exec-based delete used instead
-        # Tidy { require => User[$baselayout::testuser] }
-
-        $cmd = 'C:\Windows\system32\cmd.exe /C'
-        exec { "delete temporary files":
-            command => "$cmd IF EXIST %TEMP% forfiles -p \"%TEMP%\" -s -m *.* /D -7 /C \"$cmd /c del @paths\" & set ERRORLEVEL=0",
-                        logoutput => on_failure,
-                        onlyif => "$cmd IF EXIST %TEMP% forfiles -p \"%TEMP%\" -s -m *.* /D -7",
-        }
+        Tidy { require => User[$baselayout::testuser] }
         Registry::Value { require => User[$baselayout::testuser] }
 
         # automatically log on as this user
@@ -67,11 +58,11 @@ class baselayout::windows inherits baselayout::base {
 
         # clean testuser's temp periodically; if we don't, then nothing will clean
         # up temporary files/directories from crashing/hanging tests
-        # tidy { "C:\\Users\\$baselayout::testuser\\AppData\\Local\\Temp":
-        #     age => "1w",
-        #     recurse => true,
-        #     rmdirs => true,
-        # }
+        tidy { "C:\\Users\\$baselayout::testuser\\AppData\\Local\\Temp":
+            age => "1w",
+            recurse => true,
+            rmdirs => true,
+        }
 
         git::config {
             "core.autocrlf": content => "true";
