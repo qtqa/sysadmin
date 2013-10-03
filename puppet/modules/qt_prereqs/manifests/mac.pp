@@ -12,7 +12,7 @@ class qt_prereqs::mac inherits qt_prereqs::unix {
         }
     }
 
-    if ( $macosx_productversion_major == "10.7" ) {
+    if ( $macosx_productversion_major == "10.7" ) or ( $macosx_productversion_major == "10.8" ) {
         package {
             "mysql55":           ensure => present;
         }
