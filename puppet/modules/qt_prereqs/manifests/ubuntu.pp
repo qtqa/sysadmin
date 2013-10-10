@@ -144,6 +144,10 @@ class qt_prereqs::ubuntu inherits qt_prereqs::unix {
         }
     }
 
+    package {
+        # for android:
+        "openjdk-6-jdk": ensure => installed;
+    }
 }
 
 

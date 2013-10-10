@@ -8,11 +8,6 @@ class packaging_tester::linux inherits packaging_tester::base {
     }
 
     package {
-        # for android:
-        "openjdk-6-jdk": ensure => installed;
-    }
-
-    package {
         # for configure test cases
         "expect":             ensure => installed;
     }
