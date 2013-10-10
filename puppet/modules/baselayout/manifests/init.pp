@@ -21,6 +21,7 @@ class baselayout (
     case $::operatingsystem {
         Darwin:     { include baselayout::mac }
         Ubuntu:     { include baselayout::ubuntu }
+        OpenSuSE:   { include baselayout::opensuse }
         CentOS:     { include baselayout::centos }
         Linux:      { include baselayout::linux }
         Solaris:    { include baselayout::solaris }
