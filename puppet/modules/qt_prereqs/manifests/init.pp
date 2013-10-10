@@ -18,7 +18,8 @@ class qt_prereqs(
 
     case $::operatingsystem {
         Darwin:     { include qt_prereqs::mac }
-        Ubuntu:     { include qt_prereqs::linux }
+        Ubuntu:     { include qt_prereqs::ubuntu }
+        OpenSuSE:   { include qt_prereqs::opensuse }
         Linux:      { include qt_prereqs::linux }
         Solaris:    { include qt_prereqs::solaris }
     }

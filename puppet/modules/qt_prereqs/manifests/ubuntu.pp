@@ -1,4 +1,4 @@
-class qt_prereqs::linux inherits qt_prereqs::unix {
+class qt_prereqs::ubuntu inherits qt_prereqs::unix {
 
     $gstreamer = $::operatingsystem ? {
         Ubuntu      =>  "libgstreamer0.10-dev",
