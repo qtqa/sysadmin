@@ -75,7 +75,7 @@ sub reboot
     if ($OSNAME =~ m{win32}i) {
         system( qw(shutdown /r /t 60 /c), "Jenkins slave unexpectedly terminated" );
     } else {
-        system( qw(sudo -n reboot) );
+        system( qw(sudo -n /sbin/reboot) );
     }
     sleep( 180 );
     warn "Rebooting failed? Exiting...\n";
