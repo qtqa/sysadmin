@@ -47,7 +47,6 @@ use FindBin;
 use File::Spec::Functions;
 use LWP::UserAgent;
 use English qw( -no_match_vars );
-use Sys::Hostname;
 
 # True iff Windows
 my $WINDOWS = ($OSNAME =~ m{win32}i);
@@ -59,7 +58,7 @@ my $JENKINS_SERVER = '<%= jenkins_server %>';
 my $JENKINS_CWD = $FindBin::Bin;
 
 # Name of this Jenkins slave
-my $JENKINS_SLAVE_NAME = hostname;
+my $JENKINS_SLAVE_NAME = '<%= jenkins_slave_name %>';
 
 # Remote slave.jar
 my $JENKINS_SLAVE_JAR_URL = "$JENKINS_SERVER/jnlpJars/slave.jar";
