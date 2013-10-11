@@ -7,8 +7,8 @@ class jenkins_slave (
 ) {
     include java
     case $::operatingsystem {
-        Ubuntu:     { include jenkins_slave::linux }
-        Linux:      { include jenkins_slave::linux }
+        Ubuntu:     { include jenkins_slave::ubuntu }
+        OpenSuSE:   { include jenkins_slave::opensuse }
         Darwin:     { include jenkins_slave::mac }
         windows:    { include jenkins_slave::windows }
     }
@@ -16,17 +16,9 @@ class jenkins_slave (
         $cli_log = "jenkins_cli_log.txt"
         case $::operatingsystem {
             Ubuntu:     { include jenkins_slave::register_online::linux }
-            Linux:      { include jenkins_slave::register_online::linux }
+            OpenSuSE:   { include jenkins_slave::register_online::linux }
             Darwin:     { include jenkins_slave::register_online::mac }
             windows:    { include jenkins_slave::register_online::windows }
-        }
-    }
-    if $::operatingsystem == 'Ubuntu' or $::operatingsystem == 'Darwin' {
-        file { "/etc/sudoers.d/${user}-nopasswd-reboot":
-            owner    =>  "root",
-            mode     =>  0440,
-            content  =>  template("jenkins_slave/testuser-nopasswd-reboot.erb"),
-            require  =>  Exec["Ensure sudoers.d is enabled"]
         }
     }
 }

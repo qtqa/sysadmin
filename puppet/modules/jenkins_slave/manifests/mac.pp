@@ -9,4 +9,11 @@ class jenkins_slave::mac inherits jenkins_slave::base {
         require =>  File["/Users/$user/jenkins/jenkins-slave.pl"],
         user    =>  $user,
     }
+    file { "/etc/sudoers.d/${user}-nopasswd-reboot":
+        owner    =>  "root",
+        group    =>  "wheel",
+        mode     =>  0440,
+        content  =>  template("jenkins_slave/testuser-nopasswd-reboot.erb"),
+        require  =>  Exec["Ensure sudoers.d is enabled"]
+    }
 }

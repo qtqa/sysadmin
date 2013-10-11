@@ -1,14 +1,10 @@
 class jenkins_slave::linux inherits jenkins_slave::base {
-    package { "libwww-perl": ensure => installed; }
-    $user = $jenkins_slave::user
-    baselayout::startup { "jenkins-slave":
-        path    =>  "/bin/sh",
-        arguments => [
-            "-c",
-            "exec /home/$user/jenkins/jenkins-slave.pl 2>&1 | tee /home/$user/jenkins/log.txt | logger -t jenkins"
-        ],
-        require =>  File["/home/$user/jenkins/jenkins-slave.pl"],
-        user    =>  $user,
+    file { "/etc/sudoers.d/${user}-nopasswd-reboot":
+        owner    =>  "root",
+        group    =>  "root",
+        mode     =>  0440,
+        content  =>  template("jenkins_slave/testuser-nopasswd-reboot.erb"),
+        require  =>  Exec["Ensure sudoers.d is enabled"]
     }
 }
 
