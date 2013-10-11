@@ -11,8 +11,9 @@
 # for installing packages.
 class homedir_virtualenv {
     case $::operatingsystem {
-        Ubuntu:     { include homedir_virtualenv::ubuntu }
+        Ubuntu:     { include homedir_virtualenv::linux }
         Darwin:     { include homedir_virtualenv::mac }
+        OpenSuSE:   { include homedir_virtualenv::linux }
         default:    { err("homedir_virtualenv is not yet implemented for $::operatingsystem") }
     }
 }
