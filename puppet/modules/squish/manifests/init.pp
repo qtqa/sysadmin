@@ -1,6 +1,4 @@
 # This cross-platform module downloads the given $version of Squish and installs it to the specified $path.
-# If a different squish is already installed, it is uninstalled first.
-# Also squish-package will be renamed, not_configured file will be removed and squish license is installed using secret file.
 
 class squish {
 
@@ -37,7 +35,7 @@ class squish {
         default => "squish-5.0.1-qt51x-win32-msvc10",
     }
 
-    $ubuntu_pkg_name = $::architecture ? {
+    $linux_pkg_name = $::architecture ? {
         i386    => "squish-5.0.1-qt51x-linux32",
         default => "squish-5.0.1-qt51x-linux64",
     }
@@ -71,7 +69,15 @@ class squish {
         Ubuntu: {
             squish_install {
                 "package":
-                    pkg_name => "$ubuntu_pkg_name",
+                    pkg_name => "$linux_pkg_name",
+                    path     => "$path",
+                    version  => "5.0.1",
+            }
+        }
+        OpenSuSE: {
+            squish_install {
+                "package":
+                    pkg_name => "$linux_pkg_name",
                     path     => "$path",
                     version  => "5.0.1",
             }
@@ -111,9 +117,7 @@ class squish {
             require => Unzip_package["$name"],
         }
 
-        # Rename squish package name as '$name' so the path to squish won´t change after version update. In Windows nodes the package is named after
-        # compiler and in other platforms it is named as 'squish' so the environment variables specified in 'squish_env.sh.erb' won´t change along
-        # with platform. 'squish_env.sh' will set environment variables for all other platforms except for Winodws.
+        # Rename squish package name as '$name' so the path to squish won't change after version update.
         if $::operatingsystem == 'windows' {
             exec { "rename $pkg_name as $name":
                 command     => "C:\\Windows\\system32\\cmd.exe /C \"rename ${path}\\${pkg_name} $name\"",
