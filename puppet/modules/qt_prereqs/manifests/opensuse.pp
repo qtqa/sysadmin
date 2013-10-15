@@ -25,6 +25,9 @@ class qt_prereqs::opensuse inherits qt_prereqs::unix {
 
         # DBus development libraries
         "dbus-1-devel":                 ensure => installed;
+
+        #OpenSSL developemtn libraries
+        "libopenssl-devel":             ensure => installed;
     }
 }
 
