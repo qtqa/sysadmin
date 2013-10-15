@@ -45,6 +45,7 @@ class jenkins_server::debian inherits jenkins_server
 
     jenkins_server::plugin {
         "git":;                     # git SCM support
+        "build-publisher":;         # publish build results to another Jenkins
         "conditional-buildstep":;   # make commands conditional on OS or on master vs slave
         "envfile":;                 # send CI-related env vars from master to slave
         "groovy-postbuild":;        # offline / reboot hook
