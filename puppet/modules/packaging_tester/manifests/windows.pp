@@ -11,6 +11,7 @@ class packaging_tester::windows inherits packaging_tester::base {
     include virtual_clone_drive
     include postgresql
     include mysql
+    include openssl_android
     # Install modules needed by SYSTEM user outside building
     include cpan
 }
