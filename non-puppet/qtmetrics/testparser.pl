@@ -400,7 +400,7 @@ sub get_log_data
     $logdata{cfg} = getdata(\@filecontent, qr/^cfg='(.*)'$/);
     $logdata{qtqa_qt_configure_args} = getdata(\@filecontent, qr/^set QTQA_QT_CONFIGURE_ARGS=(.*)$/);
     $logdata{qtqa_qt_configure_extra_args} = getdata(\@filecontent, qr/^set QTQA_QT_CONFIGURE_EXTRA_ARGS=(.*)$/);
-    $logdata{FORCESUCCESS} = exists_in_array(\@filecontent, qr/^Normally I would now fail. However, `forcesuccess' was set in/);
+    $logdata{FORCESUCCESS} = exists_in_array(\@filecontent, qr/^Normally I would now fail.  However, `forcesuccess' was set in/);
     $logdata{FORCESUCCESS} |= exists_in_array(\@filecontent, qr/^Note: forcesuccess is set, but the test script succeeded./);
     $logdata{INSIGNIFICANT} = exists_in_array(\@filecontent, qr/^This is a warning, not an error, because the `qt.tests.insignificant' option was used./);
     return (\%logdata);
