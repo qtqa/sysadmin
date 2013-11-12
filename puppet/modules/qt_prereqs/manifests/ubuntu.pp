@@ -52,6 +52,14 @@ class qt_prereqs::ubuntu inherits qt_prereqs::unix {
             }
         }
 
+        if $::lsbmajdistrelease == 11 or $::lsbmajdistrelease == 12  {
+            if $::architecture == x86_64 or $::architecture == amd64 {
+                package {
+                    "ia32-libs":                     ensure => installed;
+                }
+            }
+        }
+
         if $::lsbmajdistrelease >= 11 {
             package {
                 # for accessibility
