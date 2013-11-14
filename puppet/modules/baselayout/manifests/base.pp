@@ -11,6 +11,7 @@ class baselayout::base {
             "qtqa.hardgit.server.qtgitreadonly.mirror-$location": content => $qtgitreadonly_local;
             "user.name": content => "Qt Continuous Integration System";
             "user.email": content => "ci-noreply@qt-project.org";
+            "http.postBuffer": content => "524288000";
         }
 
         if $baselayout::qt_gerrit_mirror {
