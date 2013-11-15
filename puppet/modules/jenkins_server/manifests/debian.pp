@@ -44,18 +44,19 @@ class jenkins_server::debian inherits jenkins_server
     }
 
     jenkins_server::plugin {
-        "git":;                     # git SCM support
-        "build-publisher":;         # publish build results to another Jenkins
-        "conditional-buildstep":;   # make commands conditional on OS or on master vs slave
-        "envfile":;                 # send CI-related env vars from master to slave
-        "groovy-postbuild":;        # offline / reboot hook
-        "next-build-number":;       # allow manual set of build numbers
-        "postbuildscript":;         # CI post-build task
-        "preSCMbuildstep":;         # CI pre-build task
-        "project-health-report":;   # shows how many build failed, and which testcases are the top breakers
-        "run-condition":;           # conditional-buildstep prereq
-        "timestamper":;             # timestamps in build logs
-        "token-macro":;             # expand macros in various places
+        "git":;                       # git SCM support
+        "build-publisher":;           # publish build results to another Jenkins
+        "conditional-buildstep":;     # make commands conditional on OS or on master vs slave
+        "envfile":;                   # send CI-related env vars from master to slave
+        "extended-read-permission":;  # enables the extended read permission
+        "groovy-postbuild":;          # offline / reboot hook
+        "next-build-number":;         # allow manual set of build numbers
+        "postbuildscript":;           # CI post-build task
+        "preSCMbuildstep":;           # CI pre-build task
+        "project-health-report":;     # shows how many build failed, and which testcases are the top breakers
+        "run-condition":;             # conditional-buildstep prereq
+        "timestamper":;               # timestamps in build logs
+        "token-macro":;               # expand macros in various places
     }
 
 
