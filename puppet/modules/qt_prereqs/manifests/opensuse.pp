@@ -28,6 +28,13 @@ class qt_prereqs::opensuse inherits qt_prereqs::unix {
 
         #OpenSSL developemtn libraries
         "libopenssl-devel":             ensure => installed;
+
+        # for xslt support in qtwebkit
+        "libxslt1-devel": ensure => installed;
+
+        # for XML parsing
+        "libxml2-devel": ensure => installed;
+
     }
 }
 

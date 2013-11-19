@@ -33,6 +33,12 @@ class qt_prereqs::ubuntu inherits qt_prereqs::unix {
         # for krazy:
         "libxml-writer-perl": ensure => installed;
         "libtie-ixhash-perl": ensure => installed;
+
+        # for xslt support in qtwebkit
+        "libxslt1-dev": ensure => installed;
+
+        # for XML parsing
+        "libxml2-dev": ensure => installed;
     }
 
     if $::operatingsystem == "Ubuntu" {
