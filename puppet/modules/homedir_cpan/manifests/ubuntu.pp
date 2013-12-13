@@ -6,6 +6,9 @@ class homedir_cpan::ubuntu {
 
         # We use the local::lib module to implement $HOME/perl5
         "liblocal-lib-perl":    ensure  =>  installed;
+
+        # Needed to build XML::Parser
+        "libexpat1-dev":        ensure  => installed;
     }
 
     file { "/etc/profile.d/local-lib-perl.sh":
