@@ -422,7 +422,7 @@ sub select_class
     my ($in, $out) = @_;
 
     print "\n";
-    my @classes = keys %{ $in->{ classes } };
+    my @classes = sort keys %{ $in->{ classes } };
     my $selected = prompt_menu_idx(
         'Select which of the following best describes the purpose of this host:',
         (map { "$_ - $in->{ classes }{ $_ }{ doc }" } @classes)
