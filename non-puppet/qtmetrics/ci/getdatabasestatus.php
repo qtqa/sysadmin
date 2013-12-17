@@ -48,7 +48,7 @@ session_start();
 <?php
 $initial = $_GET["initial"];                         // 'true' = initial load of the page, 'false' = normal use of the page
 $timeOffset = $_GET["timeoffset"];                   // Use client local time offset taking daylight saving time into account, e.g. "GMT-0600"
-$timeOffset = str_replace(" ","+",$timeOffset);      // Problem: Parameter passing (with GET method in URL) destroys the string "+" ("GMT+0300" -> "GMT 0300")
+$timeOffset = rawurldecode($timeOffset);             // Decode the encoded parameter (encoding in ajaxrequest.js)
 
 include "functions.php";
 

@@ -125,6 +125,7 @@ function showFilters(div)
 /* Request database status (initial loading of the page) */
 function getDatabaseStatusInitial(div, filepath, initial, timeOffset)
 {
+    timeOffset = encodeURIComponent(timeOffset);                      // Encode the parameters to follow correct URL encoding (e.g. possible "+" character in "GMT+0300")
     createFilterRequestObject();
     filterRequest.open("GET",filepath+"?initial="+initial+"&timeoffset="+timeOffset,true);
     filterRequest.send();
@@ -140,6 +141,7 @@ function getDatabaseStatusInitial(div, filepath, initial, timeOffset)
 /* Request database status (normal use of the page) */
 function getDatabaseStatus(div, filepath, initial, timeOffset)
 {
+    timeOffset = encodeURIComponent(timeOffset);                      // Encode the parameters to follow correct URL encoding (e.g. possible "+" character in "GMT+0300")
     createFilterRequestObject();
     filterRequest.open("GET",filepath+"?initial="+initial+"&timeoffset="+timeOffset,true);
     filterRequest.send();
