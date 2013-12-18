@@ -208,6 +208,11 @@ my %INTERACTIVE = (
             parameters => $PARAMETERS_FOR_TESTER
         },
 
+        bb_tester => {
+            doc => 'BlackBery CI tester, performing Qt compilation and autotests',
+            parameters => $PARAMETERS_FOR_TESTER
+        },
+
         packaging_tester => {
             doc => 'Qt Project Packaging tester, performing Qt compilation and autotests',
             parameters => $PARAMETERS_FOR_TESTER

@@ -41,13 +41,14 @@ Here is an example interactive configuration session:
 
     Select which of the following best describes the purpose of this host:
 
-      (1) ci_server - Qt Project CI system server (Jenkins <-> Gerrit integration)
-      (2) ci_tester - Qt Project CI tester, performing Qt compilation and autotests
-      (3) network_test_server - Network test server, used for some QtNetwork autotests (qt-test-server.qt-test-net)
-      (4) packaging_server - Qt Project packaging server
-      (5) packaging_tester - Qt Project Packaging tester, performing Qt compilation and autotests
+      (1) bb_tester - BlackBerry CI tester, performing Qt compilation and autotests
+      (2) ci_server - Qt Project CI system server (Jenkins <-> Gerrit integration)
+      (3) ci_tester - Qt Project CI tester, performing Qt compilation and autotests
+      (4) network_test_server - Network test server, used for some QtNetwork autotests (qt-test-server.qt-test-net)
+      (5) packaging_server - Qt Project packaging server
+      (6) packaging_tester - Qt Project Packaging tester, performing Qt compilation and autotests
 
-    ? 2
+    ? 3
     Configuring a node of class 'ci_tester'
 
     Username of the account used for all testing;
