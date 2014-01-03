@@ -290,9 +290,8 @@ if ($autotest == "All") {
             }                    // Endfor Configurations in project
             $projectCounter++;
             $timeProjectEnd = microtime(true);
-            if (round($timeProjectEnd - $timeProjectStart, 2) > $timeDuration)
-                $timeDuration = round($timeProjectEnd - $timeProjectStart, 2);        // Save the duration of longest read operation
-            $time = round($timeEnd - $timeStart, 2);
+            if (round($timeProjectEnd - $timeProjectStart, 2) > $timeProjectDuration)
+                $timeProjectDuration = round($timeProjectEnd - $timeProjectStart, 2); // Save the duration of longest read operation
         }                        // Endfor Projects
 
         /* Save data to session variables to be able to use them in nested level 2 below */
@@ -711,7 +710,7 @@ if ($autotest == "All") {
         echo "<div class=\"elapdedTime\">";
         echo "<ul><li>";
         echo "Total time: $time s (database connect time: $timeDbConnect s;
-              for latest builds: $projectCounter projects checked, longest project calculation $timeDuration s, $latestAutotests autotests checked";
+              for latest builds: $projectCounter projects checked, longest project calculation $timeProjectDuration s, $latestAutotests autotests checked";
         if ($printAllBuildsData)
             echo "; for all builds: $allAutotestsCount found from $allAutotestsFromDb in $timeAll s)";
         else
