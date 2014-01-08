@@ -43,15 +43,26 @@
 
 <?php
 
-$arrayMetricsBoxesCI = array (
+/* Metrics boxes */
+$arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All,Project,Configuration,Autotest,Timescale
+    // *) Possible values: All, project, conf, autotest, timescale
     //
-    //        File path and name                Applied filters *)                   Filters to clear when other applied ones change *)
+    //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
     //        --------------------------------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"    ,"Project,Configuration,Timescale"   ,""                       ),
-    array(    "ci/showautotestdashboard.php"   ,"All"                               ,"Autotest"               ),
+    array(    "ci/showprojectdashboard.php"    ,"project,conf,timescale"      ,""                       ),
+    array(    "ci/showautotestdashboard.php"   ,"All"                         ,"autotest"               ),
 );
+
+/* Filters */
+define("FILTERSEPARATOR", ";");
+define("FILTERVALUESEPARATOR", ":");
+define("FILTERPROJECT", 0);
+define("FILTERCONF", 1);
+define("FILTERAUTOTEST", 2);
+define("FILTERTIMESCALETYPE", 3);
+define("FILTERTIMESCALEVALUE", 4);
+define("FILTERSORTBY", 5);
 
 ?>

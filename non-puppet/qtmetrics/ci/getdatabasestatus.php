@@ -51,6 +51,7 @@ $timeOffset = $_GET["timeoffset"];                   // Use client local time of
 $timeOffset = rawurldecode($timeOffset);             // Decode the encoded parameter (encoding in ajaxrequest.js)
 
 include "functions.php";
+include(__DIR__.'/../commonfunctions.php');
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');

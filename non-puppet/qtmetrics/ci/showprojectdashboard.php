@@ -47,14 +47,25 @@ session_start();
 
 <?php
 include "functions.php";
+include(__DIR__.'/../commonfunctions.php');
+include "metricsboxdefinitions.php";
 
 $timeStart = microtime(true);
-$project = $_GET["project"];
-$project = rawurldecode($project);            // Decode the encoded parameter (encoding in ajaxrequest.js)
-$conf = $_GET["conf"];
-$conf = rawurldecode($conf);                  // Decode the encoded parameter (encoding in ajaxrequest.js)
-$timescaleType = $_GET["tstype"];
-$timescaleValue = $_GET["tsvalue"];
+
+/* Get the filters */
+$arrayFilters = array();
+$arrayFilter = array();
+$filters = $_GET["filters"];
+$filters = rawurldecode($filters);            // Decode the encoded parameter (encoding in ajaxrequest.js)
+$arrayFilters = explode(FILTERSEPARATOR, $filters);
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERPROJECT]);
+$project = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
+$conf = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERTIMESCALETYPE]);
+$timescaleType = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERTIMESCALEVALUE]);
+$timescaleValue = $arrayFilter[1];
 
 /* Connect to the server */
 require(__DIR__.'/../connect.php');

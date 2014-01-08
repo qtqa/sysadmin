@@ -61,10 +61,36 @@ session_start();
 
     <script>
 
-        /* Load all filter values */
-        function loadAll()
+        /* With these functions you can control the order of execution when loading the page first time.
+           These functions are called from ajaxrequest.js
+           Here the boxes are loaded synchoronously in the following order:
+           a) Database status (initial loading with welcome text)
+           b) Filters
+           c) Metrics boxes
+           d) Database status (normal use with session and database status)   */
+        function loadAll()                                       // The starting point
         {
-            loadDatabaseStatus(1);                               // Boxes are loaded synchoronously: Database status (initial loading with welcome text = 'true') -> Filters -> Metrics boxes -> Database status (normal use with session and database status = 'false')
+            loadDatabaseStatus(1);                               // a)
+        }
+
+        function getMetricDataRequestCompleted()                 // Called when a metrics box has been updated
+        {
+            // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
+            loadDatabaseStatus(0);                               // d)
+        }
+
+        function getFiltersRequestCompleted()                    // Called when the filter box has been updated
+        {
+            loadMetricsboxes();                                  // c) Load the metrics boxes next
+        }
+
+        function getDatabaseStatusInitialRequestCompleted()      // Called when the status box has been updated (initial step)
+        {
+            getFilters("filters", "ci/getfilters.php");          // b) Load the filters next (initial loading of the page)
+        }
+
+        function getDatabaseStatusRequestCompleted()             // Called when the status box has been updated (following steps)
+        {
         }
 
         /* Load database status */
@@ -85,105 +111,37 @@ session_start();
         /* Update all metrics boxes */
         function showMetricsBoxes(project, conf, autotest, timescale)
         {
+            document.getElementById("project").value = project;  // Save default values (not necessarily the first item in the list)
+            document.getElementById("conf").value = conf;
+            document.getElementById("autotest").value = autotest;
+            document.getElementById("timescale").value = timescale;
             var i;
             var file;
+            var filterString;
             <?php
-            foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxesCI[$key][0];
+            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all defined boxes (read and store the file path via php because defined as php)
+                $filepath = $arrayMetricsBoxes[$key][0];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                getMetricData(i, file, project, conf, autotest, timescale);
+                filterString = createFilterString(project, conf, autotest, timescale, "na", "na");
+                getMetricData(i, file, filterString);
             <?php
             }
             ?>
         }
 
-        /* Update those metrics boxes that are applied to this filter */
-        function filterProject(value)
+        /* Update the metrics boxes based on filtering */
+        function updateMetricsBoxes(filter, value, sortBy)       // filter = "project" / "conf" / "autotest" / "timescale"; sortBy is optional
         {
-            document.getElementById("project").value = value;    // Save filtered value
-            var i;
-            var file;
-            var appliedFilter;
-            var clearFilter;
-            var thisFilter = "Project";
-            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
-            var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
-            if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
-                timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
-                timescaleType = "In";
-            }
-            <?php
-            foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxesCI[$key][0];
-                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
-                $clearFilters = $arrayMetricsBoxesCI[$key][2];
-            ?>
-                i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
-                file = "<?php echo $filepath ?>";
-                appliedFilter = "-<?php echo $appliedFilters ?>";
-                clearFilter = "-<?php echo $clearFilters ?>";
-                checkClearFilter(appliedFilter, clearFilter, thisFilter);
-                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)   // Check if this filter should update the metrics box
-                    getMetricData(i, file, value,
-                                           document.getElementById("conf").value,
-                                           document.getElementById("autotest").value,
-                                           timescaleType,
-                                           timescaleValue);
-            <?php
-            }
-            ?>
-        }
-
-        /* Update those metrics boxes that are applied to this filter */
-        function filterConf(value)
-        {
-            document.getElementById("conf").value = value;       // Save filtered value
-            var i;
-            var file;
-            var appliedFilter;
-            var clearFilter;
-            var thisFilter = "Conf";
-            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
-            var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
-            if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
-                timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
-                timescaleType = "In";
-            }
-            <?php
-            foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxesCI[$key][0];
-                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
-                $clearFilters = $arrayMetricsBoxesCI[$key][2];
-            ?>
-                i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
-                file = "<?php echo $filepath ?>";
-                appliedFilter = "-<?php echo $appliedFilters ?>";
-                clearFilter = "-<?php echo $clearFilters ?>";
-                checkClearFilter(appliedFilter, clearFilter, thisFilter);
-                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)    // Check if this filter should update the metrics box
-                    getMetricData(i, file, document.getElementById("project").value,
-                                           value,
-                                           document.getElementById("autotest").value,
-                                           timescaleType,
-                                           timescaleValue);
-            <?php
-            }
-            ?>
-        }
-
-        /* Update those metrics boxes that are applied to this filter */
-        function filterAutotest(value, sortBy)
-        {
-            document.getElementById("autotest").value = value;   // Save filtered value
-            if (typeof sortBy == "undefined")                                    // sortBy is optional, set 0 as a default
+            document.getElementById(filter).value = value;       // Save filtered value
+            if (typeof sortBy == "undefined")                    // sortBy is optional, set 0 as a default
                 var sortBy = 0;
             var i;
             var file;
+            var filterString;
             var appliedFilter;
             var clearFilter;
-            var thisFilter = "Autotest";
             var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
             var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
             if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
@@ -191,60 +149,25 @@ session_start();
                 timescaleType = "In";
             }
             <?php
-            foreach ($arrayMetricsBoxesCI as $key=>$value) {     // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxesCI[$key][0];
-                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
-                $clearFilters = $arrayMetricsBoxesCI[$key][2];
+            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all defined boxes (read and store the file path via php because defined as php)
+                $filepath = $arrayMetricsBoxes[$key][0];
+                $appliedFilters = $arrayMetricsBoxes[$key][1];
+                $clearFilters = $arrayMetricsBoxes[$key][2];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
                 appliedFilter = "-<?php echo $appliedFilters ?>";
                 clearFilter = "-<?php echo $clearFilters ?>";
-                checkClearFilter(appliedFilter, clearFilter, thisFilter);
-                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)    // Check if this filter should update the metrics box
-                    getMetricData(i, file, document.getElementById("project").value,
-                                           document.getElementById("conf").value,
-                                           value,
-                                           timescaleType,
-                                           timescaleValue,
-                                           sortBy);
-            <?php
-            }
-            ?>
-        }
-
-        /* Update those metrics boxes that are applied to this filter */
-        function filterTimescale(value)
-        {
-            document.getElementById("timescale").value = value;      // Save filtered value
-            var i;
-            var file;
-            var appliedFilter;
-            var clearFilter;
-            var thisFilter = "Timescale";
-            var timescaleType = document.getElementById("timescale").value;      // Type: All/In/Since
-            var timescaleValue = document.getElementById("since").value;         // In case of type "Since" use date value set in the calendar
-            if (timescaleType.search("In") == 0) {                               // In case of type "In" ...
-                timescaleValue = timescaleType.substr(3);                        // ... set value to month (e.g. "2013-06")
-                timescaleType = "In";
-            }
-            <?php
-            foreach ($arrayMetricsBoxesCI as $key=>$value) {         // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxesCI[$key][0];
-                $appliedFilters = $arrayMetricsBoxesCI[$key][1];
-                $clearFilters = $arrayMetricsBoxesCI[$key][2];
-            ?>
-                i = "<?php echo $key ?>";                            // (transfer php variables to javascript variables)
-                file = "<?php echo $filepath ?>";
-                appliedFilter = "-<?php echo $appliedFilters ?>";
-                clearFilter = "-<?php echo $clearFilters ?>";
-                checkClearFilter(appliedFilter, clearFilter, thisFilter);
-                if (appliedFilter.search(thisFilter) >= 0 || appliedFilter.search("All") >= 0)    // Check if this filter should update the metrics box
-                    getMetricData(i, file, document.getElementById("project").value,
-                                           document.getElementById("conf").value,
-                                           document.getElementById("autotest").value,
-                                           timescaleType,
-                                           timescaleValue);
+                checkClearFilter(appliedFilter, clearFilter, filter);
+                if (appliedFilter.search(filter) >= 0 || appliedFilter.search("All") >= 0) {    // Check if this filter should update the metrics box
+                    filterString = createFilterString(document.getElementById("project").value,
+                                                      document.getElementById("conf").value,
+                                                      document.getElementById("autotest").value,
+                                                      timescaleType,
+                                                      timescaleValue,
+                                                      sortBy);
+                    getMetricData(i, file, filterString);
+                }
             <?php
             }
             ?>
@@ -253,46 +176,85 @@ session_start();
         /* Check and clear filters on other filter changes (used with nested metrics boxes to get to 1st level) */
         function checkClearFilter(applied, clear, filter)
         {
-            if (clear.search("Project") >= 0 && filter != "Project") {
+            if (clear.search("project") >= 0 && filter != "project") {
                 if (applied.search("All") >= 0)
                     document.getElementById("project").value = "All";
-                if (applied.search("Conf") >= 0)
+                if (applied.search("conf") >= 0)
                     document.getElementById("project").value = "All";
-                if (applied.search("Autotest") >= 0)
+                if (applied.search("autotest") >= 0)
                     document.getElementById("project").value = "All";
-                if (applied.search("Timescale") >= 0)
+                if (applied.search("timescale") >= 0)
                     document.getElementById("project").value = "All";
             }
-            if (clear.search("Conf") >= 0 && filter != "Conf") {
+            if (clear.search("conf") >= 0 && filter != "conf") {
                 if (applied.search("All") >= 0)
                     document.getElementById("conf").value = "All";
-                if (applied.search("Project") >= 0)
+                if (applied.search("project") >= 0)
                     document.getElementById("conf").value = "All";
-                if (applied.search("Autotest") >= 0)
+                if (applied.search("autotest") >= 0)
                     document.getElementById("conf").value = "All";
-                if (applied.search("Timescale") >= 0)
+                if (applied.search("timescale") >= 0)
                     document.getElementById("conf").value = "All";
             }
-            if (clear.search("Autotest") >= 0 && filter != "Autotest") {
+            if (clear.search("autotest") >= 0 && filter != "autotest") {
                 if (applied.search("All") >= 0)
                     document.getElementById("autotest").value = "All";
-                if (applied.search("Project") >= 0)
+                if (applied.search("project") >= 0)
                     document.getElementById("autotest").value = "All";
-                if (applied.search("Conf") >= 0)
+                if (applied.search("conf") >= 0)
                     document.getElementById("autotest").value = "All";
-                if (applied.search("Timescale") >= 0)
+                if (applied.search("timescale") >= 0)
                     document.getElementById("autotest").value = "All";
             }
-            if (clear.search("Timescale") >= 0 && filter != "Timescale") {
+            if (clear.search("timescale") >= 0 && filter != "timescale") {
                 if (applied.search("All") >= 0)
                     document.getElementById("timescale").value = "All";
-                if (applied.search("Project") >= 0)
+                if (applied.search("project") >= 0)
                     document.getElementById("timescale").value = "All";
-                if (applied.search("Conf") >= 0)
+                if (applied.search("conf") >= 0)
                     document.getElementById("timescale").value = "All";
-                if (applied.search("Autotest") >= 0)
+                if (applied.search("autotest") >= 0)
                     document.getElementById("timescale").value = "All";
             }
+        }
+
+        /* Create the filter string */
+        function createFilterString(project, conf, autotest, timescaleType, timescaleValue, sortBy)
+        {
+            var filterString;
+            var filterSeparator = "<?php echo FILTERSEPARATOR ?>";               // (transfer php constant to javascript)
+            var filterValueSeparator = "<?php echo FILTERVALUESEPARATOR ?>";
+            filterString = "project" + filterValueSeparator + project + filterSeparator
+                + "conf" + filterValueSeparator + conf + filterSeparator
+                + "autotest" + filterValueSeparator + autotest + filterSeparator
+                + "timescaleType" + filterValueSeparator + timescaleType + filterSeparator
+                + "timescaleValue" + filterValueSeparator + timescaleValue + filterSeparator
+                + "sortBy" + filterValueSeparator + sortBy + filterSeparator;
+            return filterString;
+        }
+
+        /* Update the metrics boxes when project filter changed */
+        function filterProject(value)
+        {
+            updateMetricsBoxes("project", value);
+        }
+
+        /* Update the metrics boxes when conf filter changed */
+        function filterConf(value)
+        {
+            updateMetricsBoxes("conf", value);
+        }
+
+        /* Update the metrics boxes when autotest filter changed; output table can also be sorted */
+        function filterAutotest(value, sortBy)
+        {
+            updateMetricsBoxes("autotest", value, sortBy);
+        }
+
+        /* Update the metrics boxes when timescale filter changed */
+        function filterTimescale(value)
+        {
+            updateMetricsBoxes("timescale", value);
         }
 
         /* Set all filters to "All" */
@@ -376,7 +338,7 @@ session_start();
 
         <!-- Metrics boxes -->
         <?php
-        foreach ($arrayMetricsBoxesCI as $key=>$value)
+        foreach ($arrayMetricsBoxes as $key=>$value)
             echo "<div id=\"metricsBox$key\" class=\"metricArea\"><img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...</div>";   // Div content when initially opening the page before Ajax call
         ?>
 

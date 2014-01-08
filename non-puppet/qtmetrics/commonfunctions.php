@@ -43,19 +43,38 @@
 
 <?php
 
-/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412) */
-function createBuildNumberString($buildNumber)
+/* Converts UTC time to local time based on time offset
+   Input:  $time is in UTC in format "Y-m-d H:i:s" e.g. "2013-06-07 04:02:06",
+           $offset is e.g. "GMT+0300" or "GMT+0000" or "GMT-0600"
+   Output: in UTC in format without the seconds (to save display space) "Y-m-d H:i" e.g. "2013-06-07 07:02" */
+function getLocalTime($time, $offset)
 {
-    $buildString = $buildNumber;
-    if ($buildNumber < 10000)
-        $buildString = '0' . $buildNumber;
-    if ($buildNumber < 1000)
-        $buildString = '00' . $buildNumber;
-    if ($buildNumber < 100)
-        $buildString = '000' . $buildNumber;
-    if ($buildNumber < 10)
-        $buildString = '0000' . $buildNumber;
-    return $buildString;
+    date_default_timezone_set('UTC');
+    $originalTimestamp = strtotime($time . ' UTC');
+    $offsetSign = substr($offset, 3, 1);
+    $offsetHour = intval(substr($offset, 4, 2));
+    $offsetMinute = intval(substr($offset, 6, 2));
+
+    if ($offsetSign == "-") {
+        $modifiedTimestamp = mktime(
+            intval(date("H",$originalTimestamp)) - $offsetHour,
+            intval(date("i",$originalTimestamp)) - $offsetMinute,
+            intval(date("s",$originalTimestamp)),
+            intval(date("m",$originalTimestamp)),
+            intval(date("d",$originalTimestamp)),
+            intval(date("Y",$originalTimestamp)));
+    } else {
+        $modifiedTimestamp = mktime(
+            intval(date("H",$originalTimestamp)) + $offsetHour,
+            intval(date("i",$originalTimestamp)) + $offsetMinute,
+            intval(date("s",$originalTimestamp)),
+            intval(date("m",$originalTimestamp)),
+            intval(date("d",$originalTimestamp)),
+            intval(date("Y",$originalTimestamp)));
+    }
+
+    $local = date("Y-m-d H:i", $modifiedTimestamp);
+    return $local;
 }
 
 ?>

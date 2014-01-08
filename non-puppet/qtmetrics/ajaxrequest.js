@@ -61,21 +61,16 @@ function createFilterRequestObject()
 }
 
 /* Request metric data (e.g. from database) */
-function getMetricData(metricId, filepath, project, conf, autotest, timescaleType, timescaleValue, sortBy)
+function getMetricData(metricId, filepath, filters)
 {
     document.getElementById("metricsBox"+metricId).innerHTML = "<img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...";    // Div content during the Ajax call
-    if (project == "") {
+    if (filters == "") {
         document.getElementById("metricsBox"+metricId).innerHTML = "";
         return;
     }
-    if (typeof sortBy == "undefined")                                 // sortBy is optional, set 0 as a default
-        var sortBy = 0;
-    project = encodeURIComponent(project);                            // Encode the parameters to follow correct URL encoding (e.g. possible "+" characters)
-    conf = encodeURIComponent(conf);                                  // -,,-
-    autotest = encodeURIComponent(autotest);                          // -,,-
+    filters = encodeURIComponent(filters);                            // Encode the parameters to follow correct URL encoding (e.g. possible "+" characters)
     createMetricRequestObject(metricId);
-    metricRequest[metricId].open("GET",filepath+"?project="+project+"&conf="+conf+"&autotest="+autotest+"&tstype="
-                                      +timescaleType+"&tsvalue="+timescaleValue+"&sort="+sortBy,true);
+    metricRequest[metricId].open("GET",filepath+"?filters="+filters,true);
     metricRequest[metricId].send();
     metricRequest[metricId].onreadystatechange = function(index)
     {
@@ -92,7 +87,8 @@ function showMetricData(metricId)
     if (metricRequest[metricId].readyState == 4 && metricRequest[metricId].status == 200) {
         var response = metricRequest[metricId].responseText;
         document.getElementById("metricsBox"+metricId).innerHTML = response;
-        loadDatabaseStatus(0);                                        // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
+        getMetricDataRequestCompleted();
+        return;
     }
 }
 
@@ -117,7 +113,7 @@ function showFilters(div)
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {
         var response = filterRequest.responseText;
         document.getElementById(div).innerHTML = response;
-        loadMetricsboxes();                                           // When filters are ready, load the metrics boxes next
+        getFiltersRequestCompleted();
         return;
     }
 }
@@ -160,7 +156,7 @@ function showDatabaseStatusInitial(div)
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {
         var response = filterRequest.responseText;
         document.getElementById(div).innerHTML = response;
-        getFilters("filters", "ci/getfilters.php");                   // Continue to load the filters next (initial loading of the page)
+        getDatabaseStatusInitialRequestCompleted();
         return;
     }
 }
@@ -171,6 +167,7 @@ function showDatabaseStatus(div)
     if (filterRequest.readyState == 4 && filterRequest.status == 200) {
         var response = filterRequest.responseText;
         document.getElementById(div).innerHTML = response;
+        getDatabaseStatusRequestCompleted();
         return;
     }
 }
