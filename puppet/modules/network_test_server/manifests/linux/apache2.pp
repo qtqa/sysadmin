@@ -3,10 +3,35 @@ class network_test_server::linux::apache2 {
         "apache2":          ensure  =>  present;
     }
 
+    $spdy_filename = $::architecture ? {
+        i386    => "mod-spdy-beta_current_i386.deb",
+        x86     => "mod-spdy-beta_current_i386.deb",
+        x86_64  => "mod-spdy-beta_current_amd64.deb",
+        amd64   => "mod-spdy-beta_current_amd64.deb",
+        default => "mod-spdy-beta_current_amd64.deb",
+    }
+
+    exec {
+        "download SPDY module":
+            command => "/usr/bin/wget https://dl-ssl.google.com/dl/linux/direct/$spdy_filename --directory-prefix=/home/qt-test-server",
+            creates => "/home/qt-test-server/$spdy_filename",
+            notify  =>  Service["apache2"]
+        ;
+    }
+
+    package {
+        "mod_spdy":
+            ensure   => installed,
+            provider => dpkg,
+            source   => "/home/qt-test-server/$spdy_filename",
+            notify   => Service["apache2"],
+            require  => [ Package["apache2"], Exec["download SPDY module"] ]
+    }
+
     service { "apache2":
         enable  =>  true,
         ensure  =>  running,
-        require =>  Package["apache2"],
+        require =>  Package["apache2", "mod_spdy"],
     }
 
     apache2_module {
