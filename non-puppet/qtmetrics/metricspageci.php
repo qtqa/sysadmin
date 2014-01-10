@@ -81,7 +81,7 @@ session_start();
 
         function getFiltersRequestCompleted()                    // Called when the filter box has been updated
         {
-            loadMetricsboxes();                                  // c) Load the metrics boxes next
+            loadMetricsBoxes();                                  // c) Load the metrics boxes next
         }
 
         function getDatabaseStatusInitialRequestCompleted()      // Called when the status box has been updated (initial step)
@@ -94,7 +94,7 @@ session_start();
         }
 
         /* Load database status */
-        function loadDatabaseStatus(initial)                     // Called first in page loading, and every time a metrics box is updated (from showMetricData)
+        function loadDatabaseStatus(initial)
         {
             if (initial == 1)
                 getDatabaseStatusInitial("databaseStatus", "ci/getdatabasestatus.php", initial, getTimeOffset());  // Time offset passed to show the session time and database update time with the same 'timezone'
@@ -103,7 +103,7 @@ session_start();
         }
 
         /* Load all metrics boxes */
-        function loadMetricsboxes()                              // Called after filters are ready (from showFilters)
+        function loadMetricsBoxes()
         {
             showMetricsBoxes("All", "All", "All", "All");
         }
@@ -260,16 +260,13 @@ session_start();
         /* Set all filters to "All" */
         function clearFilters()
         {
-            filterProject("All");
-            filterConf("All");
-            filterAutotest("All");
-            filterTimescale("All");
+            loadMetricsBoxes();                                 // Note: Using this function will lead to only one Ajax call
         }
 
         /* Set Project filters to "All" */
         function clearProjectFilters()
         {
-            filterProject("All");
+            filterProject("All");                               // Note: Using separate functions will lead to several Ajax calls
             filterConf("All");
         }
 
