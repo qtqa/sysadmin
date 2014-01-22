@@ -41,8 +41,24 @@
 #############################################################################
 ?>
 
-<div id="footer">
-<b>Report builder v1.6 15-Jan-2014</b><br/>
-Description, guidance and support:<br/>
-<a href="http://qt-project.org/wiki/Qt_Metrics_Page_Description" target="_blank">http://qt-project.org/wiki/Qt_Metrics_Page_Description</a>
-</div>
+<?php
+
+/* Metrics boxes */
+$arrayMetricsBoxes = array (
+    // Metrics boxes will appear in the order defined below
+    //
+    // *) Possible values: All, test, license, platform
+    //
+    //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
+    //        --------------------------------------------------------------------------------------------------------------------------
+    array(    "rta/showrtafailures.php"        ,"All"                        ,""                       ),
+);
+
+/* Filters */
+define("FILTERSEPARATOR", ";");
+define("FILTERVALUESEPARATOR", ":");
+define("FILTERTEST", 0);
+define("FILTERLICENSE", 1);
+define("FILTERPLATFORM", 2);
+
+?>

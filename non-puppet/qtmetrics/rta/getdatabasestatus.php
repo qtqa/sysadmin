@@ -1,4 +1,8 @@
 <?php
+session_start();
+?>
+
+<?php
 #############################################################################
 ##
 ## Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
@@ -41,8 +45,28 @@
 #############################################################################
 ?>
 
-<div id="footer">
-<b>Report builder v1.6 15-Jan-2014</b><br/>
-Description, guidance and support:<br/>
-<a href="http://qt-project.org/wiki/Qt_Metrics_Page_Description" target="_blank">http://qt-project.org/wiki/Qt_Metrics_Page_Description</a>
-</div>
+<?php
+$initial = $_GET["initial"];                         // 'true' = initial load of the page, 'false' = normal use of the page
+$timeOffset = $_GET["timeoffset"];                   // Use client local time offset taking daylight saving time into account, e.g. "GMT-0600"
+$timeOffset = rawurldecode($timeOffset);             // Decode the encoded parameter (encoding in ajaxrequest.js)
+
+include(__DIR__.'/../commonfunctions.php');
+
+/* Print status */
+echo '<div id="sessionStatus">';
+if ($timeOffset == "GMT+0000")
+    $timeOffsetFormatted = "GMT";
+else
+    $timeOffsetFormatted = substr($timeOffset, 0, 6) . ':' . substr($timeOffset, 6, 2);         // Add minute separator ':'
+$sessionTime = getLocalTime($_SESSION['sessionDate'], $timeOffset);                             // Change UTC to local time
+if ($initial == 1) {                                 // Initial loading of the page
+    echo '<b>Welcome</b><br/><br/>';
+    echo 'Loading data for your session.<br/><br/>';
+    echo 'If not ready in one minute, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a>...';
+}
+if ($initial == 0) {                                 // Normal case (show session time)
+    echo 'Session started:<br/>' . $sessionTime . ' (' . $timeOffsetFormatted . ')<br/><br/>';
+}
+echo '</div>';
+
+?>

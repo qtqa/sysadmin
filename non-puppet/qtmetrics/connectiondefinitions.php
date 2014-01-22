@@ -49,13 +49,23 @@ $useMysqli = TRUE;                      // Set TRUE for mysqli extension or FALS
 /* Select connection type. The 'normal connection will be closed as soon as the script ends */
 $usePersistentConnection = TRUE;        // Set TRUE for persistent connection or FALSE for 'normal'
 
-/* Database server definitions */
-$host = 'localhost';
-$user = 'phpreader';
-$passwd = 'r-kl_DsS';
-$db = 'qt';
+/* Database server definitions
+   Define as empty "" if not accessible in server environment where this file is used */
+$host = "localhost";
+$user = "phpreader";
+$passwd = "r-kl_DsS";
+$db = "qt";
 
 /* Disable MySQL and other error messages (to prevent e.g. MySQL connection settings to be displayed in case of a connection failure) */
 $disableErrorMessages = TRUE;           // Set TRUE when using target live server or FALSE in development environment
+
+/* The base directory for RTA test result XML files under which all the files are available in a certain directory structure
+   Define as empty "" if not accessible in server environment where this file is used */
+define("RTAXMLBASEDIRECTORY", "");
+
+/* RTA directories in Packaging Jenkins
+   Define as empty "" if not accessible in server environment where this file is used */
+define("PACKAGINGJENKINSENTERPRISE", "");
+define("PACKAGINGJENKINSOPENSOURCE", "");
 
 ?>
