@@ -54,6 +54,9 @@ include "metricsboxdefinitions.php";
 define("RESULTXMLFILENAMEPREFIX", "result");    // The result file name starts with this string
 define("TARFILENAMEEXTENSION", ".tar.gz");      // Tar file name used for configuration name by removing this extension
 
+define("WORDWRAPCHARSNORMAL", 90);
+define("WORDWRAPCHARSBOLD", 80);
+
 define("TESTERRORCOUNT", 0);
 define("TESTFATALCOUNT", 1);
 define("TESTFAILCOUNT", 2);
@@ -75,10 +78,11 @@ function saveXmlFailures($xmlResultFile, &$timestamp, &$failureDescription, &$te
             foreach ($testCase->message as $message) {
                 if ($message['type'] == "ERROR" OR $message['type'] == "FATAL") {
                     $failureDescription = $failureDescription . '<b>' . $message['type'] . ' in ' . $name . '</b><br>';
-                    $failureDescription = $failureDescription . '<b>(' . wordwrap($message['file'], 80, "<br>\n", TRUE) . ': ' . $message['line'] . ')</b><br>';
-                    foreach ($message->description as $description) {                           // Details from each <description> and <description type="DETAILED">
+                    $failureDescription = $failureDescription . '<b>(' . wordwrap($message['file'], WORDWRAPCHARSBOLD, "<br>\n", TRUE) .
+                                          ': ' . $message['line'] . ')</b><br>';
+                    foreach ($message->description as $description) {                   // Details from each <description> and <description type="DETAILED">
                         if ($description <> "")
-                            $failureDescription = $failureDescription . wordwrap($description, 100, "<br>\n", TRUE) . '<br>';
+                            $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
                     }
                 }
                 if ($message['type'] == "ERROR")
@@ -91,10 +95,11 @@ function saveXmlFailures($xmlResultFile, &$timestamp, &$failureDescription, &$te
                 foreach ($verification->result as $result) {
                     if ($result['type'] == "FAIL" OR $result['type'] == "XPASS") {
                         $failureDescription = $failureDescription . '<b>' . $result['type'] . ' in ' . $name . '</b><br>';
-                        $failureDescription = $failureDescription . '<b>(' . wordwrap($verification['file'], 80, "<br>\n", TRUE) . ': ' . $verification['line'] . ')</b><br>';
-                        foreach ($result->description as $description) {                        // Details from each <description> and <description type="DETAILED">
+                        $failureDescription = $failureDescription . '<b>(' . wordwrap($verification['file'], WORDWRAPCHARSBOLD, "<br>\n", TRUE) .
+                                              ': ' . $verification['line'] . ')</b><br>';
+                        foreach ($result->description as $description) {                // Details from each <description> and <description type="DETAILED">
                             if ($description <> "")
-                                $failureDescription = $failureDescription . wordwrap($description, 100, "<br>\n", TRUE) . '<br>';
+                                $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
                         }
                     }
                     if ($result['type'] == "FAIL")
@@ -111,17 +116,17 @@ function saveXmlFailures($xmlResultFile, &$timestamp, &$failureDescription, &$te
             if ($message['type'] == "ERROR" OR $message['type'] == "FATAL" OR $message['type'] == "FAIL" OR $message['type'] == "XPASS") {
                 $testJobSummary[TESTFATALCOUNT]++;
                 $failureDescription = $failureDescription . '<b>' . $message['type'] . ' message</b><br>';
-                foreach ($message->description as $description) {                           // Details from each <description type="DETAILED">
+                foreach ($message->description as $description) {                       // Details from each <description type="DETAILED">
                     if ($description['type'] == "DETAILED")
-                        $failureDescription = $failureDescription . wordwrap($description, 100, "<br>\n", TRUE) . '<br>';
+                        $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
                 }
             }
         }
     }
 }
 
-/* Print table title row (the same columns to be used in showTableEnd and showXmlResultFailures) */
-function showTableTitle()
+/* Print table title row (the same columns to be used in showTestFailuresTableEnd and showTestFailures) */
+function showTestFailuresTableTitle()
 {
     echo '<table class="fontSmall">';
     echo '<tr class="tableBottomBorder">';
@@ -129,11 +134,11 @@ function showTableTitle()
     echo '<th class="tableSideBorder">Failure Description</th>';
     echo '<th class="tableSideBorder">Summary</th>';
     echo '</tr>';
-    // Leave the table 'open', to be closed in showTableEnd
+    // Leave the table 'open', to be closed in showTestFailuresTableEnd
 }
 
 /* Close the table */
-function showTableEnd()
+function showTestFailuresTableEnd()
 {
     echo '<tr class="tableTopBorder">';
     echo '<td></td>';           // Test Job
@@ -236,7 +241,7 @@ if ($rtaXmlBaseDir != "") {
         $testJobSummary = array();
 
         /* Print table titles */
-        showTableTitle();
+        showTestFailuresTableTitle();
 
         /* Check possible filtering */
         $k = 0;
@@ -308,7 +313,7 @@ if ($rtaXmlBaseDir != "") {
         }
 
         /* Show summary and close the table */
-        showTableEnd();
+        showTestFailuresTableEnd();
 
     } else {
         echo '<br>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';

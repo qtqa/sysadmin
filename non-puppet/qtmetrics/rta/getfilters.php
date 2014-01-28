@@ -48,8 +48,10 @@ session_start();
 <?php
 include(__DIR__.'/../commondefinitions.php');
 include(__DIR__.'/../connectiondefinitions.php');
+include "metricsboxdefinitions.php";
 
 define("RESULTXMLFILENAMEPREFIX", "result");            // The result file name starts with this string
+define("TARFILENAMEEXTENSION", ".tar.gz");              // Tar file name used for configuration name by removing this extension
 define("RTATESTHISTORYNUMBERMAX", 999);                 // The biggest Jenkins build history number used to identify build number directory names from main level ones
 define("TESTTYPESEPARATOR", "_tests_");                 // String to separate the test type and platform (e.g. "Qt5_RTA_opensource_installer_tests_linux_32bit")
 define("LICENSETYPESEPARATOR", "_RTA_");                // String to separate the license type
@@ -107,24 +109,23 @@ if ($rtaXmlBaseDir != "") {
                     $i++;
                 $rtaTestJobId[$i] = $i;
                 $rtaTestJobName[$i] = $dirName;
-                $historyNumbers = array();
                 $rtaTestHistoryNumbers[$i] = array();
                 $rtaTestHistoryMin[$i] = RTATESTHISTORYNUMBERMAX;
                 $rtaTestHistoryMax[$i] = 0;
             // ... and then its history directories
             } else {
-                $historyNumbers[] = $dirName;
+                $rtaTestHistoryNumbers[$i][] = $dirName;
                 if ($dirName < $rtaTestHistoryMin[$i])
                     $rtaTestHistoryMin[$i] = $dirName;
                 if ($dirName > $rtaTestHistoryMax[$i])
                     $rtaTestHistoryMax[$i] = $dirName;
             }
-            rsort($historyNumbers);                                     // Sort the numbers in descending order
-            $rtaTestHistoryNumbers[$i] = $historyNumbers;
         }
-        /* Get the data by opening the tar.gz files: latest build number from the result XML file */
+        /* Get the data by checking the tar.gz files */
         $i = RTATESTHISTORYNUMBERMAX + 1;
-        $rtaTestJobLatestBuild = array();
+        $rtaTestJobLatestBuild = array();                                   // Latest installer build number
+        $rtaTestConfs = array();                                            // List of configurations per each test job
+        $rtaTestConfsHistory = array();                                     // List of configurations per each test job and its history number
         foreach ($directories as $directory) {
             $dirName = substr($directory, strripos($directory, "/") + 1);
             // Main level test job directory checked first to initialize the variables ...
@@ -133,17 +134,23 @@ if ($rtaXmlBaseDir != "") {
                     $i = 0;
                 else
                     $i++;
+                $j = 0;
                 $rtaTestJobLatestBuild[$i] = 0;
+                $rtaTestConfs[$i] = array();                                // Per each test job
+                $rtaTestConfsHistory[$i] = array();                         // Per each test job
             // ... and then its history directories
             } else {
-                if ($dirName == $rtaTestHistoryMax[$i]) {                   // Check the latest run only
-                    $handle = opendir($directory);
-                    while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
-                        if ($entry == "." || $entry == "..") {
-                            continue;
-                        }
-                        $buildNumber = 0;
-                        $timestamp = '';
+                $rtaTestConfsHistory[$i][$j] = array();                     // Per each history number in a test job
+                $handle = opendir($directory);
+                while (($entry = readdir($handle)) !== FALSE) {             // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
+                    if ($entry == "." || $entry == "..") {
+                        continue;
+                    }
+                    $buildNumber = 0;
+                    $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
+                    $rtaTestConfs[$i][] = $configuration;
+                    $rtaTestConfsHistory[$i][$j][] = $configuration;
+                    if ($dirName == $rtaTestHistoryMax[$i]) {               // Check the latest run only
                         $filePath = $directory . '/' . $entry;
                         if (is_file($filePath)) {
                             try {                                           // Open an existing phar
@@ -160,19 +167,28 @@ if ($rtaXmlBaseDir != "") {
                             }
                         }
                         clearstatcache();
+                        $rtaTestJobLatestBuild[$i] = $buildNumber;
                     }
-                    closedir($handle);
-                    $rtaTestJobLatestBuild[$i] = $buildNumber;
                 }
+                closedir($handle);
+                $j++;
             }
         }
-        /* Save session variables */
+        /* Manipulate the lists */
         $rtaTestJobCount = $i + 1;
-        array_multisort($rtaTestJobName, $rtaTestJobId);                // Sort the test jobs alphabetically (and keep the linking via their Id)
-        $_SESSION['rtaTestJobCount'] = $rtaTestJobCount;                // Save session variables
+        for ($i=0; $i<$rtaTestJobCount; $i++) {                             // Check each RTA test job directory (e.g. Qt5_RTA_opensource_installer_tests_linux_32bit) and its test runs (e.g. 220)
+            array_multisort($rtaTestHistoryNumbers[$i], SORT_DESC, $rtaTestConfsHistory[$i]);  // Sort the history numbers in descending order (and keep the linking via their configurations)
+            sort($rtaTestConfs[$i]);                                        // Sort alphabetically
+            $rtaTestConfs[$i] = array_unique($rtaTestConfs[$i]);            // Remove duplicate values
+        }
+        /* Save session variables */
+        array_multisort($rtaTestJobName, $rtaTestJobId);                    // Sort the test jobs alphabetically (and keep the linking via their Id)
+        $_SESSION['rtaTestJobCount'] = $rtaTestJobCount;                    // Save session variables
         $_SESSION['rtaTestJobId'] = $rtaTestJobId;
         $_SESSION['rtaTestJobName'] = $rtaTestJobName;
         $_SESSION['rtaTestJobLatestBuild'] = $rtaTestJobLatestBuild;
+        $_SESSION['rtaTestConfs'] = $rtaTestConfs;
+        $_SESSION['rtaTestConfsHistory'] = $rtaTestConfsHistory;
         $_SESSION['rtaTestHistoryNumbers'] = $rtaTestHistoryNumbers;
         $_SESSION['rtaTestHistoryMin'] = $rtaTestHistoryMin;
         $_SESSION['rtaTestHistoryMax'] = $rtaTestHistoryMax;

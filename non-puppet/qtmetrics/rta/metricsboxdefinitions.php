@@ -51,6 +51,7 @@ $arrayMetricsBoxes = array (
     //
     //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
     //        --------------------------------------------------------------------------------------------------------------------------
+    array(    "rta/showrtahistory.php"         ,"All"                        ,""                       ),
     array(    "rta/showrtafailures.php"        ,"All"                        ,""                       ),
 );
 

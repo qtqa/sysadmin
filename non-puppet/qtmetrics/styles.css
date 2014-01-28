@@ -288,20 +288,20 @@ td {
 }
 
 .fontColorBlack {
-    color:black;
+    color: black;
 }
 
 .fontColorGrey {
-    color:grey;
+    color: grey;
 }
 
 .fontColorGreen {                          /* This can be used to highlight successful results */
-    color:green;
+    color: green;
 }
 
 .fontColorRed {                            /* This can be used to highlight failed results */
-    color:red;
-    font-weight:bold;
+    color: red;
+    font-weight: bold;
 }
 
 .fontSmall {
@@ -318,6 +318,10 @@ td {
 
 .tableBottomBorder {
     border-bottom: 1px solid black;
+}
+
+.tableBottomBorderThick {
+    border-bottom: 2px solid black;
 }
 
 .tableLeftBorder {
@@ -344,7 +348,7 @@ td {
     background-color: #73B873;
 }
 
-.tableCellBackgroundRedDark  {             /* This can be used to highlight failed results (most severe) */
+.tableCellBackgroundRedDark  {              /* This can be used to highlight failed results (most severe) */
     background-color: #990000;
 }
 
@@ -354,6 +358,10 @@ td {
 
 .tableCellBackgroundRedLight  {             /* This can be used to highlight failed results (least severe) */
     background-color: #FFC285;
+}
+
+.tableCellBackgroundYellow  {               /* This can be used to highlight warnings or yellow in traffic lights */
+    background-color: #FFFF33;
 }
 
 .tableCellCentered {

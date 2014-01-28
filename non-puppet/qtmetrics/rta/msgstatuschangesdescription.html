@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="../styles.css" />
+        <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
+        <title>Qt Metrics Information</title>
+    </head>
+
+    <body class="messageWindow">
+        <img src="../images/info.png" alt="info"><br><br>
+
+        <!-- The message or content to be shown on new window -->
+        <p><b><u>RTA RESULTS STATUS & CHANGES NOTATION:</u></b></p>
+        <table>
+        <tr><td colspan="2"><b>Status:</b></td></tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundRed"></td>
+        <td>The latest RTA test job run (last) has <b>new failures</b> compared to the previous (last-1) one.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundYellow"></td>
+        <td>The latest RTA test job run (last) still has <b>failures</b>.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered tableCellBackgroundGreen"></td>
+        <td>The latest RTA test job run (last) does <b>not</b> have <b>any failures</b>.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered"></td>
+        <td>The <b>passed test cases</b> are not color coded.</td>
+        </tr>
+        <tr>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td></td>
+        </tr>
+        <tr><td colspan="2"><b>Changes (used with any status color):</b></td></tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered">+2</td>
+        <td>The number of passes, or failures of any type (sum of all types), is <b>increasing</b> in the latest RTA
+            test job run compared to the previous (last-1) one.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered">-1</td>
+        <td>The number of passes, or failures of any type (sum of all types), is <b>decreasing</b> in the latest RTA
+            test job run compared to the previous (last-1) one.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered">+2 / -1</td>
+        <td>There are both <b>increases</b> (sum of all types) and <b>decreases</b> (sum of all types) among the
+            different failure types. In practice, failures are increasing with one or several types while decreasing
+            with another type or types. Counts are compared between the latest RTA test job run (last) and the previous
+            (last-1) one.</td>
+        </tr>
+        <tr>
+        <td class="tableSingleBorder tableCellCentered"></td>
+        <td>There are <b>not any changes</b> in passes or in any of the failure types in the latest RTA test job run
+            compared to the previous (last-1) one.</td>
+        </tr>
+        </table>
+        <br>
+        <p>The failures include the following types: ERROR, FAIL, FATAL and XPASS i.e. uneXpected PASS.
+           Each failure type is compared separately for the change counts. Therefore it is possible to
+           identify the cases where failures are decreasing with one type, while increasing with some other type.</p>
+        <!-- End of message -->
+
+        <br><br>
+        <button type="button" onclick="window.open('', '_self', ''); window.close();">Close</button>
+        <br><br>
+
+    </body>
+</html>
