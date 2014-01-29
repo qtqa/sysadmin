@@ -51,6 +51,7 @@ $timeOffset = $_GET["timeoffset"];                   // Use client local time of
 $timeOffset = rawurldecode($timeOffset);             // Decode the encoded parameter (encoding in ajaxrequest.js)
 
 include(__DIR__.'/../commonfunctions.php');
+include(__DIR__.'/../connectiondefinitions.php');
 
 /* Store session start time */
 if (!isset($_SESSION['sessionDate']))
@@ -64,12 +65,16 @@ else
     $timeOffsetFormatted = substr($timeOffset, 0, 6) . ':' . substr($timeOffset, 6, 2);         // Add minute separator ':'
 $sessionTime = getLocalTime($_SESSION['sessionDate'], $timeOffset);                             // Change UTC to local time
 if ($initial == 1) {                                 // Initial loading of the page
-    echo '<b>Welcome</b><br/><br/>';
-    echo 'Loading data for your session.<br/><br/>';
-    echo 'If not ready in one minute, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a>...';
+    echo '<b>Welcome to RTA Metrics</b><br/><br/>';
+    echo 'Loading data for your session.<br/><br/><br/>';
+    if (RTAMETRICSDESCRIPTION != "")
+        echo '<span class="fontSmall">See <a href="' . RTAMETRICSDESCRIPTION . '" target="_blank"><b>RTA Metrics Description</b></a> for guidance and support</span>';
 }
 if ($initial == 0) {                                 // Normal case (show session time)
+    echo '<b>RTA Metrics</b><br/><br/>';
     echo 'Session started:<br/>' . $sessionTime . ' (' . $timeOffsetFormatted . ')<br/><br/>';
+    if (RTAMETRICSDESCRIPTION != "")
+        echo '<span class="fontSmall">See <a href="' . RTAMETRICSDESCRIPTION . '" target="_blank"><b>RTA Metrics Description</b></a> for guidance and support</span>';
 }
 echo '</div>';
 

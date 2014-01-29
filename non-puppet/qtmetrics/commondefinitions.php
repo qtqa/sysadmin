@@ -55,9 +55,6 @@ define("AUTOTEST_LATESTBUILDCOUNT", 20);        // Number of latest builds to be
 define("AUTOTEST_PROJECTCOUNT", 10);            // Number of Projects to be shown in list
 define("AUTOTEST_CONFIGURATIONCOUNT", 10);      // Number of Configurations to be shown in list
 
-/* Log file paths */
-define("LOGFILEPATHCI", "http://testresults.qt-project.org/ci/");
-
 /* Flag display tags (e.g. for Configuration force success) */
 define("FLAGON", "Yes");
 define("FLAGOFF", "-");

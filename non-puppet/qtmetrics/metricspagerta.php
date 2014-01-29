@@ -46,6 +46,19 @@ session_start();
 #############################################################################
 ?>
 
+<?php
+include "connectiondefinitions.php";
+include "commonfunctions.php";
+
+/* Redirect to local server if this page is requested on public server from internal Digia network (so that the public server path
+   can be used in delivering the URL to this RTA metrics page instead of the internal one) */
+if (isPublicServer(PUBLICSERVER)) {
+    if (isInternalClient($internalIps))
+        header('Location: http://' . LOCALSERVER . '/qtmetrics/metricspagerta.php');
+}
+
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -299,8 +312,11 @@ session_start();
     <!-- Initially show all data -->
     <body onload="loadAll()">
         <div id="container">
-        <?php include "commondefinitions.php";?>
-        <?php include "header.php";?>
+        <?php
+        include "commondefinitions.php";
+        $metricsPage = "metricspagerta";                 // Filename (without the extension) to identify active page for menu
+        include "header.php";
+        ?>
 
         <!-- Filters (loaded with Ajax call) -->
         <div id="filters">

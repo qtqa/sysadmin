@@ -43,29 +43,29 @@
 
 <?php
 
+/* Include the server specific definitions. Note: Typically only either one on a same server */
+include('/home/qtintegration/connectionconfig.php');        // Read if available, skip otherwise
+include('connectionconfig.php');                            // -,,-
+
+/* Local server (local metrics pages are shown from here) */
+if (!defined("LOCALSERVER"))
+    define("LOCALSERVER", "");
+
+/* Public server (public metrics pages are shown from here) */
+if (!defined("PUBLICSERVER"))
+    define("PUBLICSERVER", "testresults.qt-project.org");
+
+/* CI log file path */
+if (!defined("LOGFILEPATHCI"))
+    define("LOGFILEPATHCI", "http://testresults.qt-project.org/ci/");
+
 /* Select MySQL API. For more details, see http://php.net/manual/en/mysqlinfo.api.choosing.php */
 $useMysqli = TRUE;                      // Set TRUE for mysqli extension or FALSE for old mysql extension
 
 /* Select connection type. The 'normal connection will be closed as soon as the script ends */
 $usePersistentConnection = TRUE;        // Set TRUE for persistent connection or FALSE for 'normal'
 
-/* Database server definitions
-   Define as empty "" if not accessible in server environment where this file is used */
-$host = "localhost";
-$user = "phpreader";
-$passwd = "r-kl_DsS";
-$db = "qt";
-
 /* Disable MySQL and other error messages (to prevent e.g. MySQL connection settings to be displayed in case of a connection failure) */
 $disableErrorMessages = TRUE;           // Set TRUE when using target live server or FALSE in development environment
-
-/* The base directory for RTA test result XML files under which all the files are available in a certain directory structure
-   Define as empty "" if not accessible in server environment where this file is used */
-define("RTAXMLBASEDIRECTORY", "");
-
-/* RTA directories in Packaging Jenkins
-   Define as empty "" if not accessible in server environment where this file is used */
-define("PACKAGINGJENKINSENTERPRISE", "");
-define("PACKAGINGJENKINSOPENSOURCE", "");
 
 ?>

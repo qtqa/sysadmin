@@ -46,6 +46,11 @@ session_start();
 #############################################################################
 ?>
 
+<?php
+include "connectiondefinitions.php";
+include "commonfunctions.php";
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -319,8 +324,10 @@ session_start();
     <!-- Initially show all data -->
     <body onload="loadAll()">
         <div id="container">
-        <?php include "commondefinitions.php";?>
-        <?php include "header.php";?>
+        <?php include "commondefinitions.php";
+        $metricsPage = "metricspageci";                 // Filename (without the extension) to identify active page for menu
+        include "header.php";
+        ?>
 
         <!-- Filters (loaded with Ajax call) -->
         <div id="filters">

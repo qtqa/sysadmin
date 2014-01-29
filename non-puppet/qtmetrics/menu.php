@@ -41,14 +41,38 @@
 #############################################################################
 ?>
 
-<div id="menu">
+<?php
 
-<!--Main menu-->
+/* The connectiondefinitions.php and commonfunctions.php are needed but they are included in the parent metrics page (metricspage***.php) instead */
 
-<div class="active"><a href="metricspageci.php">CI Metrics</a></div>
+/*  Main menu ($metricsPage identifies the active page, it is set in the metricspage***.php) */
+echo '<div id="menu">';
+echo '<ul class="mainMenu">';
 
-<!--Inactive menu items would appear like this:
-<div class="inactive"><a href="metricspagenew.php">New Metrics</a></div>
--->
+/* This page is on public Qt Project server */
+if (isPublicServer(PUBLICSERVER)) {
+    // CI metrics
+    if ($metricsPage == "metricspageci")
+        echo '<li class="active"><a href="metricspageci.php">CI Metrics</a></li>';
+    else
+        echo '<li class="inactive"><a href="metricspageci.php">CI Metrics</a></li>';
+    // RTA metrics (redirect to local server; show only if requested from internal Digia network)
+    if (isInternalClient($internalIps))
+        echo '<li class="inactive"><a href="metricspagerta.php">RTA Metrics</a></li>';
+}
 
-</div>
+/* This page is on local Digia server */
+else {
+    // CI metrics (redirect to public server)
+    echo '<li class="inactive"><a href="http://' . PUBLICSERVER . '/qtmetrics/metricspageci.php">CI Metrics</a></li>';
+    // RTA metrics
+    if ($metricsPage == "metricspagerta")
+        echo '<li class="active"><a href="metricspagerta.php">RTA Metrics</a></li>';
+    else
+        echo '<li class="inactive"><a href="metricspagerta.php">RTA Metrics</a></li>';
+}
+
+echo '</ul>';
+echo '</div>';
+
+?>

@@ -90,7 +90,7 @@ body {
     float: left;
     height: 40px;
     margin-top: 10px;
-    margin-left: 10px;
+    margin-left: 45px;
     color: #44a51c;
     font-size: 32px;
     font-weight: bold;
@@ -117,6 +117,10 @@ body {
     margin-top: 65px;
 }
 
+ul.mainMenu {
+    list-style-type: none;
+}
+
 .active {
     height: 20px;
     width: 125px;
@@ -127,6 +131,36 @@ body {
     font-weight: bold;
     background: #44a51c;
     border: 1px solid #44a51c;
+    -webkit-animation: animationMenuActive 1s;      /* Safari and Chrome */
+    animation: animationMenuActive 1s;
+}
+
+/* Animation to highlight the selected item */
+@-webkit-keyframes animationMenuActive {            /* Safari and Chrome */
+    0% {
+        background: #fff;
+        margin-top: 0px;
+    }
+    50% {
+        margin-top: -3px;
+    }
+    100% {
+        background: #44a51c;
+        margin-top: 0px;
+    }
+}
+@keyframes animationMenuActive {
+    0% {
+        background: #fff;
+        margin-top: 0px;
+    }
+    50% {
+        margin-top: -3px;
+    }
+    100% {
+        background: #44a51c;
+        margin-top: 0px;
+    }
 }
 
 .inactive {
@@ -143,24 +177,29 @@ body {
 
 .active a:link,
 .inactive a:link {
+    display: block;
     text-decoration: none;
     color: #000;
 }
 .active a:visited,
 .inactive a:visited {
+    display: block;
     text-decoration: none;
     color: #000;
 }
 .active a:hover {
+    display: block;
     text-decoration: none;
     color: #000;
 }
 .inactive a:hover {
+    display: block;
     text-decoration: none;
     color: #44a51c;
 }
 .active a:active,
 .inactive a:active {
+    display: block;
     text-decoration: none;
     color: #000;
 }

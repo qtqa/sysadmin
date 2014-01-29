@@ -1,7 +1,6 @@
 <?php
-include "metricspageci.php";
-// Home page (redirects now to CI metrics page)
-// To be replaced with real redirect when moved to target server: header("Location: metricspageci.php");
+// Home page redirect to CI metrics page
+header("Location: metricspageci.php");
 ?>
 
 <?php

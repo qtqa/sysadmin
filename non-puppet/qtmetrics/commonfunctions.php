@@ -77,4 +77,31 @@ function getLocalTime($time, $offset)
     return $local;
 }
 
+/* Checks if the code here is run on defined public server
+   Input: $publicServer is the defined public server name
+   Output: TRUE/FALSE */
+function isPublicServer($publicServer)
+{
+    $result = FALSE;
+    if ($_SERVER['SERVER_NAME'] == $publicServer)
+        $result = TRUE;
+    return $result;
+}
+
+/* Checks if client is connecting from a list of internal IP addresses
+   Input: $internalIps is the list of internal IP addresses
+   Output: TRUE/FALSE */
+function isInternalClient($internalIps)
+{
+    $remoteAddress = $_SERVER['REMOTE_ADDR'];
+    $result = FALSE;
+    foreach($internalIps as $ip) {
+        if($remoteAddress == $ip) {
+            $result = TRUE;
+            break;
+        }
+    }
+    return $result;
+}
+
 ?>
