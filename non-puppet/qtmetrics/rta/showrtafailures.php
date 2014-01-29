@@ -50,80 +50,8 @@ include(__DIR__.'/../commonfunctions.php');
 include(__DIR__.'/../commondefinitions.php');
 include(__DIR__.'/../connectiondefinitions.php');
 include "metricsboxdefinitions.php";
-
-define("RESULTXMLFILENAMEPREFIX", "result");    // The result file name starts with this string
-define("TARFILENAMEEXTENSION", ".tar.gz");      // Tar file name used for configuration name by removing this extension
-
-define("WORDWRAPCHARSNORMAL", 90);
-define("WORDWRAPCHARSBOLD", 80);
-
-define("TESTERRORCOUNT", 0);
-define("TESTFATALCOUNT", 1);
-define("TESTFAILCOUNT", 2);
-define("TESTXPASSCOUNT", 3);
-define("TESTPASSCOUNT", 4);
-
-/* Save the failure information for a test job from XML file or files (in the latter case this function is called several times in a row)
-   Listed failures are: ERROR, FATAL, FAIL and UNEXPECTED_PASS (=XPASS) */
-function saveXmlFailures($xmlResultFile, &$timestamp, &$failureDescription, &$testJobSummary)
-{
-    define("BUILDNUMBERTITLE", "nstaller build number:");           // The leading "I" left out on purpose
-    $resultFile = simplexml_load_file($xmlResultFile);
-    foreach ($resultFile->children() as $test) {                                        // Usually one per each XML result file
-        if ($timestamp == "")
-            $timestamp = str_replace("T", "&nbsp;&nbsp;", $test->prolog['time']);       // Just to improve readability
-        foreach ($test->children() as $testCase) {
-            $name = $testCase['name'];
-            /* ERROR or FATAL (from <message type="ERROR" or "FATAL") */
-            foreach ($testCase->message as $message) {
-                if ($message['type'] == "ERROR" OR $message['type'] == "FATAL") {
-                    $failureDescription = $failureDescription . '<b>' . $message['type'] . ' in ' . $name . '</b><br>';
-                    $failureDescription = $failureDescription . '<b>(' . wordwrap($message['file'], WORDWRAPCHARSBOLD, "<br>\n", TRUE) .
-                                          ': ' . $message['line'] . ')</b><br>';
-                    foreach ($message->description as $description) {                   // Details from each <description> and <description type="DETAILED">
-                        if ($description <> "")
-                            $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
-                    }
-                }
-                if ($message['type'] == "ERROR")
-                    $testJobSummary[TESTERRORCOUNT]++;
-                if ($message['type'] == "FATAL")
-                    $testJobSummary[TESTFATALCOUNT]++;
-            }
-            /* FAIL or UNEXPECTED_PASS plus the PASS (from <verification ... <result type="FAIL" or "XPASS") */
-            foreach ($testCase->verification as $verification) {
-                foreach ($verification->result as $result) {
-                    if ($result['type'] == "FAIL" OR $result['type'] == "XPASS") {
-                        $failureDescription = $failureDescription . '<b>' . $result['type'] . ' in ' . $name . '</b><br>';
-                        $failureDescription = $failureDescription . '<b>(' . wordwrap($verification['file'], WORDWRAPCHARSBOLD, "<br>\n", TRUE) .
-                                              ': ' . $verification['line'] . ')</b><br>';
-                        foreach ($result->description as $description) {                // Details from each <description> and <description type="DETAILED">
-                            if ($description <> "")
-                                $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
-                        }
-                    }
-                    if ($result['type'] == "FAIL")
-                        $testJobSummary[TESTFAILCOUNT]++;
-                    if ($result['type'] == "XPASS")
-                        $testJobSummary[TESTXPASSCOUNT]++;
-                    if ($result['type'] == "PASS")
-                        $testJobSummary[TESTPASSCOUNT]++;
-                }
-            }
-        }
-        /* There may also be high level messages outside the testCase scope */
-        foreach ($test->message as $message) {
-            if ($message['type'] == "ERROR" OR $message['type'] == "FATAL" OR $message['type'] == "FAIL" OR $message['type'] == "XPASS") {
-                $testJobSummary[TESTFATALCOUNT]++;
-                $failureDescription = $failureDescription . '<b>' . $message['type'] . ' message</b><br>';
-                foreach ($message->description as $description) {                       // Details from each <description type="DETAILED">
-                    if ($description['type'] == "DETAILED")
-                        $failureDescription = $failureDescription . wordwrap($description, WORDWRAPCHARSNORMAL, "<br>\n", TRUE) . '<br>';
-                }
-            }
-        }
-    }
-}
+include "definitions.php";
+include "functions.php";
 
 /* Print table title row (the same columns to be used in showTestFailuresTableEnd and showTestFailures) */
 function showTestFailuresTableTitle()
@@ -148,7 +76,17 @@ function showTestFailuresTableEnd()
     echo '</table>';
 }
 
-/* Print failure information */
+/* Print failure information for a test job as one row in a table
+   Input:   $testJobName        (string)  the main title
+            $testConfiguration  (string)  detailed information shown below the title
+            $buildNumber        -,,-
+            $testHistoryNumber  -,,-
+            $timestamp          -,,-
+            $failureDescription (array)   [failure] the list of failures with type, test name, file name, line number and failure description itself
+            $testJobSummary     (array)   [type] the number of passes and each failure type
+            $rowNumber          (integer) a counter how many times this function called, used to separate every other row with a different background color
+   Output:  (none)
+*/
 function showTestFailures($testJobName, $testConfiguration, $buildNumber, $testHistoryNumber, $timestamp, $failureDescription,
                           $testJobSummary, $rowNumber)
 {
@@ -161,17 +99,22 @@ function showTestFailures($testJobName, $testConfiguration, $buildNumber, $testH
     else
         $testHistoryNumberLink = PACKAGINGJENKINSOPENSOURCE;
     if ($testHistoryNumberLink != "")
-        $testHistoryNumberLink = $testHistoryNumberLink . 'job/' . $testJobName . '/' . $testHistoryNumber . '/cfg=' . $testConfiguration . '/squishReport/';
-    echo '<td><b>' . $testJobName . '</b><br><br>';                                         // Test job info
+        $testHistoryNumberLink = $testHistoryNumberLink . 'job/' . $testJobName . '/' . $testHistoryNumber .
+                                 '/cfg=' . $testConfiguration . '/squishReport/';
+    // Link to filter the job which will update the history box to comparison view (level 2). Note that the latest failures list in this box remains the same.
+    $selectedJob = $testJobName . FILTERSEPARATOR . 'conf'. FILTERVALUESEPARATOR . $testConfiguration;    // Note: The filter values (in getfilters.php) must include all these values
+    echo '<td><a href="javascript:void(0);" onclick="filterJob(\'' . $selectedJob . '\')"><b>' . $testJobName . '</b></a><br><br>';
     echo '<table>';
     echo '<tr><td><b>Job start time: </b></td><td>' . $timestamp . '</td></tr>';
     echo '<tr><td><b>Configuration: </b></td><td>' . $testConfiguration . '</td></tr>';
     echo '<tr><td><b>Installer build number: </b></td><td>' . $buildNumber . '</td></tr>';
-    echo '<tr><td><b>Jenkins build history: </b></td><td><a href="' . $testHistoryNumberLink . '" target="_blank">' . $testHistoryNumber . ' (open squish report)</a></td></tr>';
+    echo '<tr><td><b>Jenkins build history: </b></td><td><a href="' . $testHistoryNumberLink .
+         '" title="Report opens if available in Jenkins" target="_blank">' . $testHistoryNumber .
+         ' (open squish report)</a></td></tr>';
     echo '</table>';
-    echo '</td>';
-    echo '<td class="tableSideBorder">' . $failureDescription . '<br></td>';                // Failure Description
-    echo '<td class="tableSideBorder">';                                                    // Summary totals
+    echo '<br></td>';
+    echo '<td class="tableSideBorder">' . implode($failureDescription) . '<br></td>';
+    echo '<td class="tableSideBorder">';
     echo '<table>';
     echo '<tr class="fontColorGreen"><td><b>PASSes: </b></td><td>' . $testJobSummary[TESTPASSCOUNT] . '</td></tr>';
     echo '<tr><td><b>ERRORs: </b></td><td>' . $testJobSummary[TESTERRORCOUNT] . '</td></tr>';
@@ -278,7 +221,8 @@ if ($rtaXmlBaseDir != "") {
                                 continue;
                             }
                             $timestamp = '';
-                            $failureDescription = '';
+                            $buildNumber = 0;
+                            $failureDescription = array();
                             $testJobSummary[TESTERRORCOUNT] = 0;
                             $testJobSummary[TESTFATALCOUNT] = 0;
                             $testJobSummary[TESTFAILCOUNT] = 0;
@@ -292,7 +236,7 @@ if ($rtaXmlBaseDir != "") {
                                         if (stripos($file->getFileName(), RESULTXMLFILENAMEPREFIX) === 0) {        // Check for the result file (e.g. result_10_08_17.446.xml)
                                             // Get the failure data (Note: May be several XML files)
                                             $filePathPhar = 'phar://' . $directory . '/' . $entry . '/' . $file->getFileName();
-                                            saveXmlFailures($filePathPhar, $timestamp, $failureDescription, $testJobSummary);
+                                            saveXmlFailures($filePathPhar, $timestamp, $buildNumber, $failureDescription, $testJobSummary);
                                         }
                                     }
                                     // Print the failure data

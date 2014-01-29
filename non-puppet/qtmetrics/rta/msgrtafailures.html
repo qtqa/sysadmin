@@ -18,7 +18,8 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Purpose</th>
-        <td class="tableSingleBorder">Improve Release Test Automation (RTA) stability by proving a list of failures in latest test jobs to be able to start needed corrective actions</td>
+        <td class="tableSingleBorder">Improve Release Test Automation (RTA) stability by proving a list of failures in latest test jobs
+                                      to be able to start needed corrective actions</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Question</th>
@@ -30,7 +31,9 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Test type, License type, Platform</td>
+        <td class="tableSingleBorder">Test type, License type, Platform can be used to filter the list.<br>
+                                      The test job name links in the list can be used to update the <u>RTA history</u> box for detailed
+                                      information about the test job (Note: this list is remains the same).</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -56,21 +59,24 @@
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data items</th>
         <td class="tableSingleBorder"><b>Test job name:</b> Job name in Packaging Jenkins, e.g. "Qt5_RTA_opensource_installer_tests_linux_32bit",
-                                         where "opensource" is a License type, "installer" is a Test type and "linux" is a Platform (as used in the filters)<br>
+                                         where "opensource" is a License type, "installer" is a Test type and "linux" is a Platform
+                                         (as used in the filters)<br>
                                       <b>Job start time:</b> Date and time when job started (shown as it appears in the source result file)<br>
                                       <b>Configuration:</b> One or several per test job (e.g. "linux-g++-Ubuntu11.10-x86")<br>
                                       <b>Installer build number:</b> Number of the offline/online Qt installer under test<br>
                                       <b>Jenkins build history:</b> Running number of test jobs in Packaging Jenkins<br>
-                                      <b>Failure description:</b> Failure type and test case name, python script name and line number, and failure description<br>
+                                      <b>Failure description:</b> Failure type and test case name, python script name and line number, and
+                                         failure description<br>
                                       <b>Summary:</b> Number of PASSed and failed tests per each failure type
         </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data source</th>
-        <td class="tableSingleBorder">Data in result XML files (result_***.xml) saved from Packaging Jenkins to ci-files02-hki.ci.local/home/bld.qt/squishlogs/.<br>
-                                      Files are located under each test job directory (e.g. "Qt5_RTA_opensource_installer_tests_linux_32bit") and
-                                      their Packaging Jenkins build history number directory (e.g. "220") as configuration specific tar.gz files
-                                      (e.g. "linux-g++-Ubuntu11.10-x86.tar.gz"). </td>
+        <td class="tableSingleBorder">Data in result XML files (result_***.xml) saved from Packaging Jenkins to
+                                      ci-files02-hki.ci.local/home/bld.qt/squishlogs/.<br>
+                                      Files are located under each test job directory (e.g. "Qt5_RTA_opensource_installer_tests_linux_32bit")
+                                      and their Packaging Jenkins build history number directory (e.g. "220") as configuration specific
+                                      tar.gz files (e.g. "linux-g++-Ubuntu11.10-x86.tar.gz"). </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data update cycle</th>

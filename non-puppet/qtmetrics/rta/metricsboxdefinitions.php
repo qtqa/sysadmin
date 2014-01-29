@@ -47,12 +47,12 @@
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All, test, license, platform
+    // *) Possible values: All, test, license, platform, job
     //
     //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
     //        --------------------------------------------------------------------------------------------------------------------------
-    array(    "rta/showrtahistory.php"         ,"All"                        ,""                       ),
-    array(    "rta/showrtafailures.php"        ,"All"                        ,""                       ),
+    array(    "rta/showrtahistory.php"         ,"All"                        ,"job"                 ),
+    array(    "rta/showrtafailures.php"        ,"test, license, platform"    ,""                    ),
 );
 
 /* Filters */
@@ -61,5 +61,7 @@ define("FILTERVALUESEPARATOR", ":");
 define("FILTERTEST", 0);
 define("FILTERLICENSE", 1);
 define("FILTERPLATFORM", 2);
+define("FILTERTESTJOB", 3);
+define("FILTERTESTCONF", 4);
 
 ?>

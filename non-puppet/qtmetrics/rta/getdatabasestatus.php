@@ -52,6 +52,10 @@ $timeOffset = rawurldecode($timeOffset);             // Decode the encoded param
 
 include(__DIR__.'/../commonfunctions.php');
 
+/* Store session start time */
+if (!isset($_SESSION['sessionDate']))
+    $_SESSION['sessionDate'] = gmdate("Y-m-d H:i:s");                        // UTC time
+
 /* Print status */
 echo '<div id="sessionStatus">';
 if ($timeOffset == "GMT+0000")

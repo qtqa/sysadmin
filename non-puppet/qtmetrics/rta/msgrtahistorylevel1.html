@@ -11,7 +11,8 @@
         <img src="../images/info.png" alt="info"><br><br>
 
         <!-- The message or content to be shown on new window -->
-        <p><b><u>RTA HISTORY SUMMARY DESCRIPTION:</u></b></p>
+        <p><b><u>RTA HISTORY DESCRIPTION:</u></b></p>
+        <p><b>Level 1: Show list of test jobs</b></p>
         <table>
         <tr>
         <th class="tableCellAlignLeft">GENERAL</th><td></td>
@@ -33,7 +34,8 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Test type, License type, Platform</td>
+        <td class="tableSingleBorder">Test type, License type, Platform can be used to filter the list.<br>
+                                      The test job name links in the list can be used to dive in into detailed information (level 2 view).</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -41,8 +43,8 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
-        <td class="tableSingleBorder">The changes are compared only between the latest and previous test run, older ones are shown
-                                      just for reference.<br>
+        <td class="tableSingleBorder">The changes are compared only between the latest (last) and previous (last-1) test run, older
+                                      ones are shown just for reference.<br>
                                       The failure count is a summary of the following types: ERROR, FAIL, FATAL and XPASS i.e.
                                       uneXpected PASS. Each failure type is compared separately for the change counts. Therefore
                                       it is possible to identify the cases where failures are decreasing with one type, while
@@ -80,7 +82,7 @@
                                          history number), <u>used in comparison.</u><br>
                                       <b>last-1:</b> Number of passes and failures in the previous test run, <u>used in comparison.</u>
                                          The value "-" indicates that the specific configuration in the related test job run was
-                                         not executed.<br>
+                                         not executed, or that the results are otherwise not available.<br>
                                       <b>last-n:</b> Number of passes and failures in the previous test runs. See above for the
                                          value "-".</td>
         </tr>

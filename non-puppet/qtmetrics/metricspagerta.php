@@ -75,6 +75,7 @@ session_start();
         {
             // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
             loadDatabaseStatus(0);                                  // d)
+            window.scrollTo(0,0);                                   // Scroll window focus to the top of the page (selecting a job from history to show level 2 kept the focus vertically without this)
         }
 
         function getFiltersRequestCompleted()                       // Called when the filter box has been updated
@@ -103,15 +104,16 @@ session_start();
         /* Load all metrics boxes */
         function loadMetricsBoxes()
         {
-            showMetricsBoxes("All", "All", "All");
+            showMetricsBoxes("All", "All", "All", "All");
         }
 
         /* Update all metrics boxes */
-        function showMetricsBoxes(test, license, platform)
+        function showMetricsBoxes(test, license, platform, job)
         {
             document.getElementById("test").value = test;           // Save default values (not necessarily the first item in the list)
             document.getElementById("license").value = license;
             document.getElementById("platform").value = platform;
+            document.getElementById("job").value = job;
             var i;
             var file;
             var filterString;
@@ -121,7 +123,7 @@ session_start();
             ?>
                 i = "<?php echo $key ?>";                           // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
-                filterString = createFilterString(test, license, platform);
+                filterString = createFilterString(test, license, platform, job);
                 getMetricData(i, file, filterString);
             <?php
             }
@@ -129,7 +131,7 @@ session_start();
         }
 
         /* Update the metrics boxes based on filtering */
-        function updateMetricsBoxes(filter, value)                  // filter = "test" / "license" / "platform"
+        function updateMetricsBoxes(filter, value)                  // filter = "test" / "license" / "platform" / "job"
         {
             document.getElementById(filter).value = value;          // Save filtered value
             var i;
@@ -151,7 +153,8 @@ session_start();
                 if (appliedFilter.search(filter) >= 0 || appliedFilter.search("All") >= 0) {    // Check if this filter should update the metrics box
                     filterString = createFilterString(document.getElementById("test").value,
                                                       document.getElementById("license").value,
-                                                      document.getElementById("platform").value);
+                                                      document.getElementById("platform").value,
+                                                      document.getElementById("job").value);
                     getMetricData(i, file, filterString);
                 }
             <?php
@@ -169,6 +172,8 @@ session_start();
                     document.getElementById("test").value = "All";
                 if (applied.search("platform") >= 0)
                     document.getElementById("test").value = "All";
+                if (applied.search("job") >= 0)
+                    document.getElementById("test").value = "All";
             }
             if (clear.search("license") >= 0 && filter != "license") {
                 if (applied.search("All") >= 0)
@@ -176,6 +181,8 @@ session_start();
                 if (applied.search("test") >= 0)
                     document.getElementById("license").value = "All";
                 if (applied.search("platform") >= 0)
+                    document.getElementById("license").value = "All";
+                if (applied.search("job") >= 0)
                     document.getElementById("license").value = "All";
             }
             if (clear.search("platform") >= 0 && filter != "platform") {
@@ -185,18 +192,31 @@ session_start();
                     document.getElementById("platform").value = "All";
                 if (applied.search("license") >= 0)
                     document.getElementById("platform").value = "All";
+                if (applied.search("job") >= 0)
+                    document.getElementById("platform").value = "All";
+            }
+            if (clear.search("job") >= 0 && filter != "job") {
+                if (applied.search("All") >= 0)
+                    document.getElementById("job").value = "All";
+                if (applied.search("test") >= 0)
+                    document.getElementById("job").value = "All";
+                if (applied.search("license") >= 0)
+                    document.getElementById("job").value = "All";
+                if (applied.search("platform") >= 0)
+                    document.getElementById("job").value = "All";
             }
         }
 
         /* Create the filter string */
-        function createFilterString(test, license, platform)
+        function createFilterString(test, license, platform, job)
         {
             var filterString;
             var filterSeparator = "<?php echo FILTERSEPARATOR ?>";               // (transfer php constant to javascript)
             var filterValueSeparator = "<?php echo FILTERVALUESEPARATOR ?>";
             filterString = "test" + filterValueSeparator + test + filterSeparator
                 + "license" + filterValueSeparator + license + filterSeparator
-                + "platform" + filterValueSeparator + platform + filterSeparator;
+                + "platform" + filterValueSeparator + platform + filterSeparator
+                + "job" + filterValueSeparator + job + filterSeparator;
             return filterString;
         }
 
@@ -216,6 +236,12 @@ session_start();
         function filterPlatform(value)
         {
             updateMetricsBoxes("platform", value);
+        }
+
+        /* Update the metrics boxes when job filter changed */
+        function filterJob(value)
+        {
+            updateMetricsBoxes("job", value);
         }
 
         /* Set all filters to "All" */
