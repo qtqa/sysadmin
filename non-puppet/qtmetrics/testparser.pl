@@ -564,45 +564,56 @@ sub sql_create_tables
             $dbh->do ("INSERT IGNORE INTO generic (name, rebuild, date, current, total) values ('qt', 0, NULL, 0, 0);");
         }
 
-        $dbh->do ("CREATE TABLE IF NOT EXISTS ci (project VARCHAR(50),
-                                                  build_number INTEGER,
-                                                  result VARCHAR(10),
-                                                  timestamp TIMESTAMP NULL,
-                                                  duration TIME NULL,
-                                                  PRIMARY KEY (`project`, `build_number`)
-                                                 )
-                  ");
-        $dbh->do ("CREATE TABLE IF NOT EXISTS cfg (cfg VARCHAR(100),
-                                                   project VARCHAR(50),
-                                                   build_number INTEGER,
-                                                   result VARCHAR(10),
-                                                   forcesuccess BOOLEAN,
-                                                   insignificant BOOLEAN,
-                                                   total_autotests INTEGER,
-                                                   timestamp TIMESTAMP NULL,
-                                                   duration TIME NULL,
-                                                   PRIMARY KEY (`cfg`, `project`, `build_number`)
-                                                  )
-                  ");
-        $dbh->do ("CREATE TABLE IF NOT EXISTS test (name VARCHAR(50),
-                                                    project VARCHAR(50),
-                                                    build_number INTEGER,
-                                                    cfg VARCHAR(100),
-                                                    insignificant BOOLEAN,
-                                                    timestamp TIMESTAMP NULL,
-                                                    PRIMARY KEY (`name`, `project`, `build_number`, `cfg`)
-                                                   )
-                  ");
-        $dbh->do ("CREATE TABLE IF NOT EXISTS phases (project VARCHAR(50),
+        foreach my $tablename (qw(ci ci_latest)) {
+            $dbh->do ("CREATE TABLE IF NOT EXISTS $tablename (project VARCHAR(50),
                                                       build_number INTEGER,
-                                                      cfg VARCHAR(100),
-                                                      phase VARCHAR(100),
-                                                      parent VARCHAR(100),
-                                                      start TIMESTAMP NULL,
-                                                      end TIMESTAMP NULL,
-                                                      PRIMARY KEY (`project`, `build_number`, `cfg`, `phase`)
+                                                      result VARCHAR(10),
+                                                      timestamp TIMESTAMP NULL,
+                                                      duration TIME NULL,
+                                                      PRIMARY KEY (`project`, `build_number`)
                                                      )
-                  ");
+                      ");
+        }
+
+        foreach my $tablename (qw(cfg cfg_latest)) {
+            $dbh->do ("CREATE TABLE IF NOT EXISTS $tablename (cfg VARCHAR(100),
+                                                       project VARCHAR(50),
+                                                       build_number INTEGER,
+                                                       result VARCHAR(10),
+                                                       forcesuccess BOOLEAN,
+                                                       insignificant BOOLEAN,
+                                                       total_autotests INTEGER,
+                                                       timestamp TIMESTAMP NULL,
+                                                       duration TIME NULL,
+                                                       PRIMARY KEY (`cfg`, `project`, `build_number`)
+                                                      )
+                      ");
+        }
+
+        foreach my $tablename (qw(test test_latest)) {
+            $dbh->do ("CREATE TABLE IF NOT EXISTS $tablename (name VARCHAR(50),
+                                                        project VARCHAR(50),
+                                                        build_number INTEGER,
+                                                        cfg VARCHAR(100),
+                                                        insignificant BOOLEAN,
+                                                        timestamp TIMESTAMP NULL,
+                                                        PRIMARY KEY (`name`, `project`, `build_number`, `cfg`)
+                                                       )
+                      ");
+        }
+
+        foreach my $tablename (qw(phases phases_latest)) {
+            $dbh->do ("CREATE TABLE IF NOT EXISTS $tablename (project VARCHAR(50),
+                                                          build_number INTEGER,
+                                                          cfg VARCHAR(100),
+                                                          phase VARCHAR(100),
+                                                          parent VARCHAR(100),
+                                                          start TIMESTAMP NULL,
+                                                          end TIMESTAMP NULL,
+                                                          PRIMARY KEY (`project`, `build_number`, `cfg`, `phase`)
+                                                         )
+                      ");
+        }
         $dbh->commit;   # commit the changes if we get this far
     };
     if ($@) {
@@ -651,17 +662,29 @@ sub sql
         # Have to store quotes in scalar, as printing can't have those if we want to have the possibility to print NULL.
         my $timestamp = $datahash{TIMESTAMP} ? "\"$datahash{TIMESTAMP}\"" : "NULL";
         my $duration = $datahash{DURATION} ? "\"$datahash{DURATION}\"" : "NULL";
-        print OUTPUT "INSERT INTO ci VALUES (\"$datahash{FULLDISPLAYNAME}\",
-                                               $datahash{BUILD_NUMBER},
-                                               \"$datahash{RESULT}\",
-                                               $timestamp,
-                                               $duration)\n" if $VERBOSE or $output;
-        $dbh->do ("INSERT INTO ci VALUES (\"$datahash{FULLDISPLAYNAME}\",
-                                          $datahash{BUILD_NUMBER},
-                                          \"$datahash{RESULT}\",
-                                          $timestamp,
-                                          $duration)
-                  ") or print "insert of keys info ci failed: $!\n" if !$output;
+        # delete the contents from the *_latest databases where the project name matches. Only latest data is stored.
+        $dbh->do ("DELETE from ci_latest where project=\"$datahash{FULLDISPLAYNAME}\"
+                      ") or print "delete of keys from ci_latest failed: $!\n" if !$output;
+        $dbh->do ("DELETE from cfg_latest where project=\"$datahash{FULLDISPLAYNAME}\"
+                  ") or print "delete of keys from cfg_latest failed: $!\n" if !$output;
+        $dbh->do ("DELETE from test_latest where project=\"$datahash{FULLDISPLAYNAME}\"
+                  ") or print "delete of keys from test_latest failed: $!\n" if !$output;
+        $dbh->do ("DELETE from phases_latest where project=\"$datahash{FULLDISPLAYNAME}\"
+                  ") or print "delete of keys from phases_latest failed: $!\n" if !$output;
+
+        foreach my $tablename (qw(ci ci_latest)) {
+            print OUTPUT "INSERT INTO $tablename VALUES (\"$datahash{FULLDISPLAYNAME}\",
+                                                   $datahash{BUILD_NUMBER},
+                                                   \"$datahash{RESULT}\",
+                                                   $timestamp,
+                                                   $duration)\n" if $VERBOSE or $output;
+            $dbh->do ("INSERT INTO $tablename VALUES (\"$datahash{FULLDISPLAYNAME}\",
+                                              $datahash{BUILD_NUMBER},
+                                              \"$datahash{RESULT}\",
+                                              $timestamp,
+                                              $duration)
+                      ") or print "insert of keys into $tablename failed: $!\n" if !$output;
+        }
 
         #insert data for configuration
         foreach my $cfg (keys %{$datahash{cfg}}) {
@@ -670,63 +693,69 @@ sub sql
             my $total_autotests = $datahash{cfg}{$cfg}{testresults}{TOTAL_AUTOTESTS} ? $datahash{cfg}{$cfg}{testresults}{TOTAL_AUTOTESTS} : 0;
             my $timestamp_cfg = $datahash{cfg}{$cfg}{builddata}{TIMESTAMP} ? "\"$datahash{cfg}{$cfg}{builddata}{TIMESTAMP}\"" : "NULL";
             my $duration_cfg = $datahash{cfg}{$cfg}{builddata}{DURATION} ? "\"$datahash{cfg}{$cfg}{builddata}{DURATION}\"" : "NULL";
-            print OUTPUT "INSERT INTO cfg VALUES (\"$cfg\",
-                                                     \"$datahash{FULLDISPLAYNAME}\",
-                                                     $datahash{BUILD_NUMBER},
-                                                     \"$datahash{cfg}{$cfg}{builddata}{RESULT}\",
-                                                     $forcesuccess_cfg,
-                                                     $insignificant_cfg,
-                                                     $total_autotests,
-                                                     $timestamp_cfg,
-                                                     $duration_cfg)\n" if $VERBOSE or $output;
-            $dbh->do ("INSERT INTO cfg VALUES (\"$cfg\",
-                                               \"$datahash{FULLDISPLAYNAME}\",
-                                               $datahash{BUILD_NUMBER},
-                                               \"$datahash{cfg}{$cfg}{builddata}{RESULT}\",
-                                               $forcesuccess_cfg,
-                                               $insignificant_cfg,
-                                               $total_autotests,
-                                               $timestamp_cfg,
-                                               $duration_cfg)
-                      ") or print "insert of keys into cfg failed: $!\n" if !$output;
+            foreach my $tablename (qw(cfg cfg_latest)) {
+                print OUTPUT "INSERT INTO $tablename VALUES (\"$cfg\",
+                                                         \"$datahash{FULLDISPLAYNAME}\",
+                                                         $datahash{BUILD_NUMBER},
+                                                         \"$datahash{cfg}{$cfg}{builddata}{RESULT}\",
+                                                         $forcesuccess_cfg,
+                                                         $insignificant_cfg,
+                                                         $total_autotests,
+                                                         $timestamp_cfg,
+                                                         $duration_cfg)\n" if $VERBOSE or $output;
+                $dbh->do ("INSERT INTO $tablename VALUES (\"$cfg\",
+                                                   \"$datahash{FULLDISPLAYNAME}\",
+                                                   $datahash{BUILD_NUMBER},
+                                                   \"$datahash{cfg}{$cfg}{builddata}{RESULT}\",
+                                                   $forcesuccess_cfg,
+                                                   $insignificant_cfg,
+                                                   $total_autotests,
+                                                   $timestamp_cfg,
+                                                   $duration_cfg)
+                          ") or print "insert of keys into $tablename failed: $!\n" if !$output;
+            }
 
 
             if (defined $datahash{cfg}{$cfg}{testresults}{insignificant_failed_tests}) {
                 my $timestamp_cfg = $datahash{cfg}{$cfg}{builddata}{TIMESTAMP} ? "\"$datahash{cfg}{$cfg}{builddata}{TIMESTAMP}\"" : "NULL";
                 foreach my $test (@{$datahash{cfg}{$cfg}{testresults}{insignificant_failed_tests}}) {
                     print "$cfg - $test (insignificant)\n" if $VERBOSE;
-                    print OUTPUT "INSERT INTO test VALUES (\"$test\",
-                                                           \"$datahash{FULLDISPLAYNAME}\",
-                                                           $datahash{BUILD_NUMBER},
-                                                           \"$cfg\",
-                                                           1,
-                                                           $timestamp_cfg)\n" if $VERBOSE or $output;
-                    $dbh->do ("INSERT INTO test VALUES (\"$test\",
-                                                        \"$datahash{FULLDISPLAYNAME}\",
-                                                        $datahash{BUILD_NUMBER},
-                                                        \"$cfg\",
-                                                        1,
-                                                        $timestamp_cfg)
-                              ") or print "insert of keys into test failed: $!\n" if !$output;
+                    foreach my $tablename (qw(test test_latest)) {
+                        print OUTPUT "INSERT INTO $tablename VALUES (\"$test\",
+                                                               \"$datahash{FULLDISPLAYNAME}\",
+                                                               $datahash{BUILD_NUMBER},
+                                                               \"$cfg\",
+                                                               1,
+                                                               $timestamp_cfg)\n" if $VERBOSE or $output;
+                        $dbh->do ("INSERT INTO $tablename VALUES (\"$test\",
+                                                            \"$datahash{FULLDISPLAYNAME}\",
+                                                            $datahash{BUILD_NUMBER},
+                                                            \"$cfg\",
+                                                            1,
+                                                            $timestamp_cfg)
+                                  ") or print "insert of keys into $tablename failed: $!\n" if !$output;
+                    }
                 }
             }
             if (defined $datahash{cfg}{$cfg}{testresults}{failed_tests}) {
                 my $timestamp_cfg = $datahash{cfg}{$cfg}{builddata}{TIMESTAMP} ? "\"$datahash{cfg}{$cfg}{builddata}{TIMESTAMP}\"" : "NULL";
                 foreach my $test (@{$datahash{cfg}{$cfg}{testresults}{failed_tests}}) {
                     print "$cfg - $test\n" if $VERBOSE;
-                    print OUTPUT "INSERT INTO test VALUES (\"$test\",
-                                                           \"$datahash{FULLDISPLAYNAME}\",
-                                                           $datahash{BUILD_NUMBER},
-                                                           \"$cfg\",
-                                                           0,
-                                                           $timestamp_cfg)\n" if $VERBOSE or $output;
-                    $dbh->do ("INSERT INTO test VALUES (\"$test\",
-                                                        \"$datahash{FULLDISPLAYNAME}\",
-                                                        $datahash{BUILD_NUMBER},
-                                                        \"$cfg\",
-                                                        0,
-                                                        $timestamp_cfg)
-                              ") or print "insert of keys into test failed: $!\n" if !$output;
+                    foreach my $tablename (qw(test test_latest)) {
+                        print OUTPUT "INSERT INTO $tablename VALUES (\"$test\",
+                                                               \"$datahash{FULLDISPLAYNAME}\",
+                                                               $datahash{BUILD_NUMBER},
+                                                               \"$cfg\",
+                                                               0,
+                                                               $timestamp_cfg)\n" if $VERBOSE or $output;
+                        $dbh->do ("INSERT INTO $tablename VALUES (\"$test\",
+                                                            \"$datahash{FULLDISPLAYNAME}\",
+                                                            $datahash{BUILD_NUMBER},
+                                                            \"$cfg\",
+                                                            0,
+                                                            $timestamp_cfg)
+                                  ") or print "insert of keys into $tablename failed: $!\n" if !$output;
+                    }
                 }
             }
             if (defined $datahash{cfg}{$cfg}{phases}) {
@@ -735,21 +764,23 @@ sub sql
                     my $parent = $datahash{cfg}{$cfg}{phases}{$phase}{parent} ? $datahash{cfg}{$cfg}{phases}{$phase}{parent} : "";
                     my $start = $datahash{cfg}{$cfg}{phases}{$phase}{start} ? $datahash{cfg}{$cfg}{phases}{$phase}{start} : "";
                     my $end = $datahash{cfg}{$cfg}{phases}{$phase}{end} ? $datahash{cfg}{$cfg}{phases}{$phase}{end} : "";
-                    print OUTPUT "INSERT INTO phases VALUES (\"$datahash{FULLDISPLAYNAME}\",
-                                                             $datahash{BUILD_NUMBER},
-                                                             \"$cfg\",
-                                                             \"$phase\",
-                                                             \"$parent\",
-                                                             \"$start\",
-                                                             \"$end\")\n" if $VERBOSE or $output;
-                    $dbh->do ("INSERT INTO phases VALUES (\"$datahash{FULLDISPLAYNAME}\",
-                                                          $datahash{BUILD_NUMBER},
-                                                          \"$cfg\",
-                                                          \"$phase\",
-                                                          \"$parent\",
-                                                          \"$start\",
-                                                          \"$end\")
-                              ") or print "insert of keys into phases failed: $!\n" if !$output;
+                    foreach my $tablename (qw(phases phases_latest)) {
+                        print OUTPUT "INSERT INTO $tablename VALUES (\"$datahash{FULLDISPLAYNAME}\",
+                                                                 $datahash{BUILD_NUMBER},
+                                                                 \"$cfg\",
+                                                                 \"$phase\",
+                                                                 \"$parent\",
+                                                                 \"$start\",
+                                                                 \"$end\")\n" if $VERBOSE or $output;
+                        $dbh->do ("INSERT INTO $tablename VALUES (\"$datahash{FULLDISPLAYNAME}\",
+                                                              $datahash{BUILD_NUMBER},
+                                                              \"$cfg\",
+                                                              \"$phase\",
+                                                              \"$parent\",
+                                                              \"$start\",
+                                                              \"$end\")
+                                  ") or print "insert of keys into $tablename failed: $!\n" if !$output;
+                    }
                 }
             }
 
