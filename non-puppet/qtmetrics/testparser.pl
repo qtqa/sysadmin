@@ -560,7 +560,9 @@ sub sql_create_tables
                   ");
 
         # gives the table initial values, since only one row is used in this table
-        $dbh->do ("INSERT IGNORE INTO generic (name, rebuild, date, current, total) values ('qt', 0, NULL, 0, 0);");
+        if ("0E0" eq $dbh->do ("SELECT * FROM generic")) {
+            $dbh->do ("INSERT IGNORE INTO generic (name, rebuild, date, current, total) values ('qt', 0, NULL, 0, 0);");
+        }
 
         $dbh->do ("CREATE TABLE IF NOT EXISTS ci (project VARCHAR(50),
                                                   build_number INTEGER,
