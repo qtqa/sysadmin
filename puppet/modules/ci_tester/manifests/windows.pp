@@ -3,6 +3,7 @@ class ci_tester::windows inherits ci_tester::base {
     include activepython
     include mingw
     include mingw48
+    include mingw482
     include openssl
     include strawberryperl
     include strawberryperl_portable
