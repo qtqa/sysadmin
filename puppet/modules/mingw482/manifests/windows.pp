@@ -22,7 +22,7 @@ class mingw482::windows(
     $match_revision = regsubst($revision, 'rev', 'r(ev)?')
 
     # installer file URL
-    $url = "http://ci-files01-hki.ci.local/input/windows/i686-${version}-release-${threading}-${exceptions}-rt_v3-${revision}.7z"
+    $url = "$input/windows/i686-${version}-release-${threading}-${exceptions}-rt_v3-${revision}.7z"
 
     windows::zip_package { "mingw482":
         url => $url,
