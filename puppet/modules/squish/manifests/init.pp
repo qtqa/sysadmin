@@ -18,29 +18,39 @@ class squish {
     }
 
     # Squish have separate packages for x86 and x64 architectures in Windows 7, Windows 8 and Ubuntu
+    $msvc12_pkg_name = $::architecture ? {
+        x64     => "squish-5.1-20140320-1457-qt52x-win64-msvc12",
+        default => "squish-5.1-20140320-1454-qt52x-win32-msvc12",
+    }
+
     $msvc11_pkg_name = $::architecture ? {
         x64     => "squish-5.0.2-qt51x-win64-msvc11",
-        default => "squish-5.0.1-qt51x-win32-msvc11",
+        default => "squish-5.1-20140321-1117-qt52x-win32-msvc11",
     }
 
     $msvc11_version = $::architecture ? {
         x64     => "5.0.2",
-        default => "5.0.1",
+        default => "5.1.0",
     }
 
-    $mingw_pkg_name = "squish-5.0.1-qt51x-win32-mingw_gcc48_posix_dwarf"
+    $mingw_pkg_name = "squish-5.1-20140321-0826-qt52x-win32-mingw_gcc48_posix_dwarf"
 
     $msvc10_pkg_name = $::architecture ? {
         x64     => "squish-5.0.1-qt51x-win64-msvc10",
-        default => "squish-5.0.1-qt51x-win32-msvc10",
+        default => "squish-5.1-20140320-1449-qt52x-win32-msvc10",
+    }
+
+    $msvc10_version = $::architecture ? {
+        x64     => "5.0.1",
+        default => "5.1.0",
     }
 
     $linux_pkg_name = $::architecture ? {
-        i386    => "squish-5.0.1-qt51x-linux32",
-        default => "squish-5.0.1-qt51x-linux64",
+        i386    => "squish-5.1-20140320-1446-qt52x-linux32",
+        default => "squish-5.1-20140320-1154-qt52x-linux64",
     }
 
-    $darwin_pkg_name = "squish-5.0.1-qt51x-macx86_64"
+    $darwin_pkg_name = "squish-5.1-20140320-1447-qt52x-macx86_64"
 
     case $::operatingsystem {
         windows: {
@@ -50,6 +60,11 @@ class squish {
                         pkg_name => "$msvc11_pkg_name",
                         path     => "$path",
                         version  => "$msvc11_version",
+                    ;
+                    "msvc12":
+                        pkg_name => "$msvc12_pkg_name",
+                        path     => "$path",
+                        version  => "5.1.0",
                     }
             }
             else {
@@ -57,21 +72,31 @@ class squish {
                     "mingw":
                         pkg_name => "$mingw_pkg_name",
                         path     => "$path",
-                        version  => "5.0.1",
+                        version  => "5.1.0",
                     ;
                     "msvc10":
                         pkg_name => "$msvc10_pkg_name",
                         path     => "$path",
-                        version  => "5.0.1",
+                        version  => "$msvc10_version",
+                    ;
+                    "msvc11":
+                        pkg_name => "$msvc11_pkg_name",
+                        path     => "$path",
+                        version  => "$msvc11_version",
+                    ;
+                    "msvc12":
+                        pkg_name => "$msvc12_pkg_name",
+                        path     => "$path",
+                        version  => "5.1.0",
+                    }
                 }
-            }
         }
         Ubuntu: {
             squish_install {
                 "package":
                     pkg_name => "$linux_pkg_name",
                     path     => "$path",
-                    version  => "5.0.1",
+                    version  => "5.1.0",
             }
         }
         OpenSuSE: {
@@ -79,7 +104,7 @@ class squish {
                 "package":
                     pkg_name => "$linux_pkg_name",
                     path     => "$path",
-                    version  => "5.0.1",
+                    version  => "5.1.0",
             }
         }
         Darwin: {
@@ -91,7 +116,7 @@ class squish {
                 "package":
                     pkg_name => "$darwin_pkg_name",
                     path     => "$path",
-                    version  => "5.0.1",
+                    version  => "5.1.0",
             }
         }
     }
