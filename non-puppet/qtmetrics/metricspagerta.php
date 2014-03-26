@@ -69,7 +69,6 @@ if (isPublicServer(PUBLICSERVER)) {
 
         <?php include "rta/metricsboxdefinitions.php";?>
 
-
     <script>
 
         /* With these functions you can control the order of execution when loading the page first time.
@@ -84,10 +83,38 @@ if (isPublicServer(PUBLICSERVER)) {
             loadDatabaseStatus(1);                                  // a)
         }
 
-        function getMetricDataRequestCompleted()                    // Called when a metrics box has been updated
+        function getMetricDataRequestCompleted(metricId)            // Called when a metrics box has been updated
         {
-            // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
-            loadDatabaseStatus(0);                                  // d)
+            var file;
+            var repeat;
+            var round;
+            <?php
+            foreach ($arrayMetricsBoxes as $key=>$value) {          // Loop all the metrics boxes to find the completed one
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
+            ?>
+                i = <?php echo $key ?>;                             // (transfer php variables to javascript variables)
+                if (metricId == i) {                                // Check the completed metrics box
+                    file = "<?php echo $filepath ?>";
+                    repeat = document.getElementById("repeatCount"+i).value;
+                    round = document.getElementById("roundCounter"+i).value;
+                    if (round < repeat) {                           // If the box must be repeated
+                        round++;
+                        document.getElementById("roundCounter"+i).value = round;
+                        filterString = createFilterString(document.getElementById("test").value,
+                                                          document.getElementById("license").value,
+                                                          document.getElementById("platform").value,
+                                                          document.getElementById("job").value);
+                        getMetricData(i, file, round, filterString);
+                    }
+                    else {
+                        document.getElementById("roundCounter"+i).value = 1;        // Reset the counter
+                        // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
+                        loadDatabaseStatus(0);                      // d)
+                    }
+                }
+            <?php
+            }
+            ?>
             window.scrollTo(0,0);                                   // Scroll window focus to the top of the page (selecting a job from history to show level 2 kept the focus vertically without this)
         }
 
@@ -120,7 +147,7 @@ if (isPublicServer(PUBLICSERVER)) {
             showMetricsBoxes("All", "All", "All", "All");
         }
 
-        /* Update all metrics boxes */
+        /* Show all metrics boxes the first time */
         function showMetricsBoxes(test, license, platform, job)
         {
             document.getElementById("test").value = test;           // Save default values (not necessarily the first item in the list)
@@ -129,15 +156,20 @@ if (isPublicServer(PUBLICSERVER)) {
             document.getElementById("job").value = job;
             var i;
             var file;
+            var round;
             var filterString;
             <?php
-            foreach ($arrayMetricsBoxes as $key=>$value) {          // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxes[$key][0];
+            $arrayMetricsBoxRepeat = array();
+            $arrayMetricsBoxRound = array();
+            foreach ($arrayMetricsBoxes as $key=>$value) {          // Loop all the metrics boxes and send the Ajax call for each of them
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
             ?>
-                i = "<?php echo $key ?>";                           // (transfer php variables to javascript variables)
+                i = <?php echo $key ?>;                             // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
+                round = 1;                                          // First round tor this update
+                document.getElementById("roundCounter"+i).value = round;
                 filterString = createFilterString(test, license, platform, job);
-                getMetricData(i, file, filterString);
+                getMetricData(i, file, round, filterString);
             <?php
             }
             ?>
@@ -149,17 +181,20 @@ if (isPublicServer(PUBLICSERVER)) {
             document.getElementById(filter).value = value;          // Save filtered value
             var i;
             var file;
+            var round;
             var filterString;
             var appliedFilter;
             var clearFilter;
             <?php
-            foreach ($arrayMetricsBoxes as $key=>$value) {          // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxes[$key][0];
-                $appliedFilters = $arrayMetricsBoxes[$key][1];
-                $clearFilters = $arrayMetricsBoxes[$key][2];
+            foreach ($arrayMetricsBoxes as $key=>$value) {          // Loop all the metrics boxes and send the Ajax call for each of them
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
+                $appliedFilters = $arrayMetricsBoxes[$key][METRICSBOXFILTERSAPPLIED];
+                $clearFilters = $arrayMetricsBoxes[$key][METRICSBOXFILTERSCLEARED];
             ?>
                 i = "<?php echo $key ?>";                           // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
+                round = 1;                                          // First round tor this update
+                document.getElementById("roundCounter"+i).value = round;
                 appliedFilter = "-<?php echo $appliedFilters ?>";
                 clearFilter = "-<?php echo $clearFilters ?>";
                 checkClearFilter(appliedFilter, clearFilter, filter);
@@ -168,7 +203,7 @@ if (isPublicServer(PUBLICSERVER)) {
                                                       document.getElementById("license").value,
                                                       document.getElementById("platform").value,
                                                       document.getElementById("job").value);
-                    getMetricData(i, file, filterString);
+                    getMetricData(i, file, round, filterString);
                 }
             <?php
             }
@@ -314,7 +349,7 @@ if (isPublicServer(PUBLICSERVER)) {
         <div id="container">
         <?php
         include "commondefinitions.php";
-        $metricsPage = "metricspagerta";                 // Filename (without the extension) to identify active page for menu
+        $metricsPage = "metricspagerta";                    // Filename (without the extension) to identify active page for menu
         include "header.php";
         ?>
 
@@ -331,8 +366,12 @@ if (isPublicServer(PUBLICSERVER)) {
 
         <!-- Metrics boxes -->
         <?php
-        foreach ($arrayMetricsBoxes as $key=>$value)
+        foreach ($arrayMetricsBoxes as $key=>$value) {      // Loop all the metrics boxes to create a div (and hidden input elements) for each of them
             echo "<div id=\"metricsBox$key\" class=\"metricArea\"><img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...</div>";   // Div content when initially opening the page before Ajax call
+            $repeat = $arrayMetricsBoxes[$key][METRICSBOXREPEAT];
+            echo "<input id=\"repeatCount$key\" type=\"hidden\" value=\"$repeat\">";    // Store repeat count to an input element to be available for JavaScript functions
+            echo "<input id=\"roundCounter$key\" type=\"hidden\">";                     // Store round counter to an input element to be available for JavaScript functions
+        }
         ?>
 
         <?php include "footer.php";?>

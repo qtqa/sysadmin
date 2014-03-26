@@ -63,7 +63,6 @@ include "commonfunctions.php";
 
         <?php include "ci/metricsboxdefinitions.php";?>
 
-
     <script>
 
         /* With these functions you can control the order of execution when loading the page first time.
@@ -78,10 +77,40 @@ include "commonfunctions.php";
             loadDatabaseStatus(1);                               // a)
         }
 
-        function getMetricDataRequestCompleted()                 // Called when a metrics box has been updated
+        function getMetricDataRequestCompleted(metricId)         // Called when a metrics box has been updated
         {
-            // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
-            loadDatabaseStatus(0);                               // d)
+            var file;
+            var repeat;
+            var round;
+            <?php
+            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all the metrics boxes to find the completed one
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
+            ?>
+                i = <?php echo $key ?>;                          // (transfer php variables to javascript variables)
+                if (metricId == i) {                             // Check the completed metrics box
+                    file = "<?php echo $filepath ?>";
+                    repeat = document.getElementById("repeatCount"+i).value;
+                    round = document.getElementById("roundCounter"+i).value;
+                    if (round < repeat) {                        // If the box must be repeated
+                        round++;
+                        document.getElementById("roundCounter"+i).value = round;
+                        filterString = createFilterString(document.getElementById("project").value,
+                                                          document.getElementById("conf").value,
+                                                          document.getElementById("autotest").value,
+                                                          document.getElementById("timescale").value,
+                                                          document.getElementById("since").value,
+                                                          document.getElementById("autotestSortBy").value);
+                        getMetricData(i, file, round, filterString);
+                    }
+                    else {
+                        document.getElementById("roundCounter"+i).value = 1;        // Reset the counter
+                        // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
+                        loadDatabaseStatus(0);                   // d)
+                    }
+                }
+            <?php
+            }
+            ?>
         }
 
         function getFiltersRequestCompleted()                    // Called when the filter box has been updated
@@ -113,7 +142,7 @@ include "commonfunctions.php";
             showMetricsBoxes("All", "All", "All", "All");
         }
 
-        /* Update all metrics boxes */
+        /* Show all metrics boxes the first time */
         function showMetricsBoxes(project, conf, autotest, timescale)
         {
             document.getElementById("project").value = project;  // Save default values (not necessarily the first item in the list)
@@ -122,15 +151,20 @@ include "commonfunctions.php";
             document.getElementById("timescale").value = timescale;
             var i;
             var file;
+            var round;
             var filterString;
             <?php
-            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxes[$key][0];
+            $arrayMetricsBoxRepeat = array();
+            $arrayMetricsBoxRound = array();
+            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all the metrics boxes and send the Ajax call for each of them
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
             ?>
-                i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
+                i = <?php echo $key ?>;                          // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
+                round = 1;                                       // First round tor this update
+                document.getElementById("roundCounter"+i).value = round;
                 filterString = createFilterString(project, conf, autotest, timescale, "na", "na");
-                getMetricData(i, file, filterString);
+                getMetricData(i, file, round, filterString);
             <?php
             }
             ?>
@@ -142,8 +176,10 @@ include "commonfunctions.php";
             document.getElementById(filter).value = value;       // Save filtered value
             if (typeof sortBy == "undefined")                    // sortBy is optional, set 0 as a default
                 var sortBy = 0;
+            document.getElementById("autotestSortBy").value = sortBy;
             var i;
             var file;
+            var round;
             var filterString;
             var appliedFilter;
             var clearFilter;
@@ -154,13 +190,15 @@ include "commonfunctions.php";
                 timescaleType = "In";
             }
             <?php
-            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all defined boxes (read and store the file path via php because defined as php)
-                $filepath = $arrayMetricsBoxes[$key][0];
-                $appliedFilters = $arrayMetricsBoxes[$key][1];
-                $clearFilters = $arrayMetricsBoxes[$key][2];
+            foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all the metrics boxes and send the Ajax call for each of them
+                $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
+                $appliedFilters = $arrayMetricsBoxes[$key][METRICSBOXFILTERSAPPLIED];
+                $clearFilters = $arrayMetricsBoxes[$key][METRICSBOXFILTERSCLEARED];
             ?>
                 i = "<?php echo $key ?>";                        // (transfer php variables to javascript variables)
                 file = "<?php echo $filepath ?>";
+                round = 1;                                       // First round tor this update
+                document.getElementById("roundCounter"+i).value = round;
                 appliedFilter = "-<?php echo $appliedFilters ?>";
                 clearFilter = "-<?php echo $clearFilters ?>";
                 checkClearFilter(appliedFilter, clearFilter, filter);
@@ -171,7 +209,7 @@ include "commonfunctions.php";
                                                       timescaleType,
                                                       timescaleValue,
                                                       sortBy);
-                    getMetricData(i, file, filterString);
+                    getMetricData(i, file, round, filterString);
                 }
             <?php
             }
@@ -342,8 +380,12 @@ include "commonfunctions.php";
 
         <!-- Metrics boxes -->
         <?php
-        foreach ($arrayMetricsBoxes as $key=>$value)
+        foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all the metrics boxes to create a div (and hidden input elements) for each of them
             echo "<div id=\"metricsBox$key\" class=\"metricArea\"><img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...</div>";   // Div content when initially opening the page before Ajax call
+            $repeat = $arrayMetricsBoxes[$key][METRICSBOXREPEAT];
+            echo "<input id=\"repeatCount$key\" type=\"hidden\" value=\"$repeat\">";    // Store repeat count to an input element to be available for JavaScript functions
+            echo "<input id=\"roundCounter$key\" type=\"hidden\">";                     // Store round counter to an input element to be available for JavaScript functions
+        }
         ?>
 
         <?php include "footer.php";?>

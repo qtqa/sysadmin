@@ -51,6 +51,8 @@
     // $timeStart
     // $timeConnect
 
+$timeStartThis = microtime(true);
+
 /* Read data from database */
 if ($project<>"All" AND $conf=="All") {                                       // Print Project Builds
     $sql = "SELECT build_number, result, timestamp
@@ -163,13 +165,13 @@ if ($printedBuildCount > 0) {
 /* Elapsed time */
 if ($showElapsedTime) {
     $timeEnd = microtime(true);
-    $timeDbConnect = round($timeConnect - $timeStart, 2);
-    $timeDbRead = round($timeRead - $timeConnect, 2);
-    $timeCalc = round($timeEnd - $timeRead, 2);
-    $time = round($timeEnd - $timeStart, 2);
+    $timeDbConnect = round($timeConnect - $timeStart, 4);
+    $timeDbRead = round($timeRead - $timeStartThis, 4);
+    $timeCalc = round($timeEnd - $timeRead, 4);
+    $time = round($timeEnd - $timeStartThis, 4);
     echo "<div class=\"elapdedTime\">";
     echo "<ul><li>";
-    echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
+    echo "<b>Total time</b> (round $round): $time s (database read time: $timeDbRead s, calculation time: $timeCalc s); database connect time: $timeDbConnect s";
     echo "</li></ul>";
     echo "</div>";
 } else {

@@ -97,6 +97,7 @@ $timeAutotestValues = microtime(true);
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
+<input id="autotestSortBy" type="hidden" value="0">
 </div>
 <div id="filterFieldsMiddle">
 <label>Timescale:</label>
@@ -135,13 +136,18 @@ $myCalendar = new tc_calendar("since", true, false);                  // Instant
 /* Elapsed time */
 if ($showElapsedTime) {
     $timeEnd = microtime(true);
-    $time1 = round($timeProjectValues - $timeStart, 2);
-    $time2 = round($timeConfValues - $timeProjectValues, 2);
-    $time3 = round($timeAutotestValues - $timeConfValues, 2);
-    $time = round($timeEnd - $timeStart, 2);
+    $time1 = round($timeProjectValues - $timeStart, 4);
+    $time11 = round($timeProjectValuesStep1 - $timeStart, 4);
+    $time12 = round($timeProjectValuesStep2 - $timeProjectValuesStep1, 4);
+    $time13 = round($timeProjectValuesStep3 - $timeProjectValuesStep2, 4);
+    $time14 = round($timeProjectValuesStep4 - $timeProjectValuesStep3, 4);
+    $time15 = round($timeProjectValuesStep5 - $timeProjectValuesStep4, 4);
+    $time2 = round($timeConfValues - $timeProjectValues, 4);
+    $time3 = round($timeAutotestValues - $timeConfValues, 4);
+    $time = round($timeEnd - $timeStart, 4);
     echo "<div class=\"elapdedTime\">";
     echo "<ul><li>";
-    echo "Total time: $time s (project values: $time1 s, conf values: $time2 s, autotest values: $time3 s)";
+    echo "Total time: $time s (project values: $time1 s ($time11 + $time12 + $time13 + $time14 + $time15), conf values: $time2 s, autotest values: $time3 s)";
     echo "</li></ul>";
     echo "</div>";
 }

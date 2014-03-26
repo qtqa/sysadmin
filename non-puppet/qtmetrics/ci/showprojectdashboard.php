@@ -52,7 +52,8 @@ include "metricsboxdefinitions.php";
 
 $timeStart = microtime(true);
 
-/* Get the filters */
+/* Get the input parameters */
+$round = $_GET["round"];
 $arrayFilters = array();
 $arrayFilter = array();
 $filters = $_GET["filters"];
@@ -85,7 +86,11 @@ if ($useMysqli) {
 /************************************************************/
 
 if ($project == "All" AND $conf == "All") {
-    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel1.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
+    if ($round == 1)
+        echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
+    else
+        echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel1.html\')">
+              <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> Select Project<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
 
@@ -111,7 +116,11 @@ if ($project == "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf == "All") {
-    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel2.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
+    if ($round == 1)
+        echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
+    else
+        echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel2.html\')">
+              <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> ' . $project . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         $projectFilter = "";
@@ -132,8 +141,6 @@ if ($project <> "All" AND $conf == "All") {
     } else {
         echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
-    if (isset($_SESSION['projectDashboardShowFullList']))                                                         // List cut mode: After diving to next level, set back to default mode when viewing the list next time
-        unset($_SESSION['projectDashboardShowFullList']);
 }
 
 /************************************************************/
@@ -141,7 +148,11 @@ if ($project <> "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf <> "All") {
-    echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel3.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
+    if ($round == 1)
+        echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
+    else
+        echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel3.html\')">
+              <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf . '<br/><br/>';
     if(isset($_SESSION['arrayProjectName'])) {
         /* Show general data */
@@ -161,12 +172,10 @@ if ($project <> "All" AND $conf <> "All") {
     } else {
         echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
-    if (isset($_SESSION['projectDashboardShowFullList']))                                                // List cut mode: After diving to next level, set back to default mode when viewing the list next time
-        unset($_SESSION['projectDashboardShowFullList']);
 }
 
 /************************************************************/
-/* Project not selected when Configuration selected            */
+/* Project not selected when Configuration selected         */
 /************************************************************/
 
 if ($project == "All" AND $conf <> "All") {

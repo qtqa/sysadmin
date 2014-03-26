@@ -408,7 +408,8 @@ $timeStart = microtime(true);
 $rtaXmlBaseDir = RTAXMLBASEDIRECTORY;
 if ($rtaXmlBaseDir != "") {
 
-    /* Get the filters */
+    /* Get the input parameters */
+    $round = $_GET["round"];
     $arrayFilters = array();
     $arrayFilter = array();
     $filters = $_GET["filters"];
@@ -449,7 +450,11 @@ if ($rtaXmlBaseDir != "") {
 
     /* Level 1 titles and used filters */
     if ($job == "All") {
-        echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'rta/msgrtahistorylevel1.html\')"><img src="images/info.png" alt="info"></a>&nbsp&nbsp';
+        if ($round == 1)
+            echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
+        else
+            echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'rta/msgrtahistorylevel1.html\')">
+                  <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
         echo '<b>RTA HISTORY:</b><br><br>';
         if ($test <> "All" OR $license <> "All" OR $platform <> "All") {
             echo '<table>';
@@ -465,8 +470,11 @@ if ($rtaXmlBaseDir != "") {
     }
     /* Level 2 titles and used filters */
     else {
-        echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'rta/msgrtahistorylevel2.html\')">
-              <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
+        if ($round == 1)
+            echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
+        else
+            echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'rta/msgrtahistorylevel2.html\')">
+                  <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
         echo '<b>RTA HISTORY:</b> <a href="javascript:void(0);" onclick="filterJob(\'All\')">Select Job</a> -> ' .
               $job . ' (' . $conf . ')' . '<br><br>';
         echo '<table>';
@@ -477,109 +485,41 @@ if ($rtaXmlBaseDir != "") {
         echo '<br><b>Test history</b><br>';
     }
 
-    // The following applies to level 1 (all or filtered rows), and to level 2 where separately noted (the selected job and configuration row only)
-    if (isset($_SESSION['rtaTestJobCount'])) {
+    // Get the data on second round
+    if ($round > 1) {
 
-        $testJobHistory = array();
-
-        /* Print table titles */
-        showTestHistoryTableTitle();
-
-        /* Loop each RTA test job and its test history in sorted order ($rtaTestJobName is sorted, other data linked with the $rtaTestJobId) */
-        $k = 0;
-        if ($test == "All")
-            $filterTest = '_';                                                  // Filtering: Set the string to be found in the test job name (i.e. directory name)
-        else
-            $filterTest = '_' . $test . '_';                                    // -,,-
-        if ($license == "All")
-            $filterLicense = '_';                                               // -,,-
-        else
-            $filterLicense = '_' . $license . '_';                              // -,,-
-        if ($platform == "All")
-            $filterPlatform = '_';                                              // -,,-
-        else
-            $filterPlatform = '_' . $platform . '_';                            // -,,-
-        if ($job <> "All") {                                                    // Level 2 view: Show the history row for selected job and configuration
-            $filterTest = '';
-            $filterLicense = '';
-            $filterPlatform = '';
-        }
-        for ($i=0; $i<$rtaTestJobCount; $i++) {                                 // Check each RTA test job directory (e.g. Qt5_RTA_opensource_installer_tests_linux_32bit) and its test runs (e.g. 220)
-            if ((strpos($rtaTestJobName[$i], $filterTest) > 0 AND               // Check possible filtering
-                strpos($rtaTestJobName[$i], $filterLicense) > 0 AND
-                strpos($rtaTestJobName[$i], $filterPlatform) > 0) OR
-                $rtaTestJobName[$i] == $job) {                                  // Level 2 view: Check the job name
-                $j = $rtaTestJobId[$i];
-                $rtaTestJobDirectory = $rtaXmlBaseDir . $rtaTestJobName[$i];    // Set pointer to the related test job directory
-                $directories = new RecursiveIteratorIterator(
-                    new ParentIterator(
-                        new RecursiveDirectoryIterator($rtaTestJobDirectory)),
-                        RecursiveIteratorIterator::SELF_FIRST);
-                foreach ($directories as $directory) {                          // Check each RTA test job history (e.g. 220, 219, 218)
-                    $dirName = substr($directory, strripos($directory, "/") + 1);
-                    if ($dirName == $rtaTestHistoryMax[$j]) {                   // Show the history based on the latest run only
-                        $handle = opendir($directory);
-                        while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
-                            if ($entry == "." || $entry == "..")
-                                continue;
-                            $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
-                            if ($job <> "All" AND $configuration <> $conf)      // Level 2 view: Check only the filtered configuration
-                                continue;
-                            $filePath = $directory . '/' . $entry;
-                            if (is_file($filePath)) {
-                                try {                                           // Open an existing phar
-                                    $archive  = new PharData($filePath);
-                                    foreach (new RecursiveIteratorIterator($archive ) as $file) {
-                                        if ($file->getFileName() == SUMMARYXMLFILENAME) {        // Check for the summary file
-                                            // Get the history data
-                                            $filePathPhar = 'phar://' . substr($directory, 0, strripos($directory, "/") + 1);
-                                            $fileName = $entry . '/' . $file->getFileName();
-                                            saveXmlHistory($configuration, $rtaTestConfsHistory[$j], $filePathPhar,
-                                                           $rtaTestHistoryNumbers[$j], $fileName, $testJobHistory);
-                                            // Print the history data
-                                            showTestHistory($rtaTestJobName[$i], $configuration, $rtaTestJobLatestBuild[$j],
-                                                            $rtaTestHistoryNumbers[$j], $testJobHistory, $k, $job);
-                                            $k++;
-                                        }
-                                    }
-                                } catch (Exception $e) {
-                                    echo 'Could not open Phar: ', $e;
-                                }
-                            }
-                            clearstatcache();
-                        }
-                        closedir($handle);
-                    }
-                }
-            }
-        }
-
-        /* Close the table */
-        showTestHistoryTableEnd();
-
-    } else {
-        echo '<br>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
-    }
-
-/************************************************************/
-/* NESTED LEVEL 2: The comparison view                      */
-/************************************************************/
-
-    if ($job <> "All") {
-        echo '<br><br><b>Comparison of the last two test runs</b><br><br>';
+        // The following applies to level 1 (all or filtered rows), and to level 2 where separately noted (the selected job and configuration row only)
         if (isset($_SESSION['rtaTestJobCount'])) {
 
-            $testJobSummary = array();
-            $timestamp = array();
-            $buildNumber = array();
-            $failureDescription = array();
+            $testJobHistory = array();
 
             /* Print table titles */
-            showTestComparisonTableTitle();
+            showTestHistoryTableTitle();
 
             /* Loop each RTA test job and its test history in sorted order ($rtaTestJobName is sorted, other data linked with the $rtaTestJobId) */
-            for ($i=0; $i<$rtaTestJobCount; $i++) {                                 // Check each RTA test job directory (e.g. Qt5_RTA_opensource_installer_tests_linux_32bit) ...
-                if ($job == $rtaTestJobName[$i]) {                                  // ... to find the selected one
+            $k = 0;
+            if ($test == "All")
+                $filterTest = '_';                                                  // Filtering: Set the string to be found in the test job name (i.e. directory name)
+            else
+                $filterTest = '_' . $test . '_';                                    // -,,-
+            if ($license == "All")
+                $filterLicense = '_';                                               // -,,-
+            else
+                $filterLicense = '_' . $license . '_';                              // -,,-
+            if ($platform == "All")
+                $filterPlatform = '_';                                              // -,,-
+            else
+                $filterPlatform = '_' . $platform . '_';                            // -,,-
+            if ($job <> "All") {                                                    // Level 2 view: Show the history row for selected job and configuration
+                $filterTest = '';
+                $filterLicense = '';
+                $filterPlatform = '';
+            }
+            for ($i=0; $i<$rtaTestJobCount; $i++) {                                 // Check each RTA test job directory (e.g. Qt5_RTA_opensource_installer_tests_linux_32bit) and its test runs (e.g. 220)
+                if ((strpos($rtaTestJobName[$i], $filterTest) > 0 AND               // Check possible filtering
+                    strpos($rtaTestJobName[$i], $filterLicense) > 0 AND
+                    strpos($rtaTestJobName[$i], $filterPlatform) > 0) OR
+                    $rtaTestJobName[$i] == $job) {                                  // Level 2 view: Check the job name
                     $j = $rtaTestJobId[$i];
                     $rtaTestJobDirectory = $rtaXmlBaseDir . $rtaTestJobName[$i];    // Set pointer to the related test job directory
                     $directories = new RecursiveIteratorIterator(
@@ -588,80 +528,36 @@ if ($rtaXmlBaseDir != "") {
                             RecursiveIteratorIterator::SELF_FIRST);
                     foreach ($directories as $directory) {                          // Check each RTA test job history (e.g. 220, 219, 218)
                         $dirName = substr($directory, strripos($directory, "/") + 1);
-                        // Check the latest run
-                        if ($dirName == $rtaTestHistoryNumbers[$j][0]) {
+                        if ($dirName == $rtaTestHistoryMax[$j]) {                   // Show the history based on the latest run only
                             $handle = opendir($directory);
                             while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
                                 if ($entry == "." || $entry == "..")
                                     continue;
                                 $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
-                                if ($conf == $configuration) {                      // If this is the selected configuration
-                                    $timestamp[0] = '';
-                                    $buildNumber[0] = 0;
-                                    $failureDescription[0] = array();
-                                    $testJobSummary[0] = array();
-                                    $testJobSummary[0][TESTERRORCOUNT] = 0;
-                                    $testJobSummary[0][TESTFATALCOUNT] = 0;
-                                    $testJobSummary[0][TESTFAILCOUNT] = 0;
-                                    $testJobSummary[0][TESTXPASSCOUNT] = 0;
-                                    $testJobSummary[0][TESTPASSCOUNT] = 0;
-                                    $filePath = $directory . '/' . $entry;
-                                    if (is_file($filePath)) {
-                                        try {                                       // Open an existing phar
-                                            $archive  = new PharData($filePath);
-                                            foreach (new RecursiveIteratorIterator($archive ) as $file) {
-                                                if (stripos($file->getFileName(), RESULTXMLFILENAMEPREFIX) === 0) {        // Check for the result file (e.g. result_10_08_17.446.xml)
-                                                    // Get the data from latest test run
-                                                    $filePathPhar = 'phar://' . $directory . '/' . $entry . '/' . $file->getFileName();
-                                                    saveXmlFailures($filePathPhar, $timestamp[0], $buildNumber[0], $failureDescription[0],
-                                                                    $testJobSummary[0]);
-                                                }
-                                            }
-                                        } catch (Exception $e) {
-                                            echo 'Could not open Phar: ', $e;
-                                        }
-                                    }
-                                    clearstatcache();
-                                }
-                            }
-                            closedir($handle);
-                        }
-                        // Check the previous run
-                        if ($dirName == $rtaTestHistoryNumbers[$j][1]) {
-                            $handle = opendir($directory);
-                            while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
-                                if ($entry == "." || $entry == "..") {
+                                if ($job <> "All" AND $configuration <> $conf)      // Level 2 view: Check only the filtered configuration
                                     continue;
-                                }
-                                $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
-                                if ($conf == $configuration) {                      // If this is the selected configuration
-                                    $timestamp[1] = '';
-                                    $buildNumber[1] = 0;
-                                    $failureDescription[1] = array();
-                                    $testJobSummary[1] = array();
-                                    $testJobSummary[1][TESTERRORCOUNT] = 0;
-                                    $testJobSummary[1][TESTFATALCOUNT] = 0;
-                                    $testJobSummary[1][TESTFAILCOUNT] = 0;
-                                    $testJobSummary[1][TESTXPASSCOUNT] = 0;
-                                    $testJobSummary[1][TESTPASSCOUNT] = 0;
-                                    $filePath = $directory . '/' . $entry;
-                                    if (is_file($filePath)) {
-                                        try {                                       // Open an existing phar
-                                            $archive  = new PharData($filePath);
-                                            foreach (new RecursiveIteratorIterator($archive ) as $file) {
-                                                if (stripos($file->getFileName(), RESULTXMLFILENAMEPREFIX) === 0) {        // Check for the result file (e.g. result_10_08_17.446.xml)
-                                                    // Get the data from latest test run
-                                                    $filePathPhar = 'phar://' . $directory . '/' . $entry . '/' . $file->getFileName();
-                                                    saveXmlFailures($filePathPhar, $timestamp[1], $buildNumber[1], $failureDescription[1],
-                                                                    $testJobSummary[1]);
-                                                }
+                                $filePath = $directory . '/' . $entry;
+                                if (is_file($filePath)) {
+                                    try {                                           // Open an existing phar
+                                        $archive  = new PharData($filePath);
+                                        foreach (new RecursiveIteratorIterator($archive ) as $file) {
+                                            if ($file->getFileName() == SUMMARYXMLFILENAME) {        // Check for the summary file
+                                                // Get the history data
+                                                $filePathPhar = 'phar://' . substr($directory, 0, strripos($directory, "/") + 1);
+                                                $fileName = $entry . '/' . $file->getFileName();
+                                                saveXmlHistory($configuration, $rtaTestConfsHistory[$j], $filePathPhar,
+                                                               $rtaTestHistoryNumbers[$j], $fileName, $testJobHistory);
+                                                // Print the history data
+                                                showTestHistory($rtaTestJobName[$i], $configuration, $rtaTestJobLatestBuild[$j],
+                                                                $rtaTestHistoryNumbers[$j], $testJobHistory, $k, $job);
+                                                $k++;
                                             }
-                                        } catch (Exception $e) {
-                                            echo 'Could not open Phar: ', $e;
                                         }
+                                    } catch (Exception $e) {
+                                        echo 'Could not open Phar: ', $e;
                                     }
-                                    clearstatcache();
                                 }
+                                clearstatcache();
                             }
                             closedir($handle);
                         }
@@ -669,15 +565,137 @@ if ($rtaXmlBaseDir != "") {
                 }
             }
 
-            /* Print the comparison */
-            showTestComparison($job, $conf, $buildNumber, $rtaTestHistoryNumbers[$j], $timestamp, $testJobSummary, $failureDescription);
-
             /* Close the table */
-            showTestComparisonTableEnd();
+            showTestHistoryTableEnd();
 
         } else {
             echo '<br>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
         }
+
+    }
+
+/************************************************************/
+/* NESTED LEVEL 2: The comparison view                      */
+/************************************************************/
+
+    // Get the data on second round
+    if ($round > 1) {
+
+        if ($job <> "All") {
+            echo '<br><br><b>Comparison of the last two test runs</b><br><br>';
+            if (isset($_SESSION['rtaTestJobCount'])) {
+
+                $testJobSummary = array();
+                $timestamp = array();
+                $buildNumber = array();
+                $failureDescription = array();
+
+                /* Print table titles */
+                showTestComparisonTableTitle();
+
+                /* Loop each RTA test job and its test history in sorted order ($rtaTestJobName is sorted, other data linked with the $rtaTestJobId) */
+                for ($i=0; $i<$rtaTestJobCount; $i++) {                                 // Check each RTA test job directory (e.g. Qt5_RTA_opensource_installer_tests_linux_32bit) ...
+                    if ($job == $rtaTestJobName[$i]) {                                  // ... to find the selected one
+                        $j = $rtaTestJobId[$i];
+                        $rtaTestJobDirectory = $rtaXmlBaseDir . $rtaTestJobName[$i];    // Set pointer to the related test job directory
+                        $directories = new RecursiveIteratorIterator(
+                            new ParentIterator(
+                                new RecursiveDirectoryIterator($rtaTestJobDirectory)),
+                                RecursiveIteratorIterator::SELF_FIRST);
+                        foreach ($directories as $directory) {                          // Check each RTA test job history (e.g. 220, 219, 218)
+                            $dirName = substr($directory, strripos($directory, "/") + 1);
+                            // Check the latest run
+                            if ($dirName == $rtaTestHistoryNumbers[$j][0]) {
+                                $handle = opendir($directory);
+                                while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
+                                    if ($entry == "." || $entry == "..")
+                                        continue;
+                                    $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
+                                    if ($conf == $configuration) {                      // If this is the selected configuration
+                                        $timestamp[0] = '';
+                                        $buildNumber[0] = 0;
+                                        $failureDescription[0] = array();
+                                        $testJobSummary[0] = array();
+                                        $testJobSummary[0][TESTERRORCOUNT] = 0;
+                                        $testJobSummary[0][TESTFATALCOUNT] = 0;
+                                        $testJobSummary[0][TESTFAILCOUNT] = 0;
+                                        $testJobSummary[0][TESTXPASSCOUNT] = 0;
+                                        $testJobSummary[0][TESTPASSCOUNT] = 0;
+                                        $filePath = $directory . '/' . $entry;
+                                        if (is_file($filePath)) {
+                                            try {                                       // Open an existing phar
+                                                $archive  = new PharData($filePath);
+                                                foreach (new RecursiveIteratorIterator($archive ) as $file) {
+                                                    if (stripos($file->getFileName(), RESULTXMLFILENAMEPREFIX) === 0) {        // Check for the result file (e.g. result_10_08_17.446.xml)
+                                                        // Get the data from latest test run
+                                                        $filePathPhar = 'phar://' . $directory . '/' . $entry . '/' . $file->getFileName();
+                                                        saveXmlFailures($filePathPhar, $timestamp[0], $buildNumber[0], $failureDescription[0],
+                                                                        $testJobSummary[0]);
+                                                    }
+                                                }
+                                            } catch (Exception $e) {
+                                                echo 'Could not open Phar: ', $e;
+                                            }
+                                        }
+                                        clearstatcache();
+                                    }
+                                }
+                                closedir($handle);
+                            }
+                            // Check the previous run
+                            if ($dirName == $rtaTestHistoryNumbers[$j][1]) {
+                                $handle = opendir($directory);
+                                while (($entry = readdir($handle)) !== FALSE) {         // Check the results in a tar.gz file (e.g. linux-g++-Ubuntu11.10-x86.tar.gz)
+                                    if ($entry == "." || $entry == "..") {
+                                        continue;
+                                    }
+                                    $configuration = substr($entry, 0, strpos($entry, TARFILENAMEEXTENSION));
+                                    if ($conf == $configuration) {                      // If this is the selected configuration
+                                        $timestamp[1] = '';
+                                        $buildNumber[1] = 0;
+                                        $failureDescription[1] = array();
+                                        $testJobSummary[1] = array();
+                                        $testJobSummary[1][TESTERRORCOUNT] = 0;
+                                        $testJobSummary[1][TESTFATALCOUNT] = 0;
+                                        $testJobSummary[1][TESTFAILCOUNT] = 0;
+                                        $testJobSummary[1][TESTXPASSCOUNT] = 0;
+                                        $testJobSummary[1][TESTPASSCOUNT] = 0;
+                                        $filePath = $directory . '/' . $entry;
+                                        if (is_file($filePath)) {
+                                            try {                                       // Open an existing phar
+                                                $archive  = new PharData($filePath);
+                                                foreach (new RecursiveIteratorIterator($archive ) as $file) {
+                                                    if (stripos($file->getFileName(), RESULTXMLFILENAMEPREFIX) === 0) {        // Check for the result file (e.g. result_10_08_17.446.xml)
+                                                        // Get the data from latest test run
+                                                        $filePathPhar = 'phar://' . $directory . '/' . $entry . '/' . $file->getFileName();
+                                                        saveXmlFailures($filePathPhar, $timestamp[1], $buildNumber[1], $failureDescription[1],
+                                                                        $testJobSummary[1]);
+                                                    }
+                                                }
+                                            } catch (Exception $e) {
+                                                echo 'Could not open Phar: ', $e;
+                                            }
+                                        }
+                                        clearstatcache();
+                                    }
+                                }
+                                closedir($handle);
+                            }
+                        }
+                    }
+                }
+
+                /* Print the comparison */
+                showTestComparison($job, $conf, $buildNumber, $rtaTestHistoryNumbers[$j], $timestamp, $testJobSummary, $failureDescription);
+
+                /* Close the table */
+                showTestComparisonTableEnd();
+
+            } else {
+                echo '<br>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
+            }
+        }
+
     }
 
 /* Proceed only if the source data directory is set */

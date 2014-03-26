@@ -90,8 +90,8 @@ if ($conf == "All") {
 /* Configuration data */
 else {
     $sql = "SELECT result, timestamp, duration, forcesuccess, insignificant
-            FROM cfg
-            WHERE $projectFilter $confFilter AND build_number=$latestBuild";
+            FROM cfg_latest
+            WHERE $projectFilter $confFilter";
     $dbColumnCfgResult = 0;
     $dbColumnCfgTimestamp = 1;
     $dbColumnCfgDuration = 2;

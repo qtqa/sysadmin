@@ -47,6 +47,9 @@
     // All Project session variables: $_SESSION['arrayProject...']
     // $timescaleType
     // $timescaleValue
+    // $timeStart
+    // $timeConnect
+    // $round
 
 $i = 0;
 echo '<table class="fontSmall">';
@@ -57,8 +60,12 @@ echo '<th></th>';
 echo '<th colspan="8" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
 if ($timescaleType == "All")
     echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
-if ($timescaleType == "Since")
-    echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+if ($timescaleType == "Since") {
+    if ($round == 1)
+        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></th>';
+    else
+        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+}
 echo '</tr>';
 echo '<tr>';
 echo '<th></th>';
@@ -95,7 +102,7 @@ $allSuccessCount = 0;
 $allTotalCount = 0;
 
 /* Read the Build statistics for each Project in filtered Timescope (session variables already include the statistics for all Builds in the database) */
-if ($timescaleType == "Since") {
+if ($round == 2 AND $timescaleType == "Since") {
     $arrayProjectBuildSinceCount = array();
     $arrayProjectBuildSinceCountSuccess = array();
     $arrayProjectBuildSinceCountFailure = array();
@@ -136,6 +143,7 @@ if ($timescaleType == "Since") {
     if ($useMysqli)
         mysqli_free_result($result);                                                 // Free result set
 }
+$timeBuildStats = microtime(true);
 
 /* Print Project data from the session variables */
 foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
@@ -205,13 +213,19 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
         $ratio = round(100*$count/$_SESSION['arrayProjectBuildCount'][$key],0);
     }
     if ($timescaleType == "Since") {                                       // With Timescope: read from the arrays calculated above
-        $count = $arrayProjectBuildSinceCountFailure[$key];
-        $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+        if ($round == 1) {
+            $count = -1;
+        } else {
+            $count = $arrayProjectBuildSinceCountFailure[$key];
+            $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+        }
     }
     if ($count > 0)
         echo '<td class="tableLeftBorder tableCellAlignRight">' . $count . ' (' . $ratio . '%)</td>';
-    else
+    if ($count == 0)
         echo '<td class="tableLeftBorder tableCellCentered">-</td>';
+    if ($count == -1)
+        echo '<td class="tableLeftBorder tableCellCentered"></td>';
     $allFailureCount = $allFailureCount + $count;
 
     /* All Builds: Success count and ratio */
@@ -220,24 +234,36 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
         $ratio = round(100*$count/$_SESSION['arrayProjectBuildCount'][$key],0);
     }
     if ($timescaleType == "Since") {                                       // With Timescope: read from the arrays calculated above
-        $count = $arrayProjectBuildSinceCountSuccess[$key];
-        $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+        if ($round == 1) {
+            $count = -1;
+        } else {
+            $count = $arrayProjectBuildSinceCountSuccess[$key];
+            $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+        }
     }
     if ($count > 0)
         echo '<td class="tableCellAlignRight">' . $count . ' (' . $ratio . '%)</td>';
-    else
+    if ($count == 0)
         echo '<td class="tableCellCentered">-</td>';
+    if ($count == -1)
+        echo '<td class="tableCellCentered"></td>';
     $allSuccessCount = $allSuccessCount + $count;
 
     /* All Builds: Total count */
     if ($timescaleType == "All")                                          // For all Builds: read from the session variables
         $count = $_SESSION['arrayProjectBuildCount'][$key];
     if ($timescaleType == "Since")                                        // With Timescope: read from the arrays calculated above
-        $count = $arrayProjectBuildSinceCount[$key];
+        if ($round == 1) {
+            $count = -1;
+        } else {
+            $count = $arrayProjectBuildSinceCount[$key];
+        }
     if ($count > 0)
         echo '<td class="tableRightBorder tableCellAlignRight">' . $count . '</td>';
-    else
+    if ($count == 0)
         echo '<td class="tableRightBorder tableCellCentered">-</td>';
+    if ($count == -1)
+        echo '<td class="tableRightBorder tableCellCentered"></td>';
     $allTotalCount = $allTotalCount + $count;
 
     echo "</tr>";
@@ -248,6 +274,7 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     }
 }
 $printedProjects = $i;
+$timeProjectData = microtime(true);
 
 /* Print Totals summary row */
 if ($listCutMode == FALSE) {
@@ -261,26 +288,47 @@ if ($listCutMode == FALSE) {
     echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $latestForceSuccessConfCount . '</td>';
     echo '<td class="tableTopBorder tableCellCentered">' . $latestInsignConfCount . '</td>';
     echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestTotalConfCount . '</td>';
-    if ($allFailureCount > 0)
-        echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . round(100*$allFailureCount/$allTotalCount,0) . '%)</td>';
-    else
-        echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">-</td>';
-    if ($allSuccessCount > 0)
-        echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . round(100*$allSuccessCount/$allTotalCount,0) . '%)</td>';
-    else
-        echo '<td class="tableTopBorder tableCellCentered">-</td>';
-    if ($allTotalCount > 0)
-        echo '<td class="tableRightBorder tableTopBorder tableCellAlignRight">' . $allTotalCount . '</td>';
-    else
-        echo '<td class="tableRightBorder tableTopBorder tableCellCentered">-</td>';
+    if ($round == 1) {
+            echo '<td class="tableLeftBorder tableTopBorder tableCellCentered"></td>';
+            echo '<td class="tableTopBorder tableCellCentered"></td>';
+            echo '<td class="tableRightBorder tableTopBorder tableCellCentered"></td>';
+    } else {
+        if ($allFailureCount > 0)
+            echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . round(100*$allFailureCount/$allTotalCount,0) . '%)</td>';
+        else
+            echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">-</td>';
+        if ($allSuccessCount > 0)
+            echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . round(100*$allSuccessCount/$allTotalCount,0) . '%)</td>';
+        else
+            echo '<td class="tableTopBorder tableCellCentered">-</td>';
+        if ($allTotalCount > 0)
+            echo '<td class="tableRightBorder tableTopBorder tableCellAlignRight">' . $allTotalCount . '</td>';
+        else
+            echo '<td class="tableRightBorder tableTopBorder tableCellCentered">-</td>';
+    }
     echo '</tr>';
 }
 
 echo "</table>";
 
-if (!isset($_SESSION['projectDashboardShowFullList'])) {
+if ($round == 2 AND !isset($_SESSION['projectDashboardShowFullList'])) {
     echo '<br/><a href="javascript:void(0);" onclick="clearProjectFilters()">Show full list...</a><br/><br/>';   // List cut mode: If only first n items shown, add a link to see all
     $_SESSION['projectDashboardShowFullList'] = TRUE;                                                            // List cut mode: After refreshing the metrics box, show all items instead (set below to return the default 'cut mode')
+}
+
+/* Elapsed time */
+if ($showElapsedTime) {
+    $timeEnd = microtime(true);
+    $timeDbConnect = round($timeConnect - $timeStart, 4);
+    $timeBuilds = round($timeBuildStats - $timeConnect, 4);
+    $timeProjects = round($timeProjectData - $timeBuildStats, 4);
+    $time = round($timeEnd - $timeStart, 4);
+    echo "<div class=\"elapdedTime\">";
+    echo "<ul><li>";
+    echo "<b>Total time:</b>&nbsp $time s (round $round)<br>";
+    echo "Database connect time: $timeDbConnect s, read build data: $timeBuilds s, print project data: $timeProjects s";
+    echo "</li></ul>";
+    echo "</div>";
 }
 
 ?>

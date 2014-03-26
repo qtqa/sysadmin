@@ -44,15 +44,19 @@
 <?php
 
 /* Metrics boxes */
+define("METRICSBOXNAME", 0);                // Path and name of the metrics box implementation file
+define("METRICSBOXREPEAT", 1);              // How many times the metrics box implementation file is called on each update
+define("METRICSBOXFILTERSAPPLIED", 2);      // The metrics box is updated when this filter changes
+define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other applied filters change
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
     // *) Possible values: All, project, conf, autotest, timescale
     //
-    //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
-    //        --------------------------------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"    ,"project,conf,timescale"      ,""                       ),
-    array(    "ci/showautotestdashboard.php"   ,"All"                         ,"autotest"               ),
+    //        File path and name                Repeat      Applied filters *)             Filters to clear *)
+    //        -------------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"     ,2          ,"project,conf,timescale"      ,""              ),
+    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                         ,"autotest"      ),
 );
 
 /* Filters */

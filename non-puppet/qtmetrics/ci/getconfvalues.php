@@ -51,7 +51,7 @@ if(!isset($_SESSION['arrayConfName'])) {
     require(__DIR__.'/../connect.php');
 
     /* Read all Configuration values from database */
-    $sql="SELECT DISTINCT cfg FROM cfg ORDER BY cfg;";
+    $sql="SELECT DISTINCT cfg FROM cfg_latest ORDER BY cfg;";
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
     } else {

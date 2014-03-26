@@ -52,22 +52,15 @@
     // $projectFilter
     // $confFilter
     // $showElapsedTime
-    // $timeStart
-    // $timeConnect
+    // $timeEnd
+    // $round
+
+$timeStartThis = $timeEnd;                          // Start where previous step ended
 
 /* Read data from database */
-$buildFilter = "";
-if ($project <> "All") {
-    $build = "";
-    foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
-        if ($value == $project)
-            $build = $_SESSION['arrayProjectBuildLatest'][$key];
-    }
-    $buildFilter = " AND build_number=$build";
-}
 $sql = "SELECT cfg, result, forcesuccess, insignificant
-        FROM cfg
-        WHERE $projectFilter $buildFilter $confFilter
+        FROM cfg_latest
+        WHERE $projectFilter $confFilter
         ORDER BY result,cfg";
 $dbColumnCfgCfg = 0;
 $dbColumnCfgResult = 1;
@@ -101,10 +94,14 @@ if ($numberOfRows > 0) {
     echo '<tr>';
     echo '<th></th>';
     echo '<th colspan="5" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
-    if ($timescaleType == "All")
-        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
-    if ($timescaleType == "Since")
-        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+    if ($round == 1) {
+        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></th>';
+    } else {
+        if ($timescaleType == "All")
+            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
+        if ($timescaleType == "Since")
+            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+    }
     echo '</tr>';
     echo '<tr>';
     echo '<th></th>';
@@ -138,6 +135,8 @@ if ($numberOfRows > 0) {
         echo '<td><a href="javascript:void(0);" onclick="filterConf(\'' . $confName
             . '\')">' . $confName . '</a></td>';
 
+        $timeReadLatestStart = microtime(true);
+
         /* Latest Build: Result */
         $fontColorClass = "fontColorBlack";
         if ($resultRow[$dbColumnCfgResult] == "SUCCESS")
@@ -162,12 +161,12 @@ if ($numberOfRows > 0) {
 
         /* Latest Build: Number of failed significant/insignificant autotests */
         $sql = "SELECT 'significant', COUNT(name) AS 'count'
-                FROM test
-                WHERE insignificant=0 AND $projectFilter $buildFilter AND cfg=\"$confName\"
+                FROM test_latest
+                WHERE insignificant=0 AND $projectFilter AND cfg=\"$confName\"
                 UNION
                 SELECT 'insignificant', COUNT(name) AS 'count'
-                FROM test
-                WHERE insignificant=1 AND $projectFilter $buildFilter AND cfg=\"$confName\"";       // Will return two rows
+                FROM test_latest
+                WHERE insignificant=1 AND $projectFilter AND cfg=\"$confName\"";       // Will return two rows
         if ($useMysqli) {
             $result2 = mysqli_query($conn, $sql);
             $numberOfRows2 = mysqli_num_rows($result2);
@@ -200,55 +199,73 @@ if ($numberOfRows > 0) {
         if ($useMysqli)
             mysqli_free_result($result2);                                   // Free result set
 
+        $timeReadLatestEnd = microtime(true);
+        $timeReadLatest = $timeReadLatest + round($timeReadLatestEnd - $timeReadLatestStart, 4);
+        $timeReadAllStart = microtime(true);
+
         /* All Builds data */
-        $timescopeFilter = "";
-        if ($timescaleType == "Since")
-            $timescopeFilter = " AND timestamp>=\"$timescaleValue\"";
-        $sql = "SELECT result, COUNT(result) AS count
-                FROM cfg
-                WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter
-                GROUP BY result
-                UNION
-                SELECT 'Total', COUNT(cfg) AS count
-                FROM cfg
-                WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter";    // Will return up to five rows (results ABORTED,FAILURE,SUCCESS,undef and the Total)
-        if ($useMysqli) {
-            $result2 = mysqli_query($conn, $sql);
-            $numberOfRows2 = mysqli_num_rows($result2);
+        if ($round == 1) {
+            $confFailureCount = -1;
+            $confSuccessCount = -1;
+            $confTotalCount = -1;
         } else {
-            $result2 = mysql_query($sql) or die (mysql_error());
-            $numberOfRows2 = mysql_num_rows($result2);
-        }
-        $confFailureCount = 0;
-        $confSuccessCount = 0;
-        $confTotalCount = 0;
-        for ($j=0; $j<$numberOfRows2; $j++) {                               // Loop to print Conf success rate (up to five rows)
-            if ($useMysqli)
-                $resultRow2 = mysqli_fetch_row($result2);
-            else
-                $resultRow2 = mysql_fetch_row($result2);
-            if ($resultRow2[0] == "FAILURE")
-                $confFailureCount = $resultRow2[1];
-            if ($resultRow2[0] == "SUCCESS")
-                $confSuccessCount = $resultRow2[1];
-            if ($resultRow2[0] == "Total")
-                $confTotalCount = $resultRow2[1];
+            $timescopeFilter = "";
+            if ($timescaleType == "Since")
+                $timescopeFilter = " AND timestamp>=\"$timescaleValue\"";
+            $sql = "SELECT result, COUNT(result) AS count
+                    FROM cfg
+                    WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter
+                    GROUP BY result
+                    UNION
+                    SELECT 'Total', COUNT(cfg) AS count
+                    FROM cfg
+                    WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter";    // Will return up to five rows (results ABORTED,FAILURE,SUCCESS,undef and the Total)
+            if ($useMysqli) {
+                $result2 = mysqli_query($conn, $sql);
+                $numberOfRows2 = mysqli_num_rows($result2);
+            } else {
+                $result2 = mysql_query($sql) or die (mysql_error());
+                $numberOfRows2 = mysql_num_rows($result2);
+            }
+            $confFailureCount = 0;
+            $confSuccessCount = 0;
+            $confTotalCount = 0;
+            for ($j=0; $j<$numberOfRows2; $j++) {                           // Loop to print Conf success rate (up to five rows)
+                if ($useMysqli)
+                    $resultRow2 = mysqli_fetch_row($result2);
+                else
+                    $resultRow2 = mysql_fetch_row($result2);
+                if ($resultRow2[0] == "FAILURE")
+                    $confFailureCount = $resultRow2[1];
+                if ($resultRow2[0] == "SUCCESS")
+                    $confSuccessCount = $resultRow2[1];
+                if ($resultRow2[0] == "Total")
+                    $confTotalCount = $resultRow2[1];
+            }
         }
         if ($confFailureCount > 0)
             echo '<td class="tableLeftBorder tableCellAlignRight">' . $confFailureCount . ' (' . round(100*$confFailureCount/$confTotalCount,0) . '%)' . '</td>';
-        else
+        if ($confFailureCount == 0)
             echo '<td class="tableLeftBorder tableCellCentered">-</td>';
+        if ($confFailureCount == -1)
+            echo '<td class="tableLeftBorder tableCellCentered"></td>';
         if ($confSuccessCount > 0)
             echo '<td class="tableCellAlignRight">' . $confSuccessCount . ' (' . round(100*$confSuccessCount/$confTotalCount,0) . '%)' . '</td>';
-        else
+        if ($confSuccessCount == 0)
             echo '<td class="tableCellCentered">-</td>';
+        if ($confSuccessCount == -1)
+            echo '<td class="tableCellCentered"></td>';
         if ($confTotalCount > 0)
             echo '<td class="tableRightBorder tableCellAlignRight">' . $confTotalCount . '</td>';
-        else
+        if ($confTotalCount == 0)
             echo '<td class="tableRightBorder tableCellCentered">-</td>';
+        if ($confTotalCount == -1)
+            echo '<td class="tableRightBorder tableCellCentered"></td>';
         $allFailureCount = $allFailureCount + $confFailureCount;
         $allSuccessCount = $allSuccessCount + $confSuccessCount;
         $allTotalCount = $allTotalCount + $confTotalCount;
+        $timeReadAllEnd = microtime(true);
+        $timeReadAll = $timeReadAll + round($timeReadAllEnd - $timeReadAllStart, 4);
         if ($useMysqli)
             mysqli_free_result($result2);                                   // Free result set
 
@@ -264,18 +281,24 @@ if ($numberOfRows > 0) {
     echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestInsignCount . '</td>';
     echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $latestFailingSignAutotestCount . '</td>';
     echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestFailingInsignAutotestCount . '</td>';
-    if ($allFailureCount > 0)
-        echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . round(100*$allFailureCount/$allTotalCount,0) . '%)</td>';
-    else
-        echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">-</td>';
-    if ($allSuccessCount > 0)
-        echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . round(100*$allSuccessCount/$allTotalCount,0) . '%)</td>';
-    else
-        echo '<td class="tableTopBorder tableCellCentered">-</td>';
-    if ($allTotalCount > 0)
-        echo '<td class="tableRightBorder tableTopBorder tableCellAlignRight">' . $allTotalCount . '</td>';
-    else
-        echo '<td class="tableRightBorder tableTopBorder tableCellCentered">-</td>';
+    if ($round == 1) {
+            echo '<td class="tableLeftBorder tableTopBorder tableCellCentered"></td>';
+            echo '<td class="tableTopBorder tableCellCentered"></td>';
+            echo '<td class="tableRightBorder tableTopBorder tableCellCentered"></td>';
+    } else {
+        if ($allFailureCount > 0)
+            echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . round(100*$allFailureCount/$allTotalCount,0) . '%)</td>';
+        else
+            echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">-</td>';
+        if ($allSuccessCount > 0)
+            echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . round(100*$allSuccessCount/$allTotalCount,0) . '%)</td>';
+        else
+            echo '<td class="tableTopBorder tableCellCentered">-</td>';
+        if ($allTotalCount > 0)
+            echo '<td class="tableRightBorder tableTopBorder tableCellAlignRight">' . $allTotalCount . '</td>';
+        else
+            echo '<td class="tableRightBorder tableTopBorder tableCellCentered">-</td>';
+    }
     echo '</tr>';
 
     echo "</table>";
@@ -290,13 +313,14 @@ if ($useMysqli)
 /* Elapsed time */
 if ($showElapsedTime) {
     $timeEnd = microtime(true);
-    $timeDbConnect = round($timeConnect - $timeStart, 2);
-    $timeDbRead = round($timeRead - $timeConnect, 2);
-    $timeCalc = round($timeEnd - $timeRead, 2);
-    $time = round($timeEnd - $timeStart, 2);
+    $timeDbRead = round($timeRead - $timeStartThis, 4);
+    $time = round($timeEnd - $timeStartThis, 4);
     echo "<div class=\"elapdedTime\">";
     echo "<ul><li>";
-    echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
+    echo "<b>Total time:</b>&nbsp $time s (database read and calculation time; round $round)<br>";
+    echo "Latest builds: $timeReadLatest s<br>";
+    if ($round == 2)
+        echo "All builds:&nbsp&nbsp&nbsp&nbsp&nbsp $timeReadAll s<br>";
     echo "</li></ul>";
     echo "</div>";
 } else {

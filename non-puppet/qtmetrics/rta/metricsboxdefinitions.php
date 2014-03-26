@@ -44,15 +44,19 @@
 <?php
 
 /* Metrics boxes */
+define("METRICSBOXNAME", 0);                // Path and name of the metrics box implementation file
+define("METRICSBOXREPEAT", 1);              // How many times the metrics box implementation file is called on each update
+define("METRICSBOXFILTERSAPPLIED", 2);      // The metrics box is updated when this filter changes
+define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other applied filters change
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
     // *) Possible values: All, test, license, platform, job
     //
-    //        File path and name                Applied filters *)            Filters to clear when other applied ones change *)
-    //        --------------------------------------------------------------------------------------------------------------------------
-    array(    "rta/showrtahistory.php"         ,"All"                        ,"job"                 ),
-    array(    "rta/showrtafailures.php"        ,"test, license, platform"    ,""                    ),
+    //        File path and name                Repeat      Applied filters *)             Filters to clear *)
+    //        -------------------------------------------------------------------------------------------------
+    array(    "rta/showrtahistory.php"          ,2          ,"All"                         ,"job"           ),
+    array(    "rta/showrtafailures.php"         ,2          ,"test, license, platform"     ,""              ),
 );
 
 /* Filters */

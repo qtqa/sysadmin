@@ -51,20 +51,15 @@
     // $projectFilter
     // $confFilter
     // $showElapsedTime
-    // $timeStart
-    // $timeConnect
+    // $timeEnd
 
-/* Check the latest Build number for the Project */
-foreach($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
-    if ($project == $projectValue)
-        $latestProjectBuild = $_SESSION['arrayProjectBuildLatest'][$projectKey];
-}
+$timeStartThis = $timeEnd;                          // Start where previous step ended
 
 /* Check the blocking (non-insignificant) Configurations (to skip printing significant Autotests for insignificant Configurations) */
 $arrayBlockingConfs = array();
 $sql = "SELECT cfg
-        FROM cfg
-        WHERE insignificant=0 $projectFilter $confFilter AND build_number=$latestProjectBuild";
+        FROM cfg_latest
+        WHERE insignificant=0 $projectFilter $confFilter";
 $dbColumnCfgCfg = 0;
 if ($useMysqli) {
     $result = mysqli_query($conn, $sql);
@@ -83,8 +78,8 @@ for ($i=0; $i<$numberOfRows; $i++) {                                          //
 
 /* Read Autotest data from database */
 $sql = "SELECT name,project,build_number,cfg
-        FROM test
-        WHERE insignificant=0 $projectFilter $confFilter AND build_number=$latestProjectBuild
+        FROM test_latest
+        WHERE insignificant=0 $projectFilter $confFilter
         ORDER BY name, project, build_number DESC";
 $dbColumnTestName = 0;
 $dbColumnTestProject = 1;
@@ -174,13 +169,12 @@ if ($failedAutotestCount > 0) {
 /* Elapsed time */
 if ($showElapsedTime) {
     $timeEnd = microtime(true);
-    $timeDbConnect = round($timeConnect - $timeStart, 2);
-    $timeDbRead = round($timeRead - $timeConnect, 2);
-    $timeCalc = round($timeEnd - $timeRead, 2);
-    $time = round($timeEnd - $timeStart, 2);
+    $timeDbRead = round($timeRead - $timeStartThis, 4);
+    $timeCalc = round($timeEnd - $timeRead, 4);
+    $time = round($timeEnd - $timeStartThis, 4);
     echo "<div class=\"elapdedTime\">";
     echo "<ul><li>";
-    echo "Total time: $time s (database connect time: $timeDbConnect s, database read time: $timeDbRead s, calculation time: $timeCalc s)";
+    echo "<b>Total time</b> (round $round): $time s (database read time: $timeDbRead s, calculation time: $timeCalc s)";
     echo "</li></ul>";
     echo "</div>";
 } else {

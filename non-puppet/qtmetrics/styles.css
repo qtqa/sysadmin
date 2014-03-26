@@ -549,6 +549,49 @@ a:active {
     text-decoration: none;
 }
 
+/*** Loading dots animation (from http://css-tricks.com/loading-dots-plugin/) ***/
+
+@-webkit-keyframes opacity {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@-moz-keyframes opacity {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.loading {
+    text-align: center;
+    margin: 100px 0 0 0;
+}
+
+.loading span {
+    -webkit-animation-name: opacity;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-name: opacity;
+    -moz-animation-duration: 1s;
+    -moz-animation-iteration-count: infinite;
+}
+
+.loading span:nth-child(2) {
+    -webkit-animation-delay: 100ms;
+    -moz-animation-delay: 100ms;
+}
+
+.loading span:nth-child(3) {
+    -webkit-animation-delay: 300ms;
+    -moz-animation-delay: 300ms;
+}
+
 /*** Footer ***/
 
 #footer {

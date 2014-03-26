@@ -61,16 +61,15 @@ function createFilterRequestObject()
 }
 
 /* Request metric data (e.g. from database) */
-function getMetricData(metricId, filepath, filters)
+function getMetricData(metricId, filepath, round, filters)
 {
-    document.getElementById("metricsBox"+metricId).innerHTML = "<img src=\"images/ajax-loader.gif\" alt=\"loading\"> Loading...";    // Div content during the Ajax call
     if (filters == "") {
         document.getElementById("metricsBox"+metricId).innerHTML = "";
         return;
     }
     filters = encodeURIComponent(filters);                            // Encode the parameters to follow correct URL encoding (e.g. possible "+" characters)
     createMetricRequestObject(metricId);
-    metricRequest[metricId].open("GET",filepath+"?filters="+filters,true);
+    metricRequest[metricId].open("GET",filepath+"?round="+round+"&filters="+filters,true);
     metricRequest[metricId].send();
     metricRequest[metricId].onreadystatechange = function(index)
     {
@@ -87,7 +86,7 @@ function showMetricData(metricId)
     if (metricRequest[metricId].readyState == 4 && metricRequest[metricId].status == 200) {
         var response = metricRequest[metricId].responseText;
         document.getElementById("metricsBox"+metricId).innerHTML = response;
-        getMetricDataRequestCompleted();
+        getMetricDataRequestCompleted(metricId);
         return;
     }
 }

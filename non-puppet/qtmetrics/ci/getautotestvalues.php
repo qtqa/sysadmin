@@ -51,7 +51,7 @@ if(!isset($_SESSION['arrayAutotestName'])) {
     require(__DIR__.'/../connect.php');
 
     /* Read all Autotest values from database */
-    $sql = "SELECT DISTINCT name FROM test ORDER BY name";
+    $sql = "SELECT DISTINCT name FROM test_latest ORDER BY name";
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
