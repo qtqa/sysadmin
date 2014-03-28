@@ -65,10 +65,15 @@ class qt_prereqs::ubuntu inherits qt_prereqs::unix {
             }
         }
 
-        if $::lsbmajdistrelease >= 11 {
+        if $::lsbmajdistrelease > 11  {
             package {
                 # Ubuntu 11.xx is having too old git in its pkg manager
                 "$git":                              ensure => installed;
+            }
+        }
+
+        if $::lsbmajdistrelease >= 11 {
+            package {
                 # for accessibility
                 "libatspi2.0-dev":                   ensure => installed;
 
