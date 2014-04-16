@@ -54,6 +54,7 @@ class jenkins_server::debian inherits jenkins_server
         "postbuildscript":;           # CI post-build task
         "preSCMbuildstep":;           # CI pre-build task
         "project-health-report":;     # shows how many build failed, and which testcases are the top breakers
+        "publish-over-ssh":;          # enables artifact uploading to remote server
         "run-condition":;             # conditional-buildstep prereq
         "timestamper":;               # timestamps in build logs
         "token-macro":;               # expand macros in various places
