@@ -29,16 +29,12 @@ class qnx::linux
         }
     }
 
-    if $::lsbmajdistrelease == 12 {
-        if $::architecture == amd64 {
-            qnx_install {
-                "sdp":
-                    filename => "$filename",
-                    options  => "xz --strip-components=1",
-                    target   => "$target",
-                    url      => "$url",
-                 ;
-            }
-        }
+    qnx_install {
+        "sdp":
+            filename => "$filename",
+            options  => "xz --strip-components=1",
+            target   => "$target",
+            url      => "$url",
+         ;
     }
 }
