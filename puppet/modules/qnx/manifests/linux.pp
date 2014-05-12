@@ -23,7 +23,7 @@ class qnx::linux
     define qnx_install($filename,$options,$target,$url) {
         exec { "install $filename to $target":
             command => "/bin/bash -c 'wget $url/$filename -O - | tar -C $target -$options'",
-            unless  => "/bin/bash -c '/usr/bin/test -d $target'",
+            unless  => "/bin/bash -c '/usr/bin/test -f $target/qnx660-env.sh'",
             require => File["/opt","$target"],
             timeout => 1800,
         }
