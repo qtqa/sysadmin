@@ -15,4 +15,5 @@ class packaging_tester::windows inherits packaging_tester::base {
     include openssl_android
     # Install modules needed by SYSTEM user outside building
     include cpan
+    include qnx
 }
