@@ -300,6 +300,12 @@ include "commonfunctions.php";
             updateMetricsBoxes("timescale", value);
         }
 
+        function filterProjectAutotest(project, autotest)
+        {
+            filterProject(project);
+            filterAutotest(autotest);
+        }
+
         /* Set all filters to "All" */
         function clearFilters()
         {

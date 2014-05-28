@@ -379,8 +379,12 @@ td {
     border-right: 1px solid black;
 }
 
+.tableBackgroundNormal {
+    background-color: white;
+}
+
 .tableBackgroundColored {                  /* This can be used to highlight every other row in lists for better readability */
-    background-color: #F3F3F3;
+    background-color: #F0F0F0;
 }
 
 .tableCellBackgroundTitle {
@@ -422,6 +426,14 @@ td.tableCellBackgroundTitle {
 
 .tableCellAlignRight {
     text-align: right;
+}
+
+.tableWidth1 {
+    width: 45px;
+}
+
+.tableWidth2 {
+    width: 75px;
 }
 
 /*** Elapsed time print in metrics boxes ***/

@@ -46,6 +46,7 @@ session_start();
 ?>
 
 <?php
+include "definitions.php";
 include "functions.php";
 include(__DIR__.'/../commonfunctions.php');
 include "metricsboxdefinitions.php";

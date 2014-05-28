@@ -12,20 +12,21 @@
 
         <!-- The message or content to be shown on new window -->
         <p><b><u>AUTOTEST DASHBOARD DESCRIPTION:</u></b></p>
-        <p><b>Level 2: Show Autotest failures</b></p>
+        <p><b>Level 2: Show Autotest and test case failures</b></p>
         <table>
         <tr>
         <th class="tableCellAlignLeft">GENERAL</th><td></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Purpose</th>
-        <td class="tableSingleBorder">Improve Continuous Integration (CI) stability, throughput and coverage by fixing Autotests e.g. to make insignificant Autotests significant</td>
+        <td class="tableSingleBorder">Improve Continuous Integration (CI) stability, throughput and coverage by fixing Autotests and their test cases, or the code under test</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Question</th>
-        <td class="tableSingleBorder">In which Configurations and Projects the Autotest is failing, and how often.<br>
+        <td class="tableSingleBorder">In which Projects and Configurations the Autotest is failing, and how often.<br>
                                       In which Configuration builds the failing Autotest is blocking the build.<br>
-                                      Is the Autotest failing constantly in build history.</td>
+                                      Is the Autotest failing constantly in build history.
+                                      Which are the failing test cases.</td>
         </tr>
         <tr><td>&nbsp;</td><td></td></tr>
         <tr>
@@ -33,26 +34,34 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration, Autotest, Timescale (in build history only)</td>
+        <td class="tableSingleBorder">Project, Configuration, Autotest, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
-        <td class="tableSingleBorder">List of Configurations and Projects the Autotest is failing by failure category, both for the latest build and for the last n builds.
-                                      <i>For result history table, see the linked notation description.</i></td>
+        <td class="tableSingleBorder"><b>Result history:</b> List of Projects and Configurations (for the last 20 builds) where the Autotest is failing by failure category.
+                                      <i>For result history table, see the linked notation description.</i><br>
+                                      <b>Test cases:</b> The number of Project Configuration builds where the test case has failed and run, and percentage of the failed ones.
+                                         Calculated based on all test report files for the latest build, or according to the Timescale filter i.e. based on the builds
+                                         done after the selected date.<br>
+                                         <i>Note 1: This is calculated only when a Project is filtered.</i><br>
+                                         <i>Note 2: Test report files may not be available from all builds. </i></td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
-        <td class="tableSingleBorder"><b>Latest builds:</b> Counting the number of failures in each Configuration (and Project) in Project specific latest build for each Autotest (by failure category).<br>
-                                      <b>Result history:</b> Calculating the result, or the failure category in case of failure, in each Project Configuration build based on the Autotest failure and significance, and build result and significance.</td>
+        <td class="tableSingleBorder"><b>Result history:</b> The result, and the failure category in case of failure, in each Project Configuration build based on the Autotest
+                                         failure and its significance, and on build result and its significance.<br>
+                                      <b>Test cases:</b> Calculating the result, or the failure category in case of failure, in each Project Configuration build based on the
+                                         Autotest failure and significance, and build result and significance.</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
-        <td class="tableSingleBorder">Higher number of Configurations indicates a need for analysis.<br>
-                                      Repeating failures, especially the blocking ones, require corrective actions. <i>See the Failure category description for action details.</i></td>
+        <td class="tableSingleBorder">Repeating failures, especially the blocking ones, require corrective actions. <i>See the Failure category description for action details</i>.<br>
+                                      Higher count means the test case is failing in higher number of Configurations, and should therefore be analyzed.<br>
+                                      Failed percentage 100% means the test case has failed in every build it has been run.</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Target value</th>
-        <td class="tableSingleBorder">Zero i.e. not any</td>
+        <td class="tableSingleBorder">The failed count or percentage is zero</td>
         </tr>
         <tr><td>&nbsp;</td><td></td></tr>
         <tr>
@@ -63,16 +72,26 @@
         <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration<br>
                                       <b>Build number:</b> several per Project (numeric 1 to n; number is Project specific)<br>
                                       <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86)<br>
-                                      <b>Configuration build result:</b> SUCCESS/FAILURE/ABORTED/undef ("undef" means the build was cancelled before it was even started because some other Configuration build failed and caused the whole Project build failure)<br>
-                                      <b>Configuration significance:</b> blocked/insignificant Configurations (if Configuration is tagged as "insignificant" the build will not fail even though some significant Autotests would fail)<br>
-                                      <b>Autotest name:</b> several per Configuration (e.g. tst_qftp)<br>
+                                      <b>Configuration build result:</b> SUCCESS/FAILURE/ABORTED/undef ("undef" means the build was cancelled before it was even started because
+                                         some other Configuration build failed and caused the whole Project build failure)<br>
+                                      <b>Configuration significance:</b> blocked/insignificant tag (if Configuration is tagged as "insignificant" the build will not fail even
+                                         though some significant Autotests would fail)<br>
+                                      <b>Autotest name:</b> e.g. tst_qftp, several per Project and Configuration<br>
                                       <b>Autotest result:</b> name in the list indicates a failure (i.e. the passed ones are not listed)<br>
-                                      <b>Autotest significance:</b> Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)
+                                      <b>Autotest significance:</b> tag "significant" (failure leads to build failure, unless the Configuration set insignificant) /
+                                         "insignificant" (failure does not lead to build failure)<br>
+                                      <b>Autotest result file:</b> if the related test result file (e.g. tst_qftp-testresults-00.xml) exists, the Autotest was run in
+                                         the related Configuration build<br>
+                                      <b>Test case name:</b> e.g. activeMode[WithoutProxy], test case naming structure varies between Autotests<br>
+                                      <b>Test case result:</b> pass/fail/xfail, note that only the "fail" results are included<br>
+                                      <b>Test case configuration:</b> the Project Configuration directory where the test result files are located, e.g.
+                                         QtBase_stable_Integration/build_03681/macx-ios-clang_OSX_10.8
         </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data source</th>
-        <td class="tableSingleBorder">Data in SQL database from log files in http://testresults.qt-project.org/ci/</td>
+        <td class="tableSingleBorder">Test case data is in xml files (zipped) in Project Configuration directories in http://testresults.qt-project.org/ci/<br>
+                                      All other data is in SQL database parsed from the log files in http://testresults.qt-project.org/ci/</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data update cycle</th>
