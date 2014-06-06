@@ -3,6 +3,7 @@ class ci_tester::linux inherits ci_tester::base {
     include crosscompilers
     include android
     include qnx
+    include qnx650
     include imx6
 
     if $ci_tester::vmware_enabled {

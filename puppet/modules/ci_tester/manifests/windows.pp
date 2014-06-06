@@ -12,6 +12,8 @@ class ci_tester::windows inherits ci_tester::base {
     include postgresql
     include mysql
     include qnx
+    include qnx650
+
     # Install modules needed by SYSTEM user outside building
     include cpan
 

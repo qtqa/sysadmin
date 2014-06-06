@@ -3,6 +3,7 @@ class packaging_tester::linux inherits packaging_tester::base {
     include crosscompilers
     include android
     include qnx
+    include qnx650
 
     if $packaging_tester::vmware_enabled {
         include vmware_tools
