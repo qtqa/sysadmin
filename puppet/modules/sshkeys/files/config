@@ -12,6 +12,6 @@ Host codereview.qt-project.org
   Port 29418
   User qt-builder
 
-Host qt-gerrit.it.local
+Host qt-gerrit.*
   Port 29418
   User bld.qt
