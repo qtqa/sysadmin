@@ -49,54 +49,91 @@
     // $_SESSION['arrayProjectBuildLatestResult']
     // $project
     // $conf
+    // $build
     // $timescaleType
     // $timescaleValue
     // $projectFilter
     // $confFilter
 
-/* Read the latest Build number (used also in other listxxx files) */
+/* Read the Build data */
 foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     if ($value == $project) {
-        $latestBuild = $_SESSION['arrayProjectBuildLatest'][$key];
-        $latestBuildResult = $_SESSION['arrayProjectBuildLatestResult'][$key];
-        $latestBuildTimestamp = $_SESSION['arrayProjectBuildLatestTimestamp'][$key];
-        $latestBuildDuration = $_SESSION['arrayProjectBuildLatestDuration'][$key];
+        $latestBuildNumber = $_SESSION['arrayProjectBuildLatest'][$key];
+        $buildNumber = $_SESSION['arrayProjectBuildLatest'][$key];
+        $buildResult = $_SESSION['arrayProjectBuildLatestResult'][$key];
+        $buildTimestamp = $_SESSION['arrayProjectBuildLatestTimestamp'][$key];
+        $buildDuration = $_SESSION['arrayProjectBuildLatestDuration'][$key];
     }
 }
-$buildNumberString = createBuildNumberString($latestBuild);
-$projectConfValid = FALSE;               // Can be used to identify if Configuration is available for the latest Project Build (later in other listxxx.php files)
+$buildNumber = $latestBuildNumber - $build;     // Selected build
+$buildNumberString = createBuildNumberString($buildNumber);
+$projectConfValid = FALSE;                      // Can be used to identify if Configuration is available for the latest Project Build (later in other listxxx.php files)
 
 /* Project data */
 if ($conf == "All") {
+    if ($build == 0) {                          // Show the latest build ...
+        // Data read above
+    } else {                                    // ... or the selected build (read from database)
+        $sql = cleanSqlString(
+               "SELECT result, timestamp, duration
+                FROM ci
+                WHERE $projectFilter AND build_number=$buildNumber");
+        $dbColumnCiResult = 0;
+        $dbColumnCiTimestamp = 1;
+        $dbColumnCiDuration = 2;
+        if ($useMysqli) {
+            $result = mysqli_query($conn, $sql);
+            $numberOfRows = mysqli_num_rows($result);
+        } else {
+            $result = mysql_query($sql) or die (mysql_error());
+            $numberOfRows = mysql_num_rows($result);
+        }
+        if ($numberOfRows > 0) {                                        // Should be only one match
+            if ($useMysqli)
+                $resultRow = mysqli_fetch_row($result);
+            else
+                $resultRow = mysql_fetch_row($result);
+            $buildResult = $resultRow[$dbColumnCiResult];
+            $buildTimestamp = $resultRow[$dbColumnCiTimestamp];
+            $buildDuration = $resultRow[$dbColumnCiDuration];
+        }
+    }
     echo "<table>";
     echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
     if ($timescaleType == "Since")
-        echo '<tr><td>Since:</td><td class="tableCellBackgroundTitle">' . $timescaleValue . '</td></tr>';
-    echo "<tr><td>Latest Build: </td><td>$latestBuild</td></tr>";
+        echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
+    echo "<tr><td>Build: </td><td>$buildNumber</td></tr>";
     $fontColorClass = "fontColorBlack";
-    if ($latestBuildResult == "SUCCESS")
+    if ($buildResult == "SUCCESS")
         $fontColorClass = "fontColorGreen";
-    if ($latestBuildResult == "FAILURE")
+    if ($buildResult == "FAILURE")
         $fontColorClass = "fontColorRed";
-    echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-    echo '<tr><td>Build Time: </td><td>' . $latestBuildTimestamp . ' (GMT)</td></tr>';
-    echo '<tr><td>Build Duration: </td><td>' . $latestBuildDuration . '</td></tr>';
+    echo '<tr><td>Build Result: </td><td class="' . $fontColorClass . '">' . $buildResult . '</td></tr>';
+    echo '<tr><td>Build Time: </td><td>' . $buildTimestamp . ' (GMT)</td></tr>';
+    echo '<tr><td>Build Duration: </td><td>' . $buildDuration . '</td></tr>';
     echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
         . '/build_' . $buildNumberString . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
         // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/log.txt.gz
-    echo "</table><br/>";
+    echo "</table>";
 }
 
 /* Configuration data */
 else {
-    $sql = "SELECT result, timestamp, duration, forcesuccess, insignificant
-            FROM cfg_latest
-            WHERE $projectFilter $confFilter";
+    if ($build == 0)                        // Show the latest build ...
+        $sql = cleanSqlString(
+               "SELECT result, forcesuccess, insignificant, timestamp, duration
+                FROM cfg_latest
+                WHERE $confFilter AND $projectFilter");
+    else                                    // ... or the selected build
+        $sql = cleanSqlString(
+               "SELECT result, forcesuccess, insignificant, timestamp, duration
+                FROM cfg
+                WHERE $confFilter AND $projectFilter AND build_number=$buildNumber");
     $dbColumnCfgResult = 0;
-    $dbColumnCfgTimestamp = 1;
-    $dbColumnCfgDuration = 2;
-    $dbColumnCfgForceSuccess = 3;
-    $dbColumnCfgInsignificant = 4;
+    $dbColumnCfgForceSuccess = 1;
+    $dbColumnCfgInsignificant = 2;
+    $dbColumnCfgTimestamp = 3;
+    $dbColumnCfgDuration = 4;
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -109,39 +146,38 @@ else {
             $resultRow = mysqli_fetch_row($result);
         else
             $resultRow = mysql_fetch_row($result);
-        $latestBuildResult = $resultRow[$dbColumnCfgResult];
-        $latestBuildTimestamp = $resultRow[$dbColumnCfgTimestamp];
-        $latestBuildDuration = $resultRow[$dbColumnCfgDuration];
-        $latestBuildForceSuccess = $resultRow[$dbColumnCfgForceSuccess];
-        $latestBuildInsignificant = $resultRow[$dbColumnCfgInsignificant];
+        $buildResult = $resultRow[$dbColumnCfgResult];
+        $buildTimestamp = $resultRow[$dbColumnCfgTimestamp];
+        $buildDuration = $resultRow[$dbColumnCfgDuration];
+        $buildForceSuccess = $resultRow[$dbColumnCfgForceSuccess];
+        $buildInsignificant = $resultRow[$dbColumnCfgInsignificant];
         $projectConfValid = TRUE;
         echo "<table>";
         echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
         echo "<tr><td>Configuration: </td><td class=\"tableCellBackgroundTitle\">$conf</td></tr>";
         // Note: Timescale filter not shown here because it does not affect this view
-        echo "<tr><td>Latest Build: </td><td>$latestBuild</td></tr>";
+        echo "<tr><td>Build: </td><td>$buildNumber</td></tr>";
         $fontColorClass = "fontColorBlack";
-        if ($latestBuildResult == "SUCCESS")
+        if ($buildResult == "SUCCESS")
             $fontColorClass = "fontColorGreen";
-        if ($latestBuildResult == "FAILURE")
+        if ($buildResult == "FAILURE")
             $fontColorClass = "fontColorRed";
-        echo '<tr><td>Latest Build Result: </td><td class="' . $fontColorClass . '">' . $latestBuildResult . '</td></tr>';
-        echo '<tr><td>Build Time: </td><td>' . $latestBuildTimestamp . ' (GMT)</td></tr>';
-        echo '<tr><td>Build Duration: </td><td>' . $latestBuildDuration . '</td></tr>';
-        if ($latestBuildForceSuccess == 1)
+        echo '<tr><td>Build Result: </td><td class="' . $fontColorClass . '">' . $buildResult . '</td></tr>';
+        echo '<tr><td>Build Time: </td><td>' . $buildTimestamp . ' (GMT)</td></tr>';
+        echo '<tr><td>Build Duration: </td><td>' . $buildDuration . '</td></tr>';
+        if ($buildForceSuccess == 1)
             echo '<tr><td>Force Success: </td><td>' . FLAGON . '</td></tr>';
         else
             echo '<tr><td>Force Success: </td><td>' . FLAGOFF . '</td></tr>';
-        if ($latestBuildInsignificant == 1)
+        if ($buildInsignificant == 1)
             echo '<tr><td>Insignificant: </td><td>' . FLAGON . '</td></tr>';
         else
             echo '<tr><td>Insignificant: </td><td>' . FLAGOFF . '</td></tr>';
         echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
             . '/build_' . $buildNumberString . '/' . $conf . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
             // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86/log.txt.gz
-        echo "</table><br/>";
+        echo "</table>";
     }
 }
-echo "<br>";
 
 ?>

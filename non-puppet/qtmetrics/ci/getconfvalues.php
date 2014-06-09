@@ -47,11 +47,12 @@
 
 /* Get list of project values to session variable xxx (if not done already) */
 if(!isset($_SESSION['arrayConfName'])) {
+
     /* Connect to the server */
     require(__DIR__.'/../connect.php');
 
     /* Read all Configuration values from database */
-    $sql="SELECT DISTINCT cfg FROM cfg_latest ORDER BY cfg;";
+    $sql="SELECT DISTINCT cfg FROM cfg ORDER BY cfg;";          // Read from the complete table to include values for any build
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
     } else {

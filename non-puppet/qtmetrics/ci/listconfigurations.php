@@ -47,6 +47,8 @@
     // $_SESSION['arrayProjectName']
     // $_SESSION['arrayProjectBuildLatest']
     // $project
+    // $build
+    // $buildNumber        (in listgeneraldata.php)
     // $timescaleType
     // $timescaleValue
     // $projectFilter
@@ -58,10 +60,19 @@
 $timeStartThis = $timeEnd;                          // Start where previous step ended
 
 /* Read data from database */
-$sql = "SELECT cfg, result, forcesuccess, insignificant
-        FROM cfg_latest
-        WHERE $projectFilter $confFilter
-        ORDER BY result,cfg";
+if ($build == 0) {                          // Show the latest build ...
+    $sql = cleanSqlString(
+           "SELECT cfg, result, forcesuccess, insignificant
+            FROM cfg_latest
+            WHERE $confFilter AND $projectFilter
+            ORDER BY result, cfg");
+} else {                                    // ... or the selected build
+    $sql = cleanSqlString(
+           "SELECT cfg, result, forcesuccess, insignificant
+            FROM cfg
+            WHERE $confFilter AND $projectFilter AND build_number=$buildNumber
+            ORDER BY result, cfg");
+}
 $dbColumnCfgCfg = 0;
 $dbColumnCfgResult = 1;
 $dbColumnCfgForceSuccess = 2;
@@ -79,28 +90,39 @@ if ($numberOfRows > 0) {
 
     /* Counters for printing totals summary row */
     $printedConfs = 0;
-    $latestForceSuccessCount = 0;
-    $latestInsignCount = 0;
-    $latestFailingSignAutotestCount = 0;
-    $latestFailingInsignAutotestCount = 0;
+    $buildForceSuccessCount = 0;
+    $buildInsignCount = 0;
+    $buildFailingSignAutotestCount = 0;
+    $buildFailingInsignAutotestCount = 0;
     $allFailureCount = 0;
     $allSuccessCount = 0;
     $allTotalCount = 0;
 
-    echo '<b>Configurations</b><br>';
+    echo '<div class="metricsTitle">';
+    echo '<b>Configurations</b>';
+    echo '</div>';
 
     /* Titles */
     echo '<table class="fontSmall">';
     echo '<tr>';
     echo '<th></th>';
-    echo '<th colspan="5" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
+    echo '<td colspan="5" class="tableBottomBorder tableSideBorder tableCellCentered tableCellBuildSelected">';
+    if ($build == 0)                                // Show the latest build ...
+        echo 'LATEST BUILD';
+    else                                            // ... or the selected build
+        echo 'BUILD ' . $buildNumber;
+    echo '</td>';
     if ($round == 1) {
-        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></th>';
+        if ($timescaleType == "All")
+            echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleAll">';
+        if ($timescaleType == "Since")
+            echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">';
+        echo 'Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></td>';
     } else {
         if ($timescaleType == "All")
-            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
+            echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleAll"><b>ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</b>';
         if ($timescaleType == "Since")
-            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+            echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">ALL BUILDS SINCE ' . $timescaleValue . '</td>';
     }
     echo '</tr>';
     echo '<tr>';
@@ -137,7 +159,7 @@ if ($numberOfRows > 0) {
 
         $timeReadLatestStart = microtime(true);
 
-        /* Latest Build: Result */
+        /* Build result */
         $fontColorClass = "fontColorBlack";
         if ($resultRow[$dbColumnCfgResult] == "SUCCESS")
             $fontColorClass = "fontColorGreen";
@@ -145,28 +167,40 @@ if ($numberOfRows > 0) {
             $fontColorClass = "fontColorRed";
         echo '<td class="tableLeftBorder tableCellCentered ' . $fontColorClass . '">' . $resultRow[$dbColumnCfgResult] . '</td>';
 
-        /* Latest Build: Force success and Insignificant */
+        /* Build force success and Insignificant */
         if ($resultRow[$dbColumnCfgForceSuccess] == 1) {
             echo '<td class="tableCellCentered">' . FLAGON . '</td>';
-            $latestForceSuccessCount++;
+            $buildForceSuccessCount++;
         } else {
             echo '<td class="tableCellCentered">' . FLAGOFF . '</td>';
         }
         if ($resultRow[$dbColumnCfgInsignificant] == 1) {
             echo '<td class="tableCellCentered">' . FLAGON . '</td>';
-            $latestInsignCount++;
+            $buildInsignCount++;
         } else {
             echo '<td class="tableCellCentered">' . FLAGOFF . '</td>';
         }
 
-        /* Latest Build: Number of failed significant/insignificant autotests */
-        $sql = "SELECT 'significant', COUNT(name) AS 'count'
-                FROM test_latest
-                WHERE insignificant=0 AND $projectFilter AND cfg=\"$confName\"
-                UNION
-                SELECT 'insignificant', COUNT(name) AS 'count'
-                FROM test_latest
-                WHERE insignificant=1 AND $projectFilter AND cfg=\"$confName\"";       // Will return two rows
+        /* Build number of failed significant/insignificant autotests */
+        if ($build == 0) {                          // Show the latest build ...
+            $sql = cleanSqlString(
+                   "SELECT 'significant', COUNT(name) AS 'count'
+                    FROM test_latest
+                    WHERE $projectFilter AND cfg=\"$confName\" AND insignificant=0
+                    UNION
+                    SELECT 'insignificant', COUNT(name) AS 'count'
+                    FROM test_latest
+                    WHERE $projectFilter AND cfg=\"$confName\" AND insignificant=1");                                   // Will return two rows
+        } else {                                    // ... or the selected build
+            $sql = cleanSqlString(
+                   "SELECT 'significant', COUNT(name) AS 'count'
+                    FROM test
+                    WHERE $projectFilter AND build_number=$buildNumber AND cfg=\"$confName\" AND insignificant=0
+                    UNION
+                    SELECT 'insignificant', COUNT(name) AS 'count'
+                    FROM test
+                    WHERE $projectFilter AND build_number=$buildNumber AND cfg=\"$confName\" AND insignificant=1");     // Will return two rows
+        }
         if ($useMysqli) {
             $result2 = mysqli_query($conn, $sql);
             $numberOfRows2 = mysqli_num_rows($result2);
@@ -194,8 +228,8 @@ if ($numberOfRows > 0) {
             echo '<td class="tableCellCentered">' . $confInsignAutotestCount . '</td>';
         else
             echo '<td class="tableCellCentered">-</td>';
-        $latestFailingSignAutotestCount = $latestFailingSignAutotestCount + $confSignAutotestCount;
-        $latestFailingInsignAutotestCount = $latestFailingInsignAutotestCount + $confInsignAutotestCount;
+        $buildFailingSignAutotestCount = $buildFailingSignAutotestCount + $confSignAutotestCount;
+        $buildFailingInsignAutotestCount = $buildFailingInsignAutotestCount + $confInsignAutotestCount;
         if ($useMysqli)
             mysqli_free_result($result2);                                   // Free result set
 
@@ -211,15 +245,16 @@ if ($numberOfRows > 0) {
         } else {
             $timescopeFilter = "";
             if ($timescaleType == "Since")
-                $timescopeFilter = " AND timestamp>=\"$timescaleValue\"";
-            $sql = "SELECT result, COUNT(result) AS count
+                $timescopeFilter = "AND timestamp>=\"$timescaleValue\"";
+            $sql = cleanSqlString(
+                   "SELECT result, COUNT(result) AS count
                     FROM cfg
-                    WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter
+                    WHERE cfg=\"$confName\" AND $projectFilter $timescopeFilter
                     GROUP BY result
                     UNION
                     SELECT 'Total', COUNT(cfg) AS count
                     FROM cfg
-                    WHERE $projectFilter AND cfg=\"$confName\" $timescopeFilter";    // Will return up to five rows (results ABORTED,FAILURE,SUCCESS,undef and the Total)
+                    WHERE cfg=\"$confName\" AND $projectFilter $timescopeFilter");   // Will return up to five rows (results ABORTED,FAILURE,SUCCESS,undef and the Total)
             if ($useMysqli) {
                 $result2 = mysqli_query($conn, $sql);
                 $numberOfRows2 = mysqli_num_rows($result2);
@@ -277,10 +312,10 @@ if ($numberOfRows > 0) {
     echo '<tr>';
     echo '<td class="tableRightBorder tableTopBorder">total (' . $printedConfs . ')</td>';
     echo '<td class="tableLeftBorder tableTopBorder"></td>';
-    echo '<td class="tableTopBorder tableCellCentered">' . $latestForceSuccessCount . '</td>';
-    echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestInsignCount . '</td>';
-    echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $latestFailingSignAutotestCount . '</td>';
-    echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestFailingInsignAutotestCount . '</td>';
+    echo '<td class="tableTopBorder tableCellCentered">' . $buildForceSuccessCount . '</td>';
+    echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $buildInsignCount . '</td>';
+    echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $buildFailingSignAutotestCount . '</td>';
+    echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $buildFailingInsignAutotestCount . '</td>';
     if ($round == 1) {
             echo '<td class="tableLeftBorder tableTopBorder tableCellCentered"></td>';
             echo '<td class="tableTopBorder tableCellCentered"></td>';

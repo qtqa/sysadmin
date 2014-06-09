@@ -64,6 +64,8 @@ $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERPROJECT]);
 $project = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
 $conf = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERBUILD]);
+$build = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERTIMESCALETYPE]);
 $timescaleType = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERTIMESCALEVALUE]);
@@ -87,21 +89,26 @@ if ($useMysqli) {
 /************************************************************/
 
 if ($project == "All" AND $conf == "All") {
+    echo '<div class="metricsBoxHeader">';
+    echo '<div class="metricsBoxHeaderIcon">';
     if ($round == 1)
         echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
     else
         echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel1.html\')">
               <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
-    echo '<b>PROJECT DASHBOARD:</b> Select Project<br/><br/>';
-    if(isset($_SESSION['arrayProjectName'])) {
+    echo '</div>';
+    echo '<div class="metricsBoxHeaderText">';
+    echo '<b>PROJECT DASHBOARD:</b> Select Project';
+    echo '</div>';
+    echo '</div>';
+    if (isset($_SESSION['arrayProjectName'])) {
 
         /* Print the used filters */
         if ($timescaleType <> "All") {
             echo '<table>';
             if ($timescaleType == "Since")
-                echo '<tr><td>Since:</td><td class="tableCellBackgroundTitle">' . $timescaleValue . '</td></tr>';
+                echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
             echo '</table>';
-            echo '<br>';
         }
 
         /* Show list of Projects (from the session variable that was saved for the filters */
@@ -117,27 +124,28 @@ if ($project == "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf == "All") {
+    echo '<div class="metricsBoxHeader">';
+    echo '<div class="metricsBoxHeaderIcon">';
     if ($round == 1)
         echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
     else
         echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel2.html\')">
               <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
-    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> ' . $project . '<br/><br/>';
-    if(isset($_SESSION['arrayProjectName'])) {
-        $projectFilter = "";
+    echo '</div>';
+    echo '<div class="metricsBoxHeaderText">';
+    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> ' . $project;
+    echo '</div>';
+    echo '</div>';
+    if (isset($_SESSION['arrayProjectName'])) {
+        $projectFilter = "project=\"$project\"";
         $confFilter = "";
         /* Show general data */
         require('listgeneraldata.php');
         /* Show Build history */
-        $projectFilter = " project=\"$project\"";
         require('listbuilds.php');
-        /* Show Configurations for latest Build */
-        echo '<br/>';
-        $projectFilter = " project=\"$project\"";
+        /* Show Configurations for the latest/selected Build */
         require('listconfigurations.php');
         /* Show Top failing autotests */
-        echo '<br/>';
-        $projectFilter = " AND project=\"$project\"";
         require('listfailingautotests.php');
     } else {
         echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
@@ -149,23 +157,28 @@ if ($project <> "All" AND $conf == "All") {
 /************************************************************/
 
 if ($project <> "All" AND $conf <> "All") {
+    echo '<div class="metricsBoxHeader">';
+    echo '<div class="metricsBoxHeaderIcon">';
     if ($round == 1)
         echo "<img src=\"images/ajax-loader.gif\" alt=\"loading\">&nbsp&nbsp";    // On the first round show the loading icon
     else
         echo '<a href="javascript:void(0);" class="imgLink" onclick="showMessageWindow(\'ci/msgprojectdashboardlevel3.html\')">
               <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
-    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> -> <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf . '<br/><br/>';
-    if(isset($_SESSION['arrayProjectName'])) {
+    echo '</div>';
+    echo '<div class="metricsBoxHeaderText">';
+    echo '<b>PROJECT DASHBOARD:</b> <a href="javascript:void(0);" onclick="clearProjectFilters()">Select Project</a> ->
+        <a href="javascript:void(0);" onclick="filterConf(\'All\')">' . $project . '</a> -> ' . $conf;
+    echo '</div>';
+    echo '</div>';
+    if (isset($_SESSION['arrayProjectName'])) {
         /* Show general data */
-        $projectFilter = " project=\"$project\"";
-        $confFilter = " AND cfg=\"$conf\"";
+        $projectFilter = "project=\"$project\"";
+        $confFilter = "cfg=\"$conf\"";
         require('listgeneraldata.php');
         if ($projectConfValid) {
             /* Show Build history */
             require('listbuilds.php');
             /* Show Top failing autotests */
-            echo '<br/>';
-            $projectFilter = " AND project=\"$project\"";
             require('listfailingautotests.php');
         } else {
             echo "<br/>Configuration $conf not built for $project<br/>";
@@ -180,8 +193,12 @@ if ($project <> "All" AND $conf <> "All") {
 /************************************************************/
 
 if ($project == "All" AND $conf <> "All") {
-    echo '<b>PROJECT DASHBOARD:</b><br/><br/>';
-    echo "<br/>(Please select a project...)<br/><br/>";
+    echo '<div class="metricsBoxHeader">';
+    echo '<div class="metricsBoxHeaderText">';
+    echo '<b>PROJECT DASHBOARD:</b>';
+    echo '</div>';
+    echo '</div>';
+    echo "(Please select a project...)<br/><br/>";
 }
 
 /* Close connection to the server */

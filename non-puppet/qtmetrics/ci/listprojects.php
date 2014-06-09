@@ -57,14 +57,21 @@ echo '<table class="fontSmall">';
 /* Titles */
 echo '<tr>';
 echo '<th></th>';
-echo '<th colspan="8" class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
-if ($timescaleType == "All")
-    echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</th>';
+if ($timescaleType == "All") {
+    echo '<td colspan="8" class="tableBottomBorder tableSideBorder tableCellCentered">';
+    echo '<b>LATEST PROJECT BUILDS</b></td>';
+    echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleAll">
+        <b>ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</b></td>';
+}
 if ($timescaleType == "Since") {
+    echo '<td colspan="8" class="tableBottomBorder tableSideBorder tableCellCentered">';
+    echo '<b>LATEST PROJECT BUILDS SINCE ' . $timescaleValue . '</b></td>';
     if ($round == 1)
-        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></th>';
+        echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">
+            Loading All Builds <span class="loading"><span>.</span><span>.</span><span>.</span></span></td>';
     else
-        echo '<th colspan="3" class="tableBottomBorder tableSideBorder">ALL BUILDS SINCE ' . $timescaleValue . '</th>';
+        echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">
+            ALL BUILDS SINCE ' . $timescaleValue . '</td>';
 }
 echo '</tr>';
 echo '<tr>';

@@ -47,11 +47,12 @@
 
 /* Get list of project values to session variable xxx (if not done already) */
 if(!isset($_SESSION['arrayAutotestName'])) {
+
     /* Connect to the server */
     require(__DIR__.'/../connect.php');
 
     /* Read all Autotest values from database */
-    $sql = "SELECT DISTINCT name FROM test_latest ORDER BY name";
+    $sql = "SELECT DISTINCT name FROM test ORDER BY name";                  // Read from the complete table to include values for any build
     if ($useMysqli) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
@@ -62,7 +63,7 @@ if(!isset($_SESSION['arrayAutotestName'])) {
         $numberOfRows = mysql_num_rows($result);
     }
 
-    /* Store Configuration values to session variable (ref. http://www.phpriot.com/articles/intro-php-sessions/7) */
+    /* Store Autotest values to session variable (ref. http://www.phpriot.com/articles/intro-php-sessions/7) */
     $arrayAutotestName = array();
     for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop the Autotests
         if ($useMysqli)

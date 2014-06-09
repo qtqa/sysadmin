@@ -237,6 +237,41 @@ ul.mainMenu {
     float: left;
 }
 
+.metricsBoxHeader{
+    overflow: hidden;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.metricsBoxHeaderIcon {
+    min-height: 15px;
+    vertical-align: middle;
+    float: left;
+    padding: 5px 0px 5px 0px;
+}
+
+.metricsBoxHeaderText {
+    min-width: 300px;
+    min-height: 15px;
+    vertical-align: middle;
+    float: left;
+    padding: 5px 10px 5px 10px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 2px #888888;
+    background: linear-gradient(to bottom, #EEF7EB 0%, #C7E4BB 50%, #EEF7EB 100%);
+}
+
+.metricsTitle {
+    width: 1130px;
+    min-height: 15px;
+    float: left;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 2px 5px 2px 5px;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, #FFFFFF 0%, #F2F2F2 100%);
+}
+
 /*** Filters ***/
 
 #filterTitle {
@@ -291,6 +326,18 @@ ul.mainMenu {
 
 #filterFieldsRight img {                    /* Adjust calendar icon vertically */
     margin-top: 6px;
+}
+
+.timescaleAll {                            /* Styling for filter box and data tables when All selected */
+    background-color: white;                 /* (Note: If this is changed, the related definition in metricspageci.php must be changed as well) */
+}
+
+.timescaleSince {                          /* Styling for filter box and data tables when Since selected */
+    background-color: #FFCC00;               /* (Note: If this is changed, the related definition in metricspageci.php must be changed as well) */
+}
+
+.timescaleSinceBuild {                     /* Styling for filter box and data tables when Since selected but the builds do not match */
+    background-color: #FFEB99;
 }
 
 .date-tccontainer {                        /* Overwrite calendar CSS definitions to adjust the colors of date selection box with other selection boxes */
@@ -388,7 +435,7 @@ td {
 }
 
 .tableCellBackgroundTitle {
-    background-color: #44A51C;
+    background-color: #8FC977;
 }
 
 td.tableCellBackgroundTitle {
@@ -401,7 +448,7 @@ td.tableCellBackgroundTitle {
 }
 
 .tableCellBackgroundRedDark  {              /* This can be used to highlight failed results (most severe) */
-    background-color: #990000;
+    background-color: #B23636;
 }
 
 .tableCellBackgroundRed  {                  /* This can be used to highlight failed results */
@@ -409,11 +456,16 @@ td.tableCellBackgroundTitle {
 }
 
 .tableCellBackgroundRedLight  {             /* This can be used to highlight failed results (least severe) */
-    background-color: #FFC285;
+    background-color: #FF9D5C;
 }
 
 .tableCellBackgroundYellow  {               /* This can be used to highlight warnings or yellow in traffic lights */
     background-color: #FFFF33;
+}
+
+.tableCellBuildSelected  {                  /* This can be used to highlight a selected build in a table */
+    color: white;
+    background-color: #5C85FF;
 }
 
 .tableCellCentered {
@@ -509,6 +561,32 @@ span.popupMessageImg:hover span {
     margin: 20px 0px 0px 80px;             /* Left margin (the last value) can be used to adjust the message box horizontally */
     width: 450px;
     z-index:100;
+}
+
+/*** Pop-up dialog (jQuery) ***/
+
+.ui-dialog.popupDialog {
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    font-size: 12px;
+    background: #FFFFFF;
+    border-color: #44A51C;
+    box-shadow: 4px 4px 4px #888888;
+}
+
+.ui-dialog.popupDialog .ui-widget-header {
+    background: #44A51C;
+    border: 0;
+    color: #fff;
+    font-weight: bold;
+}
+
+.popupDialogMessage  {
+    float: left;
+    margin: 0 7px 20px 0;
+}
+
+.popupDialogButton {
+    width: 50px;
 }
 
 /*** Message window ***/

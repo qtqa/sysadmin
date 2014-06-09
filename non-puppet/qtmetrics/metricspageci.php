@@ -49,6 +49,7 @@ session_start();
 <?php
 include "connectiondefinitions.php";
 include "commonfunctions.php";
+include "commondefinitions.php";
 ?>
 
 <!DOCTYPE html>
@@ -61,9 +62,16 @@ include "commonfunctions.php";
         <link rel="stylesheet" type="text/css" href="styles.css" />
         <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" />
 
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
+        <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+        <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+
         <?php include "ci/metricsboxdefinitions.php";?>
 
     <script>
+
+        var metricsRequestCount = 0;                             // The number of metrics box requests in progress
+        var loadingMessageTimeout;                               // Timer to delay showing the loading message
 
         /* With these functions you can control the order of execution when loading the page first time.
            These functions are called from ajaxrequest.js
@@ -97,6 +105,7 @@ include "commonfunctions.php";
                         filterString = createFilterString(document.getElementById("project").value,
                                                           document.getElementById("conf").value,
                                                           document.getElementById("autotest").value,
+                                                          document.getElementById("build").value,
                                                           document.getElementById("timescale").value,
                                                           document.getElementById("since").value,
                                                           document.getElementById("autotestSortBy").value);
@@ -106,11 +115,14 @@ include "commonfunctions.php";
                         document.getElementById("roundCounter"+i).value = 1;        // Reset the counter
                         // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
                         loadDatabaseStatus(0);                   // d)
+                        metricsRequestCount--;                   // A metrics box completed
                     }
                 }
             <?php
             }
             ?>
+            if (metricsRequestCount <= 0)                        // When all metrics boxes completed, close the loading window
+                closeLoadingWindow();
         }
 
         function getFiltersRequestCompleted()                    // Called when the filter box has been updated
@@ -139,19 +151,21 @@ include "commonfunctions.php";
         /* Load all metrics boxes */
         function loadMetricsBoxes()
         {
-            showMetricsBoxes("All", "All", "All", "All");
+            showMetricsBoxes("All", "All", "All", 0, "All");
         }
 
         /* Show all metrics boxes the first time */
-        function showMetricsBoxes(project, conf, autotest, timescale)
+        function showMetricsBoxes(project, conf, autotest, build, timescale)
         {
             document.getElementById("project").value = project;  // Save default values (not necessarily the first item in the list)
             document.getElementById("conf").value = conf;
             document.getElementById("autotest").value = autotest;
+            document.getElementById("build").value = build;
             document.getElementById("timescale").value = timescale;
             var i;
             var file;
             var round;
+            var updatedMetricsBoxCount = 0;
             var filterString;
             <?php
             $arrayMetricsBoxRepeat = array();
@@ -163,15 +177,17 @@ include "commonfunctions.php";
                 file = "<?php echo $filepath ?>";
                 round = 1;                                       // First round tor this update
                 document.getElementById("roundCounter"+i).value = round;
-                filterString = createFilterString(project, conf, autotest, timescale, "na", "na");
+                filterString = createFilterString(project, conf, autotest, build, timescale, "na", "na");
                 getMetricData(i, file, round, filterString);
+                updatedMetricsBoxCount++;
             <?php
             }
             ?>
+            metricsRequestCount = updatedMetricsBoxCount;        // Save how many metrics boxes to be updated
         }
 
         /* Update the metrics boxes based on filtering */
-        function updateMetricsBoxes(filter, value, sortBy)       // filter = "project" / "conf" / "autotest" / "timescale"; sortBy is optional
+        function updateMetricsBoxes(filter, value, sortBy)       // filter = "project" / "conf" / "autotest" / "build" / "timescale"; sortBy is optional
         {
             document.getElementById(filter).value = value;       // Save filtered value
             if (typeof sortBy == "undefined")                    // sortBy is optional, set 0 as a default
@@ -180,6 +196,7 @@ include "commonfunctions.php";
             var i;
             var file;
             var round;
+            var updatedMetricsBoxCount = 0;
             var filterString;
             var appliedFilter;
             var clearFilter;
@@ -206,14 +223,18 @@ include "commonfunctions.php";
                     filterString = createFilterString(document.getElementById("project").value,
                                                       document.getElementById("conf").value,
                                                       document.getElementById("autotest").value,
+                                                      document.getElementById("build").value,
                                                       timescaleType,
                                                       timescaleValue,
                                                       sortBy);
                     getMetricData(i, file, round, filterString);
+                    updatedMetricsBoxCount++;
                 }
             <?php
             }
             ?>
+            metricsRequestCount = updatedMetricsBoxCount;        // Save how many metrics boxes to be updated
+            showLoadingWindow();                                 // Show a loading window for long lasting operations
         }
 
         /* Check and clear filters on other filter changes (used with nested metrics boxes to get to 1st level) */
@@ -226,6 +247,8 @@ include "commonfunctions.php";
                     document.getElementById("project").value = "All";
                 if (applied.search("autotest") >= 0)
                     document.getElementById("project").value = "All";
+                if (applied.search("build") >= 0)
+                    document.getElementById("project").value = "All";
                 if (applied.search("timescale") >= 0)
                     document.getElementById("project").value = "All";
             }
@@ -235,6 +258,8 @@ include "commonfunctions.php";
                 if (applied.search("project") >= 0)
                     document.getElementById("conf").value = "All";
                 if (applied.search("autotest") >= 0)
+                    document.getElementById("conf").value = "All";
+                if (applied.search("build") >= 0)
                     document.getElementById("conf").value = "All";
                 if (applied.search("timescale") >= 0)
                     document.getElementById("conf").value = "All";
@@ -246,8 +271,22 @@ include "commonfunctions.php";
                     document.getElementById("autotest").value = "All";
                 if (applied.search("conf") >= 0)
                     document.getElementById("autotest").value = "All";
+                if (applied.search("build") >= 0)
+                    document.getElementById("autotest").value = "All";
                 if (applied.search("timescale") >= 0)
                     document.getElementById("autotest").value = "All";
+            }
+            if (clear.search("build") >= 0 && filter != "build") {
+                if (applied.search("All") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("project") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("conf") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("autotest") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("timescale") >= 0)
+                    document.getElementById("build").value = "All";
             }
             if (clear.search("timescale") >= 0 && filter != "timescale") {
                 if (applied.search("All") >= 0)
@@ -258,11 +297,13 @@ include "commonfunctions.php";
                     document.getElementById("timescale").value = "All";
                 if (applied.search("autotest") >= 0)
                     document.getElementById("timescale").value = "All";
+                if (applied.search("build") >= 0)
+                    document.getElementById("timescale").value = "All";
             }
         }
 
-        /* Create the filter string */
-        function createFilterString(project, conf, autotest, timescaleType, timescaleValue, sortBy)
+        /* Create the filter string (as defined in ci/definitions.php) */
+        function createFilterString(project, conf, autotest, build, timescaleType, timescaleValue, sortBy)
         {
             var filterString;
             var filterSeparator = "<?php echo FILTERSEPARATOR ?>";               // (transfer php constant to javascript)
@@ -270,6 +311,7 @@ include "commonfunctions.php";
             filterString = "project" + filterValueSeparator + project + filterSeparator
                 + "conf" + filterValueSeparator + conf + filterSeparator
                 + "autotest" + filterValueSeparator + autotest + filterSeparator
+                + "build" + filterValueSeparator + build + filterSeparator
                 + "timescaleType" + filterValueSeparator + timescaleType + filterSeparator
                 + "timescaleValue" + filterValueSeparator + timescaleValue + filterSeparator
                 + "sortBy" + filterValueSeparator + sortBy + filterSeparator;
@@ -280,6 +322,7 @@ include "commonfunctions.php";
         function filterProject(value)
         {
             updateMetricsBoxes("project", value);
+            filterBuild(0);                                         // Clear Project build filter when Project changed
         }
 
         /* Update the metrics boxes when conf filter changed */
@@ -298,6 +341,19 @@ include "commonfunctions.php";
         function filterTimescale(value)
         {
             updateMetricsBoxes("timescale", value);
+            if (document.getElementById("timescale").value == "Since") {        // Highlight that the timescale filter is active
+                document.getElementById("timescale").className = "timescaleSince";
+                css('.date-tccontainer', 'background-color', '#FFCC00');        // (Note: This must follow the value defined in style.css)
+            } else {
+                document.getElementById("timescale").className = "timescaleAll";
+                css('.date-tccontainer', 'background-color', 'white');          // (Note: This must follow the value defined in style.css)
+            }
+        }
+
+        /* Update the metrics boxes when build filter changed */
+        function filterBuild(value)
+        {
+            updateMetricsBoxes("build", value);
         }
 
         function filterProjectAutotest(project, autotest)
@@ -331,8 +387,51 @@ include "commonfunctions.php";
         /* Open a new window for a message file (html) */
         function showMessageWindow(messageFile)
         {
-            myWindow=window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100');
+            myWindow = window.open(messageFile,'','resizable=yes,scrollbars=yes,width=600,height=600,left=500,top=100');
             myWindow.focus();
+        }
+
+        /* Ajax loading dialog window for long lasting operations */
+        $(function()
+        {
+            $( "#popupDialog" ).dialog({
+                autoOpen: false,
+                resizable: false,
+                minheight:180,
+                modal: false,
+                dialogClass: 'popupDialog',
+                buttons: {
+                    Ok: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                open: function() {
+                    $('.ui-dialog-buttonpane').find('button').addClass('popupDialogButton');    // Add a class to be able to define the button style
+                },
+                close: function() {
+                    $( this ).dialog( "close" );
+                }
+            });
+        });
+        function showLoadingWindow()
+        {
+            var delay = <?php echo LOADINGMESSAGEDELAY ?>;
+            if (delay > 0) {                                                     // Loading message not shown at all when delay set to 0
+                clearTimeout(loadingMessageTimeout);                             // Stop possible earlier timer
+                loadingMessageTimeout = setTimeout(
+                    function() {
+                        $('#popupDialog').dialog('open');
+                    }
+                    ,delay);                                                     // Show the message with a delay
+            }
+        }
+        function closeLoadingWindow()
+        {
+            var delay = <?php echo LOADINGMESSAGEDELAY ?>;
+            if (delay > 0) {
+                clearTimeout(loadingMessageTimeout);
+                $('#popupDialog').dialog('close');
+            }
         }
 
         /* Get time offset between current time and the GMT/UTC (returned in format "GMT+0300") */
@@ -358,6 +457,15 @@ include "commonfunctions.php";
                     timeOffset = "GMT-" + Math.abs(offsetHour) + "00";
             }
             return timeOffset;
+        }
+
+        /* Change a css property value for an id or class (provided by w3c http://stackoverflow.com/questions/566203/changing-css-values-with-javascript) */
+        function css(selector, property, value) {
+            for (var i=0; i<document.styleSheets.length;i++) {//Loop through all styles
+                //Try add rule
+                try { document.styleSheets[i].insertRule(selector+ ' {'+property+':'+value+'}', document.styleSheets[i].cssRules.length);
+                } catch(err) {try { document.styleSheets[i].addRule(selector, property+':'+value);} catch(err) {}}//IE
+            }
         }
 
     </script>
@@ -395,6 +503,12 @@ include "commonfunctions.php";
         ?>
 
         <?php include "footer.php";?>
+
+        <div id="popupDialog" title="Please wait">
+            <p><span class="ui-icon ui-icon-alert popupDialogMessage"></span>
+                Please wait, loading the data takes a while <span class="loading"><span>.</span><span>.</span><span>.</span></span><br><br>Reload, if not ready in a few minutes.
+            </p>
+        </div>
 
         </div>     <!-- end of container -->
     </body>

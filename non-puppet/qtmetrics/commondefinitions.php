@@ -43,6 +43,9 @@
 
 <?php
 
+if (!defined("LOADINGMESSAGEDELAY"))
+    define("LOADINGMESSAGEDELAY", 3000);        // The delay (in ms) after which the loading message pop-up will be displayed (set to 0 to disable the pop-up)
+
 /* Set to show or hide elapsed time printing (for testing purposes) */
 $showElapsedTime = FALSE;                       // Set TRUE to show elapsed database and calculation times (different implementations in different boxes)
 

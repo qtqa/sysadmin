@@ -47,6 +47,7 @@ session_start();
 
 <?php
 include(__DIR__.'/../commondefinitions.php');
+include "definitions.php";
 
 // Read values from database to session variables (so these are updated only once per session)
 $timeStart = microtime(true);
@@ -95,6 +96,13 @@ $timeAutotestValues = microtime(true);
     echo "<option value=\"All\">All</option>";
     foreach ($_SESSION['arrayAutotestName'] as $key=>$value)
         echo "<option value=\"$value\">$value</option>";
+?>
+</select>
+<select name="build" id="build" onchange="filterBuild(this.value)" class="hiddenElement">
+<?php
+// Note: This filter is hidden, used via build number links in Project dashboard instead
+    for ($i=0; $i<HISTORYBUILDCOUNT; $i++)
+        echo "<option value=\"$i\">$i</option>";
 ?>
 </select>
 <input id="autotestSortBy" type="hidden" value="0">

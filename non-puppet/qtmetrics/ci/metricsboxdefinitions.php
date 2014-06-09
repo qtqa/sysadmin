@@ -51,12 +51,12 @@ define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other a
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All, project, conf, autotest, timescale
+    // *) Possible values: All, project, conf, autotest, build, timescale
     //
-    //        File path and name                Repeat      Applied filters *)             Filters to clear *)
-    //        -------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"     ,2          ,"project,conf,timescale"      ,""              ),
-    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                         ,"autotest"      ),
+    //        File path and name                Repeat      Applied filters *)                  Filters to clear *)
+    //        -----------------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"     ,2          ,"project,conf,build,timescale"     ,""              ),
+    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                              ,"autotest"      ),
 );
 
 /* Filters */
@@ -65,8 +65,9 @@ define("FILTERVALUESEPARATOR", ":");
 define("FILTERPROJECT", 0);
 define("FILTERCONF", 1);
 define("FILTERAUTOTEST", 2);
-define("FILTERTIMESCALETYPE", 3);
-define("FILTERTIMESCALEVALUE", 4);
-define("FILTERSORTBY", 5);
+define("FILTERBUILD", 3);
+define("FILTERTIMESCALETYPE", 4);
+define("FILTERTIMESCALEVALUE", 5);
+define("FILTERSORTBY", 6);
 
 ?>

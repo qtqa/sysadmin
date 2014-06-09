@@ -58,4 +58,20 @@ function createBuildNumberString($buildNumber)
     return $buildString;
 }
 
+/* Clean the SQL statement with possible errors when combining several WHERE conditions */
+function cleanSqlString($sqlString)
+{
+    $sql = $sqlString;
+    // Remove multiple spaces
+    $sql = preg_replace('/\s+/', ' ', $sql);
+    // Replace invalid statements
+    $invalid = array("WHERE AND", "AND AND");
+    $valid = array("WHERE", "AND");
+    $sql = str_replace($invalid, $valid, $sql);
+    // Remove empty WHERE statement
+    if (strlen($sql) - strlen("WHERE") - 1 == strpos($sql, "WHERE"))
+        $sql = str_replace("WHERE", "", $sql);
+    return $sql;
+}
+
 ?>

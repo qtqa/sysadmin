@@ -44,9 +44,12 @@
 <?php
 
 /* Following 'input' variabes must be set prior to including this file */
+    // $build
+    // $timescaleType
+    // $timescaleValue
     // $projectFilter
     // $confFilter
-    // $latestBuild        (in listgeneraldata.php)
+    // $latestBuildNumber        (in listgeneraldata.php)
     // $showElapsedTime
     // $timeStart
     // $timeConnect
@@ -55,16 +58,18 @@ $timeStartThis = microtime(true);
 
 /* Read data from database */
 if ($project<>"All" AND $conf=="All") {                                       // Print Project Builds
-    $sql = "SELECT build_number, result, timestamp
+    $sql = cleanSqlString(
+           "SELECT build_number, result, timestamp
             FROM ci
             WHERE $projectFilter
-            ORDER BY build_number";
+            ORDER BY build_number");
 }
 if ($project<>"All" AND $conf<>"All") {                                       // Print Configuration Builds
-    $sql = "SELECT build_number, result, timestamp
+    $sql = cleanSqlString(
+           "SELECT build_number, result, timestamp
             FROM cfg
-            WHERE $projectFilter $confFilter
-            ORDER BY build_number";
+            WHERE $confFilter AND $projectFilter
+            ORDER BY build_number");
 }
 $dbColumnBuildNumber = 0;
 $dbColumnResult = 1;
@@ -80,6 +85,7 @@ $timeRead = microtime(true);
 $arrayBuildNumbersRow = array();
 $arrayBuildDatesRow = array();
 $arrayBuildResultsRow = array();
+$arrayBuildLinksRow = array();
 if ($numberOfRows>0) {
     $printedBuildCount = 0;
     for ($i=0; $i<$numberOfRows; $i++) {                                    // Loop the Builds
@@ -89,7 +95,7 @@ if ($numberOfRows>0) {
         else
             $resultRow = mysql_fetch_row($result);
         if ($numberOfRows > HISTORYBUILDCOUNT) {                            // Limit number of Builds printed (the last n ones)
-            if ($resultRow[$dbColumnBuildNumber] > $latestBuild - HISTORYBUILDCOUNT)
+            if ($resultRow[$dbColumnBuildNumber] > $latestBuildNumber - HISTORYBUILDCOUNT)
                 $printThisBuild = TRUE;
         } else {
             $printThisBuild = TRUE;
@@ -97,21 +103,24 @@ if ($numberOfRows>0) {
         if ($printThisBuild) {
 
             /* Build number */
-            $buildNumberString = createBuildNumberString($resultRow[$dbColumnBuildNumber]); // Create the link url to build directory...
-            if ($conf == "All") {
-                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
-                    . '" target="_blank">' . $resultRow[$dbColumnBuildNumber] . '</a>';                // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+            $buildNumberOffset = $latestBuildNumber - $resultRow[$dbColumnBuildNumber];
+            if ($buildNumberOffset == $build) {                                     // Highlight the selected build
+                $cellColorBuild = '<td class="tableCellCentered tableCellBuildSelected">';
+                $filterLink = $resultRow[$dbColumnBuildNumber];
             } else {
-                $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
-                    . '/' . $conf . '" target="_blank">' . $resultRow[$dbColumnBuildNumber] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+                $cellColorBuild = '<td class="tableCellCentered">';
+                $filterLink = '<b><a href="javascript:void(0);" onclick="filterBuild(' . $buildNumberOffset . ')">' . $resultRow[$dbColumnBuildNumber] . '</a></b>';
             }
-            $arrayBuildNumbersRow[] = '<td class="tableCellCentered">' . $buildLink . '</td>';
+            $arrayBuildNumbersRow[] = $cellColorBuild . $filterLink . '</td>';
 
             /* Build date */
-            $date = strstr($resultRow[$dbColumnTimestamp], ' ', TRUE);      // 'yyyy-mm-dd hh:mm:ss' -> 'yyyy-mm-dd'
-            $date = strstr($date, '-', FALSE);                              // 'yyyy-mm-dd' -> '-mm-dd'
-            $date = substr($date,1);                                        // '-mm-dd' -> 'mm-dd'
-            $arrayBuildDatesRow[] = '<td class="tableCellCentered">' . $date . '</td>';
+            $date = strstr($resultRow[$dbColumnTimestamp], ' ', TRUE);              // 'yyyy-mm-dd hh:mm:ss' -> 'yyyy-mm-dd'
+            $cellColor = $cellColorBuild;                                           // By default show like the build number
+            if ($timescaleType == "Since" AND $date >= $timescaleValue)
+                    $cellColor = '<td class="tableCellCentered timescaleSince">';   // Highlight date if inside the selected timescale
+            $date = strstr($date, '-', FALSE);                                      // 'yyyy-mm-dd' -> '-mm-dd'
+            $date = substr($date,1);                                                // '-mm-dd' -> 'mm-dd'
+            $arrayBuildDatesRow[] = $cellColor . $date . '</td>';
 
             /* Build result */
             $cellColor = '<td class="tableSingleBorder">';
@@ -121,6 +130,16 @@ if ($numberOfRows>0) {
                 $cellColor = '<td class="tableSingleBorder tableCellBackgroundRed">';
             $arrayBuildResultsRow[] = $cellColor . $resultRow[$dbColumnResult] . '</td>';
             $printedBuildCount++;
+
+            /* Build log directory link */
+            $buildNumberString = createBuildNumberString($resultRow[$dbColumnBuildNumber]);         // Create the link url to build directory...
+            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString;   // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+            if ($conf <> "All")
+                $buildLink = $buildLink . '/' . $conf;                                              // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+            $buildLink = $buildLink . '" target="_blank"><img src="images/open-folder.png" alt="open" title="Open the folder for build '
+                . $resultRow[$dbColumnBuildNumber] . '"></a>';
+            $arrayBuildLinksRow[] = '<td class="tableTopBorder tableBottomBorder tableCellCentered">' . $buildLink . '</td>';
+
         }
     }
 }
@@ -129,10 +148,12 @@ if ($useMysqli)
     mysqli_free_result($result);                                            // Free result set
 
 /* Print the data */
+echo '<div class="metricsTitle">';
 if ($project<>"All" AND $conf=="All")
-    echo '<b>Project Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+    echo '<b>Project Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)';
 if ($project<>"All" AND $conf<>"All")
-    echo '<b>Configuration Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)<br/><br/>';
+    echo '<b>Configuration Build history</b> (last ' . HISTORYBUILDCOUNT . ' Builds)';
+echo '</div>';
 if ($printedBuildCount > 0) {
     echo "<table class=\"fontSmall tableSingleBorder\">";
 
@@ -155,6 +176,13 @@ if ($printedBuildCount > 0) {
     echo "<td class=\"tableSingleBorder\"><b>Result</b></td>";
     for ($i=0; $i<$printedBuildCount; $i++)
         echo $arrayBuildResultsRow[$i];
+    echo "</tr>";
+
+    /* Build log directory link */
+    echo "<tr class=\"tableSingleBorder\">";
+    echo "<td class=\"tableSingleBorder\"><b>Log files</b></td>";
+    for ($i=0; $i<$printedBuildCount; $i++)
+        echo $arrayBuildLinksRow[$i];
     echo "</tr>";
 
     echo "</table>";

@@ -48,6 +48,8 @@
     // $_SESSION['arrayProjectBuildLatest']
     // $_SESSION['arrayProjectBuildScopeMin']
     // $project
+    // $build
+    // $buildNumber        (in listgeneraldata.php)
     // $projectFilter
     // $confFilter
     // $showElapsedTime
@@ -57,9 +59,17 @@ $timeStartThis = $timeEnd;                          // Start where previous step
 
 /* Check the blocking (non-insignificant) Configurations (to skip printing significant Autotests for insignificant Configurations) */
 $arrayBlockingConfs = array();
-$sql = "SELECT cfg
-        FROM cfg_latest
-        WHERE insignificant=0 $projectFilter $confFilter";
+if ($build == 0) {                          // Show the latest build ...
+    $sql = cleanSqlString(
+           "SELECT cfg
+            FROM cfg_latest
+            WHERE $confFilter AND $projectFilter AND insignificant=0");
+} else {                                    // ... or the selected build
+    $sql = cleanSqlString(
+           "SELECT cfg
+            FROM cfg
+            WHERE $confFilter AND $projectFilter AND build_number=$buildNumber AND insignificant=0");
+}
 $dbColumnCfgCfg = 0;
 if ($useMysqli) {
     $result = mysqli_query($conn, $sql);
@@ -77,10 +87,19 @@ for ($i=0; $i<$numberOfRows; $i++) {                                          //
 }
 
 /* Read Autotest data from database */
-$sql = "SELECT name,project,build_number,cfg
-        FROM test_latest
-        WHERE insignificant=0 $projectFilter $confFilter
-        ORDER BY name, project, build_number DESC";
+if ($build == 0) {                          // Show the latest build ...
+    $sql = cleanSqlString(
+           "SELECT name, project, build_number, cfg
+            FROM test_latest
+            WHERE $projectFilter AND $confFilter AND insignificant=0
+            ORDER BY name, project, build_number DESC");
+} else {                                    // ... or the selected build
+    $sql = cleanSqlString(
+           "SELECT name, project, build_number, cfg
+            FROM test
+            WHERE $projectFilter AND build_number=$buildNumber AND $confFilter AND insignificant=0
+            ORDER BY name, project, build_number DESC");
+}
 $dbColumnTestName = 0;
 $dbColumnTestProject = 1;
 $dbColumnTestBuild = 2;
@@ -137,12 +156,18 @@ if ($useMysqli)
     mysqli_free_result($result);                                              // Free result set
 
 /* Print the data */
-echo '<b>Failed Autotests that caused Build failure</b> (significant Autotests in blocking Configurations)<br/><br/>';
+echo '<div class="metricsTitle">';
+echo '<b>Failed Autotests that caused Build failure</b> (significant Autotests in blocking Configurations)';
+echo '</div>';
 if ($failedAutotestCount > 0) {
     echo '<table class="fontSmall">';
     echo '<tr>';
     echo '<th></th>';
-    echo '<th class="tableBottomBorder tableSideBorder">LATEST BUILD</th>';
+    echo '<td class="tableBottomBorder tableSideBorder tableCellCentered tableCellBuildSelected">';
+    if ($build == 0)                                // Show the latest build ...
+        echo 'LATEST BUILD</td>';
+    else                                            // ... or the selected build
+        echo 'BUILD ' . $buildNumber . '</td>';
     echo '</tr>';
     echo '<tr class="tableBottomBorder">';
     echo '<td></td>';
