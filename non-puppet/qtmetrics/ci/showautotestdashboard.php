@@ -576,6 +576,7 @@ if ($autotest == "All") {
             /* Step 2.1: All autotests for comparison (read from the autotest xml files) */
 
             /* Get the first available build number or the first after the selected time scale. Note: Another check is which builds include the test result xml files in the first place (see $minBuildNumberInDirectory) */
+            $minBuildNumberInDatabase = MAXCIBUILDNUMBER;
             $projectFilter = "project=\"$project\"";                                // Project is filtered here
             $timescaleFilter = "";
             if ($timescaleType <> "All")
@@ -596,10 +597,11 @@ if ($autotest == "All") {
                 $resultRow2 = mysqli_fetch_row($result2);
             else
                 $resultRow2 = mysql_fetch_row($result2);
-            $minBuildNumberInDatabase = $resultRow2[$dbColumnCiBuildNumber];
-            $_SESSION['minBuildNumberInDatabase'] = $minBuildNumberInDatabase;      // Save for level 2
+            if ($resultRow2[$dbColumnCiBuildNumber] <> NULL AND $resultRow2[$dbColumnCiBuildNumber] <> "")
+                $minBuildNumberInDatabase = $resultRow2[$dbColumnCiBuildNumber];
             if ($useMysqli)
                 mysqli_free_result($result2);                                       // Free result set
+            $_SESSION['minBuildNumberInDatabase'] = $minBuildNumberInDatabase;      // Save for level 2
 
             /* Read the test results from the Project directory (structure is e.g. QtBase_stable_Integration/build_03681/macx-ios-clang_OSX_10.8 */
             if (isset($_SESSION['previousProject'])) {
