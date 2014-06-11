@@ -232,12 +232,12 @@ function readProjectTestResultDirectory(
                                                         }
                                                         /* Save testcase data */
                                                         $arrayAllTestcaseNames[] = $testcaseFullName;                   // Collect all test cases (duplicate names cleared at the end)
-                                                        if (!in_array($testcaseFullName, $arrayTestcaseNames)) { // If not yet listed ...
+                                                        if (!in_array($testcaseFullName, $arrayTestcaseNames)) {     // If not yet listed ...
                                                             $arrayTestcaseNames[] = $testcaseFullName;               // Testcase name
                                                             $testcaseConfData = array(array());
                                                             $testcaseConfData[$confId][FAILINGTESTCASECONFNAME]
                                                                 = $arrayFailingTestcaseConfNames[$confId];           // Configuration name for the testcase
-                                                            if ($result['type'] == "fail") {
+                                                            if ($result['type'] == "fail" OR $result['type'] == "xpass") {  // The xpass is considered a fail in the test system
                                                                 $arrayTestcaseFailed[]++;                            // Count the number of fails
                                                                 $arrayTestcaseAll[]++;                               // Count all (any result)
                                                                 $testcaseConfData[$confId][FAILINGTESTCASECONFFAILED]++;
@@ -254,7 +254,7 @@ function readProjectTestResultDirectory(
                                                                 if ($testcaseName == $testcaseFullName) {
                                                                     $arrayTestcaseConfs[$key][$confId][FAILINGTESTCASECONFNAME]
                                                                         = $arrayFailingTestcaseConfNames[$confId];   // Configuration name for the testcase
-                                                                    if ($result['type'] == "fail") {
+                                                                    if ($result['type'] == "fail" OR $result['type'] == "xpass") {  // The xpass is considered a fail in the test system
                                                                         $arrayTestcaseFailed[$key]++;                // Count the number of fails
                                                                         $arrayTestcaseAll[$key]++;                   // Count all (any result)
                                                                         $arrayTestcaseConfs[$key][$confId][FAILINGTESTCASECONFFAILED]++;

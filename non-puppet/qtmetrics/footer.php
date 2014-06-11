@@ -42,7 +42,7 @@
 ?>
 
 <div id="footer">
-<b>Report builder v2.3.1 10-Jun-2014</b><br/>
+<b>Report builder v2.3.2 11-Jun-2014</b><br/>
 Description, guidance and support:<br/>
 <a href="http://qt-project.org/wiki/Qt_Metrics_Page_Description" target="_blank">http://qt-project.org/wiki/Qt_Metrics_Page_Description</a>
 </div>
