@@ -122,8 +122,7 @@ function setSeeMoreNote($timescaleType, $timescaleValue)
             $conf                                    (string)  Configuration name filtered
             $booCheckTestcases                       (boolean) TRUE to open the test result files in the zip file and check the test cases, FALSE just to scan the test result file names in the zip
             $arrayFailingAutotestNames               (array)   List of autotest names as in the test result directory and database
-   Output:  $arrayFailingAutotestBuildConfigurations (array)   The list of project build-configuration pairs that have the result xml data
-            $arrayFailingAutotestAllBuilds           (array)   The count of builds (in all project configurations and in all builds within the timescale) of each autotest
+   Output:  $arrayFailingAutotestAllBuilds           (array)   The count of builds (in all project configurations and in all builds within the timescale) of each autotest
               The following used only when $booCheckTestcases == TRUE:
                 $arrayTestcaseNames                  (array)   The names for test cases (all included)
                 $arrayTestcaseFailed                 (array)   The count of fails in different project configuration builds for each test case
@@ -139,7 +138,7 @@ define("CHECKBUILDSINCE", 0);
 define("CHECKBUILDONE", 1);
 function readProjectTestResultDirectory(
             $testResultDirectory, $project, $buildCheckType, $buildNumber, $conf, $booCheckTestcases, $arrayFailingAutotestNames,
-            &$arrayFailingAutotestBuildConfigurations, &$arrayFailingAutotestAllBuilds,
+            &$arrayFailingAutotestAllBuilds,
             &$arrayTestcaseNames, &$arrayTestcaseFailed, &$arrayTestcaseAll, &$arrayTestcaseConfs,
             &$failingTestcaseCount, &$testcaseCount, &$arrayInvalidTestResultFiles)
 {
@@ -148,7 +147,7 @@ function readProjectTestResultDirectory(
     $autotestCount = count($arrayFailingAutotestNames);
     /* Check Project directory (structure is e.g. "QtBase_stable_Integration/build_03681/macx-ios-clang_OSX_10.8" */
     $projectTestResultDirectory = $testResultDirectory . $project;
-    $minBuildNumberInDirectory = MAXCIBUILDNUMBER;                          // For saving the first build where test result xml files are available
+    $minBuildNumberWithTestResults = MAXCIBUILDNUMBER;                      // For saving the first build where test result xml files are available
     $booTestResultDirectory = FALSE;
     $arrayAllTestcaseNames = array();
     if (file_exists($projectTestResultDirectory)) {
@@ -179,7 +178,6 @@ function readProjectTestResultDirectory(
                 if ($conf <> "All" AND $configuration <> $conf)             // Skip if not the filtered configuration
                     continue;
                 $dirNumber = (int)substr($dirName, strlen(CIBUILDDIRECTORYPREFIX), strlen(strval(MAXCIBUILDNUMBER)));    // Cut to e.g. "3681"
-                $arrayFailingAutotestBuildConfigurations[] = $dirNumber . FILTERSEPARATOR . $configuration;     // Save each build-configuration pair with xml data to read failure data from database only for these
                 if (!in_array($configuration, $arrayFailingTestcaseConfNames))                                  // If configuration name not listed yet ...
                     $arrayFailingTestcaseConfNames[] = $configuration;                                          // ... save it
                 $filePath = $directory . '/' . $entry;
@@ -198,8 +196,8 @@ function readProjectTestResultDirectory(
                             }
                             if ($booTestFileNameMatch) {                    // Find the match from the list of failed autotests
                                 $arrayFailingAutotestAllBuilds[$k]++;       // Increase the count for related autotest
-                                if ($minBuildNumberInDirectory > $dirNumber)
-                                    $minBuildNumberInDirectory = $dirNumber;        // Save the lowest build where test result xml files are available
+                                if ($minBuildNumberWithTestResults > $dirNumber)
+                                    $minBuildNumberWithTestResults = $dirNumber;    // Save the lowest build where test result xml files are available
                                                                                     // (Note: The zip file may be empty -> save only if xml files found from the zip)
 
                                 /* Open the test result xml files to read the test case results ($booCheckTestcases == TRUE) */
@@ -285,7 +283,6 @@ function readProjectTestResultDirectory(
         } // endif foreach as directory
 
         /* Calculate/arrange return data */
-        $arrayFailingAutotestBuildConfigurations = array_unique($arrayFailingAutotestBuildConfigurations);
         $arrayAllTestcaseNames = array_unique($arrayAllTestcaseNames);
         $testcaseCount = count($arrayTestcaseNames);
         foreach ($arrayTestcaseNames as $key => $testcaseName) {
@@ -295,7 +292,7 @@ function readProjectTestResultDirectory(
         sort($arrayInvalidTestResultFiles);
 
     } // endif file_exists()
-    return $minBuildNumberInDirectory;
+    return $minBuildNumberWithTestResults;
 }
 
 /************************************************************/
@@ -325,6 +322,8 @@ $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERTIMESCALEVALUE]
 $timescaleValue = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERSORTBY]);
 $sortBy = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERSHOWALL]);
+$showAll = $arrayFilter[1];
 
 /* Sort field definitions */
 define("AUTOTESTSORTBYNOTSET", 0);
@@ -352,7 +351,7 @@ if ($project <> "All") {
     foreach ($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
         if ($project == $projectValue)
             $latestBuildNumber = $_SESSION['arrayProjectBuildLatest'][$projectKey];
-            $minBuildNumberInDirectory = $latestBuildNumber;                        // Initialize, to be calculated later from test results
+            $minBuildNumberWithTestResults = $latestBuildNumber;                    // Initialize, to be calculated later from test results
     }
     $buildNumber = $latestBuildNumber - $build;                                     // Selected build
 }
@@ -371,10 +370,7 @@ if ($autotest == "All") {
               <img src="images/info.png" alt="info"></a>&nbsp&nbsp';
     echo '</div>';
     echo '<div class="metricsBoxHeaderText">';
-    if ($project == "All")
-        echo '<b>AUTOTEST DASHBOARD:</b> Select Autotest &nbsp&nbsp&nbsp <i>(filter a Project to see data from all builds with failure %)</i>';
-    else
-        echo '<b>AUTOTEST DASHBOARD:</b> Select Autotest';
+    echo '<b>AUTOTEST DASHBOARD:</b> Select Autotest';
     echo '</div>';
     echo '</div>';
 
@@ -446,8 +442,6 @@ if ($autotest == "All") {
             $result = mysqli_query($conn, $sql);
             $numberOfRows = mysqli_num_rows($result);
         } else {
-            $selectdb="USE $db";
-            $result = mysql_query($selectdb) or die (mysql_error());
             $result = mysql_query($sql) or die (mysql_error());
             $numberOfRows = mysql_num_rows($result);
         }
@@ -551,167 +545,264 @@ if ($autotest == "All") {
         $_SESSION['arrayFailingInsignAutotestInsignConfProjects'] = $arrayFailingInsignAutotestInsignConfProjects;
 
         if ($useMysqli) {
-            mysqli_free_result($result);                                            // Free result set
+            mysqli_free_result($result);
         }
         $timeLatestEnd = microtime(true);
 
-        /* Step 2: Read detailed Autotest result data with possible timescale filtering (ONLY ON SECOND ROUND AND WHEN PROJECT FILTER USED) */
+        /* Step 2: Read detailed Autotest result data with possible timescale filtering (ONLY ON SECOND ROUND) */
+        $timeAllStart = microtime(true);
         $arrayFailingAutotestFailedBuilds = array();
         $arrayFailingAutotestAllBuilds = array();
         $arrayFailingAutotestFailedPercentage = array();
-        $arrayFailingAutotestBuildConfigurations = array();
 
-        $allAutotestsCount = 0;
-        $booPrintDetailedResultsTitle = FALSE;
-        $booPrintDetailedResultsData = FALSE;
-        if (isset($_SESSION['previousProject']) AND $project == "All")
-            unset($_SESSION['previousProject']);                                    // Clear the session variable if Project filter cleared
-        if ($project <> "All")
-            $booPrintDetailedResultsTitle = TRUE;                                   // Title printed only when Project filtered (server performance issue with huge data amount)
-        if ($round == 2 AND $project <> "All")
-            $booPrintDetailedResultsData = TRUE;                                    // Data printed only on 2nd round and when Project filtered (server performance issue with huge data amount)
-        if ($booPrintDetailedResultsData) {
-            $timeAllStart = microtime(true);
+        /* Step 2.1: Read all autotests for all Projects (Project not filtered) */
+        if ($project == "All") {
+            $booPrintDetailedResultsTitle = TRUE;                                       // Titles printed always
+            $booPrintDetailedResultsData = FALSE;
+            if ($timescaleValue == $_SESSION['maxBuildDate'] AND isset($_SESSION['previousTimescaleValue']))
+                unset($_SESSION['previousTimescaleValue']);                             // Clear the session variable if using the default date (to detect the need to load from database when setting timescale to Since)
+            if ($round == 2)
+                $booPrintDetailedResultsData = TRUE;                                    // Data printed only on 2nd round
+            if ($booPrintDetailedResultsData) {
+                $timeAllDbStart = microtime(true);
 
-            /* Step 2.1: All autotests for comparison (read from the autotest xml files) */
-
-            /* Get the first available build number or the first after the selected time scale. Note: Another check is which builds include the test result xml files in the first place (see $minBuildNumberInDirectory) */
-            $minBuildNumberInDatabase = MAXCIBUILDNUMBER;
-            $projectFilter = "project=\"$project\"";                                // Project is filtered here
-            $timescaleFilter = "";
-            if ($timescaleType <> "All")
-                    $timescaleFilter = "AND timestamp>=\"$timescaleValue\"";
-            $sql = cleanSqlString(
-                   "SELECT min(build_number)
-                    FROM ci
-                    WHERE $projectFilter $timescaleFilter");
-            $dbColumnCiBuildNumber = 0;
-            if ($useMysqli) {
-                $result2 = mysqli_query($conn, $sql);
-            } else {
-                $selectdb = "USE $db";
-                $result2 = mysql_query($selectdb) or die (mysql_error());
-                $result2 = mysql_query($sql) or die (mysql_error());
-            }
-            if ($useMysqli)
-                $resultRow2 = mysqli_fetch_row($result2);
-            else
-                $resultRow2 = mysql_fetch_row($result2);
-            if ($resultRow2[$dbColumnCiBuildNumber] <> NULL AND $resultRow2[$dbColumnCiBuildNumber] <> "")
-                $minBuildNumberInDatabase = $resultRow2[$dbColumnCiBuildNumber];
-            if ($useMysqli)
-                mysqli_free_result($result2);                                       // Free result set
-            $_SESSION['minBuildNumberInDatabase'] = $minBuildNumberInDatabase;      // Save for level 2
-
-            /* Read the test results from the Project directory (structure is e.g. QtBase_stable_Integration/build_03681/macx-ios-clang_OSX_10.8 */
-            if (isset($_SESSION['previousProject'])) {
-                $previousProject = $_SESSION['previousProject'];
-                $previousConfiguration = $_SESSION['previousConfiguration'];
-                $previousBuild = $_SESSION['previousBuild'];
-                $previousTimescaleType = $_SESSION['previousTimescaleType'];
-                $previousTimescaleValue = $_SESSION['previousTimescaleValue'];
-            } else {
-                $previousProject = "NA";
-                $previousConfiguration = "NA";
-                $previousBuild = "NA";
-                $previousTimescaleType = "NA";
-                $previousTimescaleValue = "NA";
-            }
-            $booReloadTestResults = TRUE;                                                                   // Performance optimization: Check when the test results need to be (re)loaded from the zip files (which takes time)
-            if ($project == $previousProject AND $conf == $previousConfiguration AND
-                $timescaleType == $previousTimescaleType AND $timescaleValue == $previousTimescaleValue)
-                $booReloadTestResults = FALSE;                                                              // No need to reload the test results if project and other filters not changed
-            if ($timescaleType == "All" AND $build <> $previousBuild)
-                $booReloadTestResults = TRUE;                                                               // Reload if build changed when timescale not filtered (then the test results are shown for selected build)
-            if (!$booReloadTestResults) {                                                                   // Use the session variables ...
-                $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuilds'];
-                $arrayFailingAutotestBuildConfigurations = $_SESSION['arrayFailingAutotestBuildConfigurations'];
-                $minBuildNumberInDirectory = $_SESSION['minBuildNumberInDirectory'];
-            } else {                                                                                        // ... otherwise read the data from the zip files
-                if ($timescaleType == "All") {                                                              // If timescale not filtered read only the latest/selected build
-                    $buildCheckType = CHECKBUILDONE;
-                    $buildNumberToCheck = $buildNumber;
-                } else {                                                                                    // If timescale filtered read all the available builds since the date
-                    $buildCheckType = CHECKBUILDSINCE;
-                    $buildNumberToCheck = setMinBuildNumberToCheck($latestBuildNumber, $minBuildNumberInDatabase, $timescaleType);
-                }
-                $minBuildNumberInDirectory = readProjectTestResultDirectory(
-                    CITESTRESULTSDIRECTORY, $project, $buildCheckType, $buildNumberToCheck, $conf, FALSE, $arrayFailingAutotestNames,
-                    $arrayFailingAutotestBuildConfigurations, $arrayFailingAutotestAllBuilds);              // Returns the first available build number if timescale filtered, otherwise returns the selected build
-            }
-
-            $timeAllXmlDirectoryCheckEnd = microtime(true);
-
-            /* Step 2.2: Failed autotests for comparison (read from the database) */
-
-            /* Read failed Autotests from the database only for those builds and configurations that have also the xml data */
-            $projectFilter = "project = \"$project\"";                              // Project is filtered here
-            $confFilter = "cfg = \"NA\"";                                           // Any value that does NOT match with any cfg
-            foreach ($arrayFailingAutotestBuildConfigurations as $buildConfiguration) {     // In format "03681;macx-ios-clang_OSX_10.8"
-                $arrayBuildConfiguration = explode(FILTERSEPARATOR, $buildConfiguration);
-                $xmlBuild = (int)$arrayBuildConfiguration[0];
-                $xmlConf = $arrayBuildConfiguration[1];                             // If configuration filtered, this includes only the filtered configuration (therefore no need to check the $conf here)
-                if ($xmlBuild >= $minBuildNumberInDirectory)
-                    $confFilter = $confFilter . ' OR (build_number = ' . $xmlBuild . ' AND cfg = "' . $xmlConf . '")';    // Include only the confs that had the xml report file
-            }
-            $confFilter = "($confFilter)";                                          // Close with () due to OR
-            if ($timescaleType == "All")                                            // If timescale not filtered read only the latest/selected build
-                $buildFilter = " build_number = $buildNumber";
-            else                                                                    // If timescale filtered read all the available builds since the date
-                $buildFilter = " build_number >= $minBuildNumberInDirectory";
-            $timeAllSelectStart = microtime(true);
-            $sql = cleanSqlString(
-                   "SELECT name
-                    FROM test
-                    WHERE $projectFilter AND $buildFilter AND $confFilter");        // (Note: No need to check timescale here, the build_number is used instead
-            $dbColumnTestName = 0;
-            if ($useMysqli) {
-                $result2 = mysqli_query($conn, $sql);
-                $numberOfRows2 = mysqli_num_rows($result2);
-            } else {
-                $selectdb = "USE $db";
-                $result2 = mysql_query($selectdb) or die (mysql_error());
-                $result2 = mysql_query($sql) or die (mysql_error());
-                $numberOfRows2 = mysql_num_rows($result2);
-            }
-
-            /* Calculate the builds where autotest has failed */
-            for ($j=0; $j<$numberOfRows2; $j++) {
-                if ($useMysqli)
-                    $resultRow2 = mysqli_fetch_row($result2);
+                /* Performance optimization: Check when the test results need to be (re)loaded from the database (which takes time) */
+                if (isset($_SESSION['previousConfiguration']))
+                    $previousConfiguration = $_SESSION['previousConfiguration'];
                 else
-                    $resultRow2 = mysql_fetch_row($result2);
-                for ($k=0; $k<$autotestCount; $k++) {                               // Loop all the available Autotests to collect data per one autotest
-                    if ($arrayFailingAutotestNames[$k] == $resultRow2[$dbColumnTestName])
-                        $arrayFailingAutotestFailedBuilds[$k]++;                    // Save fail count
+                    $previousConfiguration = "NA";
+                if (isset($_SESSION['previousTimescaleType']))
+                    $previousTimescaleType = $_SESSION['previousTimescaleType'];
+                else
+                    $previousTimescaleType = "NA";
+                if (isset($_SESSION['previousTimescaleValue']))
+                    $previousTimescaleValue = $_SESSION['previousTimescaleValue'];
+                else
+                    $previousTimescaleValue = "NA";
+                $booReloadTestResultsAll = FALSE;
+                $booReloadTestResultsFiltered = FALSE;
+                $confFilter = "";
+                $timescaleFilter = "";
+                $where = "";
+                if ($timescaleType == "All")
+                    $from = "all_test_latest";
+                else
+                    $from = "all_test";
+                if ($conf == "All" AND $timescaleType == "All") {                       // If no filters selected (only one of the $booReloadTestResultsAll/Filtered... may be TRUE at a time)
+                    if (!isset($_SESSION['arrayFailingAutotestFailedBuildsAll'])) {                         // All data loaded only once per session
+                        $booReloadTestResultsAll = TRUE;
+                    }
+                } else {
+                    if ($conf <> $previousConfiguration OR
+                        $timescaleType <> $previousTimescaleType OR
+                        $timescaleValue <> $previousTimescaleValue) {                   // Filtered data loaded when Configuration or Timescale changed
+                        $booReloadTestResultsFiltered = TRUE;
+                        $where = "WHERE ";
+                        if ($conf <> "All")
+                            $confFilter = "cfg=\"$conf\"";
+                        if ($timescaleType <> "All")
+                            $timescaleFilter = " AND timestamp>=\"$timescaleValue\"";
+                    }
                 }
-            }
-            if ($useMysqli)
-                mysqli_free_result($result2);                                       // Free result set
-            $timeAllDbFailedCheckEnd = microtime(true);
 
-            /* Step 2.3: Calculate the failure percentage */
-            for ($k=0; $k<$autotestCount; $k++)
-                $arrayFailingAutotestFailedPercentage[$k]
-                    = round(100 * ($arrayFailingAutotestFailedBuilds[$k] / $arrayFailingAutotestAllBuilds[$k]));  // Must be rounded to integer for sorting to work
+                /* Get total and failed build counts for each autotest (only one of all/configuration/timescale loading done at a time) */
+                if ($showAll == "show") {                                               // If selected to show the data (performance optimization)
+                    if ($booReloadTestResultsAll OR $booReloadTestResultsFiltered) {    // Load data from the database ...
+                        $sql = cleanSqlString(
+                               "SELECT name, failed
+                                FROM $from
+                                $where $confFilter $timescaleFilter");                  // Read all data and save to session variables for faster filtering after initial loading
+                        $dbColumnTestName = 0;
+                        $dbColumnTestFailed = 1;
+                        if ($useMysqli) {
+                            $result2 = mysqli_query($conn, $sql);
+                            $numberOfRows2 = mysqli_num_rows($result2);
+                        } else {
+                            $result2 = mysql_query($sql) or die (mysql_error());
+                            $numberOfRows2 = mysql_num_rows($result2);
+                        }
+                        for ($j=0; $j<$numberOfRows2; $j++) {
+                            if ($useMysqli)
+                                $resultRow2 = mysqli_fetch_row($result2);
+                            else
+                                $resultRow2 = mysql_fetch_row($result2);
+                            for ($k=0; $k<$autotestCount; $k++) {                       // Loop all the available Autotests to collect data per one autotest
+                                if ($arrayFailingAutotestNames[$k] == $resultRow2[$dbColumnTestName]) {
+                                    $arrayFailingAutotestAllBuilds[$k]++;
+                                    if ($resultRow2[$dbColumnTestFailed] > 0)
+                                        $arrayFailingAutotestFailedBuilds[$k]++;
+                                }
+                            }
+                        }
+                        if ($useMysqli)
+                            mysqli_free_result($result2);
+                    } else {                                                            // ... otherwise use the session variables
+                        if ($conf == "All" AND $timescaleType == "All") {               // Use the all data when no filters selected
+                            $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuildsAll'];
+                            $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuildsAll'];
+                        } else {                                                        // Use the filtered data when a filter used
+                            $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuildsFiltered'];
+                            $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuildsFiltered'];
+                        }
+                    }
+                }
 
-            /* Save the calculated data for level 2 and for returning from Level 2 to Level 1 (so that it would not be needed to read the data from xml files) */
-            $_SESSION['arrayFailingAutotestFailedBuilds'] = $arrayFailingAutotestFailedBuilds;
-            $_SESSION['arrayFailingAutotestAllBuilds'] = $arrayFailingAutotestAllBuilds;
-            $_SESSION['arrayFailingAutotestFailedPercentage'] = $arrayFailingAutotestFailedPercentage;
-            $_SESSION['minBuildNumberInDirectory'] = $minBuildNumberInDirectory;
-            $_SESSION['arrayFailingAutotestBuildConfigurations'] = $arrayFailingAutotestBuildConfigurations;
-            $_SESSION['previousProject'] = $project;
-            $_SESSION['previousConfiguration'] = $conf;
-            $_SESSION['previousBuild'] = $build;
-            $_SESSION['previousTimescaleType'] = $timescaleType;
-            $_SESSION['previousTimescaleValue'] = $timescaleValue;
+                /* Save the calculated data for for returning from Level 2 to Level 1 (so that it would not be needed to read the data from database again) */
+                if ($showAll == "show") {                                               // Save session variables only if selected to show the data
+                    if ($booReloadTestResultsAll) {
+                        $_SESSION['arrayFailingAutotestFailedBuildsAll'] = $arrayFailingAutotestFailedBuilds;
+                        $_SESSION['arrayFailingAutotestAllBuildsAll'] = $arrayFailingAutotestAllBuilds;
+                    }
+                    if ($booReloadTestResultsFiltered) {
+                        $_SESSION['arrayFailingAutotestFailedBuildsFiltered'] = $arrayFailingAutotestFailedBuilds;
+                        $_SESSION['arrayFailingAutotestAllBuildsFiltered'] = $arrayFailingAutotestAllBuilds;
+                    }
+                    $_SESSION['previousConfiguration'] = $conf;
+                    $_SESSION['previousTimescaleType'] = $timescaleType;
+                    $_SESSION['previousTimescaleValue'] = $timescaleValue;
+                }
 
-            $timeAllEnd = microtime(true);
-        } // endif $booPrintDetailedResultsData
+                $timeAllDbEnd = microtime(true);
+            } // endif $booPrintDetailedResultsData
 
-        /* Read the timestamp of the latest/selected build and the first build with detailed test result data */
-        if ($project <> "All") {
+        /* Step 2.2: Read autotests for a filtered Project */
+        } else {
+            $booPrintDetailedResultsTitle = TRUE;                                   // Titles printed always
+            $booPrintDetailedResultsData = FALSE;
+            if (isset($_SESSION['previousProject']) AND $project == "All")
+                unset($_SESSION['previousProject']);                                // Clear the session variable if Project filter cleared
+            if ($round == 2)
+                $booPrintDetailedResultsData = TRUE;                                // Data printed only on 2nd round
+            if ($booPrintDetailedResultsData) {
+                $timeAllDbStart = microtime(true);
+
+                /* Get the first available build number or the first after the selected time scale */
+                $minBuildNumberInDatabase = MAXCIBUILDNUMBER;
+                $projectFilter = "project=\"$project\"";                            // Project is filtered here
+                $timescaleFilter = "";
+                if ($timescaleType <> "All")
+                        $timescaleFilter = "AND timestamp>=\"$timescaleValue\"";
+                $sql = cleanSqlString(
+                       "SELECT MIN(build_number)
+                        FROM ci
+                        WHERE $projectFilter $timescaleFilter");
+                $dbColumnCiBuildNumber = 0;
+                if ($useMysqli) {
+                    $result2 = mysqli_query($conn, $sql);
+                    $resultRow2 = mysqli_fetch_row($result2);
+                } else {
+                    $result2 = mysql_query($sql) or die (mysql_error());
+                    $resultRow2 = mysql_fetch_row($result2);
+                }
+                if ($resultRow2[$dbColumnCiBuildNumber] <> NULL AND $resultRow2[$dbColumnCiBuildNumber] <> "")
+                    $minBuildNumberInDatabase = $resultRow2[$dbColumnCiBuildNumber];
+                if ($useMysqli)
+                    mysqli_free_result($result2);
+                $_SESSION['minBuildNumberInDatabase'] = $minBuildNumberInDatabase;  // Save for level 2
+
+                /* Get the first build with detailed test result data */
+                $projectFilter = "";                                                // NOTE: The same filters are used also on the step below (therefore calculated here for any filter selections)
+                $buildFilter = "";
+                $confFilter = "";
+                $from = "all_test_latest";
+                $projectFilter = "project=\"$project\"";                            // Project is filtered here
+                if ($conf <> "All")
+                    $confFilter = " AND cfg=\"$conf\"";
+                if ($timescaleType == "All") {                                      // If timescale not filtered read only the latest/selected build
+                    $buildFilter = " AND build_number = $buildNumber";
+                    if ($build > 0)                                                 // If other than the latest build
+                        $from = "all_test";
+                } else {                                                            // If timescale filtered read all the available builds since the date
+                    $from = "all_test";
+                    $buildFilter = " AND build_number >= $minBuildNumberInDatabase";
+                }
+                $sql = cleanSqlString(
+                       "SELECT MIN(build_number)
+                        FROM $from
+                        WHERE $projectFilter $buildFilter $confFilter");
+                $dbColumnTestBuildNumber = 0;
+                if ($useMysqli) {
+                    $result2 = mysqli_query($conn, $sql);
+                    $resultRow2 = mysqli_fetch_row($result2);
+                } else {
+                    $result2 = mysql_query($sql) or die (mysql_error());
+                    $numberOfRows2 = mysql_num_rows($result2);
+                    $resultRow2 = mysql_fetch_row($result2);
+                }
+                if ($resultRow2[$dbColumnTestBuildNumber] <> NULL AND $resultRow2[$dbColumnTestBuildNumber] <> "")
+                    $minBuildNumberWithTestResults = $resultRow2[$dbColumnTestBuildNumber]; // Replace the default value set earlier
+                if ($useMysqli)
+                    mysqli_free_result($result2);
+
+                /* Get total and failed build counts for each autotest (using the same filters as above) */
+                if (isset($_SESSION['previousProject'])) {
+                    $previousProject = $_SESSION['previousProject'];
+                    $previousConfiguration = $_SESSION['previousConfiguration'];
+                    $previousBuild = $_SESSION['previousBuild'];
+                    $previousTimescaleType = $_SESSION['previousTimescaleType'];
+                    $previousTimescaleValue = $_SESSION['previousTimescaleValue'];
+                } else {
+                    $previousProject = "NA";
+                    $previousConfiguration = "NA";
+                    $previousBuild = "NA";
+                    $previousTimescaleType = "NA";
+                    $previousTimescaleValue = "NA";
+                }
+                $booReloadTestResults = TRUE;                                       // Performance optimization: Check when the test results need to be (re)loaded from the zip files (which takes time)
+                if ($project == $previousProject AND $conf == $previousConfiguration AND
+                    $timescaleType == $previousTimescaleType AND $timescaleValue == $previousTimescaleValue)
+                    $booReloadTestResults = FALSE;                                  // No need to reload the test results if project and other filters not changed
+                if ($timescaleType == "All" AND $build <> $previousBuild)
+                    $booReloadTestResults = TRUE;                                   // Reload if build changed when timescale not filtered (then the test results are shown for selected build)
+                if (!$booReloadTestResults) {                                       // Use the session variables ...
+                    $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuilds'];
+                    $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuilds'];
+                    $minBuildNumberWithTestResults = $_SESSION['minBuildNumberWithTestResults'];
+                } else {                                                            // ... otherwise read the data from the database
+                    $sql = cleanSqlString(
+                           "SELECT name, failed
+                            FROM $from
+                            WHERE $projectFilter $buildFilter $confFilter");        // Use the same filters as above
+                    $dbColumnTestName = 0;
+                    $dbColumnTestFailed = 1;
+                    if ($useMysqli) {
+                        $result2 = mysqli_query($conn, $sql);
+                        $numberOfRows2 = mysqli_num_rows($result2);
+                    } else {
+                        $result2 = mysql_query($sql) or die (mysql_error());
+                        $numberOfRows2 = mysql_num_rows($result2);
+                    }
+                    for ($j=0; $j<$numberOfRows2; $j++) {
+                        if ($useMysqli)
+                            $resultRow2 = mysqli_fetch_row($result2);
+                        else
+                            $resultRow2 = mysql_fetch_row($result2);
+                        for ($k=0; $k<$autotestCount; $k++) {                       // Loop all the available Autotests to collect data per one autotest
+                            if ($arrayFailingAutotestNames[$k] == $resultRow2[$dbColumnTestName]) {
+                                $arrayFailingAutotestAllBuilds[$k]++;
+                                if ($resultRow2[$dbColumnTestFailed] > 0)
+                                    $arrayFailingAutotestFailedBuilds[$k]++;
+                            }
+                        }
+                    }
+                    if ($useMysqli)
+                        mysqli_free_result($result2);
+                }
+
+                /* Save the calculated data for level 2 and for returning from Level 2 to Level 1 (so that it would not be needed to read the data from database again) */
+                $_SESSION['arrayFailingAutotestFailedBuilds'] = $arrayFailingAutotestFailedBuilds;
+                $_SESSION['arrayFailingAutotestAllBuilds'] = $arrayFailingAutotestAllBuilds;
+                $_SESSION['minBuildNumberWithTestResults'] = $minBuildNumberWithTestResults;
+                $_SESSION['previousProject'] = $project;
+                $_SESSION['previousConfiguration'] = $conf;
+                $_SESSION['previousBuild'] = $build;
+                $_SESSION['previousTimescaleType'] = $timescaleType;
+                $_SESSION['previousTimescaleValue'] = $timescaleValue;
+
+                $timeAllDbEnd = microtime(true);
+            } // endif $booPrintDetailedResultsData
+            /* Read the timestamp of the latest/selected build and the first build with detailed test result data */
+
             for ($k=0; $k<=1; $k++) {                                               // Run twice: 0 = latest/selected build, 1 = first build with detailed test result data
                 $projectFilter = "project = \"$project\"";                          // Project is filtered here
                 if ($k == 0) {
@@ -724,10 +815,10 @@ if ($autotest == "All") {
                     }
                 } else {
                     $from = "ci";
-                    $buildFilter = "AND build_number = $minBuildNumberInDirectory";
+                    $buildFilter = "AND build_number = $minBuildNumberWithTestResults";
                 }
                 $sql = cleanSqlString(
-                       "SELECT min(timestamp)
+                       "SELECT MIN(timestamp)
                         FROM $from
                         WHERE $projectFilter $buildFilter");
                 $dbColumnCiTimestamp = 0;
@@ -735,8 +826,6 @@ if ($autotest == "All") {
                     $result2 = mysqli_query($conn, $sql);
                     $numberOfRows2 = mysqli_num_rows($result2);
                 } else {
-                    $selectdb = "USE $db";
-                    $result2 = mysql_query($selectdb) or die (mysql_error());
                     $result2 = mysql_query($sql) or die (mysql_error());
                     $numberOfRows2 = mysql_num_rows($result2);
                 }
@@ -747,11 +836,18 @@ if ($autotest == "All") {
                 if ($k == 0)
                     $buildTimestamp = $resultRow2[$dbColumnCiTimestamp];
                 else
-                    $minBuildNumberInDirectoryTimestamp = $resultRow2[$dbColumnCiTimestamp];
+                    $minBuildNumberWithTestResultsTimestamp = $resultRow2[$dbColumnCiTimestamp];
                 if ($useMysqli)
-                    mysqli_free_result($result2);                                   // Free result set
+                    mysqli_free_result($result2);
             }
-        }
+
+        } // End of step 2.2
+        $timeAllEnd = microtime(true);
+
+        /* Calculate the failure percentage */
+        for ($k=0; $k<$autotestCount; $k++)
+            $arrayFailingAutotestFailedPercentage[$k]
+                = round(100 * ($arrayFailingAutotestFailedBuilds[$k] / $arrayFailingAutotestAllBuilds[$k]));  // Must be rounded to integer for sorting to work
 
         /* Print the used filters */
         if ($project <> "All" OR $conf <> "All" OR $timescaleType <> "All") {
@@ -766,17 +862,18 @@ if ($autotest == "All") {
                 echo '<tr><td>Build:</td><td>' . $buildNumber . ' ('
                     . substr($buildTimestamp, 0, strpos($buildTimestamp, " ")) . ')</td></tr>';
             if ($booPrintDetailedResultsData) {
-                if ($minBuildNumberInDirectory == MAXCIBUILDNUMBER) {
+                if ($minBuildNumberWithTestResults == MAXCIBUILDNUMBER) {
                     $testResultBuilds = '(not any test result files available)';
                     $testResultBuildsSeeMore = '';
                 } else {
-                    $testResultBuilds = $minBuildNumberInDirectory . ' ('
-                        . substr($minBuildNumberInDirectoryTimestamp, 0, strpos($minBuildNumberInDirectoryTimestamp, " ")) . ')';
+                    $testResultBuilds = $minBuildNumberWithTestResults . ' ('
+                        . substr($minBuildNumberWithTestResultsTimestamp, 0, strpos($minBuildNumberWithTestResultsTimestamp, " ")) . ')';
                     if ($timescaleType == "Since")
                         $testResultBuilds = $testResultBuilds . ' onwards';
                     $testResultBuildsSeeMore = setSeeMoreNote($timescaleType, $timescaleValue);
                 }
-                echo '<tr><td>Test Results:</td><td>' . $testResultBuilds . $testResultBuildsSeeMore . '</td></tr>';
+                if ($project <> "All")
+                    echo '<tr><td>Test Results:</td><td>' . $testResultBuilds . $testResultBuildsSeeMore . '</td></tr>';
             }
             echo '</table>';
             echo '<div class="metricsTitle">';
@@ -785,13 +882,13 @@ if ($autotest == "All") {
         }
 
         /* Set the default sorting */
-        if ($booPrintDetailedResultsData) {
+        if ($booPrintDetailedResultsData AND ($showAll == "show" OR $project <> "All")) {       // Sort by Failed % on level 1 if results printed or always on level 2
             if ($sortBy == AUTOTESTSORTBYNOTSET) {
-                if ($minBuildNumberInDirectory == MAXCIBUILDNUMBER)
+                if ($minBuildNumberWithTestResults == MAXCIBUILDNUMBER)
                     $sortBy = AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF;
                 else
                     $sortBy = AUTOTESTSORTBYAUTOTESTFAILEDPERCENTAGE;                           // Sorting based the Failed % when all builds data available and shown
-                }
+            }
         } else {
             if ($sortBy == AUTOTESTSORTBYNOTSET)
                 $sortBy = AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF;                               // Default sorting is the significant blocking when only the latest/selected build shown
@@ -860,16 +957,32 @@ if ($autotest == "All") {
             if ($round == 1) {
                 $xmlBuildInfo = 'Detailed Test Results <span class="loading"><span>.</span><span>.</span><span>.</span></span>';
             } else {
-                if ($minBuildNumberInDirectory == MAXCIBUILDNUMBER) {             // No builds found with test result xml files
+                if ($minBuildNumberWithTestResults == MAXCIBUILDNUMBER) {         // No builds found with all test results
                     $xmlBuildInfo = "(not any Builds with test result files)";
                 } else {
+                    if ($project == "All") {
+                        $showAllLink = '<a href="javascript:void(0);" onclick="toggleAutotestShowAll(\'' . $showAll . '\')" ';
+                        if ($showAll == "show") {                                 // To select if the all data is shown or not
+                            $showAllLink = $showAllLink . 'title="Hide displaying the all builds data when project is not filtered. &#10;This may be practical for faster display updates when using the &#10;timescale filter.">hide</a> ';
+                            $booShowAll = TRUE;
+                        } else {
+                            $showAllLink = $showAllLink . 'title="Show the all builds data when project is not filtered. &#10;Note: This may slow down the display updates when &#10;using the timescale filter.">show</a> ';
+                            $booShowAll = FALSE;
+                        }
+                    } else {
+                        $showAllLink = '';
+                        $booShowAll = TRUE;
+                    }
                     if ($timescaleType == "All" AND CITESTRESULTBUILDCOUNT == 1)
                         $xmlBuildInfo = "Detailed Test Results";
                     else
-                        $xmlBuildInfo = "Detailed Test Results since Build $minBuildNumberInDirectory";
+                        if ($project == "All")
+                            $xmlBuildInfo = "Detailed Test Results";
+                        else
+                            $xmlBuildInfo = "Detailed Test Results since Build $minBuildNumberWithTestResults";
                 }
             }
-            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">' . $xmlBuildInfo . '</th>';
+            echo '<th colspan="3" class="tableBottomBorder tableSideBorder">' . $showAllLink . $xmlBuildInfo . '</th>';
         }
         echo '</tr>';
         echo '<tr class="tableBottomBorder">';                                                  // Third row
@@ -904,7 +1017,7 @@ if ($autotest == "All") {
         echo '</td>';
         if ($booPrintDetailedResultsTitle) {
             echo '<td class="tableBottomBorder tableLeftBorder tableCellCentered">Builds where<br>failed</td>';
-            echo '<td class="tableBottomBorder tableCellCentered">Builds where<br>run (all)</td>';
+            echo '<td class="tableBottomBorder tableCellCentered">Builds where<br>run</td>';
             echo '<td class="sortField tableBottomBorder tableRightBorder tableCellCentered">';
             if ($sortBy == AUTOTESTSORTBYAUTOTESTFAILEDPERCENTAGE)
                 echo 'Failed %<br>&diams;';                                       // Identify selected sorting
@@ -1003,7 +1116,7 @@ if ($autotest == "All") {
                             echo '<td class="tableRightBorder tableCellCentered">-</td>';
 
                         if ($booPrintDetailedResultsTitle) {
-                            if ($booPrintDetailedResultsData) {
+                            if ($booPrintDetailedResultsData AND $booShowAll) {
                                 /* Detailed test results: Builds where failed */
                                 if ($arrayFailingAutotestFailedBuilds[$i] > 0)
                                     echo '<td class="tableLeftBorder tableCellCentered">'
@@ -1070,7 +1183,7 @@ if ($autotest == "All") {
             echo '<td class="tableTopBorder tableCellCentered">' . $failingInsignAutotestBlockingConfCount . '</td>';
             echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $failingInsignAutotestInsignConfCount . '</td>';
             if ($booPrintDetailedResultsTitle) {
-                if ($booPrintDetailedResultsData) {
+                if ($booPrintDetailedResultsData AND $booShowAll) {
                     echo '<td class="tableTopBorder tableCellCentered">' . $arrayFailingAutotestFailedBuildsSum . '</td>';
                     echo '<td class="tableTopBorder tableCellCentered">' . $arrayFailingAutotestAllBuildsSum . '</td>';
                     echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $arrayFailingAutotestFailedPercentageSum . '%</td>';
@@ -1101,11 +1214,10 @@ if ($autotest == "All") {
         $timeLatest = round($timeLatestEnd - $timeLatestStart, 4);
         $timeLatestSelect = round($timeLatestSelectEnd - $timeLatestSelectStart, 4);
         $timeLatestCalculation = round($timeLatest - $timeLatestSelect, 4);
-        if (isset($timeAllEnd)) {
+        if (isset($timeAllDbEnd)) {
             $timeAll = round($timeAllEnd - $timeAllStart, 4);
-            $timeAllXml = round($timeAllXmlDirectoryCheckEnd - $timeAllStart, 4);
-            $timeAllDb = round($timeAllDbFailedCheckEnd - $timeAllXmlDirectoryCheckEnd, 4);
-            $timeAllCalculation = round($timeAll - $timeAllXml - $timeAllDb, 4);
+            $timeAllSelect = round($timeAllDbEnd - $timeAllDbStart, 4);
+            $timeAllCalculation = round($timeAll - $timeAllDb, 4);
         }
         echo "<div class=\"elapdedTime\">";
         echo "<ul><li>";
@@ -1114,11 +1226,10 @@ if ($autotest == "All") {
             (database connect time: $timeDbConnect s,
              database read time: $timeLatestSelect s,
              calculation: $timeLatestCalculation s)<br>";
-        if (isset($timeAll))
+        if (isset($timeAllDbEnd))
             echo "All builds:&nbsp&nbsp&nbsp&nbsp&nbsp $timeAll s
             (database connect time: $timeDbConnect s,
-             directory read time: $timeAllXml s,
-             database read time: $timeAllDb s,
+             database read time: $timeAllSelect s,
              calculation: $timeAllCalculation s)<br>";
         echo "</li></ul>";
         echo "</div>";
@@ -1152,8 +1263,6 @@ if ($autotest <> "All") {
     $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuilds'];
     $arrayFailingAutotestAllBuilds = array();
     $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuilds'];
-    $arrayFailingAutotestFailedPercentage = array();
-    $arrayFailingAutotestFailedPercentage = $_SESSION['arrayFailingAutotestFailedPercentage'];
     $arrayAutotestName = array();
     $arrayAutotestName[] = $autotest;                                           // Save selected autotest into array for the readProjectTestResultDirectory function call below
 
@@ -1180,17 +1289,11 @@ if ($autotest <> "All") {
                     $dbColumnCiTimestamp = 0;
                     if ($useMysqli) {
                         $result2 = mysqli_query($conn, $sql);
-                        $numberOfRows2 = mysqli_num_rows($result2);
-                    } else {
-                        $selectdb = "USE $db";
-                        $result2 = mysql_query($selectdb) or die (mysql_error());
-                        $result2 = mysql_query($sql) or die (mysql_error());
-                        $numberOfRows2 = mysql_num_rows($result2);
-                    }
-                    if ($useMysqli)
                         $resultRow2 = mysqli_fetch_row($result2);
-                    else
+                    } else {
+                        $result2 = mysql_query($sql) or die (mysql_error());
                         $resultRow2 = mysql_fetch_row($result2);
+                    }
                     $buildTimestamp = $resultRow2[$dbColumnCiTimestamp];
                     if ($useMysqli)
                         mysqli_free_result($result2);                                   // Free result set
@@ -1200,23 +1303,17 @@ if ($autotest <> "All") {
                         $from = "ci";
                         $timescaleFilter = "AND timestamp >= \"$timescaleValue\"";
                         $sql = cleanSqlString(
-                               "SELECT min(build_number)
+                               "SELECT MIN(build_number)
                                 FROM $from
                                 WHERE $projectFilter $timescaleFilter");
                         $dbColumnCiBuildNumber = 0;
                         if ($useMysqli) {
                             $result2 = mysqli_query($conn, $sql);
-                            $numberOfRows2 = mysqli_num_rows($result2);
-                        } else {
-                            $selectdb = "USE $db";
-                            $result2 = mysql_query($selectdb) or die (mysql_error());
-                            $result2 = mysql_query($sql) or die (mysql_error());
-                            $numberOfRows2 = mysql_num_rows($result2);
-                        }
-                        if ($useMysqli)
                             $resultRow2 = mysqli_fetch_row($result2);
-                        else
+                        } else {
+                            $result2 = mysql_query($sql) or die (mysql_error());
                             $resultRow2 = mysql_fetch_row($result2);
+                        }
                         if ($resultRow2[$dbColumnCiBuildNumber] <> NULL AND $resultRow2[$dbColumnCiBuildNumber] <> "")
                             $firstTimescaleBuild = $resultRow2[$dbColumnCiBuildNumber];
                         if ($useMysqli)
@@ -1262,8 +1359,6 @@ if ($autotest <> "All") {
                     $result = mysqli_query($conn, $sql);
                     $numberOfRows = mysqli_num_rows($result);
                 } else {
-                    $selectdb="USE $db";
-                    $result = mysql_query($selectdb) or die (mysql_error());
                     $result = mysql_query($sql) or die (mysql_error());
                     $numberOfRows = mysql_num_rows($result);
                 }
@@ -1410,8 +1505,6 @@ if ($autotest <> "All") {
                                     $result2 = mysqli_query($conn, $sql);
                                     $resultRow2 = mysqli_fetch_row($result2);
                                 } else {
-                                    $selectdb="USE $db";
-                                    $result2 = mysql_query($selectdb) or die (mysql_error());
                                     $result2 = mysql_query($sql) or die (mysql_error());
                                     $resultRow2 = mysql_fetch_row($result2);
                                 }
@@ -1531,14 +1624,14 @@ if ($autotest <> "All") {
                             $buildCheckType = CHECKBUILDSINCE;
                             $buildNumberToCheck = setMinBuildNumberToCheck($latestBuildNumber, $minBuildNumberInDatabase, $timescaleType);
                         }
-                        $minBuildNumberInDirectory = readProjectTestResultDirectory(
+                        $minBuildNumberWithTestResults = readProjectTestResultDirectory(
                             CITESTRESULTSDIRECTORY, $checkedProject, $buildCheckType, $buildNumberToCheck, $conf, TRUE, $arrayAutotestName,
-                            $arrayFailingAutotestBuildConfigurations, $arrayFailingAutotestAllBuilds,
+                            $arrayFailingAutotestAllBuilds,
                             $arrayTestcaseNames, $arrayTestcaseFailed, $arrayTestcaseAll, $arrayTestcaseConfs,
                             $failingTestcaseCount, $testcaseCount, $arrayInvalidTestResultFiles);       // Returns the first available build number if timescale filtered, otherwise the selected build
 
                         /* If test result files found */
-                        if ($minBuildNumberInDirectory < MAXCIBUILDNUMBER) {
+                        if ($minBuildNumberWithTestResults < MAXCIBUILDNUMBER) {
 
                             /* Calculate the failure percentage */
                             $maxCount = 0;
@@ -1553,9 +1646,9 @@ if ($autotest <> "All") {
                             /* Read the timestamp of the first build with detailed test result data */
                             if ($project <> "All") {
                                 $projectFilter = "project = \"$project\"";                              // Project is filtered here
-                                $buildFilter = "build_number = $minBuildNumberInDirectory";
+                                $buildFilter = "build_number = $minBuildNumberWithTestResults";
                                 $from = "ci";
-                                $sql = "SELECT min(timestamp)
+                                $sql = "SELECT MIN(timestamp)
                                         FROM $from
                                         WHERE $projectFilter AND $buildFilter";
                                 $dbColumnCiTimestamp = 0;
@@ -1563,8 +1656,6 @@ if ($autotest <> "All") {
                                     $result2 = mysqli_query($conn, $sql);
                                     $numberOfRows2 = mysqli_num_rows($result2);
                                 } else {
-                                    $selectdb = "USE $db";
-                                    $result2 = mysql_query($selectdb) or die (mysql_error());
                                     $result2 = mysql_query($sql) or die (mysql_error());
                                     $numberOfRows2 = mysql_num_rows($result2);
                                 }
@@ -1572,19 +1663,19 @@ if ($autotest <> "All") {
                                     $resultRow2 = mysqli_fetch_row($result2);
                                 else
                                     $resultRow2 = mysql_fetch_row($result2);
-                                $minBuildNumberInDirectoryTimestamp = $resultRow2[$dbColumnCiTimestamp];
+                                $minBuildNumberWithTestResultsTimestamp = $resultRow2[$dbColumnCiTimestamp];
                                 if ($useMysqli)
                                     mysqli_free_result($result2);                                       // Free result set
                             }
 
                             /* Print the test report info */
-                            $buildCount = $latestBuildNumber - $minBuildNumberInDirectory + 1;
+                            $buildCount = $latestBuildNumber - $minBuildNumberWithTestResults + 1;
                             if ($timescaleType == "All")
                                 $testResultBuilds = ' from build ';
                             else
                                 $testResultBuilds = ' from ' . $buildCount . ' builds since ';
-                            $testResultBuilds = $testResultBuilds . $minBuildNumberInDirectory . ' ('
-                                . substr($minBuildNumberInDirectoryTimestamp, 0, strpos($minBuildNumberInDirectoryTimestamp, " ")) . ')';
+                            $testResultBuilds = $testResultBuilds . $minBuildNumberWithTestResults . ' ('
+                                . substr($minBuildNumberWithTestResultsTimestamp, 0, strpos($minBuildNumberWithTestResultsTimestamp, " ")) . ')';
                             $testResultBuildsSeeMore = setSeeMoreNote($timescaleType, $timescaleValue);
                             $failingTestcasePercentage = calculatePercentage($failingTestcaseCount, $testcaseCount);
                             echo $testResultBuilds . $testResultBuildsSeeMore . '</div>';               // ... the title closed here
@@ -1607,7 +1698,7 @@ if ($autotest <> "All") {
                                 $buildData = '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleAll">
                                     <b>ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</b></td>';
                             if ($timescaleType == "Since") {
-                                if ($minBuildNumberInDirectory == $firstTimescaleBuild)         // Data available since the same build as filtered by date
+                                if ($minBuildNumberWithTestResults == $firstTimescaleBuild)     // Data available since the same build as filtered by date
                                     $buildData = '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">';
                                 else                                                            // Data available only for certain builds after those filtered by date
                                     $buildData = '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSinceBuild">';
@@ -1624,7 +1715,7 @@ if ($autotest <> "All") {
                             echo '<th></th>';
                             $xmlBuildInfo = '<th colspan="3" class="tableBottomBorder tableSideBorder">Detailed Test Results';
                             if ($timescaleType == "Since" OR CITESTRESULTBUILDCOUNT > 1)
-                                $xmlBuildInfo = $xmlBuildInfo . ' since Build ' . $minBuildNumberInDirectory;
+                                $xmlBuildInfo = $xmlBuildInfo . ' since Build ' . $minBuildNumberWithTestResults;
                             $xmlBuildInfo = $xmlBuildInfo . '</th>';
                             echo $xmlBuildInfo;
                             if ($conf == "All") {                                               // Show list of configurations only when not filtered

@@ -36,21 +36,23 @@
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
         <td class="tableSingleBorder">List of failing Autotests in latest builds by failure category and in all (selected) builds with failed percentage.<br>
-                                      <i>Tip: You can sort the list by clicking the desired column title.</i></td>
+                                      <i>Tip 1: By default, the all builds data is hidden. You can show or hide the list with the show/hide link.</i><br>
+                                      <i>Tip 2: You can sort the list by clicking the desired column title.</i>
+        </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
         <td class="tableSingleBorder"><b>Failed Autotests:</b> The number of Project Configurations (their latest build) where the Autotest failed (by failure category).<br>
-                                      <b>Detailed Test Results:</b> The number of Project Configurations (their all builds) where the Autotest has failed (based on data from
-                                         database) and run (based on existence of test report files), and percentage of the failed ones. Calculated based on all test report
-                                         files for the latest build, or according to the Timescale filter i.e. based on the builds done after the selected date.<br>
-                                         <i>Note 1: This is calculated only when a Project is filtered.</i><br>
-                                         <i>Note 2: Test report files may not be available from all builds. </i></td>
+                                      <b>Detailed Test Results:</b> The number of Project Configurations (their all builds) where the Autotest has failed and run,
+                                         and the percentage of the failed ones. Calculated for the latest build, or according to the Timescale filter i.e. based on the
+                                         builds done after the selected date.<br>
+        </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
         <td class="tableSingleBorder">Higher count means the Autotest is failing in higher number of Configurations, and should therefore be analyzed.<br>
-                                      Failed percentage 100% means the Autotest has failed in every build it has been run.</td>
+                                      Failed percentage 100% means the Autotest has failed in every build it has been run.
+        </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Target value</th>
@@ -68,17 +70,15 @@
                                       <b>Configuration significance:</b> blocked/insignificant tag (if Configuration is tagged as "insignificant" the build will not
                                          fail even though some significant Autotests would fail)<br>
                                       <b>Autotest name:</b> e.g. tst_qftp, several per Project and Configuration<br>
-                                      <b>Autotest result:</b> name in the list indicates a failure (i.e. the passed ones are not listed)<br>
+                                      <b>Autotest result:</b> passed/failed/skipped; name in the list indicates a failure i.e. others are not listed<br>
                                       <b>Autotest significance:</b> tag "significant" (failure leads to build failure, unless the Configuration set insignificant) /
                                          "insignificant" (failure does not lead to build failure)<br>
-                                      <b>Autotest result file:</b> if the related test result file (e.g. tst_qftp-testresults-00.xml) exists, the Autotest was run in
-                                         the related Configuration build
         </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data source</th>
-        <td class="tableSingleBorder">Test case data is in xml files (zipped) in Project Configuration directories in http://testresults.qt-project.org/ci/<br>
-                                      All other data is in SQL database parsed from the log files in http://testresults.qt-project.org/ci/</td>
+        <td class="tableSingleBorder">Data in SQL database parsed from the log files in http://testresults.qt-project.org/ci/
+        </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data update cycle</th>

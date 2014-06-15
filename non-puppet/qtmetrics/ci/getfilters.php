@@ -105,7 +105,11 @@ $timeAutotestValues = microtime(true);
         echo "<option value=\"$i\">$i</option>";
 ?>
 </select>
+<?php
+// Hidden elements to save data from Autotest dashboard selection fields
+?>
 <input id="autotestSortBy" type="hidden" value="0">
+<input name="autotestShowAll" id="autotestShowAll" type="hidden" value="hide">
 </div>
 <div id="filterFieldsMiddle">
 <label>Timescale:</label>

@@ -108,7 +108,8 @@ include "commondefinitions.php";
                                                           document.getElementById("build").value,
                                                           document.getElementById("timescale").value,
                                                           document.getElementById("since").value,
-                                                          document.getElementById("autotestSortBy").value);
+                                                          document.getElementById("autotestSortBy").value,
+                                                          document.getElementById("autotestShowAll").value);
                         getMetricData(i, file, round, filterString);
                     }
                     else {
@@ -151,17 +152,18 @@ include "commondefinitions.php";
         /* Load all metrics boxes */
         function loadMetricsBoxes()
         {
-            showMetricsBoxes("All", "All", "All", 0, "All");
+            showMetricsBoxes("All", "All", "All", 0, "All", "hide");
         }
 
         /* Show all metrics boxes the first time */
-        function showMetricsBoxes(project, conf, autotest, build, timescale)
+        function showMetricsBoxes(project, conf, autotest, build, timescale, showAll)
         {
             document.getElementById("project").value = project;  // Save default values (not necessarily the first item in the list)
             document.getElementById("conf").value = conf;
             document.getElementById("autotest").value = autotest;
             document.getElementById("build").value = build;
             document.getElementById("timescale").value = timescale;
+            document.getElementById("autotestShowAll").value = showAll;
             var i;
             var file;
             var round;
@@ -177,7 +179,7 @@ include "commondefinitions.php";
                 file = "<?php echo $filepath ?>";
                 round = 1;                                       // First round tor this update
                 document.getElementById("roundCounter"+i).value = round;
-                filterString = createFilterString(project, conf, autotest, build, timescale, "na", "na");
+                filterString = createFilterString(project, conf, autotest, build, timescale, "na", "na", showAll);
                 getMetricData(i, file, round, filterString);
                 updatedMetricsBoxCount++;
             <?php
@@ -187,12 +189,15 @@ include "commondefinitions.php";
         }
 
         /* Update the metrics boxes based on filtering */
-        function updateMetricsBoxes(filter, value, sortBy)       // filter = "project" / "conf" / "autotest" / "build" / "timescale"; sortBy is optional
+        function updateMetricsBoxes(filter, value, sortBy, showAll) // filter = "project" / "conf" / "autotest" / "build" / "timescale"; sortBy and showAll are optional
         {
             document.getElementById(filter).value = value;       // Save filtered value
-            if (typeof sortBy == "undefined")                    // sortBy is optional, set 0 as a default
-                var sortBy = 0;
+            if (typeof sortBy == "undefined")                    // sortBy is optional
+                var sortBy = document.getElementById("autotestSortBy").value;
+            if (typeof showAll == "undefined")                   // showAll is optional
+                var showAll = document.getElementById("autotestShowAll").value;
             document.getElementById("autotestSortBy").value = sortBy;
+            document.getElementById("autotestShowAll").value = showAll;
             var i;
             var file;
             var round;
@@ -226,7 +231,8 @@ include "commondefinitions.php";
                                                       document.getElementById("build").value,
                                                       timescaleType,
                                                       timescaleValue,
-                                                      sortBy);
+                                                      sortBy,
+                                                      showAll);
                     getMetricData(i, file, round, filterString);
                     updatedMetricsBoxCount++;
                 }
@@ -303,7 +309,7 @@ include "commondefinitions.php";
         }
 
         /* Create the filter string (as defined in ci/definitions.php) */
-        function createFilterString(project, conf, autotest, build, timescaleType, timescaleValue, sortBy)
+        function createFilterString(project, conf, autotest, build, timescaleType, timescaleValue, sortBy, showAll)
         {
             var filterString;
             var filterSeparator = "<?php echo FILTERSEPARATOR ?>";               // (transfer php constant to javascript)
@@ -314,7 +320,8 @@ include "commondefinitions.php";
                 + "build" + filterValueSeparator + build + filterSeparator
                 + "timescaleType" + filterValueSeparator + timescaleType + filterSeparator
                 + "timescaleValue" + filterValueSeparator + timescaleValue + filterSeparator
-                + "sortBy" + filterValueSeparator + sortBy + filterSeparator;
+                + "sortBy" + filterValueSeparator + sortBy + filterSeparator
+                + "showAll" + filterValueSeparator + showAll + filterSeparator;
             return filterString;
         }
 
@@ -365,6 +372,7 @@ include "commondefinitions.php";
         /* Set all filters to "All" */
         function clearFilters()
         {
+            filterTimescale("All");                             // Clear the possible timescale filter styling
             loadMetricsBoxes();                                 // Note: Using this function will lead to only one Ajax call
         }
 
@@ -382,6 +390,17 @@ include "commondefinitions.php";
             session_unset();                                     // After clearing the filter session variables they are reloaded from the database
             ?>
             window.location.reload(true);
+        }
+
+        /* Toggle the show/hide selection for Autotest all builds results */
+        function toggleAutotestShowAll(value)
+        {
+            var newValue;
+            if (value=="show")
+                newValue = "hide";
+            else
+                newValue = "show";
+            updateMetricsBoxes("autotest", "All", 0, newValue);
         }
 
         /* Open a new window for a message file (html) */
@@ -461,7 +480,7 @@ include "commondefinitions.php";
 
         /* Change a css property value for an id or class (provided by w3c http://stackoverflow.com/questions/566203/changing-css-values-with-javascript) */
         function css(selector, property, value) {
-            for (var i=0; i<document.styleSheets.length;i++) {//Loop through all styles
+            for (var i=0; i<document.styleSheets.length;i++) {                  //Loop through all styles
                 //Try add rule
                 try { document.styleSheets[i].insertRule(selector+ ' {'+property+':'+value+'}', document.styleSheets[i].cssRules.length);
                 } catch(err) {try { document.styleSheets[i].addRule(selector, property+':'+value);} catch(err) {}}//IE

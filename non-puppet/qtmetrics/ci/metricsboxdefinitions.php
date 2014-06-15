@@ -69,5 +69,6 @@ define("FILTERBUILD", 3);
 define("FILTERTIMESCALETYPE", 4);
 define("FILTERTIMESCALEVALUE", 5);
 define("FILTERSORTBY", 6);
+define("FILTERSHOWALL", 7);
 
 ?>
