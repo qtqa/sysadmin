@@ -103,6 +103,8 @@ include "commondefinitions.php";
                         round++;
                         document.getElementById("roundCounter"+i).value = round;
                         filterString = createFilterString(document.getElementById("project").value,
+                                                          document.getElementById("ciProject").value,
+                                                          document.getElementById("ciBranch").value,
                                                           document.getElementById("conf").value,
                                                           document.getElementById("autotest").value,
                                                           document.getElementById("build").value,
@@ -152,13 +154,15 @@ include "commondefinitions.php";
         /* Load all metrics boxes */
         function loadMetricsBoxes()
         {
-            showMetricsBoxes("All", "All", "All", 0, "All", "hide");
+            showMetricsBoxes("All", "All", "All", "All", "All", 0, "All", "hide");
         }
 
         /* Show all metrics boxes the first time */
-        function showMetricsBoxes(project, conf, autotest, build, timescale, showAll)
+        function showMetricsBoxes(project, ciProject, ciBranch, conf, autotest, build, timescale, showAll)
         {
             document.getElementById("project").value = project;  // Save default values (not necessarily the first item in the list)
+            document.getElementById("ciProject").value = ciProject;
+            document.getElementById("ciBranch").value = ciBranch;
             document.getElementById("conf").value = conf;
             document.getElementById("autotest").value = autotest;
             document.getElementById("build").value = build;
@@ -179,7 +183,7 @@ include "commondefinitions.php";
                 file = "<?php echo $filepath ?>";
                 round = 1;                                       // First round tor this update
                 document.getElementById("roundCounter"+i).value = round;
-                filterString = createFilterString(project, conf, autotest, build, timescale, "na", "na", showAll);
+                filterString = createFilterString(project, ciProject, ciBranch, conf, autotest, build, timescale, "na", "na", showAll);
                 getMetricData(i, file, round, filterString);
                 updatedMetricsBoxCount++;
             <?php
@@ -189,7 +193,7 @@ include "commondefinitions.php";
         }
 
         /* Update the metrics boxes based on filtering */
-        function updateMetricsBoxes(filter, value, sortBy, showAll) // filter = "project" / "conf" / "autotest" / "build" / "timescale"; sortBy and showAll are optional
+        function updateMetricsBoxes(filter, value, sortBy, showAll) // filter = "project" / "ciProject" / "ciBranch" / "conf" / "autotest" / "build" / "timescale"; sortBy and showAll are optional
         {
             document.getElementById(filter).value = value;       // Save filtered value
             if (typeof sortBy == "undefined")                    // sortBy is optional
@@ -226,6 +230,8 @@ include "commondefinitions.php";
                 checkClearFilter(appliedFilter, clearFilter, filter);
                 if (appliedFilter.search(filter) >= 0 || appliedFilter.search("All") >= 0) {    // Check if this filter should update the metrics box
                     filterString = createFilterString(document.getElementById("project").value,
+                                                      document.getElementById("ciProject").value,
+                                                      document.getElementById("ciBranch").value,
                                                       document.getElementById("conf").value,
                                                       document.getElementById("autotest").value,
                                                       document.getElementById("build").value,
@@ -249,6 +255,10 @@ include "commondefinitions.php";
             if (clear.search("project") >= 0 && filter != "project") {
                 if (applied.search("All") >= 0)
                     document.getElementById("project").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("project").value = "All";
+                if (applied.search("ciBranch") >= 0)
+                    document.getElementById("project").value = "All";
                 if (applied.search("conf") >= 0)
                     document.getElementById("project").value = "All";
                 if (applied.search("autotest") >= 0)
@@ -258,10 +268,46 @@ include "commondefinitions.php";
                 if (applied.search("timescale") >= 0)
                     document.getElementById("project").value = "All";
             }
+            if (clear.search("ciProject") >= 0 && filter != "ciProject") {
+                if (applied.search("All") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("project") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("ciBranch") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("conf") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("autotest") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("build") >= 0)
+                    document.getElementById("ciProject").value = "All";
+                if (applied.search("timescale") >= 0)
+                    document.getElementById("ciProject").value = "All";
+            }
+            if (clear.search("ciBranch") >= 0 && filter != "ciBranch") {
+                if (applied.search("All") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("project") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("conf") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("autotest") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("build") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+                if (applied.search("timescale") >= 0)
+                    document.getElementById("ciBranch").value = "All";
+            }
             if (clear.search("conf") >= 0 && filter != "conf") {
                 if (applied.search("All") >= 0)
                     document.getElementById("conf").value = "All";
                 if (applied.search("project") >= 0)
+                    document.getElementById("conf").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("conf").value = "All";
+                if (applied.search("ciBranch") >= 0)
                     document.getElementById("conf").value = "All";
                 if (applied.search("autotest") >= 0)
                     document.getElementById("conf").value = "All";
@@ -275,6 +321,10 @@ include "commondefinitions.php";
                     document.getElementById("autotest").value = "All";
                 if (applied.search("project") >= 0)
                     document.getElementById("autotest").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("autotest").value = "All";
+                if (applied.search("ciBranch") >= 0)
+                    document.getElementById("autotest").value = "All";
                 if (applied.search("conf") >= 0)
                     document.getElementById("autotest").value = "All";
                 if (applied.search("build") >= 0)
@@ -286,6 +336,10 @@ include "commondefinitions.php";
                 if (applied.search("All") >= 0)
                     document.getElementById("build").value = "All";
                 if (applied.search("project") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("build").value = "All";
+                if (applied.search("ciBranch") >= 0)
                     document.getElementById("build").value = "All";
                 if (applied.search("conf") >= 0)
                     document.getElementById("build").value = "All";
@@ -299,6 +353,10 @@ include "commondefinitions.php";
                     document.getElementById("timescale").value = "All";
                 if (applied.search("project") >= 0)
                     document.getElementById("timescale").value = "All";
+                if (applied.search("ciProject") >= 0)
+                    document.getElementById("timescale").value = "All";
+                if (applied.search("ciBranch") >= 0)
+                    document.getElementById("timescale").value = "All";
                 if (applied.search("conf") >= 0)
                     document.getElementById("timescale").value = "All";
                 if (applied.search("autotest") >= 0)
@@ -309,12 +367,14 @@ include "commondefinitions.php";
         }
 
         /* Create the filter string (as defined in ci/definitions.php) */
-        function createFilterString(project, conf, autotest, build, timescaleType, timescaleValue, sortBy, showAll)
+        function createFilterString(project, ciProject, ciBranch, conf, autotest, build, timescaleType, timescaleValue, sortBy, showAll)
         {
             var filterString;
             var filterSeparator = "<?php echo FILTERSEPARATOR ?>";               // (transfer php constant to javascript)
             var filterValueSeparator = "<?php echo FILTERVALUESEPARATOR ?>";
             filterString = "project" + filterValueSeparator + project + filterSeparator
+                + "ciProject" + filterValueSeparator + ciProject + filterSeparator
+                + "ciBranch" + filterValueSeparator + ciBranch + filterSeparator
                 + "conf" + filterValueSeparator + conf + filterSeparator
                 + "autotest" + filterValueSeparator + autotest + filterSeparator
                 + "build" + filterValueSeparator + build + filterSeparator
@@ -330,6 +390,22 @@ include "commondefinitions.php";
         {
             updateMetricsBoxes("project", value);
             filterBuild(0);                                         // Clear Project build filter when Project changed
+        }
+
+        /* Update the metrics boxes when (plain) project filter changed */
+        function filterCiProject(value)
+        {
+            updateMetricsBoxes("ciProject", value);
+            filterConf("All");                                      // Clear Configuration filter when Project name changed
+            filterProject("All");                                   // Clear Project filter when Project name changed
+        }
+
+        /* Update the metrics boxes when (plain) branch filter changed */
+        function filterCiBranch(value)
+        {
+            updateMetricsBoxes("ciBranch", value);
+            filterConf("All");                                      // Clear Configuration filter when Project branch changed
+            filterProject("All");                                   // Clear Project filter when Project branch changed
         }
 
         /* Update the metrics boxes when conf filter changed */

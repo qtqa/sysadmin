@@ -45,6 +45,8 @@
 
 /* Following 'input' variabes must be set prior to including this file */
     // All Project session variables: $_SESSION['arrayProject...']
+    // $ciProject
+    // $ciBranch
     // $timescaleType
     // $timescaleValue
     // $timeStart
@@ -114,40 +116,53 @@ if ($round == 2 AND $timescaleType == "Since") {
     $arrayProjectBuildSinceCountSuccess = array();
     $arrayProjectBuildSinceCountFailure = array();
     foreach ($_SESSION['arrayProjectName'] as $key=>$value) {                        // Loop the Projects
-        $sql = "SELECT 'SUCCESS', COUNT(result) AS 'count'
-                FROM ci
-                WHERE project=\"$value\" AND result=\"SUCCESS\" AND timestamp>=\"$timescaleValue\"
-                UNION
-                SELECT 'FAILURE', COUNT(result) AS 'count'
-                FROM ci
-                WHERE project=\"$value\" AND result=\"FAILURE\" AND timestamp>=\"$timescaleValue\"
-                UNION
-                SELECT 'Total', COUNT(result) AS 'count'
-                FROM ci
-                WHERE project=\"$value\" AND timestamp>=\"$timescaleValue\"";        // Will return three rows
-        if ($useMysqli) {
-            $result = mysqli_query($conn, $sql);
-            $numberOfRows = mysqli_num_rows($result);
-        } else {
-            $selectdb="USE $db";
-            $result = mysql_query($selectdb) or die (mysql_error());
-            $result = mysql_query($sql) or die (mysql_error());
-            $numberOfRows = mysql_num_rows($result);
-        }
-        for ($j=0; $j<$numberOfRows; $j++) {                                         // Loop the counts (three rows)
-            if ($useMysqli)
-                $resultRow = mysqli_fetch_row($result);
-            else
-                $resultRow = mysql_fetch_row($result);
-            if ($resultRow[0] == "SUCCESS")
-                $arrayProjectBuildSinceCountSuccess[] = $resultRow[1];
-            if ($resultRow[0] == "FAILURE")
-                $arrayProjectBuildSinceCountFailure[] = $resultRow[1];
-            if ($resultRow[0] == "Total")
-                $arrayProjectBuildSinceCount[] = $resultRow[1];
+        $booReadData = TRUE;
+        if ($ciProject <> "All")
+            if ($ciProject <> getProjectName($value))
+                $booReadData = FALSE;
+        if ($ciBranch <> "All")
+            if ($ciBranch <> getProjectBranch($value))
+                $booReadData = FALSE;
+        if ($booReadData) {                                                          // Performance optimization: Read from database only for those projects that are filtered in with $ciProject or $ciBranch
+            $sql = "SELECT 'SUCCESS', COUNT(result) AS 'count'
+                    FROM ci
+                    WHERE project=\"$value\" AND result=\"SUCCESS\" AND timestamp>=\"$timescaleValue\"
+                    UNION
+                    SELECT 'FAILURE', COUNT(result) AS 'count'
+                    FROM ci
+                    WHERE project=\"$value\" AND result=\"FAILURE\" AND timestamp>=\"$timescaleValue\"
+                    UNION
+                    SELECT 'Total', COUNT(result) AS 'count'
+                    FROM ci
+                    WHERE project=\"$value\" AND timestamp>=\"$timescaleValue\"";    // Will return three rows
+            if ($useMysqli) {
+                $result = mysqli_query($conn, $sql);
+                $numberOfRows = mysqli_num_rows($result);
+            } else {
+                $selectdb="USE $db";
+                $result = mysql_query($selectdb) or die (mysql_error());
+                $result = mysql_query($sql) or die (mysql_error());
+                $numberOfRows = mysql_num_rows($result);
+            }
+            for ($j=0; $j<$numberOfRows; $j++) {                                     // Loop the counts (three rows)
+                if ($useMysqli)
+                    $resultRow = mysqli_fetch_row($result);
+                else
+                    $resultRow = mysql_fetch_row($result);
+                if ($resultRow[0] == "SUCCESS")
+                    $arrayProjectBuildSinceCountSuccess[] = $resultRow[1];
+                if ($resultRow[0] == "FAILURE")
+                    $arrayProjectBuildSinceCountFailure[] = $resultRow[1];
+                if ($resultRow[0] == "Total")
+                    $arrayProjectBuildSinceCount[] = $resultRow[1];
+            }
+        } else {                                                                     // Save empty counts to keep the array indexes correct
+                $arrayProjectBuildSinceCountSuccess[] = 0;
+                $arrayProjectBuildSinceCountFailure[] = 0;
+                $arrayProjectBuildSinceCount[] = 0;
         }
     }
-    if ($useMysqli)
+    if ($booReadData AND $useMysqli)
         mysqli_free_result($result);                                                 // Free result set
 }
 $timeBuildStats = microtime(true);
@@ -155,10 +170,18 @@ $timeBuildStats = microtime(true);
 /* Print Project data from the session variables */
 foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
 
-    /* When Timescale filtered, and the latest Build is not within the Timescale ... */
+    /* When Project name or Branch filtered, and the Project does not match skip to the next Project (in the foreach loop) */
+    if ($ciProject <> "All")
+        if ($ciProject <> getProjectName($value))
+            continue;
+    if ($ciBranch <> "All")
+        if ($ciBranch <> getProjectBranch($value))
+            continue;
+
+    /* When Timescale filtered, and the latest Build is not within the Timescale skip to the next Project (in the foreach loop) */
     if ($timescaleType == "Since")
         if ($_SESSION['arrayProjectBuildLatestTimestamp'][$key] < $timescaleValue)
-            continue;                                                         // ... skip to the next Project (in the foreach loop)
+            continue;
 
     /* Highlight every other row for better readability */
     if ($i % 2 == 0)

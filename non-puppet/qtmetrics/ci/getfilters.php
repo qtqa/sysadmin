@@ -48,6 +48,7 @@ session_start();
 <?php
 include(__DIR__.'/../commondefinitions.php');
 include "definitions.php";
+include "functions.php";
 
 // Read values from database to session variables (so these are updated only once per session)
 $timeStart = microtime(true);
@@ -72,15 +73,25 @@ $timeAutotestValues = microtime(true);
 
 <div id="filterFieldsLeft">
 <form name="form">
+
 <label>Project:</label>
-<select name="project" id="project" onchange="filterProject(this.value)">
+<select name="project" id="project" onchange="filterProject(this.value)" class="hiddenElement">
 <?php
+// Note: This filter is hidden, used via project name links in Project dashboard instead
     echo "<option value=\"All\">All</option>";
     foreach ($_SESSION['arrayProjectName'] as $key=>$value)
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
+<select name="ciProject" id="ciProject" onchange="filterCiProject(this.value)">
+<?php
+    echo "<option value=\"All\">All</option>";
+    foreach ($_SESSION['arrayCiProject'] as $key=>$value)
+        echo "<option value=\"$value\">$value</option>";
+?>
+</select>
 <br/>
+
 <label>Configuration:</label>
 <select name="conf" id="conf" onchange="filterConf(this.value)">
 <?php
@@ -90,6 +101,7 @@ $timeAutotestValues = microtime(true);
 ?>
 </select>
 <br/>
+
 <label>Autotest:</label>
 <select name="autotest" id="autotest" onchange="filterAutotest(this.value)">
 <?php
@@ -98,6 +110,7 @@ $timeAutotestValues = microtime(true);
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
+
 <select name="build" id="build" onchange="filterBuild(this.value)" class="hiddenElement">
 <?php
 // Note: This filter is hidden, used via build number links in Project dashboard instead
@@ -111,16 +124,30 @@ $timeAutotestValues = microtime(true);
 <input id="autotestSortBy" type="hidden" value="0">
 <input name="autotestShowAll" id="autotestShowAll" type="hidden" value="hide">
 </div>
+
 <div id="filterFieldsMiddle">
+
+<label>Branch:</label>
+<select name="ciBranch" id="ciBranch" onchange="filterCiBranch(this.value)">
+<?php
+    echo "<option value=\"All\">All</option>";
+    foreach ($_SESSION['arrayCiBranch'] as $key=>$value)
+        echo "<option value=\"$value\">$value</option>";
+?>
+</select>
+
+</div>
+</form>
+
+<div id="filterFieldsRight">
+
 <label>Timescale:</label>
 <select name="timescale" id="timescale" onchange="filterTimescale(this.value)">
     <option value="All">All</option>
     <option value="Since">Since a date</option>
 </select>
-</div>
-</form>
+<br/>
 
-<div id="filterFieldsRight">
 <form name="date" id="date">
 <label>Since date:</label>
 <?php

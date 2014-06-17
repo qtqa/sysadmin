@@ -68,12 +68,14 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result = mysql_query($sql) or die (mysql_error());
         $numberOfRows = mysql_num_rows($result);
     }
-    $arrayProjectName = array();
+    $arrayProjectName = array();                                                     // Full Project name (e.g. "QtDeclarative_dev_Integration")
     $arrayProjectBuildLatest = array();
     $arrayProjectBuildLatestResult = array();
     $arrayProjectBuildLatestTimestamp = array();
     $arrayProjectBuildLatestDuration = array();
     $arrayProjectBuildScopeMin = array();
+    $arrayCiProject = array();                                                       // Plain Project name (e.g. "QtDeclarative")
+    $arrayCiBranch = array();                                                        // Plain Branch name (e.g. "dev")
     $numberOfProjects = $numberOfRows;
     for ($j=0; $j<$numberOfProjects; $j++) {                                         // Loop the Projects
         if ($useMysqli)
@@ -89,7 +91,14 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $arrayProjectBuildScopeMin[] = $resultRow[$dbColumnCiBuildNumber] - AUTOTEST_LATESTBUILDCOUNT + 1;   // First Build number in metrics scope
         else
             $arrayProjectBuildScopeMin[] = 1;                                        // Less builds than the scope count
+        $arrayCiProject[] = getProjectName($resultRow[$dbColumnCiProject]);          // Read the plain Project name
+        $arrayCiBranch[] = getProjectBranch($resultRow[$dbColumnCiProject]);         // Read the plain Project branch
     }
+    $arrayCiProject = array_unique($arrayCiProject);                                 // Remove duplicates
+    $arrayCiBranch = array_unique($arrayCiBranch);
+    $arrayCiBranch = array_filter($arrayCiBranch);                                   // Remove empty values
+    sort($arrayCiProject);
+    sort($arrayCiBranch);
     $timeProjectValuesStep1 = microtime(true);
 
     /* Step 2: Read the number of failed significant and insignificant autotests in latest Build for each Project from the database */
@@ -232,6 +241,8 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $_SESSION['arrayProjectBuildCountFailure'] = $arrayProjectBuildCountFailure;
     $_SESSION['minBuildDate'] = $minBuildDate;
     $_SESSION['maxBuildDate'] = $maxBuildDate;
+    $_SESSION['arrayCiProject'] = $arrayCiProject;
+    $_SESSION['arrayCiBranch'] = $arrayCiBranch;
 
     if ($useMysqli) {
         mysqli_free_result($result);                                                 // Free result set

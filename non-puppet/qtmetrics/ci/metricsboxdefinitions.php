@@ -51,24 +51,26 @@ define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other a
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All, project, conf, autotest, build, timescale
+    // *) Possible values: All, project, ciProject, ciBranch, conf, autotest, build, timescale
     //
-    //        File path and name                Repeat      Applied filters *)                  Filters to clear *)
-    //        -----------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"     ,2          ,"project,conf,build,timescale"     ,""              ),
-    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                              ,"autotest"      ),
+    //        File path and name                Repeat      Applied filters *)                                  Filters to clear *)
+    //        ---------------------------------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"     ,2          ,"project,ciProject,ciBranch,conf,build,timescale"  ,""              ),
+    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                                              ,"autotest"      ),
 );
 
 /* Filters */
 define("FILTERSEPARATOR", ";");
 define("FILTERVALUESEPARATOR", ":");
 define("FILTERPROJECT", 0);
-define("FILTERCONF", 1);
-define("FILTERAUTOTEST", 2);
-define("FILTERBUILD", 3);
-define("FILTERTIMESCALETYPE", 4);
-define("FILTERTIMESCALEVALUE", 5);
-define("FILTERSORTBY", 6);
-define("FILTERSHOWALL", 7);
+define("FILTERCIPROJECT", 1);
+define("FILTERCIBRANCH", 2);
+define("FILTERCONF", 3);
+define("FILTERAUTOTEST", 4);
+define("FILTERBUILD", 5);
+define("FILTERTIMESCALETYPE", 6);
+define("FILTERTIMESCALEVALUE", 7);
+define("FILTERSORTBY", 8);
+define("FILTERSHOWALL", 9);
 
 ?>

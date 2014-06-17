@@ -62,6 +62,10 @@ $filters = rawurldecode($filters);            // Decode the encoded parameter (e
 $arrayFilters = explode(FILTERSEPARATOR, $filters);
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERPROJECT]);
 $project = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPROJECT]);
+$ciProject = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIBRANCH]);
+$ciBranch = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
 $conf = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERBUILD]);
@@ -85,7 +89,7 @@ if ($useMysqli) {
 }
 
 /************************************************************/
-/* NESTED LEVEL 1: No filtering done (default view)         */
+/* NESTED LEVEL 1: No project filtering done (default view) */
 /************************************************************/
 
 if ($project == "All" AND $conf == "All") {
@@ -104,12 +108,16 @@ if ($project == "All" AND $conf == "All") {
     if (isset($_SESSION['arrayProjectName'])) {
 
         /* Print the used filters */
-        if ($timescaleType <> "All") {
+        if ($ciProject <> "All" OR $ciBranch <> "All" OR $timescaleType <> "All")
             echo '<table>';
-            if ($timescaleType == "Since")
-                echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
+        if ($ciProject <> "All")
+            echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
+        if ($ciBranch <> "All")
+            echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
+        if ($timescaleType == "Since")
+            echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
+        if ($ciProject <> "All" OR $ciBranch <> "All" OR $timescaleType <> "All")
             echo '</table>';
-        }
 
         /* Show list of Projects (from the session variable that was saved for the filters */
         require('listprojects.php');

@@ -43,6 +43,26 @@
 
 <?php
 
+/* Read the plain Project name from the full Project string */
+function getProjectName($project)
+{
+    $ciProject = substr($project, 0, strpos($project, "_Integration"));     // Cut to e.g. "QtDeclarative_dev"
+    $ciProject = substr($ciProject, 0, strrpos($ciProject, "_"));           // Cut to e.g. "QtDeclarative"; strrpos used because some Project names may contain "_"
+    if ($project == "Qt_4.8_Integration")                                   // Exception
+        $ciProject = "Qt_4.8";
+    return $ciProject;
+}
+
+/* Read the plain Project branch from the full Project string */
+function getProjectBranch($project)
+{
+    $ciBranch = substr($project, 0, strpos($project, "_Integration"));      // Cut to e.g. "QtDeclarative_dev"
+    $ciBranch = substr($ciBranch, strrpos($ciBranch, "_") + 1);             // Cut to e.g. "dev"; strrpos used because some Project names may contain "_"
+    if ($project == "Qt_4.8_Integration")                                   // Exception
+        $ciBranch = "";
+    return $ciBranch;
+}
+
 /* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412) */
 function createBuildNumberString($buildNumber)
 {

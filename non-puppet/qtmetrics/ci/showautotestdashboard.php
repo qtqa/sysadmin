@@ -310,6 +310,10 @@ $filters = rawurldecode($filters);            // Decode the encoded parameter (e
 $arrayFilters = explode(FILTERSEPARATOR, $filters);
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERPROJECT]);
 $project = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPROJECT]);
+$ciProject = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIBRANCH]);
+$ciBranch = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
 $conf = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERAUTOTEST]);
@@ -347,6 +351,7 @@ if ($useMysqli) {
 }
 
 /* Check the the latest/selected build number for the Project */
+$buildNumber = MAXCIBUILDNUMBER;
 if ($project <> "All") {
     foreach ($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
         if ($project == $projectValue)
@@ -386,19 +391,23 @@ if ($autotest == "All") {
 
         /* Arrays for number and names Configurations for each Autotest in the latest/selected Build (categorised as significant/insignificant) */
         define("SIGNAUTOTESTBLOCKINGCONF", 0);
-        $arrayFailingSignAutotestBlockingConfCount = array();
-        $arrayFailingSignAutotestBlockingConfNames = array();
-        $arrayFailingSignAutotestBlockingConfProjects = array();
+        $arrayFailingSignAutotestBlockingConfCount = array();                       // Each Conf counted only once (even if in different Project)
+        $arrayFailingSignAutotestBlockingConfCountTotal = array();                  // Each Conf counted separately for each Project
+        $arrayFailingSignAutotestBlockingConfNames = array();                       // Each Conf listed only once but with count
+        $arrayFailingSignAutotestBlockingConfProjects = array();                    // Note: Data inserted into table format <tr><td></td><td></td></tr> without the <table></table>
         define("SIGNAUTOTESTINSIGNCONF", 1);
         $arrayFailingSignAutotestInsignConfCount = array();
+        $arrayFailingSignAutotestInsignConfCountTotal = array();
         $arrayFailingSignAutotestInsignConfNames = array();
         $arrayFailingSignAutotestInsignConfProjects = array();
         define("INSIGNAUTOTESTBLOCKINGCONF", 2);
         $arrayFailingInsignAutotestBlockingConfCount = array();
+        $arrayFailingInsignAutotestBlockingConfCountTotal = array();
         $arrayFailingInsignAutotestBlockingConfNames = array();
         $arrayFailingInsignAutotestBlockingConfProjects = array();
         define("INSIGNAUTOTESTINSIGNCONF", 3);
         $arrayFailingInsignAutotestInsignConfCount = array();
+        $arrayFailingInsignAutotestInsignConfCountTotal = array();
         $arrayFailingInsignAutotestInsignConfNames = array();
         $arrayFailingInsignAutotestInsignConfProjects = array();
 
@@ -412,6 +421,19 @@ if ($autotest == "All") {
             $projectFilterLatest = "test_latest.project=\"$project\"";
             $projectFilter = "test.project=\"$project\"";
             $buildFilter = "AND test.build_number=$buildNumber";
+        } else {
+            if ($ciProject <> "All") {                                              // Filter with Project name (starting with it)
+                $projectFilterLatest = 'test_latest.project LIKE "' . $ciProject . '_%"';
+                $projectFilter = 'test.project LIKE "' . $ciProject . '_%"';
+            }
+            if ($ciBranch <> "All") {                                               // Filter with Project branch (in the middle)
+                $projectFilterLatest = 'test_latest.project LIKE "%_' . $ciBranch . '_%"';
+                $projectFilter = 'test.project LIKE "%_' . $ciBranch . '_%"';
+            }
+            if ($ciProject <> "All" AND $ciBranch <> "All") {                       // Filter with Project name and branch (starting with it)
+                $projectFilterLatest = 'test_latest.project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
+                $projectFilter = 'test.project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
+            }
         }
         $confFilter = "";
         if ($conf <> "All") {                                                       // Conf filtering
@@ -420,23 +442,24 @@ if ($autotest == "All") {
         }
         if ($build == 0)                                // Show the latest build ...
             $sql = cleanSqlString(
-                   "SELECT name, test_latest.insignificant, test_latest.timestamp, cfg_latest.cfg, cfg_latest.insignificant
+                   "SELECT name, test_latest.project, test_latest.insignificant, test_latest.timestamp, cfg_latest.cfg, cfg_latest.insignificant
                     FROM test_latest left join cfg_latest on (test_latest.project = cfg_latest.project AND
                                                               test_latest.cfg = cfg_latest.cfg AND
                                                               test_latest.build_number = cfg_latest.build_number)
                     WHERE $projectFilterLatest $confFilterLatest");
         else                                            // ... or the selected build
             $sql = cleanSqlString(
-                   "SELECT name, test.insignificant, test.timestamp, cfg.cfg, cfg.insignificant
+                   "SELECT name, test.project, test.insignificant, test.timestamp, cfg.cfg, cfg.insignificant
                     FROM test left join cfg on (test.project = cfg.project AND
                                                 test.cfg = cfg.cfg AND
                                                 test.build_number = cfg.build_number)
                     WHERE $projectFilter $buildFilter $confFilter");
         $dbColumnTestName = 0;
-        $dbColumnTestInsignificant = 1;
-        $dbColumnTestTimestamp = 2;
-        $dbColumnCfgCfg = 3;
-        $dbColumnCfgInsignificant = 4;
+        $dbColumnTestProject = 1;
+        $dbColumnTestInsignificant = 2;
+        $dbColumnTestTimestamp = 3;
+        $dbColumnCfgCfg = 4;
+        $dbColumnCfgInsignificant = 5;
         $timeLatestSelectStart = microtime(true);
         if ($useMysqli) {
             $result = mysqli_query($conn, $sql);
@@ -469,10 +492,12 @@ if ($autotest == "All") {
                     $autotestFailureCategory = INSIGNAUTOTESTINSIGNCONF;
                 }
             }
+            $projectValue = $resultRow[$dbColumnTestProject];
             for ($k=0; $k<$autotestCount; $k++) {                                   // Loop all the available Autotests to collect data per one autotest
                 if ($arrayFailingAutotestNames[$k] == $resultRow[$dbColumnTestName]) {
                     switch ($autotestFailureCategory) {
                         case SIGNAUTOTESTBLOCKINGCONF:
+                            $arrayFailingSignAutotestBlockingConfCountTotal[$k]++;
                             if (!strpos($arrayFailingSignAutotestBlockingConfNames[$k],$resultRow[$dbColumnCfgCfg])) {   // Each Conf to be listed only once
                                 $arrayFailingSignAutotestBlockingConfCount[$k]++;
                                 $latestAutotests++;
@@ -480,12 +505,21 @@ if ($autotest == "All") {
                                     = $arrayFailingSignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                 if ($arrayFailingSignAutotestBlockingConfCount[$k] > $maxCount)
                                     $maxCount = $arrayFailingSignAutotestBlockingConfCount[$k];
+                            } else {                                                                                     // Indicate if same Conf in several Projects
+                                $arrayFailingSignAutotestBlockingConfNames[$k] =
+                                    str_replace($resultRow[$dbColumnCfgCfg],
+                                                $resultRow[$dbColumnCfgCfg] . ' (several)',
+                                                $arrayFailingSignAutotestBlockingConfNames[$k]);
+                                $arrayFailingSignAutotestBlockingConfNames[$k] =
+                                    str_replace('(several) (several)', '(several)',
+                                                $arrayFailingSignAutotestBlockingConfNames[$k]);
                             }
                             $arrayFailingSignAutotestBlockingConfProjects[$k]
-                                = $arrayFailingSignAutotestBlockingConfProjects[$k] . '<br>'
-                                . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                = $arrayFailingSignAutotestBlockingConfProjects[$k]
+                                . '<tr><td>' . $projectValue . '</td><td>' . $resultRow[$dbColumnCfgCfg] . '</td></tr>'; // List Projects for each Conf (i.e. one Project or Conf may appear several times)
                             break;
                         case SIGNAUTOTESTINSIGNCONF:
+                            $arrayFailingSignAutotestInsignConfCountTotal[$k]++;
                             if (!strpos($arrayFailingSignAutotestInsignConfNames[$k],$resultRow[$dbColumnCfgCfg])) {     // Each Conf to be listed only once
                                 $arrayFailingSignAutotestInsignConfCount[$k]++;
                                 $latestAutotests++;
@@ -493,12 +527,21 @@ if ($autotest == "All") {
                                     = $arrayFailingSignAutotestInsignConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                 if ($arrayFailingSignAutotestInsignConfCount[$k] > $maxCount)
                                     $maxCount = $arrayFailingSignAutotestInsignConfCount[$k];
+                            } else {                                                                                     // Indicate if same Conf in several Projects
+                                $arrayFailingSignAutotestInsignConfNames[$k] =
+                                    str_replace($resultRow[$dbColumnCfgCfg],
+                                                $resultRow[$dbColumnCfgCfg] . ' (several)',
+                                                $arrayFailingSignAutotestInsignConfNames[$k]);
+                                $arrayFailingSignAutotestInsignConfNames[$k] =
+                                    str_replace('(several) (several)', '(several)',
+                                                $arrayFailingSignAutotestInsignConfNames[$k]);
                             }
                             $arrayFailingSignAutotestInsignConfProjects[$k]
-                                = $arrayFailingSignAutotestInsignConfProjects[$k] . '<br>'
-                                . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                = $arrayFailingSignAutotestInsignConfProjects[$k]
+                                . '<tr><td>' . $projectValue . '</td><td>' . $resultRow[$dbColumnCfgCfg] . '</td></tr>'; // List Projects for each Conf (i.e. one Project or Conf may appear several times)
                             break;
                         case INSIGNAUTOTESTBLOCKINGCONF:
+                            $arrayFailingInsignAutotestBlockingConfCountTotal[$k]++;
                             if (!strpos($arrayFailingInsignAutotestBlockingConfNames[$k],$resultRow[$dbColumnCfgCfg])) { // Each Conf to be listed only once
                                 $arrayFailingInsignAutotestBlockingConfCount[$k]++;
                                 $latestAutotests++;
@@ -506,12 +549,21 @@ if ($autotest == "All") {
                                     = $arrayFailingInsignAutotestBlockingConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                 if ($arrayFailingInsignAutotestBlockingConfCount[$k] > $maxCount)
                                     $maxCount = $arrayFailingInsignAutotestBlockingConfCount[$k];
+                            } else {                                                                                     // Indicate if same Conf in several Projects
+                                $arrayFailingInsignAutotestBlockingConfNames[$k] =
+                                    str_replace($resultRow[$dbColumnCfgCfg],
+                                                $resultRow[$dbColumnCfgCfg] . ' (several)',
+                                                $arrayFailingInsignAutotestBlockingConfNames[$k]);
+                                $arrayFailingInsignAutotestBlockingConfNames[$k] =
+                                    str_replace('(several) (several)', '(several)',
+                                                $arrayFailingInsignAutotestBlockingConfNames[$k]);
                             }
                             $arrayFailingInsignAutotestBlockingConfProjects[$k]
-                                = $arrayFailingInsignAutotestBlockingConfProjects[$k] . '<br>'
-                                . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                = $arrayFailingInsignAutotestBlockingConfProjects[$k]
+                                . '<tr><td>' . $projectValue . '</td><td>' . $resultRow[$dbColumnCfgCfg] . '</td></tr>'; // List Projects for each Conf (i.e. one Project or Conf may appear several times)
                             break;
                         case INSIGNAUTOTESTINSIGNCONF:
+                            $arrayFailingInsignAutotestInsignConfCountTotal[$k]++;
                             if (!strpos($arrayFailingInsignAutotestInsignConfNames[$k],$resultRow[$dbColumnCfgCfg])) {   // Each Conf to be listed only once
                                 $arrayFailingInsignAutotestInsignConfCount[$k]++;
                                 $latestAutotests++;
@@ -519,10 +571,18 @@ if ($autotest == "All") {
                                     = $arrayFailingInsignAutotestInsignConfNames[$k] . '<br>' . $resultRow[$dbColumnCfgCfg];
                                 if ($arrayFailingInsignAutotestInsignConfCount[$k] > $maxCount)
                                     $maxCount = $arrayFailingInsignAutotestInsignConfCount[$k];
+                            } else {                                                                                     // Indicate if same Conf in several Projects
+                                $arrayFailingInsignAutotestInsignConfNames[$k] =
+                                    str_replace($resultRow[$dbColumnCfgCfg],
+                                                $resultRow[$dbColumnCfgCfg] . ' (several)',
+                                                $arrayFailingInsignAutotestInsignConfNames[$k]);
+                                $arrayFailingInsignAutotestInsignConfNames[$k] =
+                                    str_replace('(several) (several)', '(several)',
+                                                $arrayFailingInsignAutotestInsignConfNames[$k]);
                             }
                             $arrayFailingInsignAutotestInsignConfProjects[$k]
-                                = $arrayFailingInsignAutotestInsignConfProjects[$k] . '<br>'
-                                . $projectValue . ' (' . $resultRow[$dbColumnCfgCfg] . ')';                              // List Projects for each Conf (i.e. one Project may appear several times)
+                                = $arrayFailingInsignAutotestInsignConfProjects[$k]
+                                . '<tr><td>' . $projectValue . '</td><td>' . $resultRow[$dbColumnCfgCfg] . '</td></tr>'; // List Projects for each Conf (i.e. one Project or Conf may appear several times)
                             break;
                     }
                     break;                                                          // Match found, skip the rest
@@ -532,15 +592,19 @@ if ($autotest == "All") {
 
         /* Save data to session variables to be able to use them in nested level 2 below */
         $_SESSION['arrayFailingSignAutotestBlockingConfCount'] = $arrayFailingSignAutotestBlockingConfCount;
+        $_SESSION['arrayFailingSignAutotestBlockingConfCountTotal'] = $arrayFailingSignAutotestBlockingConfCountTotal;
         $_SESSION['arrayFailingSignAutotestBlockingConfNames'] = $arrayFailingSignAutotestBlockingConfNames;
         $_SESSION['arrayFailingSignAutotestBlockingConfProjects'] = $arrayFailingSignAutotestBlockingConfProjects;
+        $_SESSION['arrayFailingSignAutotestInsignConfCountTotal'] = $arrayFailingSignAutotestInsignConfCountTotal;
         $_SESSION['arrayFailingSignAutotestInsignConfCount'] = $arrayFailingSignAutotestInsignConfCount;
         $_SESSION['arrayFailingSignAutotestInsignConfNames'] = $arrayFailingSignAutotestInsignConfNames;
         $_SESSION['arrayFailingSignAutotestInsignConfProjects'] = $arrayFailingSignAutotestInsignConfProjects;
         $_SESSION['arrayFailingInsignAutotestBlockingConfCount'] = $arrayFailingInsignAutotestBlockingConfCount;
+        $_SESSION['arrayFailingInsignAutotestBlockingConfCountTotal'] = $arrayFailingInsignAutotestBlockingConfCountTotal;
         $_SESSION['arrayFailingInsignAutotestBlockingConfNames'] = $arrayFailingInsignAutotestBlockingConfNames;
         $_SESSION['arrayFailingInsignAutotestBlockingConfProjects'] = $arrayFailingInsignAutotestBlockingConfProjects;
         $_SESSION['arrayFailingInsignAutotestInsignConfCount'] = $arrayFailingInsignAutotestInsignConfCount;
+        $_SESSION['arrayFailingInsignAutotestInsignConfCountTotal'] = $arrayFailingInsignAutotestInsignConfCountTotal;
         $_SESSION['arrayFailingInsignAutotestInsignConfNames'] = $arrayFailingInsignAutotestInsignConfNames;
         $_SESSION['arrayFailingInsignAutotestInsignConfProjects'] = $arrayFailingInsignAutotestInsignConfProjects;
 
@@ -567,6 +631,14 @@ if ($autotest == "All") {
                 $timeAllDbStart = microtime(true);
 
                 /* Performance optimization: Check when the test results need to be (re)loaded from the database (which takes time) */
+                if (isset($_SESSION['previousCiProject']))
+                    $previousCiProject = $_SESSION['previousCiProject'];
+                else
+                    $previousCiProject = "NA";
+                if (isset($_SESSION['previousCiBranch']))
+                    $previousCiBranch = $_SESSION['previousCiBranch'];
+                else
+                    $previousCiBranch = "NA";
                 if (isset($_SESSION['previousConfiguration']))
                     $previousConfiguration = $_SESSION['previousConfiguration'];
                 else
@@ -581,6 +653,7 @@ if ($autotest == "All") {
                     $previousTimescaleValue = "NA";
                 $booReloadTestResultsAll = FALSE;
                 $booReloadTestResultsFiltered = FALSE;
+                $projectFilter = "";
                 $confFilter = "";
                 $timescaleFilter = "";
                 $where = "";
@@ -588,20 +661,29 @@ if ($autotest == "All") {
                     $from = "all_test_latest";
                 else
                     $from = "all_test";
-                if ($conf == "All" AND $timescaleType == "All") {                       // If no filters selected (only one of the $booReloadTestResultsAll/Filtered... may be TRUE at a time)
-                    if (!isset($_SESSION['arrayFailingAutotestFailedBuildsAll'])) {                         // All data loaded only once per session
+                if ($ciProject == "All" AND $ciBranch == "All" AND
+                    $conf == "All" AND $timescaleType == "All") {                       // If no filters selected (only either of the $booReloadTestResultsAll/Filtered can be TRUE at a time)
+                    if (!isset($_SESSION['arrayFailingAutotestFailedBuildsAll'])) {     // All data loaded only once per session
                         $booReloadTestResultsAll = TRUE;
                     }
                 } else {
-                    if ($conf <> $previousConfiguration OR
+                    if ($ciProject <> $previousCiProject OR
+                        $ciBranch <> $previousCiBranch OR
+                        $conf <> $previousConfiguration OR
                         $timescaleType <> $previousTimescaleType OR
-                        $timescaleValue <> $previousTimescaleValue) {                   // Filtered data loaded when Configuration or Timescale changed
+                        $timescaleValue <> $previousTimescaleValue) {                   // Filtered data loaded when Project name or branch or Configuration or Timescale changed
                         $booReloadTestResultsFiltered = TRUE;
                         $where = "WHERE ";
                         if ($conf <> "All")
-                            $confFilter = "cfg=\"$conf\"";
+                            $confFilter = "AND cfg=\"$conf\"";
                         if ($timescaleType <> "All")
                             $timescaleFilter = " AND timestamp>=\"$timescaleValue\"";
+                        if ($ciProject <> "All")                                        // Filter with Project name (starting with it)
+                            $projectFilter = 'project LIKE "' . $ciProject . '_%"';
+                        if ($ciBranch <> "All")                                         // Filter with Project branch (in the middle)
+                            $projectFilter = 'project LIKE "%_' . $ciBranch . '_%"';
+                        if ($ciProject <> "All" AND $ciBranch <> "All")                 // Filter with Project name and branch (starting with it)
+                            $projectFilter = 'project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
                     }
                 }
 
@@ -611,7 +693,7 @@ if ($autotest == "All") {
                         $sql = cleanSqlString(
                                "SELECT name, failed
                                 FROM $from
-                                $where $confFilter $timescaleFilter");                  // Read all data and save to session variables for faster filtering after initial loading
+                                $where $projectFilter $confFilter $timescaleFilter");   // Read all data and save to session variables for faster filtering after initial loading
                         $dbColumnTestName = 0;
                         $dbColumnTestFailed = 1;
                         if ($useMysqli) {
@@ -657,6 +739,8 @@ if ($autotest == "All") {
                         $_SESSION['arrayFailingAutotestFailedBuildsFiltered'] = $arrayFailingAutotestFailedBuilds;
                         $_SESSION['arrayFailingAutotestAllBuildsFiltered'] = $arrayFailingAutotestAllBuilds;
                     }
+                    $_SESSION['previousCiProject'] = $ciProject;
+                    $_SESSION['previousCiBranch'] = $ciBranch;
                     $_SESSION['previousConfiguration'] = $conf;
                     $_SESSION['previousTimescaleType'] = $timescaleType;
                     $_SESSION['previousTimescaleValue'] = $timescaleValue;
@@ -801,8 +885,8 @@ if ($autotest == "All") {
 
                 $timeAllDbEnd = microtime(true);
             } // endif $booPrintDetailedResultsData
-            /* Read the timestamp of the latest/selected build and the first build with detailed test result data */
 
+            /* Read the timestamp of the latest/selected build and the first build with detailed test result data */
             for ($k=0; $k<=1; $k++) {                                               // Run twice: 0 = latest/selected build, 1 = first build with detailed test result data
                 $projectFilter = "project = \"$project\"";                          // Project is filtered here
                 if ($k == 0) {
@@ -850,10 +934,16 @@ if ($autotest == "All") {
                 = round(100 * ($arrayFailingAutotestFailedBuilds[$k] / $arrayFailingAutotestAllBuilds[$k]));  // Must be rounded to integer for sorting to work
 
         /* Print the used filters */
-        if ($project <> "All" OR $conf <> "All" OR $timescaleType <> "All") {
+        if ($project <> "All" OR $ciProject <> "All" OR $ciBranch <> "All" OR $conf <> "All" OR $timescaleType <> "All") {
             echo '<table>';
-            if ($project <> "All")
+            if ($project <> "All") {
                 echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
+            } else {
+                if ($ciProject <> "All")
+                    echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
+                if ($ciBranch <> "All")
+                    echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
+            }
             if ($conf <> "All")
                 echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
             if ($timescaleType == "Since")
@@ -1044,26 +1134,26 @@ if ($autotest == "All") {
             for ($i=0; $i<$autotestCount; $i++) {                                       // Loop the Autotests
                 switch ($sortBy) {                                                      // Check the next value to print in sorting
                     case AUTOTESTSORTBYSIGNAUTOTESTBLOCKINGCONF:
-                        $sortFieldValue = $arrayFailingSignAutotestBlockingConfCount[$i];
+                        $sortFieldValue = $arrayFailingSignAutotestBlockingConfCountTotal[$i];
                         break;
                     case AUTOTESTSORTBYSIGNAUTOTESTINSIGNCONF:
-                        $sortFieldValue = $arrayFailingSignAutotestInsignConfCount[$i];
+                        $sortFieldValue = $arrayFailingSignAutotestInsignConfCountTotal[$i];
                         break;
                     case AUTOTESTSORTBYINSIGNAUTOTESTBLOCKINGCONF:
-                        $sortFieldValue = $arrayFailingInsignAutotestBlockingConfCount[$i];
+                        $sortFieldValue = $arrayFailingInsignAutotestBlockingConfCountTotal[$i];
                         break;
                     case AUTOTESTSORTBYINSIGNAUTOTESTINSIGNGCONF:
-                        $sortFieldValue = $arrayFailingInsignAutotestInsignConfCount[$i];
+                        $sortFieldValue = $arrayFailingInsignAutotestInsignConfCountTotal[$i];
                         break;
                     case AUTOTESTSORTBYAUTOTESTFAILEDPERCENTAGE:
                         $sortFieldValue = $arrayFailingAutotestFailedPercentage[$i];
                         break;
                 }
                 if ($sortFieldValue == $countOrder) {                                   // Print the ones that are next in the sorting order
-                    if ($arrayFailingSignAutotestBlockingConfCount[$i]
-                        + $arrayFailingSignAutotestInsignConfCount[$i]
-                        + $arrayFailingInsignAutotestBlockingConfCount[$i]
-                        + $arrayFailingInsignAutotestInsignConfCount[$i]
+                    if ($arrayFailingSignAutotestBlockingConfCountTotal[$i]
+                        + $arrayFailingSignAutotestInsignConfCountTotal[$i]
+                        + $arrayFailingInsignAutotestBlockingConfCountTotoal[$i]
+                        + $arrayFailingInsignAutotestInsignConfCountTotal[$i]
                         + $arrayFailingAutotestFailedBuilds[$i] > 0) {                  // Don't print if not any failures in Latest/All Builds
                         if ($k % 2 == 0)
                             echo '<tr>';
@@ -1075,9 +1165,9 @@ if ($autotest == "All") {
                             . '\')">' . $arrayFailingAutotestNames[$i] . '</a></td>';
 
                         /* Latest/Selected Build: Significant Autotests in blocking Configuration (with names as a popup) */
-                        if ($arrayFailingSignAutotestBlockingConfCount[$i] > 0) {
+                        if ($arrayFailingSignAutotestBlockingConfCountTotal[$i] > 0) {
                             echo '<td class="tableLeftBorder tableCellCentered fontColorRed"><span class="popupMessage">'
-                                . $arrayFailingSignAutotestBlockingConfCount[$i]
+                                . $arrayFailingSignAutotestBlockingConfCountTotal[$i]
                                 . '<span><b>' . $arrayFailingAutotestNames[$i] . ':</b><br>'
                                 . substr($arrayFailingSignAutotestBlockingConfNames[$i],strlen('<br>'))
                                 . '</span></span></td>';                                // Skip leading '<br>' set above
@@ -1086,9 +1176,9 @@ if ($autotest == "All") {
                         }
 
                         /* Latest/Selected Build: Significant Autotests in insignificant Configuration (with names as a popup) */
-                        if ($arrayFailingSignAutotestInsignConfCount[$i] > 0)
+                        if ($arrayFailingSignAutotestInsignConfCountTotal[$i] > 0)
                             echo '<td class="tableCellCentered"><span class="popupMessage">'
-                                . $arrayFailingSignAutotestInsignConfCount[$i]
+                                . $arrayFailingSignAutotestInsignConfCountTotal[$i]
                                 . '<span><b>' . $arrayFailingAutotestNames[$i] . ':</b><br>'
                                 . substr($arrayFailingSignAutotestInsignConfNames[$i],strlen('<br>'))
                                 . '</span></span></td>';                                // Skip leading '<br>' set above
@@ -1096,9 +1186,9 @@ if ($autotest == "All") {
                             echo '<td class="tableCellCentered">-</td>';
 
                         /* Latest/Selected Build: Insignificant Autotests in blocking Configuration (with names as a popup) */
-                        if ($arrayFailingInsignAutotestBlockingConfCount[$i] > 0)
+                        if ($arrayFailingInsignAutotestBlockingConfCountTotal[$i] > 0)
                             echo '<td class="tableLeftBorder tableCellCentered"><span class="popupMessage">'
-                                . $arrayFailingInsignAutotestBlockingConfCount[$i]
+                                . $arrayFailingInsignAutotestBlockingConfCountTotal[$i]
                                 . '<span><b>' . $arrayFailingAutotestNames[$i] . ':</b><br>'
                                 . substr($arrayFailingInsignAutotestBlockingConfNames[$i],strlen('<br>'))
                                 . '</span></span></td>';                                // Skip leading '<br>' set above
@@ -1106,9 +1196,9 @@ if ($autotest == "All") {
                             echo '<td class="tableLeftBorder tableCellCentered">-</td>';
 
                         /* Latest/Selected Build: Insignificant Autotests in insignificant Configuration (with names as a popup) */
-                        if ($arrayFailingInsignAutotestInsignConfCount[$i] > 0)
+                        if ($arrayFailingInsignAutotestInsignConfCountTotal[$i] > 0)
                             echo '<td class="tableRightBorder tableCellCentered"><span class="popupMessage">'
-                                . $arrayFailingInsignAutotestInsignConfCount[$i]
+                                . $arrayFailingInsignAutotestInsignConfCountTotal[$i]
                                 . '<span><b>' . $arrayFailingAutotestNames[$i] . ':</b><br>'
                                 . substr($arrayFailingInsignAutotestInsignConfNames[$i],strlen('<br>'))
                                 . '</span></span></td>';                                // Skip leading '<br>' set above
@@ -1156,10 +1246,10 @@ if ($autotest == "All") {
                         $k++;
 
                         /* Count the totals */
-                        $failingSignAutotestBlockingConfCount = $failingSignAutotestBlockingConfCount + $arrayFailingSignAutotestBlockingConfCount[$i];
-                        $failingSignAutotestInsignConfCount = $failingSignAutotestInsignConfCount + $arrayFailingSignAutotestInsignConfCount[$i];
-                        $failingInsignAutotestBlockingConfCount = $failingInsignAutotestBlockingConfCount + $arrayFailingInsignAutotestBlockingConfCount[$i];
-                        $failingInsignAutotestInsignConfCount = $failingInsignAutotestInsignConfCount + $arrayFailingInsignAutotestInsignConfCount[$i];
+                        $failingSignAutotestBlockingConfCount = $failingSignAutotestBlockingConfCount + $arrayFailingSignAutotestBlockingConfCountTotal[$i];
+                        $failingSignAutotestInsignConfCount = $failingSignAutotestInsignConfCount + $arrayFailingSignAutotestInsignConfCountTotal[$i];
+                        $failingInsignAutotestBlockingConfCount = $failingInsignAutotestBlockingConfCount + $arrayFailingInsignAutotestBlockingConfCountTotal[$i];
+                        $failingInsignAutotestInsignConfCount = $failingInsignAutotestInsignConfCount + $arrayFailingInsignAutotestInsignConfCountTotal[$i];
                         $arrayFailingAutotestFailedBuildsSum = $arrayFailingAutotestFailedBuildsSum + $arrayFailingAutotestFailedBuilds[$i];
                         $arrayFailingAutotestAllBuildsSum = $arrayFailingAutotestAllBuildsSum + $arrayFailingAutotestAllBuilds[$i];
 
@@ -1258,16 +1348,26 @@ if ($autotest <> "All") {
     /* Get the data calculated on level 1 */
     $arrayFailingAutotestNames = array();
     $arrayFailingAutotestNames = $_SESSION['arrayAutotestName'];
-    $autotestCount = count($arrayFailingAutotestNames);
-    $arrayFailingAutotestFailedBuilds = array();
-    $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuilds'];
+//    $autotestCount = count($arrayFailingAutotestNames);
+//    $arrayFailingAutotestFailedBuilds = array();
+//    $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuilds'];
     $arrayFailingAutotestAllBuilds = array();
     $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuilds'];
     $arrayAutotestName = array();
     $arrayAutotestName[] = $autotest;                                           // Save selected autotest into array for the readProjectTestResultDirectory function call below
+    $arrayProjectBuildLatest = array();
+    $arrayProjectBuildLatest = $_SESSION['arrayProjectBuildLatest'];
+    $arrayFailingSignAutotestBlockingConfProjects = array();
+    $arrayFailingSignAutotestInsignConfProjects = array();
+    $arrayFailingInsignAutotestBlockingConfProjects = array();
+    $arrayFailingInsignAutotestInsignConfProjects = array();
+    $arrayFailingSignAutotestBlockingConfProjects = $_SESSION['arrayFailingSignAutotestBlockingConfProjects'];
+    $arrayFailingSignAutotestInsignConfProjects = $_SESSION['arrayFailingSignAutotestInsignConfProjects'];
+    $arrayFailingInsignAutotestBlockingConfProjects = $_SESSION['arrayFailingInsignAutotestBlockingConfProjects'];
+    $arrayFailingInsignAutotestInsignConfProjects = $_SESSION['arrayFailingInsignAutotestInsignConfProjects'];
 
     if (isset($_SESSION['arrayAutotestName'])) {
-        foreach ($_SESSION['arrayAutotestName'] as $key => $value) {
+        foreach ($arrayFailingAutotestNames as $key => $value) {
             /* Selected Autotest */
             if ($autotest == $value) {
                 $timeAutotestHistoryStart = microtime(true);
@@ -1296,7 +1396,7 @@ if ($autotest <> "All") {
                     }
                     $buildTimestamp = $resultRow2[$dbColumnCiTimestamp];
                     if ($useMysqli)
-                        mysqli_free_result($result2);                                   // Free result set
+                        mysqli_free_result($result2);
                     /* Read the timestamp of the first build inside the selected timescale */
                     $firstTimescaleBuild = MAXCIBUILDNUMBER;
                     if ($timescaleType <> "All") {
@@ -1317,17 +1417,23 @@ if ($autotest <> "All") {
                         if ($resultRow2[$dbColumnCiBuildNumber] <> NULL AND $resultRow2[$dbColumnCiBuildNumber] <> "")
                             $firstTimescaleBuild = $resultRow2[$dbColumnCiBuildNumber];
                         if ($useMysqli)
-                            mysqli_free_result($result2);                               // Free result set
+                            mysqli_free_result($result2);
                     }
                 }
 
                 /* Print the used filters */
                 echo '<table>';
-                echo '<tr><td>Autotest: </td><td class="tableCellBackgroundTitle">' . $autotest . '</td></tr>';
-                if ($project <> "All")
-                    echo '<tr><td>Project: </td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
+                echo '<tr><td>Autotest:</td><td class="tableCellBackgroundTitle">' . $autotest . '</td></tr>';
+                if ($project <> "All") {
+                    echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
+                } else {
+                    if ($ciProject <> "All")
+                        echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
+                    if ($ciBranch <> "All")
+                        echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
+                }
                 if ($conf <> "All")
-                    echo '<tr><td>Configuration: </td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
+                    echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
                 if ($timescaleType == "Since")
                     echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
                 if ($project <> "All")
@@ -1335,12 +1441,55 @@ if ($autotest <> "All") {
                         . substr($buildTimestamp, 0, strpos($buildTimestamp, " ")) . ')</td></tr>';
                echo '</table>';
 
-                /* 1. Autotest history */
+                /* 1. Result summary in the latest/selected Build */
+
+                echo '<div class="metricsTitle">';
+                if ($project == "All") {
+                    echo '<b>Failure Summary in Latest Builds</b>';
+                } else {
+                    if ($build == 0)
+                        echo '<b>Failure Summary in Latest Build</b>';
+                    else
+                        echo '<b>Failure Summary in Build ' . $buildNumber . '</b>';
+                }
+                echo '</div>';
+                echo '<table class="fontSmall">';
+                echo '<td colspan="2" class="tableCellBackgroundRedDark"><b>1) Significant Autotest in Blocking Configuration</b><td>';
+                if ($arrayFailingSignAutotestBlockingConfProjects[$key] <> "")
+                    echo $arrayFailingSignAutotestBlockingConfProjects[$key];
+                else
+                    echo '<tr><td>-</td><td>-</td></tr>';
+                echo '<td colspan="2" class="tableCellBackgroundRed"><b>2) Significant Autotest in Insignificant Configuration</b><td>';
+                if ($arrayFailingSignAutotestInsignConfProjects[$key] <> "")
+                    echo $arrayFailingSignAutotestInsignConfProjects[$key];
+                else
+                    echo '<tr><td>-</td><td>-</td></tr>';
+                echo '<td colspan="2" class="tableCellBackgroundRedLight"><b>3) Insignificant Autotest in Blocking Configuration</b><td>';
+                if ($arrayFailingInsignAutotestBlockingConfProjects[$key] <> "")
+                    echo $arrayFailingInsignAutotestBlockingConfProjects[$key];
+                else
+                    echo '<tr><td>-</td><td>-</td></tr>';
+                echo '<td colspan="2" class="tableCellBackgroundRedLight"><b>4) Insignificant Autotest in Insignificant Configuration</b><td>';
+                if ($arrayFailingInsignAutotestInsignConfProjects[$key] <> "")
+                    echo $arrayFailingInsignAutotestInsignConfProjects[$key];
+                else
+                    echo '<tr><td>-</td><td>-</td></tr>';
+                echo '</table><br/>';
+
+                /* 2. Autotest history */
 
                 /* Read Autotest history data from the database */
                 $projectFilter = "";
-                if ($project <> "All")
+                if ($project <> "All") {
                     $projectFilter = "AND project=\"$project\"";
+                } else {
+                    if ($ciProject <> "All")                                                    // Filter with Project name (starting with it)
+                        $projectFilter = 'AND project LIKE "' . $ciProject . '_%"';
+                    if ($ciBranch <> "All")                                                     // Filter with Project branch (in the middle)
+                        $projectFilter = 'AND project LIKE "%_' . $ciBranch . '_%"';
+                    if ($ciProject <> "All" AND $ciBranch <> "All")                             // Filter with Project name and branch (starting with it)
+                        $projectFilter = 'AND project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
+                }
                 $confFilter = "";
                 if ($conf <> "All")
                     $confFilter = " AND cfg=\"$conf\"";
@@ -1348,7 +1497,7 @@ if ($autotest <> "All") {
                        "SELECT name, project, build_number, cfg, insignificant, timestamp
                         FROM test
                         WHERE name=\"$autotest\" $projectFilter $confFilter
-                        ORDER BY project, build_number, cfg");                            // (Note: Timescale filter not used because it is very slow; Timescale checked instead when looping the data)
+                        ORDER BY project, build_number, cfg");                                  // (Note: Timescale filter not used because it is very slow; Timescale checked instead when looping the data)
                 $dbColumnTestName = 0;
                 $dbColumnTestProject = 1;
                 $dbColumnTestBuildNumber = 2;
@@ -1403,7 +1552,7 @@ if ($autotest <> "All") {
                 }
 
                 if ($useMysqli)
-                    mysqli_free_result($result);                                                    // Free result set
+                    mysqli_free_result($result);
 
                 /* Print Autotest history data */
                 echo '<div class="metricsTitle">';
@@ -1463,7 +1612,6 @@ if ($autotest <> "All") {
                     }
                 }
                 echo '</tr>';
-                $arrayProjectBuildLatest = $_SESSION['arrayProjectBuildLatest'];
                 $k = 0;
                 $previousProject = "";
                 foreach ($arrayFailingAutotestProjectNames as $projectKey => $projectValue) {
@@ -1592,10 +1740,10 @@ if ($autotest <> "All") {
                 echo '<tr class="tableTopBorder"><td></td><td></td><td colspan="' . HISTORYBUILDCOUNT . '"></td></tr>';    // Print bottom line to the end of the table
                 echo '</table><br/>';
                 if ($useMysqli)
-                    mysqli_free_result($result2);                           // Free result set
+                    mysqli_free_result($result2);
                 $timeAutotestHistoryEnd = microtime(true);
 
-                /* 2. Autotest case data */
+                /* 3. Autotest case data */
 
                 $arrayTestcaseNames = array();
                 $arrayTestcaseFailed = array();
@@ -1612,6 +1760,14 @@ if ($autotest <> "All") {
                     echo '<div class="metricsTitle">';
                     echo '<b>Test cases</b>';                                                           // Title to be continued below with build details ...
                     if ($checkedProjectCount == 1) {                                                    // Data shown only for one project for performance reasons
+
+                        /* Get the latest project build number if not available yet (the combined $ciProject and $ciBranch selection results to one project although $project not selected) */
+                        if ($buildNumber == MAXCIBUILDNUMBER) {
+                            foreach ($_SESSION['arrayProjectName'] as $projectKey => $projectValue) {
+                                if ($checkedProject == $projectValue)
+                                    $buildNumber = $arrayProjectBuildLatest[$projectKey];
+                            }
+                        }
 
                         /* Get the first available/filtered build in database */
                         $minBuildNumberInDatabase = $_SESSION['minBuildNumberInDatabase'];
