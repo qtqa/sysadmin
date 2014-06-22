@@ -174,12 +174,12 @@ function readProjectTestResultDirectory(
             while (($entry = readdir($handle)) !== FALSE) {                 // Check the results in zip file
                 if ($entry == "." || $entry == "..")
                     continue;
-                $configuration = substr($dirName, strlen($buildNumberDirName) + 1);                     // Cut to e.g. "macx-ios-clang_OSX_10.8"
-                if ($conf <> "All" AND $configuration <> $conf)             // Skip if not the filtered configuration
+                $configuration = substr($dirName, strlen($buildNumberDirName) + 1);                                     // Cut to e.g. "macx-ios-clang_OSX_10.8"
+                if ($conf <> "All" AND !checkStringMatch($configuration, $conf))                                        // Skip if not the filtered configuration
                     continue;
-                $dirNumber = (int)substr($dirName, strlen(CIBUILDDIRECTORYPREFIX), strlen(strval(MAXCIBUILDNUMBER)));    // Cut to e.g. "3681"
-                if (!in_array($configuration, $arrayFailingTestcaseConfNames))                                  // If configuration name not listed yet ...
-                    $arrayFailingTestcaseConfNames[] = $configuration;                                          // ... save it
+                $dirNumber = (int)substr($dirName, strlen(CIBUILDDIRECTORYPREFIX), strlen(strval(MAXCIBUILDNUMBER)));   // Cut to e.g. "3681"
+                if (!in_array($configuration, $arrayFailingTestcaseConfNames))                                          // If configuration name not listed yet ...
+                    $arrayFailingTestcaseConfNames[] = $configuration;                                                  // ... save it
                 $filePath = $directory . '/' . $entry;
                 if ($entry == CITESTRESULTSFILE AND is_file($filePath)) {
                     $zip = zip_open($filePath);
@@ -314,6 +314,8 @@ $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPROJECT]);
 $ciProject = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIBRANCH]);
 $ciBranch = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPLATFORM]);
+$ciPlatform = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
 $conf = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERAUTOTEST]);
@@ -349,6 +351,14 @@ if ($useMysqli) {
     $selectdb="USE $db";
     $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
 }
+
+/* Platform filter definitions */
+if ($ciPlatform == "All")
+    $ciPlatform = 0;
+$ciPlatform = (int)$ciPlatform;
+$ciPlatformName = $arrayPlatform[$ciPlatform][0];
+$ciPlatformFilter = $arrayPlatform[$ciPlatform][1];
+$ciPlatformFilterSql = str_replace('*', '%', $arrayPlatform[$ciPlatform][1]);     // Change the format for MySQL (wildcard '*' -> '%')
 
 /* Check the the latest/selected build number for the Project */
 $buildNumber = MAXCIBUILDNUMBER;
@@ -417,6 +427,7 @@ if ($autotest == "All") {
         $latestAutotests = 0;                                                       // Total count of Autotests in any category (used to identify if any was found)
         $projectFilter = "";
         $buildFilter = "";
+        $confFilter = "";
         if ($project <> "All") {                                                    // Project filtering
             $projectFilterLatest = "test_latest.project=\"$project\"";
             $projectFilter = "test.project=\"$project\"";
@@ -435,8 +446,11 @@ if ($autotest == "All") {
                 $projectFilter = 'test.project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
             }
         }
-        $confFilter = "";
-        if ($conf <> "All") {                                                       // Conf filtering
+        if ($ciPlatform <> 0) {                                                     // Filter with Platform
+            $confFilterLatest = 'AND test_latest.cfg LIKE "' . $ciPlatformFilterSql . '"';
+            $confFilter = 'AND test.cfg LIKE "' . $ciPlatformFilterSql . '"';
+        }
+        if ($conf <> "All") {                                                       // Filter with Conf (overwrite possible Platform filter)
             $confFilterLatest = "AND test_latest.cfg=\"$conf\"";
             $confFilter = "AND test.cfg=\"$conf\"";
         }
@@ -595,8 +609,8 @@ if ($autotest == "All") {
         $_SESSION['arrayFailingSignAutotestBlockingConfCountTotal'] = $arrayFailingSignAutotestBlockingConfCountTotal;
         $_SESSION['arrayFailingSignAutotestBlockingConfNames'] = $arrayFailingSignAutotestBlockingConfNames;
         $_SESSION['arrayFailingSignAutotestBlockingConfProjects'] = $arrayFailingSignAutotestBlockingConfProjects;
-        $_SESSION['arrayFailingSignAutotestInsignConfCountTotal'] = $arrayFailingSignAutotestInsignConfCountTotal;
         $_SESSION['arrayFailingSignAutotestInsignConfCount'] = $arrayFailingSignAutotestInsignConfCount;
+        $_SESSION['arrayFailingSignAutotestInsignConfCountTotal'] = $arrayFailingSignAutotestInsignConfCountTotal;
         $_SESSION['arrayFailingSignAutotestInsignConfNames'] = $arrayFailingSignAutotestInsignConfNames;
         $_SESSION['arrayFailingSignAutotestInsignConfProjects'] = $arrayFailingSignAutotestInsignConfProjects;
         $_SESSION['arrayFailingInsignAutotestBlockingConfCount'] = $arrayFailingInsignAutotestBlockingConfCount;
@@ -639,6 +653,10 @@ if ($autotest == "All") {
                     $previousCiBranch = $_SESSION['previousCiBranch'];
                 else
                     $previousCiBranch = "NA";
+                if (isset($_SESSION['previousCiPlatform']))
+                    $previousCiPlatform = $_SESSION['previousCiPlatform'];
+                else
+                    $previousCiPlatform = "NA";
                 if (isset($_SESSION['previousConfiguration']))
                     $previousConfiguration = $_SESSION['previousConfiguration'];
                 else
@@ -661,7 +679,7 @@ if ($autotest == "All") {
                     $from = "all_test_latest";
                 else
                     $from = "all_test";
-                if ($ciProject == "All" AND $ciBranch == "All" AND
+                if ($ciProject == "All" AND $ciBranch == "All" AND $ciPlatform == 0 AND
                     $conf == "All" AND $timescaleType == "All") {                       // If no filters selected (only either of the $booReloadTestResultsAll/Filtered can be TRUE at a time)
                     if (!isset($_SESSION['arrayFailingAutotestFailedBuildsAll'])) {     // All data loaded only once per session
                         $booReloadTestResultsAll = TRUE;
@@ -669,13 +687,12 @@ if ($autotest == "All") {
                 } else {
                     if ($ciProject <> $previousCiProject OR
                         $ciBranch <> $previousCiBranch OR
+                        $ciPlatform <> $previousCiPlatform OR
                         $conf <> $previousConfiguration OR
                         $timescaleType <> $previousTimescaleType OR
                         $timescaleValue <> $previousTimescaleValue) {                   // Filtered data loaded when Project name or branch or Configuration or Timescale changed
                         $booReloadTestResultsFiltered = TRUE;
                         $where = "WHERE ";
-                        if ($conf <> "All")
-                            $confFilter = "AND cfg=\"$conf\"";
                         if ($timescaleType <> "All")
                             $timescaleFilter = " AND timestamp>=\"$timescaleValue\"";
                         if ($ciProject <> "All")                                        // Filter with Project name (starting with it)
@@ -684,6 +701,10 @@ if ($autotest == "All") {
                             $projectFilter = 'project LIKE "%_' . $ciBranch . '_%"';
                         if ($ciProject <> "All" AND $ciBranch <> "All")                 // Filter with Project name and branch (starting with it)
                             $projectFilter = 'project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
+                        if ($ciPlatform <> 0)                                           // Filter with Platform
+                            $confFilter = 'AND cfg LIKE "' . $ciPlatformFilterSql . '"';
+                        if ($conf <> "All")                                             // Filter with Conf (overwrite possible Platform filter)
+                            $confFilter = "AND cfg=\"$conf\"";
                     }
                 }
 
@@ -741,6 +762,7 @@ if ($autotest == "All") {
                     }
                     $_SESSION['previousCiProject'] = $ciProject;
                     $_SESSION['previousCiBranch'] = $ciBranch;
+                    $_SESSION['previousCiPlatform'] = $ciPlatform;
                     $_SESSION['previousConfiguration'] = $conf;
                     $_SESSION['previousTimescaleType'] = $timescaleType;
                     $_SESSION['previousTimescaleValue'] = $timescaleValue;
@@ -790,15 +812,17 @@ if ($autotest == "All") {
                 $confFilter = "";
                 $from = "all_test_latest";
                 $projectFilter = "project=\"$project\"";                            // Project is filtered here
-                if ($conf <> "All")
-                    $confFilter = " AND cfg=\"$conf\"";
+                if ($ciPlatform <> 0)                                               // Filter with Platform
+                    $confFilter = 'AND cfg LIKE "' . $ciPlatformFilterSql . '"';
+                if ($conf <> "All")                                                 // Filter with Conf (overwrite possible Platform filter)
+                    $confFilter = "AND cfg=\"$conf\"";
                 if ($timescaleType == "All") {                                      // If timescale not filtered read only the latest/selected build
-                    $buildFilter = " AND build_number = $buildNumber";
+                    $buildFilter = "AND build_number = $buildNumber";
                     if ($build > 0)                                                 // If other than the latest build
                         $from = "all_test";
                 } else {                                                            // If timescale filtered read all the available builds since the date
                     $from = "all_test";
-                    $buildFilter = " AND build_number >= $minBuildNumberInDatabase";
+                    $buildFilter = "AND build_number >= $minBuildNumberInDatabase";
                 }
                 $sql = cleanSqlString(
                        "SELECT MIN(build_number)
@@ -820,12 +844,18 @@ if ($autotest == "All") {
 
                 /* Get total and failed build counts for each autotest (using the same filters as above) */
                 if (isset($_SESSION['previousProject'])) {
+                    $previousCiProject = $_SESSION['previousCiProject'];
+                    $previousCiBranch = $_SESSION['previousCiBranch'];
+                    $previousCiPlatform = $_SESSION['previousCiPlatform'];
                     $previousProject = $_SESSION['previousProject'];
                     $previousConfiguration = $_SESSION['previousConfiguration'];
                     $previousBuild = $_SESSION['previousBuild'];
                     $previousTimescaleType = $_SESSION['previousTimescaleType'];
                     $previousTimescaleValue = $_SESSION['previousTimescaleValue'];
                 } else {
+                    $previousCiProject = "NA";
+                    $previousCiBranch = "NA";
+                    $previousCiPlatform = "NA";
                     $previousProject = "NA";
                     $previousConfiguration = "NA";
                     $previousBuild = "NA";
@@ -833,8 +863,13 @@ if ($autotest == "All") {
                     $previousTimescaleValue = "NA";
                 }
                 $booReloadTestResults = TRUE;                                       // Performance optimization: Check when the test results need to be (re)loaded from the zip files (which takes time)
-                if ($project == $previousProject AND $conf == $previousConfiguration AND
-                    $timescaleType == $previousTimescaleType AND $timescaleValue == $previousTimescaleValue)
+                if ($ciProject == $previousCiProject AND
+                    $ciBranch == $previousCiBranch AND
+                    $ciPlatform == $previousCiPlatform AND
+                    $project == $previousProject AND
+                    $conf == $previousConfiguration AND
+                    $timescaleType == $previousTimescaleType AND
+                    $timescaleValue == $previousTimescaleValue)
                     $booReloadTestResults = FALSE;                                  // No need to reload the test results if project and other filters not changed
                 if ($timescaleType == "All" AND $build <> $previousBuild)
                     $booReloadTestResults = TRUE;                                   // Reload if build changed when timescale not filtered (then the test results are shown for selected build)
@@ -877,6 +912,9 @@ if ($autotest == "All") {
                 $_SESSION['arrayFailingAutotestFailedBuilds'] = $arrayFailingAutotestFailedBuilds;
                 $_SESSION['arrayFailingAutotestAllBuilds'] = $arrayFailingAutotestAllBuilds;
                 $_SESSION['minBuildNumberWithTestResults'] = $minBuildNumberWithTestResults;
+                $_SESSION['previousCiProject'] = $ciProject;
+                $_SESSION['previousCiBranch'] = $ciBranch;
+                $_SESSION['previousCiPlatform'] = $ciPlatform;
                 $_SESSION['previousProject'] = $project;
                 $_SESSION['previousConfiguration'] = $conf;
                 $_SESSION['previousBuild'] = $build;
@@ -934,7 +972,8 @@ if ($autotest == "All") {
                 = round(100 * ($arrayFailingAutotestFailedBuilds[$k] / $arrayFailingAutotestAllBuilds[$k]));  // Must be rounded to integer for sorting to work
 
         /* Print the used filters */
-        if ($project <> "All" OR $ciProject <> "All" OR $ciBranch <> "All" OR $conf <> "All" OR $timescaleType <> "All") {
+        if ($project <> "All" OR $ciProject <> "All" OR $ciBranch <> "All" OR $ciPlatform <> 0 OR
+            $conf <> "All" OR $timescaleType <> "All") {
             echo '<table>';
             if ($project <> "All") {
                 echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $project . '</td></tr>';
@@ -943,6 +982,10 @@ if ($autotest == "All") {
                     echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
                 if ($ciBranch <> "All")
                     echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
+            }
+            if ($ciPlatform <> 0 AND $conf == "All") {
+                echo '<tr><td>Platform:</td><td class="tableCellBackgroundTitle">' . $ciPlatformName . '</td></tr>';
+                echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle fontColorGrey">' . $ciPlatformFilter . '</td></tr>';
             }
             if ($conf <> "All")
                 echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
@@ -966,10 +1009,10 @@ if ($autotest == "All") {
                     echo '<tr><td>Test Results:</td><td>' . $testResultBuilds . $testResultBuildsSeeMore . '</td></tr>';
             }
             echo '</table>';
-            echo '<div class="metricsTitle">';
-            echo '<b>Failed autotests</b>';
-            echo '</div>';
         }
+        echo '<div class="metricsTitle">';
+        echo '<b>Failed Autotests</b>';
+        echo '</div>';
 
         /* Set the default sorting */
         if ($booPrintDetailedResultsData AND ($showAll == "show" OR $project <> "All")) {       // Sort by Failed % on level 1 if results printed or always on level 2
@@ -1152,7 +1195,7 @@ if ($autotest == "All") {
                 if ($sortFieldValue == $countOrder) {                                   // Print the ones that are next in the sorting order
                     if ($arrayFailingSignAutotestBlockingConfCountTotal[$i]
                         + $arrayFailingSignAutotestInsignConfCountTotal[$i]
-                        + $arrayFailingInsignAutotestBlockingConfCountTotoal[$i]
+                        + $arrayFailingInsignAutotestBlockingConfCountTotal[$i]
                         + $arrayFailingInsignAutotestInsignConfCountTotal[$i]
                         + $arrayFailingAutotestFailedBuilds[$i] > 0) {                  // Don't print if not any failures in Latest/All Builds
                         if ($k % 2 == 0)
@@ -1348,9 +1391,6 @@ if ($autotest <> "All") {
     /* Get the data calculated on level 1 */
     $arrayFailingAutotestNames = array();
     $arrayFailingAutotestNames = $_SESSION['arrayAutotestName'];
-//    $autotestCount = count($arrayFailingAutotestNames);
-//    $arrayFailingAutotestFailedBuilds = array();
-//    $arrayFailingAutotestFailedBuilds = $_SESSION['arrayFailingAutotestFailedBuilds'];
     $arrayFailingAutotestAllBuilds = array();
     $arrayFailingAutotestAllBuilds = $_SESSION['arrayFailingAutotestAllBuilds'];
     $arrayAutotestName = array();
@@ -1432,6 +1472,10 @@ if ($autotest <> "All") {
                     if ($ciBranch <> "All")
                         echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
                 }
+                if ($ciPlatform <> 0 AND $conf == "All") {
+                    echo '<tr><td>Platform:</td><td class="tableCellBackgroundTitle">' . $ciPlatformName . '</td></tr>';
+                    echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle fontColorGrey">' . $ciPlatformFilter . '</td></tr>';
+                }
                 if ($conf <> "All")
                     echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
                 if ($timescaleType == "Since")
@@ -1445,12 +1489,12 @@ if ($autotest <> "All") {
 
                 echo '<div class="metricsTitle">';
                 if ($project == "All") {
-                    echo '<b>Failure Summary in Latest Builds</b>';
+                    echo '<b>Failure summary in latest Builds</b>';
                 } else {
                     if ($build == 0)
-                        echo '<b>Failure Summary in Latest Build</b>';
+                        echo '<b>Failure summary in latest Build</b>';
                     else
-                        echo '<b>Failure Summary in Build ' . $buildNumber . '</b>';
+                        echo '<b>Failure summary in Build ' . $buildNumber . '</b>';
                 }
                 echo '</div>';
                 echo '<table class="fontSmall">';
@@ -1491,8 +1535,10 @@ if ($autotest <> "All") {
                         $projectFilter = 'AND project LIKE "' . $ciProject . '_' . $ciBranch . '_%"';
                 }
                 $confFilter = "";
-                if ($conf <> "All")
-                    $confFilter = " AND cfg=\"$conf\"";
+                if ($ciPlatform <> 0)                                                           // Filter with Platform
+                    $confFilter = 'AND cfg LIKE "' . $ciPlatformFilterSql . '"';
+                if ($conf <> "All")                                                             // Filter with Conf (overwrite possible Platform filter)
+                    $confFilter = "AND cfg=\"$conf\"";
                 $sql = cleanSqlString(
                        "SELECT name, project, build_number, cfg, insignificant, timestamp
                         FROM test
@@ -1780,8 +1826,14 @@ if ($autotest <> "All") {
                             $buildCheckType = CHECKBUILDSINCE;
                             $buildNumberToCheck = setMinBuildNumberToCheck($latestBuildNumber, $minBuildNumberInDatabase, $timescaleType);
                         }
+                        if ($ciPlatform == 0)                                                           // If Platform not filtered, read any Conf
+                            $confToCheck = "All";
+                        else                                                                            // Filter with Platform
+                            $confToCheck = $ciPlatformFilter;
+                        if ($conf <> "All")                                                             // Filter with Conf (overwrite possible Platform filter)
+                            $confToCheck = $conf;
                         $minBuildNumberWithTestResults = readProjectTestResultDirectory(
-                            CITESTRESULTSDIRECTORY, $checkedProject, $buildCheckType, $buildNumberToCheck, $conf, TRUE, $arrayAutotestName,
+                            CITESTRESULTSDIRECTORY, $checkedProject, $buildCheckType, $buildNumberToCheck, $confToCheck, TRUE, $arrayAutotestName,
                             $arrayFailingAutotestAllBuilds,
                             $arrayTestcaseNames, $arrayTestcaseFailed, $arrayTestcaseAll, $arrayTestcaseConfs,
                             $failingTestcaseCount, $testcaseCount, $arrayInvalidTestResultFiles);       // Returns the first available build number if timescale filtered, otherwise the selected build

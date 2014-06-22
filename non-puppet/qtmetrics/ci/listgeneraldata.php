@@ -43,10 +43,12 @@
 
 <?php
 
-/* Following 'input' variabes must be set prior to including this file */
+/* Following 'input' variables must be set prior to including this file */
     // $_SESSION['arrayProjectName']
     // $_SESSION['arrayProjectBuildLatest']
     // $_SESSION['arrayProjectBuildLatestResult']
+    // $ciPlatform
+    // $ciPlatformName
     // $project
     // $conf
     // $build
@@ -100,6 +102,10 @@ if ($conf == "All") {
     }
     echo "<table>";
     echo "<tr><td>Project: </td><td class=\"tableCellBackgroundTitle\">$project</td></tr>";
+    if ($ciPlatform <> 0) {
+        echo '<tr><td>Platform:</td><td class="tableCellBackgroundTitle">' . $ciPlatformName . '</td></tr>';
+        echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle fontColorGrey">' . $ciPlatformFilter . '</td></tr>';
+    }
     if ($timescaleType == "Since")
         echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
     echo "<tr><td>Build: </td><td>$buildNumber</td></tr>";

@@ -31,7 +31,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration, Autotest, Timescale</td>
+        <td class="tableSingleBorder">Project, Branch, Platform, Configuration, Autotest, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -64,9 +64,9 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data items</th>
-        <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration<br>
+        <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration; Project filter uses the name part "QtBase" and Branch filter uses the branch part "stable"<br>
                                       <b>Build number:</b> several per Project (numeric 1 to n; number is Project specific)<br>
-                                      <b>Configuration:</b> e.g. linux-g++-32_Ubuntu_10.04_x86, several per Project Build<br>
+                                      <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86); Platform filter uses predefined searches to the Configuration name<br>
                                       <b>Configuration significance:</b> blocked/insignificant tag (if Configuration is tagged as "insignificant" the build will not
                                          fail even though some significant Autotests would fail)<br>
                                       <b>Autotest name:</b> e.g. tst_qftp, several per Project and Configuration<br>

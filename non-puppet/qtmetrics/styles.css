@@ -294,7 +294,7 @@ ul.mainMenu {
 
 #filterFields label {                        /* This can be used to align all filter fields to start at same 'column' */
     display:block;
-    width: 90px;
+    width: 80px;
     float:left;
     margin-top: 4px;                       /* This can be used to align the filter title vertically against the selection box */
 }
@@ -314,16 +314,23 @@ ul.mainMenu {
     margin-left: 30px;
 }
 
-#filterFieldsMiddle label {                  /* Title text width of middle filter area (overwrite the common definitions for #filterFields label) */
+#filterFieldsLeft label {                    /* Title text width of the filter area (overwrite the common definitions for #filterFields label) */
     width: 50px;
 }
 
-#filterFieldsRight label {                   /* Title text width of right filter area (overwrite the common definitions for #filterFields label) */
+#filterFieldsRight label {                   /* Title text width of the filter area (overwrite the common definitions for #filterFields label) */
     width: 70px;
 }
 
-#filterFieldsMiddle select,
-#filterFieldsRight select {                  /* Selection box width of middle and right filter area (overwrite the common definitions for #filterFields select) */
+#filterFieldsLeft select {                   /* Selection box width of the filter area (overwrite the common definitions for #filterFields select) */
+    width: 180px;
+}
+
+#filterFieldsMiddle select {                 /* Selection box width of the filter area (overwrite the common definitions for #filterFields select) */
+    width: 330px;
+}
+
+#filterFieldsRight select {                  /* Selection box width of the filter area (overwrite the common definitions for #filterFields select) */
     width: 110px;
 }
 

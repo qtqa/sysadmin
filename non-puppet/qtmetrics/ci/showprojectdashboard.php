@@ -66,6 +66,8 @@ $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPROJECT]);
 $ciProject = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIBRANCH]);
 $ciBranch = $arrayFilter[1];
+$arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCIPLATFORM]);
+$ciPlatform = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERCONF]);
 $conf = $arrayFilter[1];
 $arrayFilter = explode(FILTERVALUESEPARATOR, $arrayFilters[FILTERBUILD]);
@@ -88,11 +90,19 @@ if ($useMysqli) {
     $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
 }
 
+/* Platform filter definitions */
+if ($ciPlatform == "All")
+    $ciPlatform = 0;
+$ciPlatform = (int)$ciPlatform;
+$ciPlatformName = $arrayPlatform[$ciPlatform][0];
+$ciPlatformFilter = $arrayPlatform[$ciPlatform][1];
+$ciPlatformFilterSql = str_replace('*', '%', $arrayPlatform[$ciPlatform][1]);     // Change the format for MySQL (wildcard '*' -> '%')
+
 /************************************************************/
 /* NESTED LEVEL 1: No project filtering done (default view) */
 /************************************************************/
 
-if ($project == "All" AND $conf == "All") {
+if ($project == "All") {
     echo '<div class="metricsBoxHeader">';
     echo '<div class="metricsBoxHeaderIcon">';
     if ($round == 1)
@@ -108,16 +118,28 @@ if ($project == "All" AND $conf == "All") {
     if (isset($_SESSION['arrayProjectName'])) {
 
         /* Print the used filters */
-        if ($ciProject <> "All" OR $ciBranch <> "All" OR $timescaleType <> "All")
+        if ($ciProject <> "All" OR $ciBranch <> "All" OR $ciPlatform <> 0 OR $conf <> "All" OR $timescaleType <> "All") {
             echo '<table>';
-        if ($ciProject <> "All")
-            echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
-        if ($ciBranch <> "All")
-            echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
-        if ($timescaleType == "Since")
-            echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
-        if ($ciProject <> "All" OR $ciBranch <> "All" OR $timescaleType <> "All")
+            if ($ciProject <> "All")
+                echo '<tr><td>Project:</td><td class="tableCellBackgroundTitle">' . $ciProject . '</td></tr>';
+            if ($ciBranch <> "All")
+                echo '<tr><td>Branch:</td><td class="tableCellBackgroundTitle">' . $ciBranch . '</td></tr>';
+            if ($ciPlatform <> 0 AND $conf == "All") {
+                echo '<tr><td>Platform:</td><td class="tableCellBackgroundTitle">' . $ciPlatformName . '</td></tr>';
+                echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle fontColorGrey">' . $ciPlatformFilter . '</td></tr>';
+            }
+            if ($conf <> "All")
+                echo '<tr><td>Configuration:</td><td class="tableCellBackgroundTitle">' . $conf . '</td></tr>';
+            if ($timescaleType == "Since")
+                echo '<tr><td>Since:</td><td class="timescaleSince">' . $timescaleValue . '</td></tr>';
             echo '</table>';
+        }
+        $projectTitle = "<b>Projects</b>";
+        if ($ciPlatform <> 0 OR $conf <> "All")
+            $projectTitle = "<b>Projects built in selected Configurations</b> (Note: The data is from Project level)";
+        echo '<div class="metricsTitle">';
+        echo $projectTitle;
+        echo '</div>';
 
         /* Show list of Projects (from the session variable that was saved for the filters */
         require('listprojects.php');
@@ -147,6 +169,8 @@ if ($project <> "All" AND $conf == "All") {
     if (isset($_SESSION['arrayProjectName'])) {
         $projectFilter = "project=\"$project\"";
         $confFilter = "";
+        if ($ciPlatform <> 0)
+            $confFilter = 'cfg LIKE "' . $ciPlatformFilterSql . '"';
         /* Show general data */
         require('listgeneraldata.php');
         /* Show Build history */
@@ -194,19 +218,6 @@ if ($project <> "All" AND $conf <> "All") {
     } else {
         echo '<br/>Filter values not ready or they are expired, please <a href="javascript:void(0);" onclick="reloadFilters()">reload</a> ...';
     }
-}
-
-/************************************************************/
-/* Project not selected when Configuration selected         */
-/************************************************************/
-
-if ($project == "All" AND $conf <> "All") {
-    echo '<div class="metricsBoxHeader">';
-    echo '<div class="metricsBoxHeaderText">';
-    echo '<b>PROJECT DASHBOARD:</b>';
-    echo '</div>';
-    echo '</div>';
-    echo "(Please select a project...)<br/><br/>";
 }
 
 /* Close connection to the server */

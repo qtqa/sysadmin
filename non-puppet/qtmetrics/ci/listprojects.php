@@ -47,6 +47,9 @@
     // All Project session variables: $_SESSION['arrayProject...']
     // $ciProject
     // $ciBranch
+    // $ciPlatform
+    // $ciPlatformFilterSql
+    // $conf
     // $timescaleType
     // $timescaleValue
     // $timeStart
@@ -110,6 +113,42 @@ $allFailureCount = 0;
 $allSuccessCount = 0;
 $allTotalCount = 0;
 
+/* Read the Projects that are built for selected Platform or Configuration */
+$arrayProjectConfBuilds = array();
+if ($ciPlatform <> 0 OR $conf <> "All") {
+    $confFilter = "";
+    $timescaleFilter = "";
+    if ($ciPlatform <> 0)
+        $confFilter = 'cfg LIKE "' . $ciPlatformFilterSql . '"';
+    if ($conf <> "All")
+        $confFilter = 'cfg="' . $conf . '"';                                         // Overwrite the Platform based filter if Conf filtered
+    if ($timescaleType == "All") {
+        $from = 'cfg_latest';
+    } else {
+        $from = 'cfg';
+        $timescaleFilter = 'AND timestamp>="' . $timescaleValue . '"';
+    }
+    $sql = cleanSqlString(
+           "SELECT DISTINCT project
+            FROM $from
+            WHERE $confFilter $timescaleFilter");
+    $dbColumnCfgProject = 0;
+    if ($useMysqli) {
+        $result = mysqli_query($conn, $sql);
+        $numberOfRows = mysqli_num_rows($result);
+    } else {
+        $result = mysql_query($sql) or die (mysql_error());
+        $numberOfRows = mysql_num_rows($result);
+    }
+    for ($j=0; $j<$numberOfRows; $j++) {
+        if ($useMysqli)
+            $resultRow = mysqli_fetch_row($result);
+        else
+            $resultRow = mysql_fetch_row($result);
+        $arrayProjectConfBuilds[] = $resultRow[$dbColumnCfgProject];
+    }
+}
+
 /* Read the Build statistics for each Project in filtered Timescope (session variables already include the statistics for all Builds in the database) */
 if ($round == 2 AND $timescaleType == "Since") {
     $arrayProjectBuildSinceCount = array();
@@ -119,11 +158,14 @@ if ($round == 2 AND $timescaleType == "Since") {
         $booReadData = TRUE;
         if ($ciProject <> "All")
             if ($ciProject <> getProjectName($value))
-                $booReadData = FALSE;
+                $booReadData = FALSE;                                                // Performance optimization: Read from database only for those projects that are filtered in with $ciProject
         if ($ciBranch <> "All")
             if ($ciBranch <> getProjectBranch($value))
-                $booReadData = FALSE;
-        if ($booReadData) {                                                          // Performance optimization: Read from database only for those projects that are filtered in with $ciProject or $ciBranch
+                $booReadData = FALSE;                                                // Performance optimization: Read from database only for those projects that are filtered in with $ciBranch
+        if ($ciPlatform <> 0 OR $conf <> "All")
+            if (!in_array($value, $arrayProjectConfBuilds))
+                $booReadData = FALSE;                                                // Performance optimization: Read from database only for those projects that are filtered in with $ciPlatform or $conf
+        if ($booReadData) {                                                          // Performance optimization
             $sql = "SELECT 'SUCCESS', COUNT(result) AS 'count'
                     FROM ci
                     WHERE project=\"$value\" AND result=\"SUCCESS\" AND timestamp>=\"$timescaleValue\"
@@ -170,13 +212,16 @@ $timeBuildStats = microtime(true);
 /* Print Project data from the session variables */
 foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
 
-    /* When Project name or Branch filtered, and the Project does not match skip to the next Project (in the foreach loop) */
+    /* When Project name, Branch, Platform or Conf filtered, and the Project does not match, skip to the next Project (in the foreach loop) */
     if ($ciProject <> "All")
         if ($ciProject <> getProjectName($value))
             continue;
     if ($ciBranch <> "All")
         if ($ciBranch <> getProjectBranch($value))
             continue;
+    if ($ciPlatform <> 0 OR $conf <> "All")
+        if (!in_array($value, $arrayProjectConfBuilds))
+            continue;                                                                // Note: The printing is skipped, the counts are not recalculated for those printed
 
     /* When Timescale filtered, and the latest Build is not within the Timescale skip to the next Project (in the foreach loop) */
     if ($timescaleType == "Since")

@@ -31,7 +31,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Filters</th>
-        <td class="tableSingleBorder">Project, Configuration, Timescale</td>
+        <td class="tableSingleBorder">Project, Branch, Platform, Configuration, Timescale</td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
@@ -64,12 +64,12 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Data items</th>
-        <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration<br>
+        <td class="tableSingleBorder"><b>Project:</b> e.g. QtBase_stable_Integration; Project filter uses the name part "QtBase" and Branch filter uses the branch part "stable"<br>
                                       <b>Build number:</b> several per Project (numeric 1 to n; number is Project specific)<br>
                                       <b>Build result:</b> SUCCESS/FAILURE<br>
                                       <b>Build date:</b> date when build started<br>
                                       <b>Autotest significance:</b> number of failed Autotests with tagging Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)<br>
-                                      <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86)<br>
+                                      <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86); Platform filter uses predefined searches to the Configuration name<br>
                                       <b>Configuration force success:</b> number of tagged Configurations (if tagged as "force success" the Configuration build is forced to succeed, so that it will not block the whole Project build; this is e.g. in case of a new or immature Configuration when it is not reasonable to let the whole Project build fail because of this specific Configuration)<br>
                                       <b>Configuration insignificant:</b> number of tagged Configurations (if tagged as "insignificant" the Configuration build will not fail even though some significant Autotests would fail)<br>
         </td>

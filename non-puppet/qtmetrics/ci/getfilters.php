@@ -75,6 +75,24 @@ $timeAutotestValues = microtime(true);
 <form name="form">
 
 <label>Project:</label>
+<select name="ciProject" id="ciProject" onchange="filterCiProject(this.value)">
+<?php
+    echo "<option value=\"All\">All</option>";
+    foreach ($_SESSION['arrayCiProject'] as $key=>$value)
+        echo "<option value=\"$value\">$value</option>";
+?>
+</select>
+<br/>
+
+<label>Branch:</label>
+<select name="ciBranch" id="ciBranch" onchange="filterCiBranch(this.value)">
+<?php
+    echo "<option value=\"All\">All</option>";
+    foreach ($_SESSION['arrayCiBranch'] as $key=>$value)
+        echo "<option value=\"$value\">$value</option>";
+?>
+</select>
+
 <select name="project" id="project" onchange="filterProject(this.value)" class="hiddenElement">
 <?php
 // Note: This filter is hidden, used via project name links in Project dashboard instead
@@ -83,11 +101,28 @@ $timeAutotestValues = microtime(true);
         echo "<option value=\"$value\">$value</option>";
 ?>
 </select>
-<select name="ciProject" id="ciProject" onchange="filterCiProject(this.value)">
+
+<select name="build" id="build" onchange="filterBuild(this.value)" class="hiddenElement">
+<?php
+// Note: This filter is hidden, used via build number links in Project dashboard instead
+    for ($i=0; $i<HISTORYBUILDCOUNT; $i++)
+        echo "<option value=\"$i\">$i</option>";
+?>
+</select>
+
+</div>
+
+<div id="filterFieldsMiddle">
+
+<label>Platform:</label>
+<select name="ciPlatform" id="ciPlatform" onchange="filterCiPlatform(this.value)">
 <?php
     echo "<option value=\"All\">All</option>";
-    foreach ($_SESSION['arrayCiProject'] as $key=>$value)
-        echo "<option value=\"$value\">$value</option>";
+    foreach ($arrayPlatform as $key=>$row) {
+        $value = $row[0];
+        if ($key > 0)                                               // The default "All" set above
+            echo "<option value=\"$key\">$value</option>";          // Note: Filter passes the index values instead of the name
+    }
 ?>
 </select>
 <br/>
@@ -111,30 +146,11 @@ $timeAutotestValues = microtime(true);
 ?>
 </select>
 
-<select name="build" id="build" onchange="filterBuild(this.value)" class="hiddenElement">
-<?php
-// Note: This filter is hidden, used via build number links in Project dashboard instead
-    for ($i=0; $i<HISTORYBUILDCOUNT; $i++)
-        echo "<option value=\"$i\">$i</option>";
-?>
-</select>
 <?php
 // Hidden elements to save data from Autotest dashboard selection fields
 ?>
 <input id="autotestSortBy" type="hidden" value="0">
 <input name="autotestShowAll" id="autotestShowAll" type="hidden" value="hide">
-</div>
-
-<div id="filterFieldsMiddle">
-
-<label>Branch:</label>
-<select name="ciBranch" id="ciBranch" onchange="filterCiBranch(this.value)">
-<?php
-    echo "<option value=\"All\">All</option>";
-    foreach ($_SESSION['arrayCiBranch'] as $key=>$value)
-        echo "<option value=\"$value\">$value</option>";
-?>
-</select>
 
 </div>
 </form>

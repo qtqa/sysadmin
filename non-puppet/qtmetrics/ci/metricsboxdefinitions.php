@@ -51,12 +51,12 @@ define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other a
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All, project, ciProject, ciBranch, conf, autotest, build, timescale
+    // *) Possible values: All, project, ciProject, ciBranch, ciPlatform, conf, autotest, build, timescale
     //
-    //        File path and name                Repeat      Applied filters *)                                  Filters to clear *)
-    //        ---------------------------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"     ,2          ,"project,ciProject,ciBranch,conf,build,timescale"  ,""              ),
-    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                                              ,"autotest"      ),
+    //        File path and name                Repeat      Applied filters *)                                              Filters to clear *)
+    //        ---------------------------------------------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"     ,2          ,"project,ciProject,ciBranch,ciPlatform,conf,build,timescale"   ,""              ),
+    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                                                          ,"autotest"      ),
 );
 
 /* Filters */
@@ -65,12 +65,13 @@ define("FILTERVALUESEPARATOR", ":");
 define("FILTERPROJECT", 0);
 define("FILTERCIPROJECT", 1);
 define("FILTERCIBRANCH", 2);
-define("FILTERCONF", 3);
-define("FILTERAUTOTEST", 4);
-define("FILTERBUILD", 5);
-define("FILTERTIMESCALETYPE", 6);
-define("FILTERTIMESCALEVALUE", 7);
-define("FILTERSORTBY", 8);
-define("FILTERSHOWALL", 9);
+define("FILTERCIPLATFORM", 3);
+define("FILTERCONF", 4);
+define("FILTERAUTOTEST", 5);
+define("FILTERBUILD", 6);
+define("FILTERTIMESCALETYPE", 7);
+define("FILTERTIMESCALEVALUE", 8);
+define("FILTERSORTBY", 9);
+define("FILTERSHOWALL", 10);
 
 ?>

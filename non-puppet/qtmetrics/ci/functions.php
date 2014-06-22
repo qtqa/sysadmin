@@ -94,4 +94,22 @@ function cleanSqlString($sqlString)
     return $sql;
 }
 
+/* Check if the fullString includes the findString (wildcard '*' may be used) or all of its strings separated with the wildcard '*' */
+function checkStringMatch($fullString, $findString)
+{
+    $arrayFind = array();
+    $arrayFind = explode('*', $findString);                 // Get all strings separated with '*' into an array
+    $arrayFind = array_filter($arrayFind);                  // Remove empty values
+    $findCount = count($arrayFind);
+    $findMatchCount = 0;
+    $booMatch = FALSE;
+    foreach ($arrayFind as $key => $find) {
+        if (stripos($fullString, $find) !== FALSE)
+            $findMatchCount++;                              // Count all the separate matches
+    }
+    if ($findCount == $findMatchCount)
+        $booMatch = TRUE;                                   // All strings separated with '*' match
+    return $booMatch;
+}
+
 ?>

@@ -43,6 +43,26 @@
 
 <?php
 
+/* Platform grouping by Configurations */
+
+$arrayPlatform = array(
+    //     Platform name        String in Configuration
+    array( "All",               "*" ),              // Index 0 reserved for 'not selected'
+    array( "Linux all",         "*linux*" ),
+    array( "Linux OpenSuSE",    "*linux*OpenSuSE*" ),
+    array( "Linux RHEL",        "*linux*RHEL*" ),
+    array( "Linux Ubuntu",      "*linux*Ubuntu*" ),
+    array( "Mac all",           "macx*" ),
+    array( "Mac OS X 10.6",     "macx*OSX_10.6" ),
+    array( "Mac OS X 10.7",     "macx*OSX_10.7" ),
+    array( "Mac OS X 10.8",     "macx*OSX_10.8" ),
+    array( "Mac OS X 10.9",     "macx*OSX_10.9" ),
+    array( "Windows all",       "*Windows*" ),
+    array( "Windows 7",         "*Windows_7" ),
+    array( "Windows 8",         "*Windows_8" ),
+    array( "Windows 8.1",       "*Windows_81" ),
+);
+
 /* Project dashboard definitions */
 
 if (!defined("HISTORYBUILDCOUNT"))
