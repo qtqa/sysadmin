@@ -44,14 +44,15 @@
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
         <td class="tableSingleBorder"><b>Failed Autotests:</b> The number of Project Configurations (their latest build) where the Autotest failed (by failure category).<br>
                                       <b>Detailed Test Results:</b> The number of Project Configurations (their all builds) where the Autotest has failed and run,
-                                         and the percentage of the failed ones. Calculated for the latest build, or according to the Timescale filter i.e. based on the
+                                         the percentage of the failed ones, and the number of reruns. Calculated for the latest build, or according to the Timescale filter i.e. based on the
                                          builds done after the selected date.<br>
         </td>
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
         <td class="tableSingleBorder">Higher count means the Autotest is failing in higher number of Configurations, and should therefore be analyzed.<br>
-                                      Failed percentage 100% means the Autotest has failed in every build it has been run.
+                                      Failed percentage 100% means the Autotest has failed in every build it has been run.<br>
+                                      Higher number of reruns means the Autotest must be rerun to see if it is flaky, these should be analyzed.
         </td>
         </tr>
         <tr>
@@ -73,6 +74,7 @@
                                       <b>Autotest result:</b> passed/failed/skipped; name in the list indicates a failure i.e. others are not listed<br>
                                       <b>Autotest significance:</b> tag "significant" (failure leads to build failure, unless the Configuration set insignificant) /
                                          "insignificant" (failure does not lead to build failure)<br>
+                                      <b>Autotest runs:</b> number of times the Autotest was run in a build (more than one means it was rerun to see if it is flaky)
         </td>
         </tr>
         <tr>

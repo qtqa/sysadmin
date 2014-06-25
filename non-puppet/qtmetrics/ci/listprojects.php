@@ -63,13 +63,13 @@ echo '<table class="fontSmall">';
 echo '<tr>';
 echo '<th></th>';
 if ($timescaleType == "All") {
-    echo '<td colspan="8" class="tableBottomBorder tableSideBorder tableCellCentered">';
+    echo '<td colspan="11" class="tableBottomBorder tableSideBorder tableCellCentered">';
     echo '<b>LATEST PROJECT BUILDS</b></td>';
     echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleAll">
         <b>ALL BUILDS (SINCE ' . $_SESSION['minBuildDate'] . ')</b></td>';
 }
 if ($timescaleType == "Since") {
-    echo '<td colspan="8" class="tableBottomBorder tableSideBorder tableCellCentered">';
+    echo '<td colspan="11" class="tableBottomBorder tableSideBorder tableCellCentered">';
     echo '<b>LATEST PROJECT BUILDS SINCE ' . $timescaleValue . '</b></td>';
     if ($round == 1)
         echo '<td colspan="3" class="tableBottomBorder tableSideBorder tableCellCentered timescaleSince">
@@ -82,9 +82,10 @@ echo '</tr>';
 echo '<tr>';
 echo '<th></th>';
 echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Build Info</th>';
-echo '<th colspan="2" class="tableBottomBorder tableSideBorder">Amount of Failed Autotests</th>';
-echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Amount of Configurations</th>';
-echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Amount of Builds</th>';
+echo '<th colspan="2" class="tableBottomBorder tableLeftBorder">Failed Autotests</th>';
+echo '<th colspan="3" class="tableBottomBorder tableRightBorder">All</th>';
+echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Configurations</th>';
+echo '<th colspan="3" class="tableBottomBorder tableSideBorder">Builds</th>';
 echo '</tr>';
 echo '<tr class="tableBottomBorder">';
 echo '<td></td>';
@@ -93,6 +94,9 @@ echo '<td class="tableCellCentered">Result</td>';
 echo '<td class="tableCellCentered">Date</td>';
 echo '<td class="tableLeftBorder tableCellCentered">Significant</td>';
 echo '<td class="tableCellCentered">Insignificant</td>';
+echo '<td class="tableCellCentered">Failed</td>';
+echo '<td class="tableCellCentered">Total</td>';
+echo '<td class="tableCellCentered">Rerun</td>';
 echo '<td class="tableLeftBorder tableCellCentered">Force success</td>';
 echo '<td class="tableCellCentered">Insignificant</td>';
 echo '<td class="tableCellCentered">Total</td>';
@@ -106,6 +110,9 @@ $listCutMode = FALSE;
 $printedProjects = 0;
 $latestFailingSignAutotestCount = 0;
 $latestFailingInsignAutotestCount = 0;
+$latestAutotestFailedCount = 0;
+$latestAutotestTotalCount = 0;
+$latestAutotestRerunCount = 0;
 $latestForceSuccessConfCount = 0;
 $latestInsignConfCount = 0;
 $latestTotalConfCount = 0;
@@ -237,7 +244,7 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     /* Project name */
     echo '<td><a href="javascript:void(0);" onclick="filterProject(\'' . $value . '\')">' . $value . '</a></td>';
 
-    /* Latest Build number and result */
+    /* Latest Build / Info: id, result, date */
     echo '<td class="tableLeftBorder">' . $_SESSION['arrayProjectBuildLatest'][$key] . '</td>';
     $fontColorClass = "fontColorBlack";
     if ($_SESSION['arrayProjectBuildLatestResult'][$key] == "SUCCESS")
@@ -248,7 +255,7 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     $date = strstr($_SESSION['arrayProjectBuildLatestTimestamp'][$key], ' ', TRUE);
     echo '<td>' . $date . '</td>';
 
-    /* Latest Build: Number of failed significant/insignificant autotests */
+    /* Latest Build / Failed Autotests: Failed significant/insignificant and sum */
     $count = $_SESSION['arrayProjectBuildLatestSignificantCount'][$key];
     if ($count > 0)
         echo '<td class="tableLeftBorder tableCellCentered">' . $count . '</td>';
@@ -261,8 +268,29 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
     else
         echo '<td class="tableCellCentered">-</td>';
     $latestFailingInsignAutotestCount = $latestFailingInsignAutotestCount + $count;
+    $count = $_SESSION['arrayProjectBuildLatestAutotestFailedCount'][$key];
+    $ratio = calculatePercentage($count, $_SESSION['arrayProjectBuildLatestAutotestCount'][$key]);
+    if ($_SESSION['arrayProjectBuildLatestAutotestCount'][$key] > 0)
+        echo '<td class="tableCellAlignRight">' . $count . ' (' . $ratio . '%)</td>';
+    else
+        echo '<td class="tableCellCentered">-</td>';
+    $latestAutotestFailedCount = $latestAutotestFailedCount + $count;
 
-    /* Latest Build: Force success and insignificant Configurations vs. All Configurations */
+    /* Latest Build / All Autotests: Total and rerun count */
+    $count = $_SESSION['arrayProjectBuildLatestAutotestCount'][$key];
+    if ($count > 0)
+        echo '<td class="tableCellCentered">' . $count . '</td>';
+    else
+        echo '<td class="tableCellCentered">-</td>';
+    $latestAutotestTotalCount = $latestAutotestTotalCount + $count;
+    $count = $_SESSION['arrayProjectBuildLatestAutotestRerun'][$key];
+    if ($count > 0)
+        echo '<td class="tableCellCentered">' . $count . '</td>';
+    else
+        echo '<td class="tableCellCentered">-</td>';
+    $latestAutotestRerunCount = $latestAutotestRerunCount + $count;
+
+    /* Latest Build / Configurations: Force success and insignificant Configurations vs. All Configurations */
     $count = $_SESSION['arrayProjectBuildLatestConfCountForceSuccess'][$key];
     if ($count > 0)
         echo '<td class="tableLeftBorder tableCellCentered">' . $count . '</td>';
@@ -282,17 +310,17 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
         echo '<td class="tableCellCentered">-</td>';
     $latestTotalConfCount = $latestTotalConfCount + $count;
 
-    /* All Builds: Failure count and ratio */
+    /* All Builds: Failed Build count and ratio */
     if ($timescaleType == "All") {                                         // For all Builds: read from the session variables
         $count = $_SESSION['arrayProjectBuildCountFailure'][$key];
-        $ratio = round(100*$count/$_SESSION['arrayProjectBuildCount'][$key],0);
+        $ratio = calculatePercentage($count, $_SESSION['arrayProjectBuildCount'][$key]);
     }
     if ($timescaleType == "Since") {                                       // With Timescope: read from the arrays calculated above
         if ($round == 1) {
             $count = -1;
         } else {
             $count = $arrayProjectBuildSinceCountFailure[$key];
-            $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+            $ratio = calculatePercentage($count, $arrayProjectBuildSinceCount[$key]);
         }
     }
     if ($count > 0)
@@ -303,17 +331,17 @@ foreach ($_SESSION['arrayProjectName'] as $key=>$value) {
         echo '<td class="tableLeftBorder tableCellCentered"></td>';
     $allFailureCount = $allFailureCount + $count;
 
-    /* All Builds: Success count and ratio */
+    /* All Builds: Successful Build count and ratio */
     if ($timescaleType == "All") {                                         // For all Builds: read from the session variables
         $count = $_SESSION['arrayProjectBuildCountSuccess'][$key];
-        $ratio = round(100*$count/$_SESSION['arrayProjectBuildCount'][$key],0);
+        $ratio = calculatePercentage($count, $_SESSION['arrayProjectBuildCount'][$key]);
     }
     if ($timescaleType == "Since") {                                       // With Timescope: read from the arrays calculated above
         if ($round == 1) {
             $count = -1;
         } else {
             $count = $arrayProjectBuildSinceCountSuccess[$key];
-            $ratio = round(100*$count/$arrayProjectBuildSinceCount[$key],0);
+            $ratio = calculatePercentage($count, $arrayProjectBuildSinceCount[$key]);
         }
     }
     if ($count > 0)
@@ -359,7 +387,11 @@ if ($listCutMode == FALSE) {
     echo '<td class="tableTopBorder"></td>';
     echo '<td class="tableRightBorder tableTopBorder"></td>';
     echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $latestFailingSignAutotestCount . '</td>';
-    echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestFailingInsignAutotestCount . '</td>';
+    echo '<td class="tableTopBorder tableCellCentered">' . $latestFailingInsignAutotestCount . '</td>';
+    echo '<td class="tableTopBorder tableCellAlignRight">' . $latestAutotestFailedCount . ' ('
+        . round(100*$latestAutotestFailedCount/$latestAutotestTotalCount,0) . '%)</td>';
+    echo '<td class="tableTopBorder tableCellCentered">' . $latestAutotestTotalCount . '</td>';
+    echo '<td class="tableTopBorder tableCellCentered">' . $latestAutotestRerunCount . '</td>';
     echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">' . $latestForceSuccessConfCount . '</td>';
     echo '<td class="tableTopBorder tableCellCentered">' . $latestInsignConfCount . '</td>';
     echo '<td class="tableRightBorder tableTopBorder tableCellCentered">' . $latestTotalConfCount . '</td>';
@@ -368,14 +400,18 @@ if ($listCutMode == FALSE) {
             echo '<td class="tableTopBorder tableCellCentered"></td>';
             echo '<td class="tableRightBorder tableTopBorder tableCellCentered"></td>';
     } else {
-        if ($allFailureCount > 0)
-            echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . round(100*$allFailureCount/$allTotalCount,0) . '%)</td>';
-        else
+        if ($allFailureCount > 0) {
+            $ratio = calculatePercentage($allFailureCount, $allTotalCount);
+            echo '<td class="tableLeftBorder tableTopBorder tableCellAlignRight">' . $allFailureCount . ' (' . $ratio . '%)</td>';
+        } else {
             echo '<td class="tableLeftBorder tableTopBorder tableCellCentered">-</td>';
-        if ($allSuccessCount > 0)
-            echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . round(100*$allSuccessCount/$allTotalCount,0) . '%)</td>';
-        else
+        }
+        if ($allSuccessCount > 0) {
+            $ratio = calculatePercentage($allSuccessCount, $allTotalCount);
+            echo '<td class="tableTopBorder tableCellAlignRight">' . $allSuccessCount . ' (' . $ratio . '%)</td>';
+        } else {
             echo '<td class="tableTopBorder tableCellCentered">-</td>';
+        }
         if ($allTotalCount > 0)
             echo '<td class="tableRightBorder tableTopBorder tableCellAlignRight">' . $allTotalCount . '</td>';
         else

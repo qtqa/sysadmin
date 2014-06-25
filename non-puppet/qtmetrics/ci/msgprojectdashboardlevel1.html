@@ -40,7 +40,7 @@
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Calculation</th>
         <td class="tableSingleBorder"><b>In latest build:</b> Showing ID, result and date of build,
-                                         the count of failed Autotests (by their significance tagging),
+                                         the count and ratio of failed Autotests (by their significance tagging) with the number of reruns,
                                          and the count of Configurations (by their force success and significance tagging compared to total) for each Project<br>
                                       <b>In all builds:</b> Showing the count and ratio of failed and successful builds compared to total for each Project.
                                          Calculated either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date.
@@ -48,7 +48,7 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Interpretation</th>
-        <td class="tableSingleBorder"><b>In latest build:</b> Higher count of failed Autotests indicates a need for analysis, regardless of the build result.
+        <td class="tableSingleBorder"><b>In latest build:</b> Higher count, ratio or number of reruns of failed Autotests indicates a need for analysis, regardless of the build result.
                                          Higher count of tagged (force success, insignificant) Configurations indicates a need for analysis, especially in case of failed build.<br>
                                       <b>In all builds:</b> High ratio of failed builds compared to successful builds indicates a need for analysis.
                                          <i>Note: The ratio may not be an ideal measure when the total count of builds is low.</i>
@@ -69,6 +69,7 @@
                                       <b>Build result:</b> SUCCESS/FAILURE<br>
                                       <b>Build date:</b> date when build started<br>
                                       <b>Autotest significance:</b> number of failed Autotests with tagging Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)<br>
+                                      <b>Autotest runs:</b> number of times the Autotest was run in a build (more than one means it was rerun to see if it is flaky)<br>
                                       <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86); Platform filter uses predefined searches to the Configuration name<br>
                                       <b>Configuration force success:</b> number of tagged Configurations (if tagged as "force success" the Configuration build is forced to succeed, so that it will not block the whole Project build; this is e.g. in case of a new or immature Configuration when it is not reasonable to let the whole Project build fail because of this specific Configuration)<br>
                                       <b>Configuration insignificant:</b> number of tagged Configurations (if tagged as "insignificant" the Configuration build will not fail even though some significant Autotests would fail)<br>

@@ -45,10 +45,19 @@
 
 // (Note: session started in getfilters.php)
 
-/* Get list of project values to session variable xxx (if not done already) */
+/* Get list of Project values to session variable xxx (if not done already) */
 if(!isset($_SESSION['arrayProjectName'])) {
+
     /* Connect to the server */
     require(__DIR__.'/../connect.php');
+
+    /* Select database */
+    if ($useMysqli) {
+        // Selected in mysqli_connect() call
+    } else {
+        $selectdb="USE $db";
+        $result = mysql_query($selectdb) or die ("Failure: Unable to use the database !");
+    }
 
     /* Step 1: Read name, latest Build number and calculate the Autotest result counting min/max scope for each Project */
     $sql = "SELECT project, build_number, result, timestamp, duration
@@ -63,8 +72,6 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result = mysqli_query($conn, $sql);
         $numberOfRows = mysqli_num_rows($result);
     } else {
-        $selectdb="USE $db";
-        $result = mysql_query($selectdb) or die (mysql_error());
         $result = mysql_query($sql) or die (mysql_error());
         $numberOfRows = mysql_num_rows($result);
     }
@@ -101,9 +108,13 @@ if(!isset($_SESSION['arrayProjectName'])) {
     sort($arrayCiBranch);
     $timeProjectValuesStep1 = microtime(true);
 
-    /* Step 2: Read the number of failed significant and insignificant autotests in latest Build for each Project from the database */
+    /* Step 2: Read the number of failed significant and insignificant Autotests in latest Build for each Project from the database */
     $arrayProjectBuildLatestSignificantCount = array();
     $arrayProjectBuildLatestInsignificantCount = array();
+    for ($i=0; $i<$numberOfProjects; $i++) {                                        // Initialize
+        $arrayProjectBuildLatestSignificantCount[$i] = 0;
+        $arrayProjectBuildLatestInsignificantCount[$i] = 0;
+    }
     $sql = "SELECT project, insignificant
             FROM test_latest";
     $dbColumnTestProject = 0;
@@ -112,12 +123,10 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result2 = mysqli_query($conn, $sql);
         $numberOfRows2 = mysqli_num_rows($result2);
     } else {
-        $selectdb="USE $db";
-        $result2 = mysql_query($selectdb) or die (mysql_error());
         $result2 = mysql_query($sql) or die (mysql_error());
         $numberOfRows2 = mysql_num_rows($result2);
     }
-    for ($j=0; $j<$numberOfRows2; $j++) {                                            // Loop the counts
+    for ($j=0; $j<$numberOfRows2; $j++) {                                            // Loop the tests
         if ($useMysqli)
             $resultRow2 = mysqli_fetch_row($result2);
         else
@@ -137,6 +146,11 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $arrayProjectBuildLatestConfCount = array();
     $arrayProjectBuildLatestConfCountForceSuccess = array();
     $arrayProjectBuildLatestConfCountInsignificant = array();
+    for ($i=0; $i<$numberOfProjects; $i++) {                                        // Initialize
+        $arrayProjectBuildLatestConfCount[$i] = 0;
+        $arrayProjectBuildLatestConfCountForceSuccess[$i] = 0;
+        $arrayProjectBuildLatestConfCountInsignificant[$i] = 0;
+    }
     $sql = "SELECT project, forcesuccess, insignificant
             FROM cfg_latest";
     $dbColumnCfgProject = 0;
@@ -146,12 +160,10 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result2 = mysqli_query($conn, $sql);
         $numberOfRows2 = mysqli_num_rows($result2);
     } else {
-        $selectdb="USE $db";
-        $result2 = mysql_query($selectdb) or die (mysql_error());
         $result2 = mysql_query($sql) or die (mysql_error());
         $numberOfRows2 = mysql_num_rows($result2);
     }
-    for ($j=0; $j<$numberOfRows2; $j++) {                                            // Loop the counts
+    for ($j=0; $j<$numberOfRows2; $j++) {                                            // Loop the Confs
         if ($useMysqli)
             $resultRow2 = mysqli_fetch_row($result2);
         else
@@ -169,7 +181,7 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $timeProjectValuesStep3 = microtime(true);
 
     /* Step 4: Read the number of successful, failed and all Builds for each Project from the database (all must be read separately) */
-    $arrayProjectBuildCount = array();
+    $arrayProjectBuildCount = array();                                               // Note: These must not be initialized because not filled by Projects
     $arrayProjectBuildCountSuccess = array();
     $arrayProjectBuildCountFailure = array();
     for ($i=0; $i<$numberOfProjects; $i++) {                                         // Loop the Projects (see step 1)
@@ -188,8 +200,6 @@ if(!isset($_SESSION['arrayProjectName'])) {
             $result2 = mysqli_query($conn, $sql);
             $numberOfRows2 = mysqli_num_rows($result2);
         } else {
-            $selectdb="USE $db";
-            $result2 = mysql_query($selectdb) or die (mysql_error());
             $result2 = mysql_query($sql) or die (mysql_error());
             $numberOfRows2 = mysql_num_rows($result2);
         }
@@ -215,14 +225,53 @@ if(!isset($_SESSION['arrayProjectName'])) {
         $result = mysqli_query($conn, $sql);
         $resultRow = mysqli_fetch_row($result);
     } else {
-        $selectdb="USE $db";
-        $result = mysql_query($selectdb) or die (mysql_error());
         $result = mysql_query($sql) or die (mysql_error());
         $resultRow = mysql_fetch_row($result);
     }
     $minBuildDate = substr($resultRow[0], 0, 10);
     $maxBuildDate = substr($resultRow[1], 0, 10);
     $timeProjectValuesStep5 = microtime(true);
+
+    /* Step 6: Read the number of all, failed and rerun Autotests (flaky tests) in latest Build for each Project from the database */
+    $arrayProjectBuildLatestAutotestCount = array();
+    $arrayProjectBuildLatestAutotestFailedCount = array();
+    $arrayProjectBuildLatestAutotestRerun = array();
+    for ($i=0; $i<$numberOfProjects; $i++) {                                        // Initialize
+        $arrayProjectBuildLatestAutotestCount[$i] = 0;
+        $arrayProjectBuildLatestAutotestFailedCount[$i] = 0;
+        $arrayProjectBuildLatestAutotestRerun[$i] = 0;
+    }
+    for ($i=0; $i<$numberOfProjects; $i++) {                                        // Loop the Projects (see step 1); Search test results for one Project at a time (to avoid too large return data)
+        $projectName = $arrayProjectName[$i];
+        $sql = "SELECT passed, failed, skipped, runs
+                FROM all_test_latest
+                WHERE project=\"$projectName\"";                                    // All tests with details
+        $dbColumnTestPassed = 0;
+        $dbColumnTestFailed = 1;
+        $dbColumnTestSkipped = 2;
+        $dbColumnTestRuns = 3;
+        if ($useMysqli) {
+            $result = mysqli_query($conn, $sql);
+            $numberOfRows = mysqli_num_rows($result);
+        } else {
+            $result = mysql_query($sql) or die (mysql_error());
+            $numberOfRows = mysql_num_rows($result);
+        }
+        for ($j=0; $j<$numberOfRows; $j++) {                                        // Loop the all tests
+            if ($useMysqli)
+                $resultRow = mysqli_fetch_row($result);
+            else
+                $resultRow = mysql_fetch_row($result);
+            $arrayProjectBuildLatestAutotestCount[$i]++;                            // a) Count the number of Autotests in a Project
+            if (checkAutotestFailed($resultRow[$dbColumnTestPassed],
+                                    $resultRow[$dbColumnTestFailed],
+                                    $resultRow[$dbColumnTestSkipped]))              // b) Count the number of failed Autotests in a Project (identified by case results)
+                $arrayProjectBuildLatestAutotestFailedCount[$i]++;
+            if ($resultRow[$dbColumnTestRuns] > 1)                                  // c) Count the number of rerun Autotests in a Project (not the number of reruns)
+                $arrayProjectBuildLatestAutotestRerun[$i]++;
+        }
+    }
+    $timeProjectValuesStep6 = microtime(true);
 
     /* Save session variables */
     $_SESSION['arrayProjectName'] = $arrayProjectName;
@@ -236,6 +285,9 @@ if(!isset($_SESSION['arrayProjectName'])) {
     $_SESSION['arrayProjectBuildLatestConfCount'] = $arrayProjectBuildLatestConfCount;
     $_SESSION['arrayProjectBuildLatestConfCountForceSuccess'] = $arrayProjectBuildLatestConfCountForceSuccess;
     $_SESSION['arrayProjectBuildLatestConfCountInsignificant'] = $arrayProjectBuildLatestConfCountInsignificant;
+    $_SESSION['arrayProjectBuildLatestAutotestCount'] = $arrayProjectBuildLatestAutotestCount;
+    $_SESSION['arrayProjectBuildLatestAutotestFailedCount'] = $arrayProjectBuildLatestAutotestFailedCount;
+    $_SESSION['arrayProjectBuildLatestAutotestRerun'] = $arrayProjectBuildLatestAutotestRerun;
     $_SESSION['arrayProjectBuildCount'] = $arrayProjectBuildCount;
     $_SESSION['arrayProjectBuildCountSuccess'] = $arrayProjectBuildCountSuccess;
     $_SESSION['arrayProjectBuildCountFailure'] = $arrayProjectBuildCountFailure;

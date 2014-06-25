@@ -43,7 +43,10 @@
 
 <?php
 
-/* Read the plain Project name from the full Project string */
+/* Read the plain Project name from the full Project string
+   Input:   $project        (string)  Full Project name (e.g. "QtDeclarative_dev_Integration")
+   Return:  (string) String till the second-to-last "_" character
+*/
 function getProjectName($project)
 {
     $ciProject = substr($project, 0, strpos($project, "_Integration"));     // Cut to e.g. "QtDeclarative_dev"
@@ -53,7 +56,10 @@ function getProjectName($project)
     return $ciProject;
 }
 
-/* Read the plain Project branch from the full Project string */
+/* Read the plain Project branch from the full Project string
+   Input:   $project        (string)  Full Project name (e.g. "QtDeclarative_dev_Integration")
+   Return:  (string) String between the last two "_" characters
+*/
 function getProjectBranch($project)
 {
     $ciBranch = substr($project, 0, strpos($project, "_Integration"));      // Cut to e.g. "QtDeclarative_dev"
@@ -63,7 +69,10 @@ function getProjectBranch($project)
     return $ciBranch;
 }
 
-/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412) */
+/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412)
+   Input:   $buildNumber    (integer)  Build number (1 - 99999)
+   Return:  (string) Five character string (00001 - 99999)
+*/
 function createBuildNumberString($buildNumber)
 {
     $buildString = $buildNumber;
@@ -78,7 +87,10 @@ function createBuildNumberString($buildNumber)
     return $buildString;
 }
 
-/* Clean the SQL statement with possible errors when combining several WHERE conditions */
+/* Clean the SQL statement with possible errors when combining several WHERE conditions
+   Input:   $sqlString      (string)  The SQL statement
+   Return:  (string)
+*/
 function cleanSqlString($sqlString)
 {
     $sql = $sqlString;
@@ -94,7 +106,27 @@ function cleanSqlString($sqlString)
     return $sql;
 }
 
-/* Check if the fullString includes the findString (wildcard '*' may be used) or all of its strings separated with the wildcard '*' */
+/* Identify the Autotest test result from the test case results
+   Input:   $casesPassed    (integer)  Number of passed cases for the autotest
+            $casesFailed    (integer)  Number of failed cases for the autotest
+            $casesSkipped   (integer)  Number of skipped cases for the autotest
+   Return:  (boolean) TRUE if failed
+*/
+function checkAutotestFailed($casesPassed, $casesFailed, $casesSkipped)
+{
+    $result = FALSE;
+    if (isset($casesFailed) AND $casesFailed > 0)                                  // Failed if failed cases (and not NULL)
+        $result = TRUE;
+    if (!isset($casesPassed) AND !isset($casesFailed) AND !isset($casesSkipped))    // Crashed (failed) if counts not set (all are NULL)
+        $result = TRUE;
+    return $result;
+}
+
+/* Check if the fullString includes the findString (wildcard '*' may be used) or all of its strings separated with the wildcard '*'
+   Input:   $fullString     (string)  The 'haystack' where searched from
+            $findString     (string)  The 'needle' to be matched
+   Return:  (boolean)
+*/
 function checkStringMatch($fullString, $findString)
 {
     $arrayFind = array();
@@ -110,6 +142,21 @@ function checkStringMatch($fullString, $findString)
     if ($findCount == $findMatchCount)
         $booMatch = TRUE;                                   // All strings separated with '*' match
     return $booMatch;
+}
+
+/* Calculate percentage so that very low but not quite zero result is rounded to 1 and almost 100% but not quite is rounded to 99
+   Input:   $numerator      (integer)  The numerator
+            $divider        (integer)  The divider
+   Return:  (integer) percentage (0-100)
+*/
+function calculatePercentage($numerator, $divider)
+{
+    $percentage = round(100 * ($numerator / $divider));                                 // Must be rounded to integer for sorting to work
+    if ($percentage == 0 AND $numerator > 0)                                            // Not quite 0%
+        $percentage = 1;
+    if ($percentage == 100 AND $numerator <> $divider)                                  // Not quite 100%
+        $percentage = 99;
+    return $percentage;
 }
 
 ?>

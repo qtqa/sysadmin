@@ -39,6 +39,7 @@
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Indicator</th>
         <td class="tableSingleBorder"><b>Result history:</b> List of Projects and Configurations (for the last 20 builds) where the Autotest is failing by failure category.
+                                         Autotest and Build details are displayed when moving the mouse over the Build link.
                                          The Timescale filtered and/or the Build selected in the Project dashboard is indicated.
                                       <i>For the coloring, see the linked notation description.</i><br>
                                       <b>Test cases:</b> The number of Project Configuration builds where the test case has failed and run, and percentage of the failed ones.
@@ -81,6 +82,7 @@
                                       <b>Autotest result:</b> name in the list indicates a failure (i.e. the passed ones are not listed)<br>
                                       <b>Autotest significance:</b> tag "significant" (failure leads to build failure, unless the Configuration set insignificant) /
                                          "insignificant" (failure does not lead to build failure)<br>
+                                      <b>Autotest runs:</b> number of times the Autotest was run in a build (more than one means it was rerun to see if it is flaky)<br>
                                       <b>Autotest result file:</b> if the related test result file (e.g. tst_qftp-testresults-00.xml) exists, the Autotest was run in
                                          the related Configuration build<br>
                                       <b>Test case name:</b> e.g. activeMode[WithoutProxy], test case naming structure varies between Autotests<br>

@@ -43,8 +43,8 @@
                                       <b>Build history:</b> Showing a few last Project builds with date, result and link to source build results directory (no calculation).
                                          By default, the latest Build data is shown, but any listed Build can be selected by clicking the build number.
                                          The Timescale filtered and/or the Build selected is indicated.<br>
-                                      <b>Configurations:</b> Showing the Configuration build result and tagging (force success, significance)
-                                         and count of failed Autotests by significance for the latest build,
+                                      <b>Configurations:</b> Showing the Configuration build result and tagging (force success, significance),
+                                         the count and ratio of failed Autotests by significance with the number of reruns for the latest build,
                                          and the count and ratio of failed and successful builds compared to total for each Configuration
                                          (either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date).<br>
                                          <i>Note: The sum of failed and successful builds may not match with the total because, in case some already running Configuration build fails, the possibly waiting builds are cancelled (seen with result "undef" in the list).</i><br>
@@ -57,7 +57,7 @@
                                       <b>Build history:</b> Successive failures or sudden failure after successive successful builds indicate a need for analysis<br>
                                       <b>Configurations:</b> Builds with force success tagging should be understood.
                                          Builds with insignificant tagging should be analyzed, especially if there are several failed significant Autotests.
-                                         High number of failed Autotests indicates a need for analysis.
+                                         High count, ratio or number of reruns of failed Autotests indicates a need for analysis.
                                          High ratio of failed builds compared to successful builds indicates a need for analysis.
                                          <i>Note: The ratio may not be an ideal measure when the total count of builds is low.</i><br>
                                          <i>Tip: The Autotest dashboard can be utilized here in parallel with the Project dashboard.</i><br>
@@ -84,7 +84,8 @@
                                       <b>Configuration force success:</b> Yes/- (if tagged as "force success" the Configuration build is forced to succeed, so that it will not block the whole Project build; this is e.g. in case of a new or immature Configuration when it is not reasonable to let the whole Project build fail because of this specific Configuration)<br>
                                       <b>Configuration insignificant:</b> Yes/- (if tagged as "insignificant" the Configuration build will not fail even though some significant Autotests would fail)<br>
                                       <b>Autotest name:</b> several per Configuration (e.g. tst_qftp)<br>
-                                      <b>Autotest significance:</b> number of failed Autotests with tagging Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)
+                                      <b>Autotest significance:</b> number of failed Autotests with tagging Significant (failure leads to build failure, unless the Configuration set insignificant) / Insignificant (failure does not lead to build failure)<br>
+                                      <b>Autotest runs:</b> number of times the Autotest was run in a build (more than one means it was rerun to see if it is flaky)
         </td>
         </tr>
         <tr>

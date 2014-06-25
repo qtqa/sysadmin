@@ -393,6 +393,7 @@ td {
 
 .fontColorBlack {
     color: black;
+    font-weight: normal;
 }
 
 .fontColorGrey {
