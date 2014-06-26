@@ -127,6 +127,9 @@ sub run_slave_jar
         system( @cmd );
 
         warn "system( @cmd ): $? $!";
+        if ($OSNAME =~ m{win32}i) {  # To prevent unnecessary re-connections, just reboot if in win. See QTQAINFRA-846
+            system( qw(shutdown /r /t 5 /c), "Jenkins slave unexpectedly terminated" );
+        }
 
         # If Jenkins was able to run for at least this amount of time, we assume that the slave
         # was able to connect to the server and work somewhat correctly for a while, but now
