@@ -66,6 +66,9 @@ my $JENKINS_SLAVE_JAR_URL = "$JENKINS_SERVER/jnlpJars/slave.jar";
 # Local slave.jar
 my $JENKINS_SLAVE_JAR = catfile( $JENKINS_CWD, 'slave.jar' );
 
+# Local jenkins-cli.jar
+my $JENKINS_CLI_JAR = catfile( $JENKINS_CWD, 'jenkins-cli.jar' );
+
 # Try to reboot this host.
 # On Linux and Mac, relies on passwordless sudo.
 # Guaranteed to exit this script even if rebooting fails.
@@ -113,6 +116,16 @@ sub run_slave_jar
         '-jnlpUrl',
         $jnlp_url,
     );
+    my @disconnect_cmd = (
+        'java',
+        '-jar',
+        $JENKINS_CLI_JAR,
+        '-s',
+        $JENKINS_SERVER,
+        'disconnect-node',
+        $JENKINS_SLAVE_NAME,
+    );
+
 
     my $INIT_ATTEMPTS = 100;    # how many times we'll try to run the slave
     my $INIT_SLEEP = 2;         # initial delay between attempts (seconds)
@@ -127,6 +140,10 @@ sub run_slave_jar
         system( @cmd );
 
         warn "system( @cmd ): $? $!";
+        if ($OSNAME =~ m{win32}i) {  # To prevent unnecessary re-connections, just reboot if in win. See QTQAINFRA-846
+            system( @disconnect_cmd ); # Disconnect the node, it will connect back after re-start
+            system( qw(shutdown /r /t 0 /c), "Jenkins slave unexpectedly terminated" );
+        }
 
         # If Jenkins was able to run for at least this amount of time, we assume that the slave
         # was able to connect to the server and work somewhat correctly for a while, but now
