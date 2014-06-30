@@ -177,6 +177,7 @@ if ($project <> "All" AND $conf == "All") {
         require('listbuilds.php');
         /* Show Configurations for the latest/selected Build */
         require('listconfigurations.php');
+        require('graphbuildphases.php');            // Build phases graph
         /* Show Top failing autotests */
         require('listfailingautotests.php');
     } else {

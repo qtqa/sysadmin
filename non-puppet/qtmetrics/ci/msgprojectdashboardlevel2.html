@@ -23,7 +23,8 @@
         </tr>
         <tr>
         <th class="tableCellBackgroundTitle tableCellAlignLeft tableSingleBorder">Question</th>
-        <td class="tableSingleBorder">Is the Project build constantly failing, and how Autotest and Configuration build settings (force success, significance) affect to results</td>
+        <td class="tableSingleBorder">Is the Project build constantly failing, and how Autotest and Configuration build settings (force success, significance) affect to results.<br>
+                                      How long do the Builds take to execute, and are the different Configurations run effectively in parallel.</td>
         </tr>
         <tr><td>&nbsp;</td><td></td></tr>
         <tr>
@@ -48,6 +49,7 @@
                                          and the count and ratio of failed and successful builds compared to total for each Configuration
                                          (either based on all data in the database or according to the Timescale filter i.e. based on the builds done after the selected date).<br>
                                          <i>Note: The sum of failed and successful builds may not match with the total because, in case some already running Configuration build fails, the possibly waiting builds are cancelled (seen with result "undef" in the list).</i><br>
+                                      <b>Build phases:</b> Showing the Configuration build execution by phases in the order of execution from their start time to end time.<br>
                                       <b>Failed Autotests:</b> Showing the list of failed significant Autotests in blocking Configurations i.e. the ones that caused the Project build failure (combined list of related failed Autotests from each Configuration build).
         </td>
         </tr>
@@ -61,6 +63,7 @@
                                          High ratio of failed builds compared to successful builds indicates a need for analysis.
                                          <i>Note: The ratio may not be an ideal measure when the total count of builds is low.</i><br>
                                          <i>Tip: The Autotest dashboard can be utilized here in parallel with the Project dashboard.</i><br>
+                                      <b>Build phases:</b> The shorter time the better. The less idle time before starting or between the phases the better.<br>
                                       <b>Failed Autotests:</b> The failed Autotests that caused build failure should be analyzed.<br>
                                          <i>Tip: The Autotest dashboard can be utilized here in parallel with the Project dashboard.</i>
         </td>
@@ -80,6 +83,7 @@
                                       <b>Build result:</b> SUCCESS/FAILURE/undef ("undef" means the build was cancelled before it was even started because some other Configuration build failed and caused the whole Project build failure)<br>
                                       <b>Build date:</b> date and time when build started<br>
                                       <b>Build duration:</b> build duration in hh:mm:ss (may show 00:00:00 for failed builds)<br>
+                                      <b>Build phases:</b> phase name, start timestamp and end timestamp<br>
                                       <b>Configuration:</b> several per Project Build (e.g. linux-g++-32_Ubuntu_10.04_x86); Platform filter uses predefined searches to the Configuration name<br>
                                       <b>Configuration force success:</b> Yes/- (if tagged as "force success" the Configuration build is forced to succeed, so that it will not block the whole Project build; this is e.g. in case of a new or immature Configuration when it is not reasonable to let the whole Project build fail because of this specific Configuration)<br>
                                       <b>Configuration insignificant:</b> Yes/- (if tagged as "insignificant" the Configuration build will not fail even though some significant Autotests would fail)<br>

@@ -43,13 +43,14 @@
 
 <?php
 
+date_default_timezone_set("UTC");               // Set timezone
+
 /* Converts UTC time to local time based on time offset
    Input:  $time is in UTC in format "Y-m-d H:i:s" e.g. "2013-06-07 04:02:06",
            $offset is e.g. "GMT+0300" or "GMT+0000" or "GMT-0600"
    Output: in UTC in format without the seconds (to save display space) "Y-m-d H:i" e.g. "2013-06-07 07:02" */
 function getLocalTime($time, $offset)
 {
-    date_default_timezone_set('UTC');
     $originalTimestamp = strtotime($time . ' UTC');
     $offsetSign = substr($offset, 3, 1);
     $offsetHour = intval(substr($offset, 4, 2));
@@ -75,6 +76,87 @@ function getLocalTime($time, $offset)
 
     $local = date("Y-m-d H:i", $modifiedTimestamp);
     return $local;
+}
+
+/* Checks the time between two timestamps (http://www.if-not-true-then-false.com/2010/php-calculate-real-differences-between-two-dates-or-timestamps/)
+   Input: $time1, $time2 in UNIX timestamp format or PHP strtotime compatible strings
+   Output: string in format "18 years, 11 months, 30 days, 23 hours, 59 minutes, 59 seconds" */
+function dateDiff($time1, $time2, $precision = 6)
+{
+    // If not numeric then convert texts to unix timestamps
+    if (!is_int($time1)) {
+        $time1 = strtotime($time1);
+    }
+    if (!is_int($time2)) {
+        $time2 = strtotime($time2);
+    }
+    // If time1 is bigger than time2 then swap time1 and time2
+    if ($time1 > $time2) {
+        $ttime = $time1;
+        $time1 = $time2;
+        $time2 = $ttime;
+    }
+    // Set up intervals and diffs arrays
+    $intervals = array('year','month','day','hour','minute','second');
+    $diffs = array();
+    // Loop thru all intervals
+    foreach ($intervals as $interval) {
+        // Create temp time from time1 and interval
+        $ttime = strtotime('+1 ' . $interval, $time1);
+        // Set initial values
+        $add = 1;
+        $looped = 0;
+        // Loop until temp time is smaller than time2
+        while ($time2 >= $ttime) {
+            // Create new temp time from time1 and interval
+            $add++;
+            $ttime = strtotime("+" . $add . " " . $interval, $time1);
+            $looped++;
+        }
+
+        $time1 = strtotime("+" . $looped . " " . $interval, $time1);
+        $diffs[$interval] = $looped;
+    }
+    $count = 0;
+    $times = array();
+    // Loop thru all diffs
+    foreach ($diffs as $interval => $value) {
+        // Break if we have needed precision
+        if ($count >= $precision) {
+            break;
+        }
+        // Add value and interval
+        // if value is bigger than 0
+        if ($value > 0) {
+            // Add s if value is not 1
+            if ($value != 1) {
+                $interval .= "s";
+            }
+            // Add value and interval to times array
+            $times[] = $value . " " . $interval;
+            $count++;
+        }
+    }
+    // Return string with times
+    return implode(", ", $times);
+}
+
+/* Checks the time between two timestamps in seconds
+   Input: $startTime is the earlier timestamp (2014-06-30 12:30:00)
+          $endTime is the later timestamp (2014-06-30 12:45:15)
+   Output: integer (seconds) */
+function timeDiffSeconds($startTime, $endTime)
+{
+    // If not numeric then convert texts to unix timestamps
+    if (!is_int($startTime)) {
+      $startTime = strtotime($startTime);
+    }
+    if (!is_int($endTime)) {
+      $endTime = strtotime($endTime);
+    }
+    // Time difference in seconds
+    $difference = abs($endTime - $startTime);
+    return $difference;
 }
 
 /* Checks if the code here is run on defined public server

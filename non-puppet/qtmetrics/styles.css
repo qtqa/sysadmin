@@ -612,6 +612,67 @@ span.popupMessageImg:hover span {
     background: #FFFFFF;
 }
 
+/*** Expandable section (jQuery) ***/
+
+.graphAccordion .ui-accordion-header.ui-state-default,
+.dataAccordion .ui-accordion-header.ui-state-default {
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    background-color: #ffffff;
+    background-image: none;
+    border: 0px;
+}
+
+.graphAccordion .ui-accordion-content {
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    width: 1080px;
+    border: 0px;
+}
+
+.dataAccordion .ui-accordion-content {
+    width: 1000px;
+    border: 0px;
+}
+
+/*** Graphs (D3) ***/
+
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    font-size: 11px;
+}
+
+.graphTooltip {
+    position: absolute;
+    text-align: center;
+    width: 40px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.graphTooltip.hidden {
+    display: none;
+}
+
+.graphTooltip p {
+    margin: 0;
+    font-family: Tahoma, Arial, Verdana, Geneva, sans-serif;
+    font-size: 12px;
+    line-height: 24px;
+}
+
 /*** Images and image links ***/
 
 img {

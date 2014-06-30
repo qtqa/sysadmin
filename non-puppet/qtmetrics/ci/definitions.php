@@ -77,6 +77,36 @@ if (!defined("FLAGON"))
 if (!defined("FLAGOFF"))
     define("FLAGOFF", "-");                         // Flag display tags (e.g. for Configuration force success)
 
+/* Build phases in the order of execution */
+define("BUILDMAINPHASEPREFIX", "testing");          // The checked phases appear under this main phase (starting with this string)
+define("PHASEQUICKWITHIDLE", 99999);                // Tag phase that was delayed (has an idle time) but was completed in 0s (encode in calculation, decode in printing)
+define("BUILDPHASESID", 0);
+define("BUILDPHASESDISPLAYNAME", 1);
+define("BUILDPHASESFULLNAMEPREFIX", 2);
+$arrayAllBuildPhases = array(
+    //     Id                       Displayed name       Phase name in database (starting with)
+    array( "PHASECLEANINGIDLE",     "",                  "idle" ),                                   // The idle time before starting the next phase
+    array( "PHASECLEANING",         "cleaning",          "cleaning existing target directories" ),
+    array( "PHASEGITREPOSIDLE",     "",                  "idle" ),
+    array( "PHASEGITREPOS",         "git repos",         "setting up git repositories" ),
+    array( "PHASECONFIGURINGIDLE",  "",                  "idle" ),
+    array( "PHASECONFIGURING",      "configuring Qt",    "configuring Qt" ),
+    array( "PHASEQTQATESTS1IDLE",   "",                  "idle" ),
+    array( "PHASEQTQATESTS1",       "qtqa tests (1)",    "running the qtqa tests" ),                 // Exception: qtqa tests may be run either after 'configuring Qt' or 'running the autotests' *)
+    array( "PHASECOMPILINGIDLE",    "",                  "idle" ),
+    array( "PHASECOMPILING",        "compiling Qt",      "compiling Qt" ),
+  //array( "PHASECHECKINSTIDLE",    "",                  "idle" ),
+  //array( "PHASECHECKINST",        "xxx",               "checking the installation" ),              // Skipped because typically 0s
+    array( "PHASEINSTALLINGIDLE",   "",                  "idle" ),
+    array( "PHASEINSTALLING",       "installing Qt",     "installing Qt" ),
+  //array( "PHASEMAKINGDOCSIDLE",   "",                  "idle" ),
+  //array( "PHASEMAKINGDOCS",       "xxx",               "making Qt docs" ),                         // Skipped because typically 0s
+    array( "PHASEAUTOTESTSIDLE",    "",                  "idle" ),
+    array( "PHASEAUTOTEST",         "autotests",         "running the autotests" ),
+    array( "PHASEQTQATESTS2IDLE",   "",                  "idle" ),
+    array( "PHASEQTQATESTS2",       "qtqa tests (2)",    "running the qtqa tests" ),                 // *)
+);
+
 /* Autotest dashboard definitions */
 
 if (!defined("ZIPTESTFILENAMEIDENTIFIERS"))

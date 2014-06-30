@@ -65,6 +65,7 @@ include "commondefinitions.php";
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
         <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
         <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
 
         <?php include "ci/metricsboxdefinitions.php";?>
 
@@ -90,13 +91,16 @@ include "commondefinitions.php";
             var file;
             var repeat;
             var round;
+            var scripts;
             <?php
             foreach ($arrayMetricsBoxes as $key=>$value) {       // Loop all the metrics boxes to find the completed one
                 $filepath = $arrayMetricsBoxes[$key][METRICSBOXNAME];
+                $scripts = $arrayMetricsBoxes[$key][METRICSBOXSCRIPTS];
             ?>
                 i = <?php echo $key ?>;                          // (transfer php variables to javascript variables)
                 if (metricId == i) {                             // Check the completed metrics box
                     file = "<?php echo $filepath ?>";
+                    scripts = "<?php echo $scripts ?>";
                     repeat = document.getElementById("repeatCount"+i).value;
                     round = document.getElementById("roundCounter"+i).value;
                     if (round < repeat) {                        // If the box must be repeated
@@ -117,8 +121,10 @@ include "commondefinitions.php";
                     }
                     else {
                         document.getElementById("roundCounter"+i).value = 1;        // Reset the counter
-                        // Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
-                        loadDatabaseStatus(0);                   // d)
+                        if (scripts != "")                                          // Check if the metrics box has graph (Note: Only one script per metrics box)
+                            if (document.getElementById(scripts))                   // Check if the graph is visible in this view
+                                eval(document.getElementById(scripts).innerHTML);   // Update the graph created with JavaScript (must be done only once per view)
+                        loadDatabaseStatus(0);                   // d) Load the database status every time a metrics box is updated (to keep status updated when user uses the page)
                         metricsRequestCount--;                   // A metrics box completed
                     }
                 }
@@ -540,7 +546,7 @@ include "commondefinitions.php";
             myWindow.focus();
         }
 
-        /* Ajax loading dialog window for long lasting operations */
+        /* Ajax loading dialog window for long lasting operations (jQuery) */
         $(function()
         {
             $( "#popupDialog" ).dialog({

@@ -48,15 +48,16 @@ define("METRICSBOXNAME", 0);                // Path and name of the metrics box 
 define("METRICSBOXREPEAT", 1);              // How many times the metrics box implementation file is called on each update
 define("METRICSBOXFILTERSAPPLIED", 2);      // The metrics box is updated when this filter changes
 define("METRICSBOXFILTERSCLEARED", 3);      // The filters to clear when other applied filters change
+define("METRICSBOXSCRIPTS", 4);             // The JavaScript scripts for creating the graphs that need to be executed from the Ajax result
 $arrayMetricsBoxes = array (
     // Metrics boxes will appear in the order defined below
     //
-    // *) Possible values: All, project, ciProject, ciBranch, ciPlatform, conf, autotest, build, timescale
+    // Possible values (for 'Applied filters' and 'Filters to clear'): All, project, ciProject, ciBranch, ciPlatform, conf, autotest, build, timescale
     //
-    //        File path and name                Repeat      Applied filters *)                                              Filters to clear *)
-    //        ---------------------------------------------------------------------------------------------------------------------------------
-    array(    "ci/showprojectdashboard.php"     ,2          ,"project,ciProject,ciBranch,ciPlatform,conf,build,timescale"   ,""              ),
-    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                                                          ,"autotest"      ),
+    //        File path and name                Repeat      Applied filters                                                 Filters to clear    Scripts
+    //        --------------------------------------------------------------------------------------------------------------------------------------------------------
+    array(    "ci/showprojectdashboard.php"     ,2          ,"project,ciProject,ciBranch,ciPlatform,conf,build,timescale"   ,""                 ,"scriptBuildPhases"),
+    array(    "ci/showautotestdashboard.php"    ,2          ,"All"                                                          ,"autotest"         ,""),
 );
 
 /* Filters */
