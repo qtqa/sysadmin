@@ -35,6 +35,8 @@ class qt_prereqs::opensuse inherits qt_prereqs::unix {
         # for XML parsing
         "libxml2-devel": ensure => installed;
 
+        # for Bluez Bluetooth
+        "bluez-devel": ensure => installed;
     }
 }
 
