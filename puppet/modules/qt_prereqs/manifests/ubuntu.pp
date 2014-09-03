@@ -114,6 +114,7 @@ class qt_prereqs::ubuntu inherits qt_prereqs::unix {
             "libssl-dev":                        ensure => installed;
             "libpulse-dev":                      ensure => installed;
             "pulseaudio":                        ensure => installed;
+            "libcap-dev":                        ensure => installed;
 
             # for QML visual tests
             "ttf-mscorefonts-installer":         ensure => installed;
