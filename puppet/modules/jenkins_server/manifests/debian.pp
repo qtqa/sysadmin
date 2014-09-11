@@ -58,6 +58,7 @@ class jenkins_server::debian inherits jenkins_server
         "run-condition":;             # conditional-buildstep prereq
         "timestamper":;               # timestamps in build logs
         "token-macro":;               # expand macros in various places
+        "email-ext":;                 # extended email plugin to allow direct e-mails from jenkins
     }
 
 
