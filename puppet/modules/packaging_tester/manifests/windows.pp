@@ -4,6 +4,7 @@ class packaging_tester::windows inherits packaging_tester::base {
     include mingw
     include mingw48
     include mingw482
+    include mingw491
     include openssl
     include strawberryperl
     include strawberryperl_portable
