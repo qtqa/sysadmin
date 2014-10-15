@@ -19,30 +19,30 @@ class squish {
 
     # Squish have separate packages for x86 and x64 architectures in Windows 7, Windows 8 and Ubuntu
     $msvc12_pkg_name = $::architecture ? {
-        x64     => "squish-5.1-20140320-1457-qt52x-win64-msvc12",
-        default => "squish-5.1-20140320-1454-qt52x-win32-msvc12",
+        x64     => "squish-5.1.1-qt53x-win64-msvc12",
+        default => "squish-5.1.1-qt53x-win32-msvc12",
     }
 
     $msvc11_pkg_name = $::architecture ? {
         x64     => "squish-5.0.2-qt51x-win64-msvc11",
-        default => "squish-5.1-20140321-1117-qt52x-win32-msvc11",
+        default => "squish-5.1.1-qt53x-win32-msvc11",
     }
 
     $msvc11_version = $::architecture ? {
         x64     => "5.0.2",
-        default => "5.1.0",
+        default => "5.1.1",
     }
 
-    $mingw_pkg_name = "squish-5.1-20140321-0826-qt52x-win32-mingw_gcc48_posix_dwarf"
+    $mingw_pkg_name = "squish-5.1.1-qt53x-win32-mingw_gcc482_posix_dwarf"
 
     $msvc10_pkg_name = $::architecture ? {
         x64     => "squish-5.0.1-qt51x-win64-msvc10",
-        default => "squish-5.1-20140320-1449-qt52x-win32-msvc10",
+        default => "squish-5.1.1-qt53x-win32-msvc10",
     }
 
     $msvc10_version = $::architecture ? {
         x64     => "5.0.1",
-        default => "5.1.0",
+        default => "5.1.1",
     }
 
     $linux_pkg_name = $::architecture ? {
@@ -64,7 +64,7 @@ class squish {
                     "msvc12":
                         pkg_name => "$msvc12_pkg_name",
                         path     => "$path",
-                        version  => "5.1.0",
+                        version  => "5.1.1",
                     }
             }
             else {
@@ -72,7 +72,7 @@ class squish {
                     "mingw":
                         pkg_name => "$mingw_pkg_name",
                         path     => "$path",
-                        version  => "5.1.0",
+                        version  => "5.1.1",
                     ;
                     "msvc10":
                         pkg_name => "$msvc10_pkg_name",
@@ -87,7 +87,7 @@ class squish {
                     "msvc12":
                         pkg_name => "$msvc12_pkg_name",
                         path     => "$path",
-                        version  => "5.1.0",
+                        version  => "5.1.1",
                     }
                 }
         }
