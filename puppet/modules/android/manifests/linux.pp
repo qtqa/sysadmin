@@ -30,8 +30,7 @@ class android::linux
                 && wget $url/${filename} -O - | tar -C $target -$options \
                 && mv ${target}/${directory} ${generic_dir} \
                 && echo $filename > ${generic_dir}/version.txt \
-                && chown -R $testuser: $generic_dir \
-                && (if [ $generic_dir == $target/sdk ]; then ${generic_dir}/tools/android update sdk --no-ui; fi)'",
+                && chown -R $testuser: $generic_dir'",
             unless => "/bin/bash -c '\
                 grep \"$filename\" ${generic_dir}/version.txt'",
             require =>  File["$target"],
@@ -49,11 +48,11 @@ class android::linux
             generic_dir =>  "${target}/ndk",
         ;
         "sdk":
-            filename    =>  "android-sdk_r21.0.1-linux.tgz",
-            directory   =>  "android-sdk-linux",
+            filename    =>  "android-sdk_r23.0.2-linux.tar.gz",
+            directory   =>  "android-sdk-r2302",
             options     =>  "zx",
             target      =>  "$target",
-            url         =>  "$url",
+            url         =>  "http://ci-files01-hki.ci.local/input/ubuntu",
             generic_dir =>  "${target}/sdk",
         ;
     }
