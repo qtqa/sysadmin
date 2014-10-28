@@ -2,8 +2,9 @@
 # old version will be removed if $filename is changed to point to new or older version.
 class android::linux
 {
-    $url = "http://dl.google.com/android"
     $target = "/opt/android"
+    $ndk_filename = "android-ndk-r10c-linux-x86.bin"
+    $sdk_filename = "android-sdk_r23.0.2-linux.tar.gz"
 
     file { "$target":
         ensure  =>  directory,
@@ -23,11 +24,11 @@ class android::linux
         content => template("android/android_env.sh.erb"),
         }
 
-    define android_install($filename,$directory,$options,$generic_dir,$target,$url) {
+    define android_install($filename,$directory,$generic_dir,$target,$fetch) {
         exec { "install $filename to ${target}/${directory}":
             command =>  "/bin/bash -c '\
                 (if [ -e ${generic_dir} ]; then rm -fr ${generic_dir}; fi) \
-                && wget $url/${filename} -O - | tar -C $target -$options \
+                && $fetch \
                 && mv ${target}/${directory} ${generic_dir} \
                 && echo $filename > ${generic_dir}/version.txt \
                 && chown -R $testuser: $generic_dir'",
@@ -40,20 +41,18 @@ class android::linux
 
     android_install {
         "ndk":
-            filename    =>  "ndk/android-ndk-r9c-${ndk_host}.tar.bz2",
-            directory   =>  "android-ndk-r9c",
-            options     =>  "xj",
+            filename    =>  "$ndk_filename",
+            directory   =>  "android-ndk-r10c",
             target      =>  "$target",
-            url         =>  "$url",
             generic_dir =>  "${target}/ndk",
+            fetch       =>  "wget http://dl.google.com/android/ndk/android-ndk-r10c-linux-x86.bin -O ${target}/${ndk_filename} && chown $testuser: ${target}/${ndk_filename} && chmod 755 ${target}/${ndk_filename} && cd ${target} && ./${ndk_filename}",
         ;
         "sdk":
-            filename    =>  "android-sdk_r23.0.2-linux.tar.gz",
+            filename    =>  "$sdk_filename",
             directory   =>  "android-sdk-r2302",
-            options     =>  "zx",
             target      =>  "$target",
-            url         =>  "http://ci-files01-hki.ci.local/input/ubuntu",
             generic_dir =>  "${target}/sdk",
+            fetch       =>  "wget ${input}/ubuntu/${sdk_filename} -O - | tar -C $target -zx",
         ;
     }
 }
