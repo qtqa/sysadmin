@@ -1,7 +1,6 @@
 class packaging_tester::linux inherits packaging_tester::base {
     include ccache
     include crosscompilers
-    include android
     include qnx
     include qnx650
 
