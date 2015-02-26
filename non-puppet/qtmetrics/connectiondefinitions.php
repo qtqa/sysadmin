@@ -53,11 +53,11 @@ if (!defined("LOCALSERVER"))
 
 /* Public server (public metrics pages are shown from here) */
 if (!defined("PUBLICSERVER"))
-    define("PUBLICSERVER", "testresults.qt-project.org");
+    define("PUBLICSERVER", "testresults.qt.io");
 
 /* CI log file path */
 if (!defined("LOGFILEPATHCI"))
-    define("LOGFILEPATHCI", "http://testresults.qt-project.org/ci/");
+    define("LOGFILEPATHCI", "http://testresults.qt.io/ci/");
 
 /* Select MySQL API. For more details, see http://php.net/manual/en/mysqlinfo.api.choosing.php */
 $useMysqli = TRUE;                      // Set TRUE for mysqli extension or FALSE for old mysql extension

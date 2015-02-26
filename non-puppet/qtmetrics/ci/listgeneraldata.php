@@ -119,7 +119,7 @@ if ($conf == "All") {
     echo '<tr><td>Build Duration: </td><td>' . $buildDuration . '</td></tr>';
     echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
         . '/build_' . $buildNumberString . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
-        // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/log.txt.gz
+        // Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412/log.txt.gz
     echo "</table>";
 }
 
@@ -181,7 +181,7 @@ else {
             echo '<tr><td>Insignificant: </td><td>' . FLAGOFF . '</td></tr>';
         echo '<tr><td>Build Log File: </td><td><a href="' . LOGFILEPATHCI . $project
             . '/build_' . $buildNumberString . '/' . $conf . '/log.txt.gz" target="_blank">log.txt.gz</a></td></tr>';
-            // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86/log.txt.gz
+            // Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86/log.txt.gz
         echo "</table>";
     }
 }

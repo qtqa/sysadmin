@@ -133,9 +133,9 @@ if ($numberOfRows>0) {
 
             /* Build log directory link */
             $buildNumberString = createBuildNumberString($resultRow[$dbColumnBuildNumber]);         // Create the link url to build directory...
-            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString;   // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412
+            $buildLink = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString;   // Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412
             if ($conf <> "All")
-                $buildLink = $buildLink . '/' . $conf;                                              // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+                $buildLink = $buildLink . '/' . $conf;                                              // Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
             $buildLink = $buildLink . '" target="_blank"><img src="images/open-folder.png" alt="open" title="Open the folder for build '
                 . $resultRow[$dbColumnBuildNumber] . '"></a>';
             $arrayBuildLinksRow[] = '<td class="tableTopBorder tableBottomBorder tableCellCentered">' . $buildLink . '</td>';

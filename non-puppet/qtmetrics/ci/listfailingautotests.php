@@ -145,7 +145,7 @@ for ($i=0; $i<$numberOfRows; $i++) {                                          //
             $failedAutotestCount++;
             $buildNumberString = createBuildNumberString($resultRow[$dbColumnTestBuild]); // Create the link url to build directory...
             $link = '<a href="' . LOGFILEPATHCI . $project . '/build_' . $buildNumberString
-                . '/' . $resultRow[$dbColumnTestCfg] . '" target="_blank">' . $resultRow[$dbColumnTestCfg] . '</a>';  // Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
+                . '/' . $resultRow[$dbColumnTestCfg] . '" target="_blank">' . $resultRow[$dbColumnTestCfg] . '</a>';  // Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412/linux-g++-32_Ubuntu_10.04_x86
             $arrayAutotestConfLinks[$j] = $arrayAutotestConfLinks[$j] . ', ' . $link;
         }
     }

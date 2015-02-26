@@ -69,7 +69,7 @@ function getProjectBranch($project)
     return $ciBranch;
 }
 
-/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt-project.org/ci/Qt3D_master_Integration/build_00412)
+/* Convert the numeric Build number to a 5 digit string needed for directory links (Example: http://testresults.qt.io/ci/Qt3D_master_Integration/build_00412)
    Input:   $buildNumber    (integer)  Build number (1 - 99999)
    Return:  (string) Five character string (00001 - 99999)
 */
