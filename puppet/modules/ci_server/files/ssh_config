@@ -3,11 +3,9 @@ BatchMode=yes
 Host dev-codereview.qt-project.org
 User qtintegration
 
-Host dev-testresults.qt-project.org
-User qtintegration
-
 Host codereview.qt-project.org
 User qtintegration
 
-Host testresults.qt-project.org
+Host testresults.qt.io
 User qtintegration
+

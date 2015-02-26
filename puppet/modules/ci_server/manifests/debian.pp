@@ -96,11 +96,8 @@
     sshkey { "[dev-codereview.qt-project.org]:29418":
         key => "AAAAB3NzaC1yc2EAAAADAQABAAAAgQDSl0SfLVrmQf5lxz8/Xo5IYa8DSymJkc8lNDQx0ZHySzveR5RxLtAqhxKN8HXYyz22xImOkr9Lu8tt4OKx7+SsN/LXV9zARdK9enJk7pEatmD/9GhwhhgKLtCKGuGrSxiTvDyesg6TVL59pdyXom+E8lU/fOhf2Qv6+8+Ow7EGow==",
     }
-    sshkey { "testresults.qt-project.org":
-        key => "AAAAB3NzaC1yc2EAAAABIwAAAQEAtrQv3v3jueb2+yDB92ZIpoFyKCCOVOS7glVSqcfZrbLkbjZFIEPc64FxQ9p8G3NBBoHiL6gDtuI+Gyx5xCOm+5OP/dfM/JDnbAM8cqEGgNvrOIM80p3xB/rCpSrLwsvPy5Rb49L+MvAsYJXuR08yOSCNC+Zj+szUe2bkgGufk+DgOI/NTWwaIWEhY3bkf6ECdR+itS22/pnF/dq0BTslt7dxDNqGnNEi7QZ2K2ZsiyjRTna2yr/glqpStS3egBq92x6a7gM1da8vhlyYnzoYZu1JYpQpba8GIIbBI5D6inGMwA436AAS4C8NuCxZDcmJ+G/FUdkIDkkPx7qGbD279Q==",
-    }
-    sshkey { "dev-testresults.qt-project.org":
-        key => "AAAAB3NzaC1yc2EAAAABIwAAAQEA95lhjFPV9U+b1K3U3tZAZ7ARgW/oWCRc0f2CnW5IJ1SHDOztt0moKfREPt5UFHk3zugOYF3aPKXE/gdCyhFvkqOUYzdd7rAOwOHUvFVUZRU3ffw/j9n9i2MoQEC9qORM0NzUEHFtjv1MtoFV95ZW1RugMC9MXvkZ/LvQvRjXX9JBB6mn8iyvYbRcKXBzFDm/KS5ICqhBsOx27iR9gbLSvzo0l/iaj25CMxNZd3YVsJhlAFJviFvWpY5U+UM0GHrsZ/B2KyRJ2aDpPSfKEAGr7rTdredpwpTeKdZvbqZhFxSGL8+vmLQzGPUzpF9k3H6a6jRPkS8x1cPZQzKoxdoufw==",
+    sshkey { "testresults.qt.io":
+        key => "AAAAB3NzaC1yc2EAAAADAQABAAABAQDE6+70RZyZdK4nUwXb5O/IYZjNpHC8OKp7+3NCMqKYIFxzyDrb8BgPu5utqcolJ6rPYppE+PD4ZBKkA4+sebGyJD54kszj9emhpNDB7say1kd7Xdwy2hEjUawdcTkKxVkGXDQQQULCL0tvBPthmj8doWbFarmpxfnpTvwQdaj2aRK1Get2g2CTnmoNGnH4KoSVoa7/Ge+nkCN+Ub8Qfk/UboBRGdSAqSYAuPz/x+bfpNz0spKL2VY2f/Yg3IxjQBTB/Z4Jpj3Hi+ckj4DUiYj7lDnYEw/IsMyU5p0VZzy22ZV7cIkfkeOuYOyvSLLoyXHJrZKte5wuddMtBvnyFqGx",
     }
 
     # make sure ssh_known_hosts is world-readable
@@ -203,12 +200,8 @@
     $pidfile_base_ssh = "/var/run/ssh-qt-ci-remote-api"
 
     exec { "ssh fwd for testresults remote API":
-        command => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-testresults.pid --start -- -l -c '$sh_args_ssh qtintegration@testresults.qt-project.org'",
+        command => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-testresults.pid --start -- -l -c '$sh_args_ssh qtintegration@testresults.qt.io'",
         onlyif => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-testresults.pid --test --start",
     }
 
-    exec { "ssh fwd for dev-testresults remote API":
-        command => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-dev-testresults.pid --start -- -l -c '$sh_args_ssh qtintegration@dev-testresults.qt-project.org'",
-        onlyif => "$env $start_stop_daemon_ssh --pidfile $pidfile_base_ssh-dev-testresults.pid --test --start",
-    }
 }
