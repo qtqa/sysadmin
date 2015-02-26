@@ -349,7 +349,7 @@
             function update(interval) {
                 $('.loading').show();
                 $('#globalWrapper').addClass('show_loading_cursor');
-                var url = "http://testresults.qt-project.org/cgi-bin/ci-api";
+                var url = "http://testresults.qt.io/cgi-bin/ci-api";
                 var promise = $.getJSON(url + '?since_id=' + last_id)
                     .fail(
                         function(req, text, exception) {
