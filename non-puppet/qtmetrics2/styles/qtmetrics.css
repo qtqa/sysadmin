@@ -1,0 +1,172 @@
+/*
+#############################################################################
+##
+## Copyright (C) 2015 The Qt Company Ltd.
+## Contact: http://www.qt.io/licensing/
+##
+## This file is part of the Quality Assurance module of the Qt Toolkit.
+##
+## $QT_BEGIN_LICENSE:LGPL21$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see http://www.qt.io/terms-conditions. For further
+## information use the contact form at http://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 or version 3 as published by the Free
+## Software Foundation and appearing in the file LICENSE.LGPLv21 and
+## LICENSE.LGPLv3 included in the packaging of this file. Please review the
+## following information to ensure the GNU Lesser General Public License
+## requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## As a special exception, The Qt Company gives you certain additional
+## rights. These rights are described in The Qt Company LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+*/
+
+/**
+ * Qt Metrics style sheet
+ * @version   0.1
+ * @since     04-06-2015
+ * @author    Juha Sippola
+ */
+
+/*
+ * Brand logo and text alignment
+ */
+
+.navbar-brand img {
+    height: 30px;
+    width: auto;
+}
+
+/*
+ * Load home page image (from www.qt.io) with text color adjustments in tablets and bigger devices only (typically using faster connection)
+ */
+
+@media screen and (min-width: 720px) {
+    .jumbotron {
+        background-image: url("https://d3hp9ud7yvwzy0.cloudfront.net/wp-content/uploads/2014/06/Qt-in-nutshell-hero2.jpg");
+        background-size: cover;
+    }
+    .jumbotron h1 {
+        color: black;
+        text-shadow: 0 0 8px white;
+    }
+}
+
+/*
+ * The master version on home page
+ */
+
+.masterVersion {
+    color: forestgreen;
+    text-shadow: 0 0 8px black;
+}
+
+/*
+ * Include UI elements and behavior in tablets and bigger devices only (typically using faster connection)
+ */
+
+@media screen and (max-width: 720px) {
+    .showInLargeDisplay {
+        display: none;
+    }
+}
+
+/*
+ * Make space between buttons next to and above each others
+ */
+
+.btn {
+    margin: 0 3px 3px 0;
+}
+
+/*
+ * Make space horizontally outside an element
+ */
+
+.spaceHorizontal {
+    margin: 0 5px 0 5px;
+}
+
+/*
+ * Animation shown while loading data in autocomplete input field
+ */
+
+.ui-autocomplete-loading {
+    background: white url("../images/ui-anim_basic_16x16.gif") right center no-repeat;
+}
+
+/*
+ * Autocomplete input field
+ */
+
+.ui-autocomplete.ui-menu {
+    font-size: 12px;
+}
+
+/*
+ * Metrics page description well
+ */
+
+.infoWell{
+    background: lightblue;
+}
+
+/*
+ * Table formatting
+ */
+
+.leftBorder {
+    border-left: 2px solid lightgrey;
+}
+
+.center {
+    text-align: center
+}
+
+/*
+ * Coloring
+ */
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}
+
+.gray {
+    color: gray;
+}
+
+.greenBackground {
+    background-color: lightgreen;
+}
+
+.redBackground {
+    background-color: indianred;
+}
+
+/*
+ * Placing and sizing
+ */
+
+.floatLeft {
+    float: left;
+}
+
+.textSmall {
+    font-size: small;
+}
