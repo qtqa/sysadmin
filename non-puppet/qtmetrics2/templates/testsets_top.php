@@ -34,8 +34,8 @@
 
 /**
  * Top failures (testsets) page
- * @version   0.1
- * @since     03-06-2015
+ * @version   0.2
+ * @since     11-06-2015
  * @author    Juha Sippola
  */
 
@@ -51,6 +51,8 @@ $refreshed = $this->data['refreshed'];
 $topN = $this->data['topN'];
 $lastDays = $this->data['lastDays'];
 $sinceDate = $this->data['sinceDate'];
+$masterProject = $this->data['masterProject'];
+$masterState = $this->data['masterState'];
 /**
  * @var Testset[] $testsets
  */
@@ -85,10 +87,11 @@ $testsets = $this->data['testsets'];
                 <div class="well infoWell">
                     <span class="glyphicon glyphicon-info-sign"></span> <strong>Top failures</strong><br>
                     <ul>
-                        <li>Lists testsets by number of <strong>state</strong> builds where it failed during the last
-                            <?php echo $lastDays ?> days.</li>
-                        <li><strong>latest result</strong> shows the overall testset status based on the latest project
-                            <strong>state</strong> builds across all branches (shows failed if failed in one or in several).</li>
+                        <li>Lists testsets by number of <strong><?php echo "$masterProject $masterState" ?></strong>
+                            builds where it failed during the last <?php echo $lastDays ?> days.</li>
+                        <li><strong>latest result</strong> shows the overall testset status based on the latest
+                            <strong><?php echo "$masterProject $masterState" ?></strong> builds across all branches
+                            (shows failed if failed in one or in several).</li>
                     </ul>
                 </div>
             </div>

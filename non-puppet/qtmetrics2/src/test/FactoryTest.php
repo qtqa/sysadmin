@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.1
- * @since     04-06-2015
+ * @version   0.2
+ * @since     12-06-2015
  * @author    Juha Sippola
  */
 
@@ -128,12 +128,12 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createProjects
      * @dataProvider testCreateProjectsData
      */
-    public function testCreateProjects($status_check)
+    public function testCreateProjects($runProject, $runState)
     {
-        $projects = Factory::createProjects();
+        $projects = Factory::createProjects($runProject, $runState);
         foreach($projects as $project) {
             $this->assertTrue($project instanceof Project);
-            if (in_array($project->getName(), $status_check)) {         // check only the projects with project_run data
+            if ($project->getName() == $runProject) {                   // check only the projects with project_run data
                 $this->assertNotEmpty($project->getStatus());
             }
         }
@@ -141,7 +141,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateProjectsData()
     {
         return array(
-            array(array('QtBase', 'Qt5', 'QtConnectivity'))
+            array('Qt5', 'state',)                                      // project with project_run data
         );
     }
 
@@ -149,9 +149,9 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createTestsets
      * @dataProvider testCreateTestsetsData
      */
-    public function testCreateTestsets($list_type, $status_check, $result_check, $flaky_check)
+    public function testCreateTestsets($listType, $runProject, $runState, $status_check)
     {
-        $testsets = Factory::createTestsets($list_type);
+        $testsets = Factory::createTestsets($listType, $runProject, $runState);
         foreach($testsets as $testset) {
             $this->assertTrue($testset instanceof Testset);
             $status = $testset->getStatus();
@@ -161,21 +161,13 @@ class FactoryTest extends PHPUnit_Framework_TestCase
                 $this->assertEmpty($status);
             }
             $result = $testset->getTestsetResultCounts();
-            if (in_array($testset->getName(), $result_check)) {
-                $this->assertNotNull($result);
-                $this->assertArrayHasKey('passed', $result);
-                $this->assertArrayHasKey('failed', $result);
-            } else {
-                $this->assertNull($result);
-            }
+            $this->assertNotNull($result);
+            $this->assertArrayHasKey('passed', $result);
+            $this->assertArrayHasKey('failed', $result);
             $flaky = $testset->getTestsetFlakyCounts();
-            if (in_array($testset->getName(), $flaky_check)) {
-                $this->assertNotNull($flaky);
-                $this->assertArrayHasKey('flaky', $flaky);
-                $this->assertArrayHasKey('total', $flaky);
-            } else {
-                $this->assertNull($flaky);
-            }
+            $this->assertNotNull($flaky);
+            $this->assertArrayHasKey('flaky', $flaky);
+            $this->assertArrayHasKey('total', $flaky);
         }
     }
     public function testCreateTestsetsData()
@@ -183,15 +175,15 @@ class FactoryTest extends PHPUnit_Framework_TestCase
         return array(
             array(
                 Factory::LIST_FAILURES,
-                array('tst_qftp', 'tst_qfont', 'tst_networkselftest'),  // check only the testsets with testset_run data
-                array('tst_qftp', 'tst_qfont', 'tst_networkselftest'),  // check only the testsets with testset_run data
-                array('not-set')                                        // flaky data not set for failures list
+                'Qt5',
+                'state',
+                array('tst_qftp', 'tst_qfont', 'tst_networkselftest')   // check only the testsets with testset_run data
             ),
             array(
                 Factory::LIST_FLAKY,
-                array('not-set'),                                       // status not set for flaky list
-                array('not-set'),                                       // result data not set for flaky list
-                array('tst_qftp', 'tst_qfont', 'tst_networkselftest')   // check only the testsets with testset_run data
+                'Qt5',
+                'state',
+                array('not-set')                                        // status not set for flaky list
             )
         );
     }
@@ -200,9 +192,9 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createTestset
      * @dataProvider testCreateTestsetData
      */
-    public function testCreateTestset($testset, $project)
+    public function testCreateTestset($testset, $project, $runProject, $runState)
     {
-        $testsets = Factory::createTestset($testset);
+        $testsets = Factory::createTestset($testset, $runProject, $runState);
         foreach($testsets as $testset) {
             $this->assertTrue($testset instanceof Testset);
             if ($testset->getProjectName() == $project) {
@@ -222,8 +214,8 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestsetData()
     {
         return array(
-            array('tst_qftp', 'QtBase'),                                // testset with testset_run data
-            array('tst_qfont', 'QtBase')                                // testset with testset_run data
+            array('tst_qftp', 'qtbase', 'Qt5', 'state',),               // testset with testset_run data
+            array('tst_qfont', 'qtbase', 'Qt5', 'state',)               // testset with testset_run data
         );
     }
 

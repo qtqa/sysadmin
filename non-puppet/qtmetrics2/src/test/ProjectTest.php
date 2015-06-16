@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Project unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.1
- * @since     07-05-2015
+ * @version   0.2
+ * @since     12-05-2015
  * @author    Juha Sippola
  */
 
@@ -57,7 +57,8 @@ class ProjectTest extends PHPUnit_Framework_TestCase
     public function testGetNameData()
     {
         return array(
-            array('QtBase'),
+            array('qtbase'),
+            array('Qt5'),
             array('MyProject')
         );
     }
@@ -66,17 +67,22 @@ class ProjectTest extends PHPUnit_Framework_TestCase
      * Test getStatus and setStatus
      * @dataProvider testGetStatusData
      */
-    public function testGetStatus($name, $exp_build_results)
+    public function testGetStatus($name, $runProject, $runState, $exp_build_results)
     {
         $project = new Project($name);
-        $project->setStatus();
-        $this->assertContains($project->getStatus(), $exp_build_results);
+        if ($runProject == $name) {                                     // project with project_run data
+            $project->setStatus($runProject, $runState);
+            $this->assertContains($project->getStatus(), $exp_build_results);
+        } else {
+            $this->assertEmpty($project->getStatus());
+        }
     }
     public function testGetStatusData()
     {
         return array(
-            array('QtBase', array('SUCCESS', 'FAILURE', 'ABORTED')),
-            array('InvalidProject', array(''))
+            array('Qt5', 'Qt5', 'state', array('SUCCESS', 'FAILURE', 'ABORTED')),   // status based on build result for the master build project
+            array('QtBase', 'Qt5', 'state', array()),                               // status based on testset results not implemented yet
+            array('InvalidProject', 'Qt5', 'state', array())
         );
     }
 

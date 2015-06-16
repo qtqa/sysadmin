@@ -34,8 +34,8 @@
 
 /**
  * Project class
- * @version   0.1
- * @since     02-06-2015
+ * @version   0.2
+ * @since     12-06-2015
  * @author    Juha Sippola
  */
 
@@ -91,27 +91,34 @@ class Project {
     }
 
     /**
-     * Set status of the project calculated from the latest branch build results (in state builds only).
+     * Set status of the project calculated from the testset results in the latest branch builds (in specified builds only).
+     * @param string $runProject
+     * @param string $runState
      */
-    public function setStatus()
+    public function setStatus($runProject, $runState)
     {
-        $builds = Factory::db()->getLatestProjectBranchBuildResults($this->name, 'state');
         $status = self::STATUS_EMPTY;
         $statusText = ProjectRun::RESULT_EMPTY;
-        foreach ($builds as $build) {
-            if ($build['result'] == ProjectRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
-                $status = self::STATUS_SUCCESS;
-                $statusText = ProjectRun::RESULT_SUCCESS;
-            }
-            if ($build['result'] == ProjectRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
-                $status = self::STATUS_FAILURE;
-                $statusText = ProjectRun::RESULT_FAILURE;
-            }
-            if ($build['result'] == ProjectRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
-                $status = self::STATUS_ABORTED;
-                $statusText = ProjectRun::RESULT_ABORTED;
+        // Status for project with project_run
+        if ($this->name == $runProject) {
+            $builds = Factory::db()->getLatestProjectBranchBuildResults($runProject, $runState);
+            foreach ($builds as $build) {
+                if ($build['result'] == ProjectRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
+                    $status = self::STATUS_SUCCESS;
+                    $statusText = ProjectRun::RESULT_SUCCESS;
+                }
+                if ($build['result'] == ProjectRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
+                    $status = self::STATUS_FAILURE;
+                    $statusText = ProjectRun::RESULT_FAILURE;
+                }
+                if ($build['result'] == ProjectRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
+                    $status = self::STATUS_ABORTED;
+                    $statusText = ProjectRun::RESULT_ABORTED;
+                }
             }
         }
+        // Status based on testset results not implemented yet
+
         $this->status = $statusText;
         return;
     }

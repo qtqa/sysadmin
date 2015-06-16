@@ -34,8 +34,8 @@
 
 /**
  * Testset class
- * @version   0.1
- * @since     04-06-2015
+ * @version   0.2
+ * @since     11-06-2015
  * @author    Juha Sippola
  */
 
@@ -88,9 +88,9 @@ class Testset {
     {
         $this->name = $name;
         $this->projectName = $projectName;
-        $this->status = TestsetRun::RESULT_EMPTY;       // not initially set
-        $this->testsetResultCounts = array();           // not initially set
-        $this->testsetFlakyCounts = array();            // not initially set
+        $this->status = TestsetRun::RESULT_EMPTY;                               // not initially set
+        $this->testsetResultCounts = array('passed' => null, 'failed' => null); // not initially set
+        $this->testsetFlakyCounts = array('flaky' => null, 'total' => null);    // not initially set
     }
 
     /**
@@ -121,11 +121,13 @@ class Testset {
     }
 
     /**
-     * Set status of the testset calculated from the latest configuration build results (in state builds only).
+     * Set status of the testset calculated from the latest configuration build results (in specified builds only).
+     * @param string $runProject
+     * @param string $runState
      */
-    public function setStatus()
+    public function setStatus($runProject, $runState)
     {
-        $builds = Factory::db()->getLatestTestsetConfBuildResults($this->name, $this->projectName, 'state');
+        $builds = Factory::db()->getLatestTestsetConfBuildResults($this->name, $this->projectName, $runProject, $runState);
         $status = self::STATUS_EMPTY;
         $statusText = TestsetRun::RESULT_EMPTY;
         foreach ($builds as $build) {
@@ -143,7 +145,7 @@ class Testset {
     }
 
     /**
-     * Get count of testset results in latest Project builds (all configurations, state builds only).
+     * Get count of testset results in latest Project builds (all configurations, specified builds only).
      * @return array (int passed, int failed)
      */
     public function getTestsetResultCounts()
@@ -152,7 +154,7 @@ class Testset {
     }
 
     /**
-     * Set count of testset results in latest Project builds (all configurations, state builds only).
+     * Set count of testset results in latest Project builds (all configurations, specified builds only).
      */
     public function setTestsetResultCounts($passed, $failed)
     {
@@ -161,7 +163,7 @@ class Testset {
     }
 
     /**
-     * Get count of flaky testsets in latest Project builds (all configurations, all states).
+     * Get count of flaky testsets in latest Project builds (all configurations, all builds).
      * @return array (int passed, int failed)
      */
     public function getTestsetFlakyCounts()
@@ -170,7 +172,7 @@ class Testset {
     }
 
     /**
-     * Set count of flaky testsets in latest Project builds (all configurations, all states).
+     * Set count of flaky testsets in latest Project builds (all configurations, all builds).
      */
     public function setTestsetFlakyCounts($flaky, $total)
     {

@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.1
- * @since     08-06-2015
+ * @version   0.2
+ * @since     12-06-2015
  * @author    Juha Sippola
  */
 
@@ -54,6 +54,7 @@ $app = new \Slim\Slim(array(
 
 $app->get('/', function() use($app)
 {
+    $ini = Factory::conf();
     $app->render('home.php', array(
         'overviewRoute' => Slim\Slim::getInstance()->urlFor('root') . 'overview',
         'branchRoute' => Slim\Slim::getInstance()->urlFor('root') . 'branch',
@@ -62,7 +63,9 @@ $app->get('/', function() use($app)
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'states' => Factory::db()->getStates(),
         'branches' => Factory::db()->getBranches(),
-        'projects' => Factory::createProjects(),                        // managed as objects
+        'projects' => Factory::createProjects(
+            $ini['master_build_project'],
+            $ini['master_build_state']),                    // managed as objects
         'platforms' => Factory::db()->getTargetPlatforms()
     ));
 })->name('root');
@@ -86,7 +89,12 @@ $app->get('/test/top', function() use($app)
         'topN' => $ini['top_failures_n'],
         'lastDays' => $ini['top_failures_last_days'],
         'sinceDate' => $since,
-        'testsets' => Factory::createTestsets(Factory::LIST_FAILURES)   // managed as objects
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state'],
+        'testsets' => Factory::createTestsets(
+            Factory::LIST_FAILURES,
+            $ini['master_build_project'],
+            $ini['master_build_state'])                     // managed as objects
     ));
 });
 
@@ -109,7 +117,10 @@ $app->get('/test/flaky', function() use($app)
         'topN' => $ini['flaky_testsets_n'],
         'lastDays' => $ini['flaky_testsets_last_days'],
         'sinceDate' => $since,
-        'testsets' => Factory::createTestsets(Factory::LIST_FLAKY)      // managed as objects
+        'testsets' => Factory::createTestsets(
+            Factory::LIST_FLAKY,
+            null,
+            null)                                           // managed as objects
     ));
 });
 
@@ -129,7 +140,12 @@ $app->get('/testset/:testset', function($testset) use($app)
             'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
-            'testset' => Factory::createTestset($testset)               // managed as object
+            'masterProject' => $ini['master_build_project'],
+            'masterState' => $ini['master_build_state'],
+            'testset' => Factory::createTestset(
+                $testset,
+                $ini['master_build_project'],
+                $ini['master_build_state'])                 // managed as objects
         ));
     } else {
         $app->render('empty.php', array(

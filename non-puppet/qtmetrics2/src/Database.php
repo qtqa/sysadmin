@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.1
- * @since     04-06-2015
+ * @version   0.2
+ * @since     11-06-2015
  * @author    Juha Sippola
  */
 
@@ -279,14 +279,15 @@ class Database {
     /**
      * Get the latest build result by configuration and branch for given project and state
      * @param string $testset
-     * @param string $project
-     * @param string $state
+     * @param string $testsetProject
+     * @param string $runProject
+     * @param string $runState
      * @return array (string name, string branch, string result)
      */
-    public function getLatestTestsetConfBuildResults($testset, $project, $state)
+    public function getLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState)
     {
         $result = array();
-        $builds = self::getLatestProjectBranchBuildNumbers($project, $state);
+        $builds = self::getLatestProjectBranchBuildNumbers($runProject, $runState);
         foreach ($builds as $build) {
             $query = $this->db->prepare("
                 SELECT conf.name AS conf, branch.name AS branch, testset_run.result
@@ -304,9 +305,9 @@ class Database {
             ");
             $query->execute(array(
                 $testset,
-                $project,
-                $project,
-                $state,
+                $testsetProject,
+                $runProject,
+                $runState,
                 $build['name'],
                 $build['number']
             ));
@@ -322,14 +323,15 @@ class Database {
     }
 
     /**
-     * Get counts of all passed and failed runs by testset since specified date (list length limited)
+     * Get counts of all passed and failed runs by testset in specified builds since specified date (list length limited)
      * Only the testsets that have failed since the specified date are listed
-     * Scope is state builds only
+     * @param string $runProject
+     * @param string $runState
      * @param string $date
      * @param int $limit
      * @return array (string name, string project, int passed, int failed)
      */
-    public function getTestsetsResultCounts($date, $limit)
+    public function getTestsetsResultCounts($runProject, $runState, $date, $limit)
     {
         $result = array();
         $query = $this->db->prepare("
@@ -344,14 +346,18 @@ class Database {
                 INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
                 INNER JOIN state ON project_run.state_id = state.id
-            WHERE state.name = 'state' AND
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 project_run.timestamp >= ?
             GROUP BY testset.name
             ORDER BY failed DESC, testset.name ASC
             LIMIT ?;
         ");
-        $query->bindParam(1, $date);
-        $query->bindParam(2, $limit, PDO::PARAM_INT);       // int data type must be separately set
+        $query->bindParam(1, $runProject);
+        $query->bindParam(2, $runState);
+        $query->bindParam(3, $date);
+        $query->bindParam(4, $limit, PDO::PARAM_INT);       // int data type must be separately set
         $query->execute();
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             if ($row['failed'] > 0) {                       // return only those where failures identified
@@ -367,14 +373,15 @@ class Database {
     }
 
     /**
-     * Get counts of all passed and failed runs for a testset since specified date
+     * Get counts of all passed and failed runs for a testset in specified builds since specified date
      * If several testsets found with the same name in different projects, all are listed
-     * Scope is state builds only
      * @param string $testset
+     * @param string $runProject
+     * @param string $runState
      * @param string $date
      * @return array (string name, string project, int passed, int failed)
      */
-    public function getTestsetResultCounts($testset, $date)
+    public function getTestsetResultCounts($testset, $runProject, $runState, $date)
     {
         $result = array();
         $query = $this->db->prepare("
@@ -389,14 +396,18 @@ class Database {
                 INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
                 INNER JOIN state ON project_run.state_id = state.id
-            WHERE testset.name = ? AND
-                state.name = 'state' AND
+            WHERE
+                testset.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 project_run.timestamp >= ?
             GROUP BY testset.name
             ORDER BY project.name;
         ");
         $query->execute(array(
             $testset,
+            $runProject,
+            $runState,
             $date
         ));
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
@@ -507,6 +518,5 @@ class Database {
     }
 
 }
-
 
 ?>

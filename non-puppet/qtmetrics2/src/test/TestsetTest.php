@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Testset unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.1
- * @since     04-06-2015
+ * @version   0.2
+ * @since     11-06-2015
  * @author    Juha Sippola
  */
 
@@ -67,17 +67,17 @@ class TestsetTest extends PHPUnit_Framework_TestCase
      * Test setStatus and getStatus
      * @dataProvider testGetStatusData
      */
-    public function testGetStatus($name, $project, $exp_results)
+    public function testGetStatus($name, $project, $runProject, $runState, $exp_results)
     {
         $testset = new Testset($name, $project);
-        $testset->setStatus();
+        $testset->setStatus($runProject, $runState);
         $this->assertContains($testset->getStatus(), $exp_results);
     }
     public function testGetStatusData()
     {
         return array(
-            array('tst_qftp', 'QtBase', array('passed', 'failed', 'ipassed', 'ifailed')),
-            array('tst_invalid', 'QtBase', array(''))
+            array('tst_qftp', 'QtBase', 'Qt5', 'state', array('passed', 'failed', 'ipassed', 'ifailed')),
+            array('tst_invalid', 'QtBase', 'Qt5', 'state', array(''))
         );
     }
 
@@ -88,6 +88,13 @@ class TestsetTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetResultCounts($name, $project, $passed, $failed)
     {
         $testset = new Testset($name, $project);
+        // Counts not set
+        $result = $testset->getTestsetResultCounts();
+        $this->assertArrayHasKey('passed', $result);
+        $this->assertArrayHasKey('failed', $result);
+        $this->assertNull($result['passed']);
+        $this->assertNull($result['failed']);
+        // Counts set
         $testset->setTestsetResultCounts($passed, $failed);
         $result = $testset->getTestsetResultCounts();
         $this->assertArrayHasKey('passed', $result);
@@ -111,6 +118,13 @@ class TestsetTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetFlakyCounts($name, $project, $flaky, $total)
     {
         $testset = new Testset($name, $project);
+        // Counts not set
+        $result = $testset->getTestsetFlakyCounts();
+        $this->assertArrayHasKey('flaky', $result);
+        $this->assertArrayHasKey('total', $result);
+        $this->assertNull($result['flaky']);
+        $this->assertNull($result['total']);
+        // Counts set
         $testset->setTestsetFlakyCounts($flaky, $total);
         $result = $testset->getTestsetFlakyCounts();
         $this->assertArrayHasKey('flaky', $result);

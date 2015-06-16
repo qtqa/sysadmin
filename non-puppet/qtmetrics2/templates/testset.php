@@ -34,8 +34,8 @@
 
 /**
  * Testset page
- * @version   0.1
- * @since     03-06-2015
+ * @version   0.2
+ * @since     11-06-2015
  * @author    Juha Sippola
  */
 
@@ -46,6 +46,8 @@ $breadcrumb = $this->data['breadcrumb'];
 $refreshed = $this->data['refreshed'];
 $lastDaysFailures = $this->data['lastDaysFailures'];
 $lastDaysFlaky = $this->data['lastDaysFlaky'];
+$masterProject = $this->data['masterProject'];
+$masterState = $this->data['masterState'];
 /**
  * @var Testset[] $testsets
  */
@@ -82,12 +84,14 @@ $testsets = $this->data['testset'];
                 <div class="well infoWell">
                     <span class="glyphicon glyphicon-info-sign"></span> <strong>Testset</strong><br>
                     <ul>
-                        <li><strong>latest result</strong> shows the overall testset status based on the latest project configuration
-                            <strong>state</strong> builds across all branches (shows failed if failed in one or in several).</li>
-                        <li><strong>failed</strong> count shows the number of <strong>state</strong> builds where
-                            <?php echo $testset->getName() ?> failed during the last <?php echo $lastDaysFailures ?> days.</li>
+                        <li><strong>latest result</strong> shows the overall testset status based on the latest
+                            <strong><?php echo "$masterProject $masterState" ?></strong> builds across all branches
+                            (shows failed if failed in one or in several).</li>
+                        <li><strong>failed</strong> count shows the number of <strong><?php echo "$masterProject $masterState" ?></strong>
+                            builds where <?php echo $testset->getName() ?> failed during the last <?php echo $lastDaysFailures ?> days.</li>
                         <li><strong>flaky</strong> count shows the number of <strong>all</strong> builds where
-                            <?php echo $testset->getName() ?> failed on the first run but, when rerun, it passed (during the last <?php echo $lastDaysFlaky ?> days).</li>
+                            <?php echo $testset->getName() ?> failed on the first run but, when rerun, it passed
+                            (during the last <?php echo $lastDaysFlaky ?> days).</li>
                     </ul>
                 </div>
             </div>

@@ -838,6 +838,26 @@ sub get_log_data
     return (\%logdata);
 }
 
+sub parse_module_from_path {
+    my $path = shift;
+    $path =~ s/\\/\//g;
+    my ($returnval) = $path =~ m/.*\/(.*)\/tests\/.*/;
+    if (!defined $returnval) {              # exception: qtqa tests not in a 'tests' folder
+        ($returnval) = $path =~ m/.*\/(.*)\/scripts/;
+    }
+    return $returnval;
+}
+
+sub parse_testpath_from_path {
+    my $path = shift;
+    $path =~ s/\\/\//g;
+    my ($returnval) = $path =~ m/.*\/(.*\/tests\/.*)/;
+    if (!defined $returnval) {              # exception: qtqa tests not in a 'tests' folder
+        ($returnval) = $path =~ m/.*\/(.*\/scripts)/;
+    }
+    return $returnval;
+}
+
 sub get_test_results
 {
     print "Getting test results.\n";
@@ -854,6 +874,8 @@ sub get_test_results
     # stores the state if we're between "Testing" and "Totals:", meaning, we're storing autotestdata.
     my $testdata = 0;
     my $testsetname = "";
+    my $testsetmodule = "";
+    my $testsetpath = "";
     foreach my $line (@filecontent) {
         $line =~ s/[\n|\r]$//g;
         $phase = 1 if ($line =~ m/^$RESULTPARTSTR$/);
@@ -862,14 +884,19 @@ sub get_test_results
         $autotest = 0 if ($line =~ m/#=#.*?#=#\s\<(.*)\s#=# Elapsed (\d+) second\(s\).$/);
 
         if (1 == $autotest) {
-            if ($line =~ m/^QtQA::App::TestRunner: begin (.*):\s\[/) {
+            if ($line =~ m/^QtQA::App::TestRunner: begin (.*?)\s@\s(.*):\s\[/) {
                 $testsetname = $1;
-                next if ($testsetname =~ m/license/);
-                next if ($testsetname =~ m/tst_headers/);
-                next if ($testsetname =~ m/tst_bic/);
+                $testsetmodule = parse_module_from_path($2);
+                $testsetpath = parse_testpath_from_path($2);
+                # testsets can be skipped if needed (e.g. unsupported format)
+                #next if ($testsetname =~ m/license/);
+                #next if ($testsetname =~ m/tst_headers/);
+                #next if ($testsetname =~ m/tst_bic/);
                 $testdata = 1;
                 # set initial values for a new test set
                 if (!$testresults{all_tests}{$testsetname}) {
+                    $testresults{all_tests}{$testsetname}{module} = $testsetmodule;
+                    $testresults{all_tests}{$testsetname}{path} = $testsetpath;
                     $testresults{all_tests}{$testsetname}{runs} = 0;
                     $testresults{all_tests}{$testsetname}{passed} = 0;
                     $testresults{all_tests}{$testsetname}{failed} = 0;
@@ -1032,7 +1059,7 @@ sub sql_drop_tables
 sub sql_create_tables
 {
     my $dbh = shift;
-    print "Creating new tables.\n";
+    print "Creating new tables (if they do not exist yet).\n";
 
     $dbh->{AutoCommit} = 0;  # enable transactions, if possible
     $dbh->{RaiseError} = 1;
@@ -1485,13 +1512,22 @@ sub sql
             #insert data into test tables
 
             if (defined $datahash{cfg}{$cfg}{testresults}{all_tests}) {
-                my $timestamp_cfg = $datahash{cfg}{$cfg}{builddata}{TIMESTAMP} ? "\"$datahash{cfg}{$cfg}{builddata}{TIMESTAMP}\"" : "0";
                 foreach my $test (keys %{$datahash{cfg}{$cfg}{testresults}{all_tests}}) {
 
-                    if ("0E0" eq $dbh->do ("SELECT testset.name FROM testset INNER JOIN project ON testset.project_id = project.id
-                        WHERE testset.name = \"$test\" AND project.name = \"$projectname\"")) {
+                    # insert testset project first
+                    my $testset_project = $datahash{cfg}{$cfg}{testresults}{all_tests}{$test}{module};
+                    print "ERORR: $test doesn't have parent module set (in $cfg).\n" if (!defined $testset_project);
+                    if ("0E0" eq $dbh->do ("SELECT name FROM project WHERE name = \"$testset_project\"")) {
                         my $query =
-                            "INSERT INTO testset (project_id, name) SELECT id, \"$test\" FROM project WHERE project.name = \"$projectname\"";
+                            "INSERT INTO project (name) VALUES (\"$testset_project\")";
+                        print OUTPUT "$query\n" if $VERBOSE or $output;
+                        $dbh->do ($query) or print "insert into project failed: $!\n" if !$output;
+                    }
+                    # insert testset connected to its parent project
+                    if ("0E0" eq $dbh->do ("SELECT testset.name FROM testset INNER JOIN project ON testset.project_id = project.id
+                        WHERE testset.name = \"$test\" AND project.name = \"$testset_project\"")) {
+                        my $query =
+                            "INSERT INTO testset (project_id, name) SELECT id, \"$test\" FROM project WHERE project.name = \"$testset_project\"";
                         print OUTPUT "$query\n" if $VERBOSE or $output;
                         $dbh->do ($query) or print "insert into testset failed: $!\n" if !$output;
                     }
@@ -1502,6 +1538,7 @@ sub sql
                     } else {
                         $testset_result = $datahash{cfg}{$cfg}{testresults}{all_tests}{$test}{insignificant} ? "\"ifailed\"" : "\"failed\"";
                     }
+                    # testset is connected to its parent project (e.g. QtConnectivity) while testset_run to project where run (e.g. Qt5)
                     my $query =
                         "INSERT INTO testset_run (testset_id, conf_run_id, run, result, duration, testcases_passed, testcases_failed, testcases_skipped, testcases_blacklisted)
                             SELECT testset.id,
@@ -1515,7 +1552,7 @@ sub sql
                                     $datahash{cfg}{$cfg}{testresults}{all_tests}{$test}{blacklisted}
                                 FROM testset, conf_run
                                 WHERE testset.name = \"$test\" AND
-                                testset.project_id = (SELECT id FROM project WHERE project.name = \"$projectname\") AND
+                                testset.project_id = (SELECT id FROM project WHERE project.name = \"$testset_project\") AND
                                 conf_run.id = (
                                     SELECT conf_run.id
                                         FROM conf_run
@@ -1693,6 +1730,8 @@ sub run
         $db_status{total} = $#inputfolders+1;
 
         print "Processing $inputfolder...\n";
+        next if ($inputfolder =~ m/qt_4/i);                     # exception: exclude Qt_4.8
+
         sql_update_progress($dbh, \%db_status);
         my $statefile = catfile($inputfolder, $BUILDSTATEFILE);
         my $mainlogfile = catfile($inputfolder, $BUILDLOGFILE);
