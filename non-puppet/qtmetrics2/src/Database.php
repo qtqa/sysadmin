@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.2
- * @since     11-06-2015
+ * @version   0.3
+ * @since     16-06-2015
  * @author    Juha Sippola
  */
 
@@ -180,22 +180,24 @@ class Database {
     }
 
     /**
-     * Get the latest build number for given project, branch and state
+     * Get the latest build key for given project, branch and state
      * @param string $project
      * @param string $branch
      * @param string $state
-     * @return int
+     * @return string
      */
-    public function getLatestProjectBranchBuildNumber($project, $branch, $state)
+    public function getLatestProjectBranchBuildKey($project, $branch, $state)
     {
         $result = array();
         $query = $this->db->prepare("
-            SELECT max(build_number) AS latest_build
+            SELECT build_key AS latest_build
             FROM project_run
             WHERE
                 project_id = (SELECT id FROM project WHERE name = ?) AND
                 branch_id = (SELECT id FROM branch WHERE name = ?) AND
                 state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY timestamp DESC
+            LIMIT 1
         ");
         $query->execute(array(
             $project,
@@ -209,32 +211,24 @@ class Database {
     }
 
     /**
-     * Get the latest build numbers by branch for given project and state
+     * Get the latest build keys by branch for given project and state
      * @param string $project
      * @param string $state
-     * @return array (string name, int number)
+     * @return array (string name, string key)
      */
-    public function getLatestProjectBranchBuildNumbers($project, $state)
+    public function getLatestProjectBranchBuildKeys($project, $state)
     {
         $result = array();
-        $query = $this->db->prepare("
-            SELECT branch.name, max(build_number) AS latest_build
-            FROM project_run
-                INNER JOIN branch ON branch_id = branch.id
-            WHERE
-                project_id = (SELECT id FROM project WHERE name = ?) AND
-                state_id = (SELECT id FROM state WHERE name = ?)
-            GROUP BY branch_id
-        ");
-        $query->execute(array(
-            $project,
-            $state
-        ));
-        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = array(
-                'name' => $row['name'],
-                'number' => $row['latest_build']
-            );
+
+        $branches = self::getBranches();
+        foreach ($branches as $branch) {
+            $key = self::getLatestProjectBranchBuildKey($project, $branch['name'], $state);
+            if ($key) {
+                $result[] = array(
+                    'name' => $branch['name'],
+                    'key' => $key
+                );
+            }
         }
         return $result;
     }
@@ -248,7 +242,7 @@ class Database {
     public function getLatestProjectBranchBuildResults($project, $state)
     {
         $result = array();
-        $builds = self::getLatestProjectBranchBuildNumbers($project, $state);
+        $builds = self::getLatestProjectBranchBuildKeys($project, $state);
         foreach ($builds as $build) {
             $query = $this->db->prepare("
                 SELECT branch.name, project_run.result
@@ -258,13 +252,13 @@ class Database {
                     project_id = (SELECT id FROM project WHERE name = ?) AND
                     state_id = (SELECT id FROM state WHERE name = ?) AND
                     branch_id = (SELECT id FROM branch WHERE name = ?) AND
-                    build_number = ?;
+                    build_key = ?;
             ");
             $query->execute(array(
                 $project,
                 $state,
                 $build['name'],
-                $build['number']
+                $build['key']
             ));
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
@@ -287,7 +281,7 @@ class Database {
     public function getLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState)
     {
         $result = array();
-        $builds = self::getLatestProjectBranchBuildNumbers($runProject, $runState);
+        $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
         foreach ($builds as $build) {
             $query = $this->db->prepare("
                 SELECT conf.name AS conf, branch.name AS branch, testset_run.result
@@ -301,7 +295,7 @@ class Database {
                     project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                     project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                     project_run.branch_id = (SELECT id from branch WHERE name = ?) AND
-                    project_run.build_number = ?;
+                    project_run.build_key = ?;
             ");
             $query->execute(array(
                 $testset,
@@ -309,7 +303,7 @@ class Database {
                 $runProject,
                 $runState,
                 $build['name'],
-                $build['number']
+                $build['key']
             ));
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(

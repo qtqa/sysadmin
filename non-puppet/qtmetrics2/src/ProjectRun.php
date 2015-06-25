@@ -34,8 +34,8 @@
 
 /**
  * ProjectRun class
- * @version   0.1
- * @since     07-05-2015
+ * @version   0.2
+ * @since     12-05-2015
  * @author    Juha Sippola
  */
 
@@ -69,10 +69,10 @@ class ProjectRun {
     private $stateName;
 
     /**
-     * Build number.
-     * @var int
+     * Build key.
+     * @var string
      */
-    private $buildNumber;
+    private $buildKey;
 
     /**
      * Build result.
@@ -98,17 +98,17 @@ class ProjectRun {
      * @param string $projectName
      * @param string $branchName
      * @param string $stateName
-     * @param int $buildNumber
+     * @param int $buildKey
      * @param string $result
      * @param int $timestamp
      * @param int $duration
      */
-    public function __construct($projectName, $branchName, $stateName, $buildNumber, $result, $timestamp, $duration)
+    public function __construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration)
     {
         $this->projectName = $projectName;
         $this->branchName = $branchName;
         $this->stateName = $stateName;
-        $this->buildNumber = $buildNumber;
+        $this->buildKey = $buildKey;
         $this->result = $result;
         $this->timestamp = $timestamp;
         $this->duration = $duration;
@@ -151,12 +151,12 @@ class ProjectRun {
     }
 
     /**
-     * Get build number.
-     * @return int
+     * Get build key.
+     * @return string
      */
-    public function getBuildNumber()
+    public function getBuildKey()
     {
-        return $this->buildNumber;
+        return $this->buildKey;
     }
 
     /**

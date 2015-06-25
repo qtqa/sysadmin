@@ -38,8 +38,8 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.2
- * @since     10-06-2015
+ * @version   0.3
+ * @since     15-06-2015
  * @author    Juha Sippola
  */
 
@@ -198,45 +198,53 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test getLatestProjectBranchBuildNumbers
-     * @dataProvider testGetLatestProjectBranchBuildNumbersData
+     * Test getLatestProjectBranchBuildKeys
+     * @dataProvider testGetLatestProjectBranchBuildKeysData
      */
-    public function testGetLatestProjectBranchBuildNumbers($project, $state, $exp_branch, $exp_build_number_min)
+    public function testGetLatestProjectBranchBuildKeys($project, $state, $exp_branch, $exp_build_key)
     {
         $branches = array();
         $db = Factory::db();
-        $result = $db->getLatestProjectBranchBuildNumbers($project, $state);
+        $result = $db->getLatestProjectBranchBuildKeys($project, $state);
         $this->assertNotEmpty($result);
         foreach($result as $row) {
-            $this->assertArrayHasKey('name', $row);
-            $this->assertArrayHasKey('number', $row);
-            $this->assertGreaterThan($exp_build_number_min, $row['number']);
-            $branches[] = $row['name'];
+            if ($row['name'] == $exp_branch) {
+                $this->assertArrayHasKey('name', $row);
+                $this->assertArrayHasKey('key', $row);
+                $this->assertEquals($exp_build_key, $row['key']);
+                $branches[] = $row['name'];
+            }
         }
         $this->assertContains($exp_branch, $branches);
     }
-    public function testGetLatestProjectBranchBuildNumbersData()
+    public function testGetLatestProjectBranchBuildKeysData()
     {
         return array(
-            array('Qt5', 'state', 'dev', 100)                    // Assuming any dev build has number > 100
+            array('Qt5', 'state', 'master', '4777'),                    // based on test data
+            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345'),
+            array('Qt5', 'state', 'release', '157'),
+            array('Qt5', 'state', 'stable', '1348')
         );
     }
 
     /**
-     * Test getLatestProjectBranchBuildNumber
-     * @dataProvider testGetLatestProjectBranchBuildNumberData
+     * Test getLatestProjectBranchBuildKey
+     * @dataProvider testGetLatestProjectBranchBuildKeyData
      */
-    public function testGetLatestProjectBranchBuildNumber($project, $branch, $state, $exp_build_number_min)
+    public function testGetLatestProjectBranchBuildKey($project, $branch, $state, $exp_build_key)
     {
         $db = Factory::db();
-        $result = $db->getLatestProjectBranchBuildNumber($project, $branch, $state);
+        $result = $db->getLatestProjectBranchBuildKey($project, $branch, $state);
         $this->assertNotEmpty($result);
-        $this->assertGreaterThan($exp_build_number_min, $result);
+        $this->assertEquals($exp_build_key, $result);
     }
-    public function testGetLatestProjectBranchBuildNumberData()
+    public function testGetLatestProjectBranchBuildKeyData()
     {
         return array(
-            array('Qt5', 'dev', 'state', 100)                    // Assuming any dev build has number > 100
+            array('Qt5', 'master', 'state', '4777'),                    // based on test data
+            array('Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345'),
+            array('Qt5', 'release', 'state', '157'),
+            array('Qt5', 'stable', 'state', '1348')
         );
     }
 

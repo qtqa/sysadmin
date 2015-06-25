@@ -1175,11 +1175,11 @@ sub sql_create_tables
                 project_id            TINYINT UNSIGNED      NOT NULL,
                 branch_id             TINYINT UNSIGNED      NOT NULL,
                 state_id              TINYINT UNSIGNED      NOT NULL,
-                build_number          MEDIUMINT UNSIGNED    NOT NULL,
+                build_key             VARCHAR(256)          NOT NULL,
                 result                ENUM('SUCCESS','FAILURE','ABORTED')    NOT NULL,
                 timestamp             TIMESTAMP             NOT NULL,
                 duration              TIME                  NOT NULL,
-                UNIQUE INDEX unique_project_run (project_id,branch_id,state_id,build_number),
+                UNIQUE INDEX unique_project_run (project_id,branch_id,state_id,build_key),
                 CONSTRAINT project_run_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"
         );
@@ -1251,10 +1251,10 @@ sub sql_create_tables
                 run                   TINYINT UNSIGNED      NOT NULL,
                 result                ENUM('passed','failed','ipassed','ifailed')    NOT NULL,
                 duration              SMALLINT UNSIGNED     NOT NULL,
-                testcases_passed      SMALLINT UNSIGNED     NOT NULL,
-                testcases_failed      SMALLINT UNSIGNED     NOT NULL,
-                testcases_skipped     SMALLINT UNSIGNED     NOT NULL,
-                testcases_blacklisted SMALLINT UNSIGNED     NOT NULL,
+                total_passed          SMALLINT UNSIGNED     NOT NULL,
+                total_failed          SMALLINT UNSIGNED     NOT NULL,
+                total_skipped         SMALLINT UNSIGNED     NOT NULL,
+                total_blacklisted     SMALLINT UNSIGNED     NOT NULL,
                 CONSTRAINT testset_run_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"
         );
@@ -1302,7 +1302,7 @@ sub sql
                             WHERE project.name = \"$projectname\" AND
                                 branch.name = \"$branchname\" AND
                                 state.name = \"$statename\" AND
-                                project_run.build_number = $datahash{BUILD_NUMBER}
+                                project_run.build_key = $datahash{BUILD_NUMBER}
                     )";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in phase_run failed: $!\n" if !$output;
@@ -1321,7 +1321,7 @@ sub sql
                             WHERE project.name = \"$projectname\" AND
                                 branch.name = \"$branchname\" AND
                                 state.name = \"$statename\" AND
-                                project_run.build_number = $datahash{BUILD_NUMBER}
+                                project_run.build_key = $datahash{BUILD_NUMBER}
                     )";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in testrow_run failed: $!\n" if !$output;
@@ -1339,7 +1339,7 @@ sub sql
                             WHERE project.name = \"$projectname\" AND
                                 branch.name = \"$branchname\" AND
                                 state.name = \"$statename\" AND
-                                project_run.build_number = $datahash{BUILD_NUMBER}
+                                project_run.build_key = $datahash{BUILD_NUMBER}
                     )";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in testfunction_run failed: $!\n" if !$output;
@@ -1356,7 +1356,7 @@ sub sql
                             WHERE project.name = \"$projectname\" AND
                             branch.name = \"$branchname\" AND
                             state.name = \"$statename\" AND
-                            project_run.build_number = $datahash{BUILD_NUMBER}
+                            project_run.build_key = $datahash{BUILD_NUMBER}
                     )";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in testset_run failed: $!\n" if !$output;
@@ -1369,7 +1369,7 @@ sub sql
                                 WHERE project_run.project_id = (SELECT id FROM project WHERE name = \"$projectname\") AND
                                     project_run.branch_id = (SELECT id FROM branch WHERE name = \"$branchname\") AND
                                     project_run.state_id = (SELECT id FROM state WHERE name = \"$statename\") AND
-                                    project_run.build_number = $datahash{BUILD_NUMBER}
+                                    project_run.build_key = $datahash{BUILD_NUMBER}
                     )";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in conf_run failed: $!\n" if !$output;
@@ -1379,7 +1379,7 @@ sub sql
                     WHERE project_id = (SELECT project.id FROM project WHERE project.name = \"$projectname\") AND
                         branch_id = (SELECT branch.id FROM branch WHERE  branch.name = \"$branchname\") AND
                         state_id = (SELECT state.id FROM state WHERE state.name = \"$statename\") AND
-                        build_number = $datahash{BUILD_NUMBER}";
+                        build_key = $datahash{BUILD_NUMBER}";
             print "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "removal of old data in project_run failed: $!\n" if !$output;
 
@@ -1424,7 +1424,7 @@ sub sql
         }
 
         my $query =
-            "INSERT INTO project_run (project_id, branch_id, state_id, build_number, result, timestamp, duration)
+            "INSERT INTO project_run (project_id, branch_id, state_id, build_key, result, timestamp, duration)
                 SELECT project.id, branch.id, state.id, $datahash{BUILD_NUMBER}, \"$datahash{RESULT}\", $timestamp, $duration
                     FROM project, branch, state
                     WHERE project.name = \"$projectname\" AND
@@ -1505,7 +1505,7 @@ sub sql
                             project_run.project_id = (SELECT id FROM project WHERE name = \"$projectname\") AND
                             project_run.branch_id = (SELECT id FROM branch WHERE name = \"$branchname\") AND
                             project_run.state_id = (SELECT id FROM state WHERE name = \"$statename\") AND
-                            project_run.build_number =  $datahash{BUILD_NUMBER}";
+                            project_run.build_key =  $datahash{BUILD_NUMBER}";
             print OUTPUT "$query\n" if $VERBOSE or $output;
             $dbh->do ($query) or print "insert into conf_run failed: $!\n" if !$output;
 
@@ -1540,7 +1540,7 @@ sub sql
                     }
                     # testset is connected to its parent project (e.g. QtConnectivity) while testset_run to project where run (e.g. Qt5)
                     my $query =
-                        "INSERT INTO testset_run (testset_id, conf_run_id, run, result, duration, testcases_passed, testcases_failed, testcases_skipped, testcases_blacklisted)
+                        "INSERT INTO testset_run (testset_id, conf_run_id, run, result, duration, total_passed, total_failed, total_skipped, total_blacklisted)
                             SELECT testset.id,
                                     conf_run.id,
                                     $datahash{cfg}{$cfg}{testresults}{all_tests}{$test}{runs},
@@ -1562,7 +1562,7 @@ sub sql
                                             INNER JOIN branch ON project_run.branch_id = branch.id
                                             INNER JOIN state ON project_run.state_id = state.id
                                         WHERE conf.name = \"$cfg\" AND
-                                            project_run.build_number = $datahash{BUILD_NUMBER} AND
+                                            project_run.build_key = $datahash{BUILD_NUMBER} AND
                                             project.name = \"$projectname\" AND
                                             branch.name = \"$branchname\" AND
                                             state.name = \"$statename\" )";
@@ -1602,7 +1602,7 @@ sub sql
                                                 INNER JOIN branch ON project_run.branch_id = branch.id
                                                 INNER JOIN state ON project_run.state_id = state.id
                                             WHERE conf.name = \"$cfg\" AND
-                                                project_run.build_number = $datahash{BUILD_NUMBER} AND
+                                                project_run.build_key = $datahash{BUILD_NUMBER} AND
                                                 project.name = \"$projectname\" AND
                                                 branch.name = \"$branchname\" AND
                                                 state.name = \"$statename\" )";

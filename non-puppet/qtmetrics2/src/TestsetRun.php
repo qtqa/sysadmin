@@ -34,8 +34,8 @@
 
 /**
  * TestsetRun class
- * @version   0.1
- * @since     06-06-2015
+ * @version   0.2
+ * @since     12-06-2015
  * @author    Juha Sippola
  */
 
@@ -80,7 +80,7 @@ class TestsetRun extends ProjectRun {
      * @param string $projectName
      * @param string $branchName
      * @param string $stateName
-     * @param int $buildNumber
+     * @param int $buildKey
      * @param string $configurationName
      * @param int $run (ordinal number)
      * @param string $result (plain result without any possible flags)
@@ -88,8 +88,8 @@ class TestsetRun extends ProjectRun {
      * @param int $timestamp
      * @param int $duration
      */
-    public function __construct($name, $projectName, $branchName, $stateName, $buildNumber, $confName, $run, $result, $insignificant, $timestamp, $duration) {
-        parent::__construct($projectName, $branchName, $stateName, $buildNumber, $result, $timestamp, $duration);
+    public function __construct($name, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {
+        parent::__construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration);
         $this->name = $name;
         $this->confName = $confName;
         $this->run = $run;
