@@ -1,3 +1,4 @@
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -31,26 +32,13 @@
 ##
 #############################################################################
 
-# Qt Metrics configuration
-# @version   0.2
-# @since     17-06-2015
-# @author    Juha Sippola
+/**
+ * Show About window
+ * @version   0.1
+ * @since     16-06-2015
+ * @author    Juha Sippola
+ */
 
-# Turn on the rewriting engine
-RewriteEngine On
-
-# Set security headers
-<IfModule mod_headers.c>
-    # Apply Content Security Policy
-    Header set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src *"
-    # Provide protection against MIME type confusion attacks
-    Header set X-Content-Type-Options "nosniff"
-    # Provide protection against clickjacking
-    Header set X-Frame-Options "SAMEORIGIN"
-    # Provide protection against Cross-Site Scripting
-    Header set X-XSS-Protection "1; mode=block"
-</IfModule>
-
-# If the requested file does not exist, show link to index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [QSA,L]
+$(function(){
+    $("#about").load("templates/about.php");
+});

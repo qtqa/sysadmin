@@ -34,8 +34,8 @@
 
 /**
  * Header section of html page including the meta data and style sheets
- * @version   0.1
- * @since     08-06-2015
+ * @version   0.2
+ * @since     17-06-2015
  * @author    Juha Sippola
  */
 
@@ -58,10 +58,10 @@
     <base href="<?php echo Slim\Slim::getInstance()->urlFor('root'); ?>" />
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="lib/jQuery-UI-themes/themes/smoothness/jquery-ui.css">
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/Bootstrap/css/bootstrap.min.css">
 
     <!-- Custom styles for the Bootstrap templates used -->
     <link rel="stylesheet" href="styles/bootstrap_custom.css">
@@ -77,7 +77,6 @@
 </head>
 
 <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">

@@ -34,8 +34,8 @@
 
 /**
  * Footer section of html page including the scripts
- * @version   0.1
- * @since     02-06-2015
+ * @version   0.2
+ * @since     16-06-2015
  * @author    Juha Sippola
  */
 
@@ -55,16 +55,12 @@
     ======================================================================= -->
 
     <!-- jQuery and Bootstrap -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="lib/jQuery/jquery-1.11.3.min.js"></script>
+    <script src="lib/jQuery-UI/jquery-ui.min.js"></script>
+    <script src="lib/Bootstrap/js/bootstrap.min.js"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="scripts/ie10-viewport-bug-workaround.js"></script>
 
     <!-- About window -->
-    <script>
-        $(function(){
-            $("#about").load("templates/about.php");
-        });
-    </script>
+    <script src="scripts/about.js"></script>

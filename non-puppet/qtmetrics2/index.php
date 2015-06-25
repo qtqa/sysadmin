@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.2
- * @since     12-06-2015
+ * @version   0.3
+ * @since     16-06-2015
  * @author    Juha Sippola
  */
 
@@ -130,6 +130,7 @@ $app->get('/test/flaky', function() use($app)
 
 $app->get('/testset/:testset', function($testset) use($app)
 {
+    $testset = strip_tags($testset);
     $ini = Factory::conf();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
