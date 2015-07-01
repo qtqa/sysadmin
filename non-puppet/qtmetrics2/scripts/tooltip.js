@@ -1,4 +1,4 @@
-<?php
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,34 +33,31 @@
 #############################################################################
 
 /**
- * Testset autocomplete search
- * @version   0.2
- * @since     25-06-2015
+ * Initialize Bootstrap tooltips
+ * @version   0.1
+ * @since     26-06-2015
  * @author    Juha Sippola
  */
 
-header('Content-Type: application/json');
-require 'src/Factory.php';
+$(function () {
 
-// Get the filter and make database search
-if (isset($_GET['term'])) {
-    $list = array();
-    $rows = Factory::getTestsetsFiltered($_GET['term']);
-    foreach ($rows as $row) {
-        foreach ($row as $key => $value) {
-            if ($key === 'name')
-                $name = $value;
-            else
-                $project = $value;
-        }
-        $list[] = $name . ' (in ' . $project . ')';     // the separator must match with that used in index.php
-    }
-    // Return list as json string
-    echo json_encode($list);
+    // Set tooltip activation to click on touch devices (and hover on others)
+    var is_touch_device = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
+    $(".clickOnTouch").tooltip({
+        trigger: is_touch_device ? "click" : "hover"
+    });
 
-// Return empty string if filter not set
-} else {
-    echo json_encode([]);
-}
+    // Bootstrap tooltip
+    $('[data-toggle="tooltip"]').tooltip();
 
-?>
+    // Hide clicked tooltip
+    $('body').on('click', function (e) {
+        $('[data-toggle="tooltip"]').each(function () {
+            //the 'is' for element that triggered the tooltip
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0) {
+                $(this).tooltip('hide');
+            }
+        });
+    });
+
+});

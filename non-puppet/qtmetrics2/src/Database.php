@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.3
- * @since     16-06-2015
+ * @version   0.4
+ * @since     22-06-2015
  * @author    Juha Sippola
  */
 
@@ -114,16 +114,20 @@ class Database {
     {
         $result = array();
         $query = $this->db->prepare("
-            SELECT DISTINCT name
+            SELECT testset.name AS testset, project.name AS project
             FROM testset
-            WHERE name LIKE ?
-            ORDER BY name;
+                INNER JOIN project ON testset.project_id = project.id
+            WHERE testset.name LIKE ?
+            ORDER BY testset.name;
         ");
         $query->execute(array(
             '%' . $filter . '%'
         ));
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = array('name' => $row['name']);
+            $result[] = array(
+                'name' => $row['testset'],
+                'project' => $row['project']
+            );
         }
         return $result;
     }
@@ -493,6 +497,95 @@ class Database {
                 'project' => $row['project'],
                 'flaky' => $row['flaky'],
                 'total' => $row['total']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get project build keys and timestamps by branch
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string build_key, string timestamp)
+     */
+    public function getProjectBuildsByBranch($runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                project_run.build_key,
+                project_run.timestamp
+            FROM project_run
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, project_run.timestamp DESC;
+        ");
+        $query->execute(array(
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'buildKey' => $row['build_key'],
+                'timestamp' => $row['timestamp']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get run results for a testset in specified builds by branch and configuration
+     * @param string $testset
+     * @param $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string conf, string build_key, string result)
+     */
+    public function getTestsetResultsByBranchConf($testset, $testsetProject, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                testset_run.result,
+                project_run.timestamp,
+                testset_run.duration,
+                testset_run.run
+            FROM testset_run
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                testset.name = ? AND
+                project.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, conf.name, project_run.timestamp DESC;
+        ");
+        $query->execute(array(
+            $testset,
+            $testsetProject,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration'],
+                'run' => $row['run']
             );
         }
         return $result;

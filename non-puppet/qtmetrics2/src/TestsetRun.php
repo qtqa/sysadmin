@@ -34,8 +34,8 @@
 
 /**
  * TestsetRun class
- * @version   0.2
- * @since     12-06-2015
+ * @version   0.3
+ * @since     23-06-2015
  * @author    Juha Sippola
  */
 
@@ -56,13 +56,19 @@ class TestsetRun extends ProjectRun {
     private $name;
 
     /**
+     * Testset project name.
+     * @var string
+     */
+    private $testsetProjectName;
+
+    /**
      * Configuration name.
      * @var string
      */
     private $confName;
 
     /**
-     * Run number (a failed test is repeated once).
+     * Run number (a failed test is repeated).
      * @var int
      */
     private $run;
@@ -77,6 +83,7 @@ class TestsetRun extends ProjectRun {
      * TestsetRun constructor.
      * TestsetRun include the result in the project configuration build
      * @param string $testsetName
+     * @param string $testsetProjectName
      * @param string $projectName
      * @param string $branchName
      * @param string $stateName
@@ -86,11 +93,12 @@ class TestsetRun extends ProjectRun {
      * @param string $result (plain result without any possible flags)
      * @param bool $insignificant (true = insignificant)
      * @param int $timestamp
-     * @param int $duration
+     * @param int $duration (in deciseconds)
      */
-    public function __construct($name, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {
+    public function __construct($name, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {
         parent::__construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration);
         $this->name = $name;
+        $this->$testsetProjectName = $testsetProjectName;
         $this->confName = $confName;
         $this->run = $run;
         $this->insignificant = $insignificant;
@@ -103,6 +111,24 @@ class TestsetRun extends ProjectRun {
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get configuration name.
+     * @return string
+     */
+    public function getConfName()
+    {
+        return $this->confName;
+    }
+
+    /**
+     * Get run number.
+     * @return int
+     */
+    public function getRun()
+    {
+        return $this->run;
     }
 
     /**
@@ -134,7 +160,7 @@ class TestsetRun extends ProjectRun {
     public static function isInsignificant($resultString)
     {
         $flag = false;
-        if (strpos($resultString, 'i') == 0)                                // begins with 'i'
+        if (strpos($resultString, 'i') === 0)                               // begins with 'i'
             $flag = true;
         return $flag;
     }

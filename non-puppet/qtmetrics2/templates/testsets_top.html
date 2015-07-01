@@ -34,8 +34,8 @@
 
 /**
  * Top failures (testsets) page
- * @version   0.3
- * @since     18-06-2015
+ * @version   0.4
+ * @since     24-06-2015
  * @author    Juha Sippola
  */
 
@@ -64,6 +64,8 @@
 
         <div class="col-sm-12 col-md-12 main">
 
+            {##### Title #####}
+
             <h1 class="page-header">
                 Top {{ topN }} Failures
                 <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
@@ -71,7 +73,8 @@
                 </button>
                 <small>{{ refreshed }}</small>
             </h1>
-            <h3 class="sub-header">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h3>
+
+            {##### Info well #####}
 
             <div class="collapse" id="info">
                 <div class="well infoWell">
@@ -86,73 +89,80 @@
                 </div>
             </div>
 
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>testset</th>
-                                <th class="showInLargeDisplay">project</th>
-                                <th>latest result</th>
-                                <th class="leftBorder center">failed <span class ="gray">(total)</span></th>
-                                <th class="showInLargeDisplay">failed + passed</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {# Calculate max result count for the bar #}
-                            {% set maxCount = 1 %}
-                            {% for testset in testsets %}
-                                {% if (testset.getTestsetResultCounts.passed + testset.getTestsetResultCounts.failed) > maxCount %}
-                                    {% set maxCount = testset.getTestsetResultCounts.passed + testset.getTestsetResultCounts.failed %}
-                                {% endif %}
-                            {% endfor %}
+            {##### Top list #####}
 
-                            {# Print testsets #}
-                            {% for testset in testsets %}
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h4 class="panel-title bold">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h4>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
                                 <tr>
-                                    {# Testset name #}
-                                    <td><a href="{{ testsetRoute }}/{{ testset.getName }}">{{ testset.getName }}</a></td>
-
-                                    {# Project name #}
-                                    <td class="showInLargeDisplay">{{ testset.getProjectName }}</td>
-
-                                    {# Testset status according to the latest build results #}
-                                    {% if testset.getStatus == constant('testsetRun::RESULT_SUCCESS') %}
-                                        {% set resultIcon = 'glyphicon glyphicon-ok green' %}
-                                    {% elseif testset.getStatus == constant('testsetRun::RESULT_FAILURE') %}
-                                        {% set resultIcon = 'glyphicon glyphicon-remove red' %}
-                                    {% else %}
-                                        {% set resultIcon = '' %}
-                                    {% endif %}
-                                    <td><span class="spaceHorizontal {{ resultIcon }}"></span>{{ testset.getStatus }}</td>
-
-                                    {# Show results as numbers #}
-                                    {% set failed = testset.getTestsetResultCounts.failed %}
-                                    {% set passed = testset.getTestsetResultCounts.passed %}
-                                    {% set total = passed + failed %}
-                                    <td class="leftBorder center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
-
-                                    {# Show results as bars (scaled to BAR_AREA px) #}
-                                    {% set passedBar = ((BAR_AREA/maxCount) * passed)|round(0, 'floor') %}
-                                    {% if (passed > 0) and (passedBar == 0) %}
-                                        {% set passedBar = 1 %}
-                                    {% endif %}
-                                    {% set failedBar = ((BAR_AREA/maxCount)*failed)|round(0, 'floor') %}
-                                    {% if (failed > 0) and (failedBar == 0) %}
-                                        {% set failedBar = 1 %}
-                                    {% endif %}
-                                    <td class="center showInLargeDisplay">
-                                        <div>
-                                            <div class="floatLeft redBackground" style="width: {{ failedBar }}px">&nbsp;</div>
-                                            <div class="floatLeft greenBackground" style="width: {{ passedBar }}px">&nbsp;</div>
-                                        </div>
-                                    </td>
+                                    <th>testset</th>
+                                    <th class="showInLargeDisplay">project</th>
+                                    <th>latest result</th>
+                                    <th class="leftBorder center">failed <span class ="gray">(total)</span></th>
+                                    <th class="showInLargeDisplay">failed + passed</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div> {# /table-responsive #}
-            </div> {# /panel-body #}
+                            </thead>
+                            <tbody>
+                                {# Calculate max result count for the bar #}
+                                {% set maxCount = 1 %}
+                                {% for testset in testsets %}
+                                    {% if (testset.getTestsetResultCounts.passed + testset.getTestsetResultCounts.failed) > maxCount %}
+                                        {% set maxCount = testset.getTestsetResultCounts.passed + testset.getTestsetResultCounts.failed %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {# Print testsets #}
+                                {% for testset in testsets %}
+                                    <tr>
+                                        {# Testset name #}
+                                        <td><a href="{{ testsetRoute }}/{{ testset.getName }}/{{ testset.getProjectName }}">{{ testset.getName }}</a></td>
+
+                                        {# Project name #}
+                                        <td class="showInLargeDisplay">{{ testset.getProjectName }}</td>
+
+                                        {# Testset status according to the latest build results #}
+                                        {% if testset.getStatus == constant('testsetRun::RESULT_SUCCESS') %}
+                                            {% set resultIcon = 'glyphicon glyphicon-ok green' %}
+                                        {% elseif testset.getStatus == constant('testsetRun::RESULT_FAILURE') %}
+                                            {% set resultIcon = 'glyphicon glyphicon-remove red' %}
+                                        {% else %}
+                                            {% set resultIcon = '' %}
+                                        {% endif %}
+                                        <td><span class="spaceHorizontal {{ resultIcon }}"></span>{{ testset.getStatus }}</td>
+
+                                        {# Show results as numbers #}
+                                        {% set failed = testset.getTestsetResultCounts.failed %}
+                                        {% set passed = testset.getTestsetResultCounts.passed %}
+                                        {% set total = passed + failed %}
+                                        <td class="leftBorder center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
+
+                                        {# Show results as bars (scaled to BAR_AREA px) #}
+                                        {% set passedBar = ((BAR_AREA/maxCount) * passed)|round(0, 'floor') %}
+                                        {% if (passed > 0) and (passedBar == 0) %}
+                                            {% set passedBar = 1 %}
+                                        {% endif %}
+                                        {% set failedBar = ((BAR_AREA/maxCount)*failed)|round(0, 'floor') %}
+                                        {% if (failed > 0) and (failedBar == 0) %}
+                                            {% set failedBar = 1 %}
+                                        {% endif %}
+                                        <td class="center showInLargeDisplay">
+                                            <div>
+                                                <div class="floatLeft redBackground" style="width: {{ failedBar }}px">&nbsp;</div>
+                                                <div class="floatLeft greenBackground" style="width: {{ passedBar }}px">&nbsp;</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div> {# /table-responsive #}
+                </div> {# /panel-body #}
+            </div> {# /panel... #}
 
         </div> {# /col... #}
     </div> {# /row #}

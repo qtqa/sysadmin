@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.2
- * @since     12-06-2015
+ * @version   0.3
+ * @since     23-06-2015
  * @author    Juha Sippola
  */
 
@@ -111,11 +111,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetsFilteredData()
     {
         return array(
-            array('', 3),                           // test data includes three testsets
-            array('f', 3),                          // all
-            array('ft', 2),                         // tst_qftp and tst_networkselftest
-            array('ftp', 1),                        // tst_qftp
-            array('tst_qftp', 1),
+            array('', 4),                           // test data includes four testsets
+            array('f', 4),                          // all
+            array('ft', 3),                         // tst_qftp (twice) and tst_networkselftest
+            array('ftp', 2),                        // tst_qftp (twice)
+            array('tst_qftp', 2),
             array('tst_qfont', 1),
             array('tst_qfon', 1),
             array('tst_qfontt', 0),
@@ -133,7 +133,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase
         $projects = Factory::createProjects($runProject, $runState);
         foreach($projects as $project) {
             $this->assertTrue($project instanceof Project);
-            if ($project->getName() == $runProject) {                   // check only the projects with project_run data
+            if ($project->getName() === $runProject) {                  // check only the projects with project_run data
                 $this->assertNotEmpty($project->getStatus());
             }
         }
@@ -192,12 +192,12 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createTestset
      * @dataProvider testCreateTestsetData
      */
-    public function testCreateTestset($testset, $project, $runProject, $runState)
+    public function testCreateTestset($name, $project, $runProject, $runState)
     {
-        $testsets = Factory::createTestset($testset, $runProject, $runState);
+        $testsets = Factory::createTestset($name, $project, $runProject, $runState);
         foreach($testsets as $testset) {
             $this->assertTrue($testset instanceof Testset);
-            if ($testset->getProjectName() == $project) {
+            if ($testset->getProjectName() === $project) {
                 $status = $testset->getStatus();
                 $this->assertNotEmpty($status);
                 $result = $testset->getTestsetResultCounts();
@@ -216,6 +216,25 @@ class FactoryTest extends PHPUnit_Framework_TestCase
         return array(
             array('tst_qftp', 'qtbase', 'Qt5', 'state',),               // testset with testset_run data
             array('tst_qfont', 'qtbase', 'Qt5', 'state',)               // testset with testset_run data
+        );
+    }
+
+    /**
+     * Test createTestsetRuns
+     * @dataProvider testCreateTestsetRunsData
+     */
+    public function testCreateTestsetRuns($name, $projectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration)
+    {
+        $runs = Factory::createTestsetRuns($name, $projectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration);
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof TestsetRun);
+        }
+    }
+    public function testCreateTestsetRunsData()
+    {
+        return array(
+            array('tst_qftp', 'qtbase', 'Qt5', 'stable', 'state', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 5, 'failed', true, '28.5.2013 0:54', 8130),
+            array('tst_qfont', 'qtbase', 'Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1, 'failed', false, '28.5.2013 0:54', 8130)
         );
     }
 

@@ -35,8 +35,8 @@
 
 /**
  * Qt Metrics style sheet
- * @version   0.1
- * @since     04-06-2015
+ * @version   0.2
+ * @since     22-06-2015
  * @author    Juha Sippola
  */
 
@@ -53,7 +53,7 @@
  * Load home page image (from www.qt.io) with text color adjustments in tablets and bigger devices only (typically using faster connection)
  */
 
-@media screen and (min-width: 720px) {
+@media screen and (min-width: 768px) {
     .jumbotron {
         background-image: url("https://d3hp9ud7yvwzy0.cloudfront.net/wp-content/uploads/2014/06/Qt-in-nutshell-hero2.jpg");
         background-size: cover;
@@ -77,7 +77,7 @@
  * Include UI elements and behavior in tablets and bigger devices only (typically using faster connection)
  */
 
-@media screen and (max-width: 720px) {
+@media screen and (max-width: 768px) {
     .showInLargeDisplay {
         display: none;
     }
@@ -89,6 +89,16 @@
 
 .btn {
     margin: 0 3px 3px 0;
+}
+
+/*
+ * Make the tooltip align left, respect new lines and prevent text from wrapping
+ */
+.tooltip-inner {
+    text-align: left;
+    white-space: pre;
+    max-width: none;
+    background-color: #12293E;
 }
 
 /*
@@ -131,6 +141,10 @@
     border-left: 2px solid lightgrey;
 }
 
+.rightBorder {
+    border-right: 2px solid lightgrey;
+}
+
 .center {
     text-align: center
 }
@@ -169,4 +183,8 @@
 
 .textSmall {
     font-size: small;
+}
+
+.bold {
+    font-weight: bold;
 }

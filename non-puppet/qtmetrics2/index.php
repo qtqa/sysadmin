@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.4
- * @since     18-06-2015
+ * @version   0.5
+ * @since     25-06-2015
  * @author    Juha Sippola
  */
 
@@ -133,12 +133,13 @@ $app->get('/test/flaky', function() use($app)
 });
 
 /**
- * UI route: /testset/:testset (GET)
+ * UI route: /testset/:testset/:project (GET)
  */
 
-$app->get('/testset/:testset', function($testset) use($app)
+$app->get('/testset/:testset/:project', function($testset, $project) use($app)
 {
     $testset = strip_tags($testset);
+    $project = strip_tags($project);
     $ini = Factory::conf();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
@@ -150,10 +151,21 @@ $app->get('/testset/:testset', function($testset) use($app)
             'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
+            'sinceDateFailures' => Factory::getSinceDate(intval($ini['top_failures_last_days']) - 1),
+            'sinceDateFlaky' => Factory::getSinceDate(intval($ini['flaky_testsets_last_days']) - 1),
             'masterProject' => $ini['master_build_project'],
             'masterState' => $ini['master_build_state'],
-            'testsets' => Factory::createTestset(
+            'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+                $ini['master_build_project'],
+                $ini['master_build_state']),
+            'testset' => Factory::createTestset(
                 $testset,
+                $project,
+                $ini['master_build_project'],
+                $ini['master_build_state']),                // managed as object
+            'testsetRuns' => Factory::createTestsetRuns(
+                $testset,
+                $project,
                 $ini['master_build_project'],
                 $ini['master_build_state'])                 // managed as objects
         ));
@@ -164,7 +176,7 @@ $app->get('/testset/:testset', function($testset) use($app)
         ));
         $app->response()->status(404);
     }
-});
+})->name('testsetProject');
 
 
 $app->run();
@@ -180,7 +192,10 @@ if (isset($_POST["testsetInputSubmit"])) {
         exit();
     }
     if (isset($_POST["testsetInputValue"])) {
-        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testset/' . htmlspecialchars($_POST['testsetInputValue']));
+        $string = explode(' (in ', htmlspecialchars($_POST['testsetInputValue']));     // the separator must match with that used in testset_search.php
+        $testset = $string[0];
+        $project = str_replace(')', '', $string[1]);
+        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testset/' . $testset . '/' . $project);
         exit();
     }
 }

@@ -34,8 +34,8 @@
 
 /**
  * Factory class
- * @version   0.2
- * @since     12-06-2015
+ * @version   0.3
+ * @since     23-06-2015
  * @author    Juha Sippola
  */
 
@@ -166,7 +166,7 @@ class Factory {
         $objects = array();
         $ini = self::conf();
         // Failure result list (from specified builds only)
-        if ($listType == self::LIST_FAILURES) {
+        if ($listType === self::LIST_FAILURES) {
             $days = intval($ini['top_failures_last_days']) - 1;
             $since = self::getSinceDate($days);
             $limit = intval($ini['top_failures_n']);
@@ -179,7 +179,7 @@ class Factory {
             }
         }
         // Flaky list (all builds)
-        if ($listType == self::LIST_FLAKY) {
+        if ($listType === self::LIST_FLAKY) {
             $days = intval($ini['flaky_testsets_last_days']) - 1;
             $since = self::getSinceDate($days);
             $limit = intval($ini['flaky_testsets_n']);
@@ -194,39 +194,65 @@ class Factory {
     }
 
     /**
-     * Create Testset object(s) for those in database
-     * If several testsets with same name in different projects, all are created
+     * Create Testset object for that in database
      * Counts are limited by date (since) and length, failure result counts for specified builds only
      * @param string $name
+     * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
      * @return array Testset object(s)
      */
-    public static function createTestset($name, $runProject, $runState)
+    public static function createTestset($name, $testsetProject, $runProject, $runState)
+    {
+        $ini = self::conf();
+        $obj = new Testset($name, $testsetProject);
+        $obj->setStatus($runProject, $runState);
+        // Failure result counts (from specified builds only)
+        $days = intval($ini['top_failures_last_days']) - 1;
+        $since = self::getSinceDate($days);
+        $dbTestsetDetails = self::db()->getTestsetResultCounts($name, $runProject, $runState, $since);
+        foreach($dbTestsetDetails as $detail) {
+            if ($detail['project'] === $testsetProject)
+                $obj->setTestsetResultCounts($detail['passed'], $detail['failed']);
+        }
+        // Flaky counts (all builds)
+        $days = intval($ini['flaky_testsets_last_days']) - 1;
+        $since = self::getSinceDate($days);
+        $dbTestsetDetails = self::db()->getTestsetFlakyCounts($name, $since);
+        foreach($dbTestsetDetails as $detail) {
+            if ($detail['project'] === $testsetProject)
+                $obj->setTestsetFlakyCounts($detail['flaky'], $detail['total']);
+        }
+        return $obj;
+    }
+
+    /**
+     * Create TestsetRun objects for those in database
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestsetRun objects
+     */
+    public static function createTestsetRuns($testset, $testsetProject, $runProject, $runState)
     {
         $objects = array();
-        $ini = self::conf();
-        // Get testset(s)
-        $dbTestset = self::db()->getTestsetProject($name);
-        foreach($dbTestset as $testset) {
-            $obj = new Testset($testset['name'], $testset['project']);
-            $obj->setStatus($runProject, $runState);
-            // Failure result counts (from specified builds only)
-            $days = intval($ini['top_failures_last_days']) - 1;
-            $since = self::getSinceDate($days);
-            $dbTestsetDetails = self::db()->getTestsetResultCounts($name, $runProject, $runState, $since);
-            foreach($dbTestsetDetails as $detail) {
-                if ($testset['project'] == $detail['project'])
-                    $obj->setTestsetResultCounts($detail['passed'], $detail['failed']);
-            }
-            // Flaky counts (all builds)
-            $days = intval($ini['flaky_testsets_last_days']) - 1;
-            $since = self::getSinceDate($days);
-            $dbTestsetDetails = self::db()->getTestsetFlakyCounts($name, $since);
-            foreach($dbTestsetDetails as $detail) {
-                if ($testset['project'] == $detail['project'])
-                    $obj->setTestsetFlakyCounts($detail['flaky'], $detail['total']);
-            }
+        $dbEntries = self::db()->getTestsetResultsByBranchConf($testset, $testsetProject, $runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new TestsetRun(
+                $testset,
+                $testsetProject,
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                $entry['conf'],
+                $entry['run'],
+                TestsetRun::stripResult($entry['result']),
+                TestsetRun::isInsignificant($entry['result']),
+                $entry['timestamp'],
+                $entry['duration']
+            );
             $objects[] = $obj;
         }
         return $objects;
