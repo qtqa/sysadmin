@@ -1,4 +1,4 @@
-<?php
+{#
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,15 +33,21 @@
 #############################################################################
 
 /**
- * About window content
- * @version   0.4
- * @since     17-06-2015
+ * Empty html file with a message (for invalid routes)
+ * @version   0.2
+ * @since     18-06-2015
  * @author    Juha Sippola
  */
 
-?>
+#}
 
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.4 (17-Jun-2015)</small></p>
+{% include "header.html" %}
+
+<h2>{{ message }}</h2>
+
+{% include "footer.html" %}
+
+{# Local scripts for this page #}
+{# (none) #}
+
+{% include "close.html" %}

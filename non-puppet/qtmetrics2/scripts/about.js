@@ -34,11 +34,11 @@
 
 /**
  * Show About window
- * @version   0.1
- * @since     16-06-2015
+ * @version   0.2
+ * @since     18-06-2015
  * @author    Juha Sippola
  */
 
 $(function(){
-    $("#about").load("templates/about.php");
+    $("#about").load("templates/about.html");
 });

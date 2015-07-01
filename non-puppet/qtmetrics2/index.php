@@ -34,19 +34,24 @@
 
 /**
  * Qt Metrics API
- * @version   0.3
- * @since     16-06-2015
+ * @version   0.4
+ * @since     18-06-2015
  * @author    Juha Sippola
  */
 
-require 'src/Factory.php';
-require 'lib/Slim/Slim/Slim.php';
+require_once 'src/Factory.php';
+require_once 'lib/Slim/Slim/Slim.php';
+require_once 'lib/Slim/Slim/View.php';
+require_once 'lib/Slim/Slim/Views/Twig.php';
+require_once 'lib/Twig/lib/Twig/Autoloader.php';
 
 \Slim\Slim::registerAutoloader();
-$app = new \Slim\Slim(array(
+Twig_Autoloader::register();
+
+$app = new Slim\Slim(array(
+    'view' => new Slim\Views\Twig(),
     'templates.path' => 'templates'
 ));
-
 
 /**
  * UI route: / (GET)
@@ -55,7 +60,8 @@ $app = new \Slim\Slim(array(
 $app->get('/', function() use($app)
 {
     $ini = Factory::conf();
-    $app->render('home.php', array(
+    $app->render('home.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
         'overviewRoute' => Slim\Slim::getInstance()->urlFor('root') . 'overview',
         'branchRoute' => Slim\Slim::getInstance()->urlFor('root') . 'branch',
         'platformRoute' => Slim\Slim::getInstance()->urlFor('root') . 'platform',
@@ -82,7 +88,8 @@ $app->get('/test/top', function() use($app)
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
-    $app->render('testsets_top.php', array(
+    $app->render('testsets_top.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
         'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
@@ -110,7 +117,8 @@ $app->get('/test/flaky', function() use($app)
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
-    $app->render('testsets_flaky.php', array(
+    $app->render('testsets_flaky.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
         'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
@@ -136,20 +144,22 @@ $app->get('/testset/:testset', function($testset) use($app)
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
     if (Factory::checkTestset($testset)) {
-        $app->render('testset.php', array(
+        $app->render('testset.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
             'breadcrumb' => $breadcrumb,
             'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
             'masterProject' => $ini['master_build_project'],
             'masterState' => $ini['master_build_state'],
-            'testset' => Factory::createTestset(
+            'testsets' => Factory::createTestset(
                 $testset,
                 $ini['master_build_project'],
                 $ini['master_build_state'])                 // managed as objects
         ));
     } else {
-        $app->render('empty.php', array(
+        $app->render('empty.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
             'message' => '404 Not Found'
         ));
         $app->response()->status(404);

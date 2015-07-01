@@ -1,0 +1,171 @@
+{#
+#############################################################################
+##
+## Copyright (C) 2015 The Qt Company Ltd.
+## Contact: http://www.qt.io/licensing/
+##
+## This file is part of the Quality Assurance module of the Qt Toolkit.
+##
+## $QT_BEGIN_LICENSE:LGPL21$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see http://www.qt.io/terms-conditions. For further
+## information use the contact form at http://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 or version 3 as published by the Free
+## Software Foundation and appearing in the file LICENSE.LGPLv21 and
+## LICENSE.LGPLv3 included in the packaging of this file. Please review the
+## following information to ensure the GNU Lesser General Public License
+## requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## As a special exception, The Qt Company gives you certain additional
+## rights. These rights are described in The Qt Company LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+
+/**
+ * Home page
+ * @version   0.2
+ * @since     18-06-2015
+ * @author    Juha Sippola
+ */
+
+#}
+
+{% include "header.html" %}
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="col-md-9">
+            <h1>Qt Metrics <sup class="masterVersion">2</sup></h1>
+        </div>
+        <div class="col-md-3">
+            <div class="well well-sm">
+                <p>Data updated:</p>
+                {{ refreshed }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <h2>Overview</h2>
+        <p>See the overview of the builds by projects across the latest branches:</p>
+        <div>
+            {% for state in states %}
+                <a class="btn btn-default btn-xs" disabled="disabled" href="{{ overviewRoute }}/{{ state.name }}" role="button">{{ state.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h2>Platforms</h2>
+        <p>See target platform status:</p>
+        <div>
+            {% set all_os = [] %}
+            {% for platform in platforms %}
+                {% set all_os = all_os|merge([platform.os]) %}
+            {% endfor %}
+            {# Remove duplicates #}
+            {% set os = [] %}
+            {% for name in all_os %}
+                {% if name not in os %}
+                    {% set os = os|merge([name]) %}
+                {% endif %}
+            {% endfor %}
+            {% for name in os %}
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" disabled="disabled" data-toggle="dropdown" aria-expanded="false">{{ name }}<span class="caret"></span></button>
+                    <ul class="dropdown-menu textSmall" role="menu">
+                        {% for platform in platforms %}
+                            {% if platform.os == name %}
+                                <li><a href="{{ platformRoute }}/{{ os_name }}/{{ platform.os_version }}">
+                                    {{ (platform.os_version is empty) ? '(no version)' : platform.os_version }}
+                                </a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <h2>Branches</h2>
+        <p>See branch status:</p>
+        <div>
+            {% for branch in branches %}
+                <a class="btn btn-default btn-xs" disabled="disabled" href="{{ branchRoute }}/{{ branch.name }}" role="button">{{ branch.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <h2>Tests</h2>
+        <p>See top failure lists or single testset results:</p>
+        <div>
+            <a class="btn btn-default btn-xs" href="{{ testRoute }}/top" role="button">top failures</a>
+            <a class="btn btn-default btn-xs" href="{{ testRoute }}/flaky" role="button">flaky testsets</a>
+        </div>
+        <div>
+            <form class="form-horizontal" role="form" method="post">
+            <div class="input-group input-group-sm">
+                <input id="testsetInput" name="testsetInputValue" type="text" class="form-control" placeholder="testset name...">
+                <span class="input-group-btn">
+                    <input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-default" value="Show">
+                </span>
+            </div> {# /input-group #}
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <h2>Projects</h2>
+        <p>See project status:</p>
+        <div>
+            {% for project in projects %}
+                {# Show button color based on project status (according to the latest build results) #}
+                {% if project.getStatus == constant('ProjectRun::RESULT_SUCCESS') %}
+                    {% set buttonStatus = 'btn-success' %}
+                {% elseif project.getStatus == constant('ProjectRun::RESULT_FAILURE') %}
+                    {% set buttonStatus = 'btn-danger' %}
+                {% else %}
+                    {% set buttonStatus = 'btn-default' %}
+                {% endif %}
+                {# Show only valid projects #}
+                {% if project.getStatus != constant('ProjectRun::RESULT_EMPTY') %}
+                    <a class="btn {{ buttonStatus }} btn-xs" disabled="disabled" href="{{ overviewRoute }}/state/{{ project.getName }}" role="button">{{ project.getName }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<br>
+<div class="alert alert-danger" role="alert">
+    <strong>Under construction!</strong> Only few subpages implemented at the moment (those buttons enabled).
+</div>
+
+{% include "footer.html" %}
+
+{# Local scripts for this page #}
+<script src="scripts/testset_autocomplete.js"></script>
+
+{% include "close.html" %}

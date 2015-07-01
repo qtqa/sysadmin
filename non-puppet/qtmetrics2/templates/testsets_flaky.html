@@ -1,4 +1,4 @@
-<?php
+{#
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -34,36 +34,28 @@
 
 /**
  * Flaky testsets page
- * @version   0.1
- * @since     02-06-2015
+ * @version   0.2
+ * @since     18-06-2015
  * @author    Juha Sippola
  */
 
-include 'header.php';
+#}
 
-// Flaky bar area size (px)
-const BAR_AREA = 120;
+{% include "header.html" %}
 
-// Get input data
-$breadcrumb = $this->data['breadcrumb'];
-$testsetRoute = $this->data['testsetRoute'];
-$refreshed = $this->data['refreshed'];
-$topN = $this->data['topN'];
-$lastDays = $this->data['lastDays'];
-$sinceDate = $this->data['sinceDate'];
+{# Failed/passed bar area size in px #}
+{% set BAR_AREA = 120 %}
+
+{# testsets as Testset objects
 /**
- * @var Testset[] $testsets
+ * @var Testset[] testsets
  */
-$testsets = $this->data['testsets'];
-
-?>
+#}
 
 <ol class="breadcrumb">
-    <?php
-    foreach ($breadcrumb as $link) {
-        echo '<li><a href="' . $link['link'] . '">' . $link['name'] . '</a></li>';
-    }
-    ?>
+    {% for link in breadcrumb %}
+        <li><a href="{{ link.link }}">{{ link.name }}</a></li>
+    {% endfor %}
     <li class="active">flaky testsets</li>
 </ol>
 
@@ -73,13 +65,13 @@ $testsets = $this->data['testsets'];
         <div class="col-sm-12 col-md-12 main">
 
             <h1 class="page-header">
-                <?php echo " Top $topN Flaky Testsets" ?>
+                Top {{ topN }} Flaky Testsets
                 <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
                     <span class="glyphicon glyphicon-info-sign"></span>
                 </button>
-                <small><?php echo $refreshed ?></small>
+                <small>{{ refreshed }}</small>
             </h1>
-            <h3 class="sub-header"> <?php echo "Last $lastDays days <small>(since $sinceDate)</small>" ?> </h3>
+            <h3 class="sub-header">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h3>
 
             <div class="collapse" id="info">
                 <div class="well infoWell">
@@ -87,7 +79,7 @@ $testsets = $this->data['testsets'];
                     <ul>
                         <li>Flaky testsets are those that fail on the first run but, when rerun, they pass.</li>
                         <li><strong>flaky</strong> count shows the number of <strong>all</strong> builds where
-                            the testset is flaky (during the last <?php echo $lastDays ?> days).</li>
+                            the testset is flaky (during the last {{ lastDays }} days).</li>
                     </ul>
                 </div>
             </div>
@@ -104,52 +96,52 @@ $testsets = $this->data['testsets'];
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            // Calculate max result count for the bar
-                            $maxCount = 0;
-                            foreach ($testsets as $testset) {
-                                if ($testset->getTestsetFlakyCounts()['flaky'] > $maxCount)
-                                    $maxCount = $testset->getTestsetFlakyCounts()['flaky'];
-                            }
-                            // Print testsets
-                            foreach ($testsets as $testset) {
-                                echo '<tr>';
-                                    // Testset name
-                                    echo '<td><a href="' . $testsetRoute . '/' . $testset->getName() . '">' .
-                                        $testset->getName() . '</a></td>';
-                                    // Project name
-                                    echo '<td>' . $testset->getProjectName() . '</td>';
-                                    // Show results as numbers
-                                    $flaky = $testset->getTestsetFlakyCounts()['flaky'];
-                                    $total = $testset->getTestsetFlakyCounts()['total'];
-                                    echo '<td class="leftBorder center">' . $flaky . '<span class ="gray"> (' . $total . ')</span></td>';
-                                    // Show results as bars (scaled to BAR_AREA px)
-                                    $flakyBar = floor((BAR_AREA/$maxCount) * $flaky);
-                                    if ($flaky > 0 and $flakyBar == 0)
-                                        $flakyBar = 1;
-                                    echo '<td class="center showInLargeDisplay">';
-                                        echo '<div>';
-                                            echo '<div class="floatLeft redBackground" style="width: ' . $flakyBar . 'px">&nbsp;</div>';
-                                        echo '</div>';
-                                    echo '</td>';
-                                echo '</tr>';
-                            }
-                            ?>
+                            {# Calculate max result count for the bar #}
+                            {% set maxCount = 1 %}
+                            {% for testset in testsets %}
+                                {% if testset.getTestsetFlakyCounts.flaky > maxCount %}
+                                    {% set maxCount = testset.getTestsetFlakyCounts.flaky %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {# Print testsets #}
+                            {% for testset in testsets %}
+                                <tr>
+                                    {# Testset name #}
+                                    <td><a href="{{ testsetRoute }}/{{ testset.getName }}">{{ testset.getName }}</a></td>
+
+                                    {# Project name #}
+                                    <td>{{ testset.getProjectName }}</td>
+
+                                    {# Show results as numbers #}
+                                    {% set flaky = testset.getTestsetFlakyCounts.flaky %}
+                                    {% set total = testset.getTestsetFlakyCounts.total %}
+                                    <td class="leftBorder center">{{ flaky }}<span class ="gray"> ({{ total }})</span></td>
+
+                                    {# Show results as bars (scaled to BAR_AREA px) #}
+                                    {% set flakyBar = ((BAR_AREA/maxCount)*flaky)|round(0, 'floor') %}
+                                    {% if (flaky > 0) and (flakyBar == 0) %}
+                                        {% set flakyBar = 1 %}
+                                    {% endif %}
+                                    <td class="center showInLargeDisplay">
+                                        <div>
+                                            <div class="floatLeft redBackground" style="width: {{ flakyBar }}px">&nbsp;</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
-                </div> <!-- /table-responsive -->
-            </div> <!-- /panel-body -->
+                </div> {# /table-responsive #}
+            </div> {# /panel-body #}
 
-        </div> <!-- /col... -->
-    </div> <!-- /row -->
-</div> <!-- /container-fluid -->
+        </div> {# /col... #}
+    </div> {# /row #}
+</div> {# /container-fluid #}
 
-<?php
-include 'footer.php';
-?>
+{% include "footer.html" %}
 
-<!-- Local scripts for this page -->
+{# Local scripts for this page #}
+{# (none) #}
 
-<?php
-include 'close.php';
-?>
+{% include "close.html" %}
