@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.6
- * @since     30-06-2015
+ * @version   0.7
+ * @since     01-07-2015
  * @author    Juha Sippola
  */
 
@@ -186,23 +186,22 @@ class Database {
     }
 
     /**
-     * Get list of target platform os's and versions
-     * @return array (string os, string os_version)
+     * Get list of target platform os's
+     * @return array (string os)
      */
-    public function getTargetPlatforms()
+    public function getTargetPlatformOs()
     {
         $result = array();
         $query = $this->db->prepare("
-            SELECT platform.os, platform.os_version
+            SELECT DISTINCT platform.os
             FROM conf
                 INNER JOIN platform ON conf.target_id = platform.id
-            GROUP BY os_version;
+            ORDER BY platform.os;
         ");
         $query->execute(array());
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $result[] = array(
-                'os' => $row['os'],
-                'os_version' => $row['os_version']
+                'os' => $row['os']
             );
         }
         return $result;
@@ -714,6 +713,106 @@ class Database {
         $query->execute(array(
             $runProject,
             $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'forcesuccess' => $row['forcesuccess'],
+                'insignificant' => $row['insignificant'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get conf run data for selected target os by branch
+     * @param string $runProject
+     * @param string $runState
+     * @param string $targetOs
+     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     */
+    public function getConfOsBuildsByBranch($runProject, $runState, $targetOs)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                conf_run.forcesuccess,
+                conf_run.insignificant,
+                conf_run.result,
+                conf_run.timestamp,
+                conf_run.duration
+            FROM conf_run
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                conf.target_id IN (SELECT id FROM platform WHERE os = ?)
+            ORDER BY branch.name, conf, project_run.timestamp DESC;
+        ");
+        $query->execute(array(
+            $runProject,
+            $runState,
+            $targetOs
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'forcesuccess' => $row['forcesuccess'],
+                'insignificant' => $row['insignificant'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get conf run data for selected conf by branch
+     * @param string $runProject
+     * @param string $runState
+     * @param string $conf
+     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     */
+    public function getConfBuildByBranch($runProject, $runState, $conf)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                conf_run.forcesuccess,
+                conf_run.insignificant,
+                conf_run.result,
+                conf_run.timestamp,
+                conf_run.duration
+            FROM conf_run
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                conf.name = ?
+            ORDER BY branch.name, conf, project_run.timestamp DESC;
+        ");
+        $query->execute(array(
+            $runProject,
+            $runState,
+            $conf
         ));
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $result[] = array(

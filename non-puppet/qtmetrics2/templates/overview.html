@@ -34,8 +34,8 @@
 
 /**
  * Overview page
- * @version   0.1
- * @since     30-06-2015
+ * @version   0.2
+ * @since     01-07-2015
  * @author    Juha Sippola
  */
 
@@ -61,7 +61,7 @@
             {##### Title #####}
 
             <h1 class="page-header">
-                Overview: {{ masterProject }} {{ masterState }}
+                Overview
                 <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
                     <span class="glyphicon glyphicon-info-sign"></span>
                 </button>
@@ -77,9 +77,9 @@
                         <li><strong>Latest {{ masterProject }} {{ masterState }} Build Status</strong> shows
                             the overall result of the latest <strong>{{ masterProject }} {{ masterState }}</strong>
                             builds themselves by branch; details on the runs are available as tooltip on result icon.</li>
-                        <li><strong>Latest Testing Status</strong> shows the status based on testset results
-                            in the latest <strong>{{ masterProject }} {{ masterState }}</strong> builds in any
-                            configuration by testset project across all branches.</li>
+                        <li><strong>Latest {{ masterProject }} {{ masterState }} Testing Status</strong> shows
+                            the status based on testset results in the latest <strong>{{ masterProject }}
+                            {{ masterState }}</strong> builds in any configuration by testset project across all branches.</li>
                     </ul>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                             <tbody>
                                 <tr>
                                     {# Project name #}
-                                    <td class="rightBorder"><a href="{{ buildProjectRoute }}/{{ masterProject }}">{{ masterProject }}</a></td>
+                                    <td class="rightBorder"><a href="{{ buildProjectRoute }}">{{ masterProject }}</a></td>
 
                                     {# Result (by branch) #}
                                     {% for run in latestProjectRuns %}
@@ -140,7 +140,7 @@
 
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h4 class="panel-title bold">Latest Testing Status</h4>
+                    <h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Testing Status</h4>
                 </div>
 
                 {# Get branches and projects #}

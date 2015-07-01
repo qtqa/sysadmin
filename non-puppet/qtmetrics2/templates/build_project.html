@@ -34,8 +34,8 @@
 
 /**
  * Build project page
- * @version   0.1
- * @since     30-06-2015
+ * @version   0.2
+ * @since     01-07-2015
  * @author    Juha Sippola
  */
 
@@ -62,7 +62,13 @@
     {% for link in breadcrumb %}
         <li><a href="{{ link.link }}">{{ link.name }}</a></li>
     {% endfor %}
-    <li class="active">{{ project.getName }}</li>
+    {% if targetOs == '' and conf == '' %}
+        <li class="active">{{ project.getName }}</li>
+    {% elseif targetOs != '' %}
+        <li class="active">{{ targetOs }}</li>
+    {% elseif conf != '' %}
+        <li class="active">{{ conf }}</li>
+    {% endif %}
 </ol>
 
 <div class="container-fluid">
@@ -85,6 +91,28 @@
                 </button>
                 <small>{{ refreshed }}</small>
             </h1>
+
+            {##### Platform buttons #####}
+
+            <div>
+                {% for platform in platforms %}
+                    {% if platform.os == targetOs %}
+                        {% set buttonStyle = 'btn-primary' %}
+                    {% else %}
+                        {% set buttonStyle = 'btn-default' %}
+                    {% endif %}
+                    <div class="btn-group">
+                        <a class="btn {{ buttonStyle }} btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
+                    </div>
+                {% endfor %}
+                {% if conf != '' %}
+                    {% set link = confRoute ~ '/' ~ conf|url_encode %}
+                    <div class="btn-group">
+                        <a class="btn btn-info btn-xs" href="{{ link }}" role="button">{{ conf }}</a>
+                    </div>
+                {% endif %}
+            </div>
+            <hr>
 
             {##### Info well #####}
 
@@ -256,7 +284,25 @@
                                                         </tr>
                                                     {% endif %}
                                                     <tr>
-                                                        <td class="rightBorder"><small>{{ run.getName }}</small></td>
+                                                        {% if conf == '' %}
+                                                            {% set link = confRoute ~ '/' ~ run.getName|url_encode %}
+                                                            {% set tooltip = 'click to filter this configuration' %}
+                                                            <td class="rightBorder">
+                                                                <a href="{{ link }}">
+                                                                    <small>
+                                                                        <span data-toggle="tooltip" data-placement="top" title="{{ tooltip }}">
+                                                                            {{ run.getName }}
+                                                                        </span>
+                                                                    </small>
+                                                                </a>
+                                                            </td>
+                                                        {% else %}
+                                                            <td class="rightBorder">
+                                                                <small>
+                                                                    {{ run.getName }}
+                                                                </small>
+                                                            </td>
+                                                        {% endif %}
                                                     {% set buildKeyIndexPrinted = -1 %}
                                                 {% endif %}
 

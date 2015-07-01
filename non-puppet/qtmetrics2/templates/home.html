@@ -34,8 +34,8 @@
 
 /**
  * Home page
- * @version   0.4
- * @since     30-06-2015
+ * @version   0.5
+ * @since     01-07-2015
  * @author    Juha Sippola
  */
 
@@ -79,31 +79,9 @@
         <h2>Platforms</h2>
         <p>See target platform status:</p>
         <div>
-            {% set all_os = [] %}
             {% for platform in platforms %}
-                {% set all_os = all_os|merge([platform.os]) %}
-            {% endfor %}
-            {# Remove duplicates #}
-            {% set os = [] %}
-            {% for name in all_os %}
-                {% if name not in os %}
-                    {% set os = os|merge([name]) %}
-                {% endif %}
-            {% endfor %}
-            {% for name in os %}
                 <div class="btn-group">
-                    <button type="button" class="btn btn-primary btn-xs dropdown-toggle" disabled="disabled"
-                        data-toggle="dropdown" aria-expanded="false">{{ name }}<span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu textSmall" role="menu">
-                        {% for platform in platforms %}
-                            {% if platform.os == name %}
-                                <li><a href="{{ platformRoute }}/{{ os_name }}/{{ platform.os_version }}">
-                                    {{ (platform.os_version is empty) ? '(no version)' : platform.os_version }}
-                                </a></li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                    <a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
                 </div>
             {% endfor %}
         </div>
@@ -152,8 +130,8 @@
         <br>
         <p>See testset lists:</p>
         <div>
-            <a class="btn btn-primary btn-xs" href="{{ testRoute }}/top" role="button">top failures</a>
-            <a class="btn btn-primary btn-xs" href="{{ testRoute }}/flaky" role="button">flaky testsets</a>
+            <a class="btn btn-primary btn-xs" href="{{ topRoute }}" role="button">top failures</a>
+            <a class="btn btn-primary btn-xs" href="{{ flakyRoute }}" role="button">flaky testsets</a>
         </div>
     </div>
 
@@ -166,13 +144,6 @@
 
     <div class="col-md-4">
         <hr>
-        <h2>Branches</h2>
-        <p>See branch status:</p>
-        <div>
-            {% for branch in branches %}
-                <a class="btn btn-primary btn-xs" disabled="disabled" href="{{ branchRoute }}/{{ branch.name }}" role="button">{{ branch.name }}</a>
-            {% endfor %}
-        </div>
     </div>
 
     <div class="col-md-1">
@@ -182,11 +153,6 @@
         <hr>
     </div>
 
-</div>
-
-<br>
-<div class="alert alert-danger" role="alert">
-    <strong>Under construction!</strong> Only few subpages implemented at the moment (those buttons enabled).
 </div>
 
 {% include "footer.html" %}

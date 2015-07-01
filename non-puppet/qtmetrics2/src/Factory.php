@@ -34,8 +34,8 @@
 
 /**
  * Factory class
- * @version   0.4
- * @since     30-06-2015
+ * @version   0.5
+ * @since     01-07-2015
  * @author    Juha Sippola
  */
 
@@ -239,12 +239,18 @@ class Factory {
      * Create ConfRun objects for those in database
      * @param string $runProject
      * @param string $runState
+     * @param string $targetOs
      * @return array ConfRun objects
      */
-    public static function createConfRuns($runProject, $runState)
+    public static function createConfRuns($runProject, $runState, $targetOs, $conf)
     {
         $objects = array();
-        $dbEntries = self::db()->getConfBuildsByBranch($runProject, $runState);
+        if (empty($targetOs) and empty($conf))
+            $dbEntries = self::db()->getConfBuildsByBranch($runProject, $runState);
+        else if (!empty($targetOs))
+            $dbEntries = self::db()->getConfOsBuildsByBranch($runProject, $runState, $targetOs);
+        else
+            $dbEntries = self::db()->getConfBuildByBranch($runProject, $runState, $conf);
         foreach($dbEntries as $entry) {
             $obj = new ConfRun(
                 $entry['conf'],
