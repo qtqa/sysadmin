@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.4
- * @since     22-06-2015
+ * @version   0.6
+ * @since     30-06-2015
  * @author    Juha Sippola
  */
 
@@ -101,6 +101,31 @@ class Database {
         $query->execute(array());
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $result[] = array('name' => $row['name']);
+        }
+        return $result;
+    }
+
+    /**
+     * Get list of projects matching the filter string.
+     * @param string $filter
+     * @return array (string name)
+     */
+    public function getProjectsFiltered($filter)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT name
+            FROM project
+            WHERE name LIKE ?
+            ORDER BY name;
+        ");
+        $query->execute(array(
+            '%' . $filter . '%'
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'name' => $row['name']
+            );
         }
         return $result;
     }
@@ -185,12 +210,12 @@ class Database {
 
     /**
      * Get the latest build key for given project, branch and state
-     * @param string $project
-     * @param string $branch
-     * @param string $state
+     * @param string $runProject
+     * @param string $runBranch
+     * @param string $runState
      * @return string
      */
-    public function getLatestProjectBranchBuildKey($project, $branch, $state)
+    public function getLatestProjectBranchBuildKey($runProject, $runBranch, $runState)
     {
         $result = array();
         $query = $this->db->prepare("
@@ -204,9 +229,9 @@ class Database {
             LIMIT 1
         ");
         $query->execute(array(
-            $project,
-            $branch,
-            $state
+            $runProject,
+            $runBranch,
+            $runState
         ));
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $result= $row['latest_build'];
@@ -216,17 +241,17 @@ class Database {
 
     /**
      * Get the latest build keys by branch for given project and state
-     * @param string $project
-     * @param string $state
+     * @param string $runProject
+     * @param string $runState
      * @return array (string name, string key)
      */
-    public function getLatestProjectBranchBuildKeys($project, $state)
+    public function getLatestProjectBranchBuildKeys($runProject, $runState)
     {
         $result = array();
 
         $branches = self::getBranches();
         foreach ($branches as $branch) {
-            $key = self::getLatestProjectBranchBuildKey($project, $branch['name'], $state);
+            $key = self::getLatestProjectBranchBuildKey($runProject, $branch['name'], $runState);
             if ($key) {
                 $result[] = array(
                     'name' => $branch['name'],
@@ -239,17 +264,22 @@ class Database {
 
     /**
      * Get the latest build result by branch for given project and state
-     * @param string $project
-     * @param string $state
-     * @return array (string name, string result)
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string name, string result, string buildKey, string timestamp, string duration)
      */
-    public function getLatestProjectBranchBuildResults($project, $state)
+    public function getLatestProjectBranchBuildResults($runProject, $runState)
     {
         $result = array();
-        $builds = self::getLatestProjectBranchBuildKeys($project, $state);
+        $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
         foreach ($builds as $build) {
             $query = $this->db->prepare("
-                SELECT branch.name, project_run.result
+                SELECT
+                    branch.name,
+                    project_run.result,
+                    project_run.build_key,
+                    project_run.timestamp,
+                    project_run.duration
                 FROM project_run
                     INNER JOIN branch ON branch_id = branch.id
                 WHERE
@@ -259,15 +289,128 @@ class Database {
                     build_key = ?;
             ");
             $query->execute(array(
-                $project,
-                $state,
+                $runProject,
+                $runState,
                 $build['name'],
                 $build['key']
             ));
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'name' => $row['name'],
-                    'result' => $row['result']
+                    'result' => $row['result'],
+                    'buildKey' => $row['build_key'],
+                    'timestamp' => $row['timestamp'],
+                    'duration' => $row['duration']
+                );
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Get the latest testset result by branch for given project and state
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string project, string branch, string buildKey, string timestamp, int passed, int failed)
+     */
+    public function getLatestProjectBranchTestsetResults($runProject, $runState)
+    {
+        $result = array();
+        $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
+        foreach ($builds as $build) {
+            $query = $this->db->prepare("
+                SELECT
+                    project.name AS project,
+                    branch.name AS branch,
+                    project_run.build_key,
+                    project_run.timestamp,
+                    COUNT(CASE WHEN testset_run.result LIKE '%passed' THEN testset_run.result END) AS passed,
+                    COUNT(CASE WHEN testset_run.result LIKE '%failed' THEN testset_run.result END) AS failed
+                FROM testset_run
+                    INNER JOIN testset ON testset_run.testset_id = testset.id
+                    INNER JOIN project ON testset.project_id = project.id
+                    INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                    INNER JOIN conf ON conf_run.conf_id = conf.id
+                    INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                    INNER JOIN branch ON project_run.branch_id = branch.id
+                WHERE
+                    project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                    project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                    project_run.branch_id = (SELECT id from branch WHERE name = ?) AND
+                    project_run.build_key = ?
+                GROUP BY project.name;
+            ");
+            $query->execute(array(
+                $runProject,
+                $runState,
+                $build['name'],
+                $build['key']
+            ));
+            while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $result[] = array(
+                    'project' => $row['project'],
+                    'branch' => $row['branch'],
+                    'buildKey' => $row['build_key'],
+                    'timestamp' => $row['timestamp'],
+                    'passed' => $row['passed'],
+                    'failed' => $row['failed']
+                );
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Get the latest testset result by branch for given project and state, for selected testset project.
+     * Similar to getLatestProjectBranchTestsetResults but listing only the selected testset project.
+     * @param string $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string project, string branch, string buildKey, string timestamp, int passed, int failed)
+     */
+    public function getLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState)
+    {
+        $result = array();
+        $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
+        foreach ($builds as $build) {
+            $query = $this->db->prepare("
+                SELECT
+                    project.name AS project,
+                    branch.name AS branch,
+                    project_run.build_key,
+                    project_run.timestamp,
+                    COUNT(CASE WHEN testset_run.result LIKE '%passed' THEN testset_run.result END) AS passed,
+                    COUNT(CASE WHEN testset_run.result LIKE '%failed' THEN testset_run.result END) AS failed
+                FROM testset_run
+                    INNER JOIN testset ON testset_run.testset_id = testset.id
+                    INNER JOIN project ON testset.project_id = project.id
+                    INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                    INNER JOIN conf ON conf_run.conf_id = conf.id
+                    INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                    INNER JOIN branch ON project_run.branch_id = branch.id
+                WHERE
+                    project.name = ? AND
+                    project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                    project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                    project_run.branch_id = (SELECT id from branch WHERE name = ?) AND
+                    project_run.build_key = ?
+                GROUP BY project.name;
+            ");
+            $query->execute(array(
+                $testsetProject,
+                $runProject,
+                $runState,
+                $build['name'],
+                $build['key']
+            ));
+            while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $result[] = array(
+                    'project' => $row['project'],
+                    'branch' => $row['branch'],
+                    'buildKey' => $row['build_key'],
+                    'timestamp' => $row['timestamp'],
+                    'passed' => $row['passed'],
+                    'failed' => $row['failed']
                 );
             }
         }
@@ -288,7 +431,10 @@ class Database {
         $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
         foreach ($builds as $build) {
             $query = $this->db->prepare("
-                SELECT conf.name AS conf, branch.name AS branch, testset_run.result
+                SELECT
+                    conf.name AS conf,
+                    branch.name AS branch,
+                    testset_run.result
                 FROM testset_run
                     INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
                     INNER JOIN conf ON conf_run.conf_id = conf.id
@@ -503,7 +649,7 @@ class Database {
     }
 
     /**
-     * Get project build keys and timestamps by branch
+     * Get project run data by branch
      * @param string $runProject
      * @param string $runState
      * @return array (string branch, string build_key, string timestamp)
@@ -538,12 +684,59 @@ class Database {
     }
 
     /**
+     * Get conf run data by branch
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     */
+    public function getConfBuildsByBranch($runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                conf_run.forcesuccess,
+                conf_run.insignificant,
+                conf_run.result,
+                conf_run.timestamp,
+                conf_run.duration
+            FROM conf_run
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, conf, project_run.timestamp DESC;
+        ");
+        $query->execute(array(
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'forcesuccess' => $row['forcesuccess'],
+                'insignificant' => $row['insignificant'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration']
+            );
+        }
+        return $result;
+    }
+
+    /**
      * Get run results for a testset in specified builds by branch and configuration
      * @param string $testset
      * @param $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string build_key, string result)
+     * @return array (string branch, string conf, string build_key, string result, string timestamp, string duration, int run)
      */
     public function getTestsetResultsByBranchConf($testset, $testsetProject, $runProject, $runState)
     {
@@ -586,6 +779,58 @@ class Database {
                 'timestamp' => $row['timestamp'],
                 'duration' => $row['duration'],
                 'run' => $row['run']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get result counts for a testset project in specified builds by branch and configuration
+     * @param $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string conf, string build_key, int passed, int ipassed, int failed, int ifailed)
+     */
+    public function getTestsetProjectResultsByBranchConf($testsetProject, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                COUNT(CASE WHEN testset_run.result = 'passed' THEN testset_run.result END) AS passed,
+                COUNT(CASE WHEN testset_run.result = 'ipassed' THEN testset_run.result END) AS ipassed,
+                COUNT(CASE WHEN testset_run.result = 'failed' THEN testset_run.result END) AS failed,
+                COUNT(CASE WHEN testset_run.result = 'ifailed' THEN testset_run.result END) AS ifailed
+            FROM testset_run
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                project.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            GROUP BY branch.name, project_run.build_key, conf.name
+            ORDER BY branch.name, conf.name, project_run.build_key DESC;
+        ");
+        $query->execute(array(
+            $testsetProject,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'passed' => $row['passed'],
+                'ipassed' => $row['ipassed'],
+                'failed' => $row['failed'],
+                'ifailed' => $row['ifailed']
             );
         }
         return $result;

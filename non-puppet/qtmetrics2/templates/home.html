@@ -34,8 +34,8 @@
 
 /**
  * Home page
- * @version   0.2
- * @since     18-06-2015
+ * @version   0.4
+ * @since     30-06-2015
  * @author    Juha Sippola
  */
 
@@ -59,17 +59,23 @@
 
 <div class="row">
 
-    <div class="col-md-6">
+    <div class="col-md-1">
+    </div>
+
+    <div class="col-md-4">
+        <hr>
         <h2>Overview</h2>
-        <p>See the overview of the builds by projects across the latest branches:</p>
+        <p>See the latest build status across the branches:</p>
         <div>
-            {% for state in states %}
-                <a class="btn btn-default btn-xs" disabled="disabled" href="{{ overviewRoute }}/{{ state.name }}" role="button">{{ state.name }}</a>
-            {% endfor %}
+            <a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">{{ masterProject }} {{ masterState }}</a>
         </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-1">
+    </div>
+
+    <div class="col-md-4">
+        <hr>
         <h2>Platforms</h2>
         <p>See target platform status:</p>
         <div>
@@ -86,7 +92,9 @@
             {% endfor %}
             {% for name in os %}
                 <div class="btn-group">
-                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" disabled="disabled" data-toggle="dropdown" aria-expanded="false">{{ name }}<span class="caret"></span></button>
+                    <button type="button" class="btn btn-primary btn-xs dropdown-toggle" disabled="disabled"
+                        data-toggle="dropdown" aria-expanded="false">{{ name }}<span class="caret"></span>
+                    </button>
                     <ul class="dropdown-menu textSmall" role="menu">
                         {% for platform in platforms %}
                             {% if platform.os == name %}
@@ -100,62 +108,80 @@
             {% endfor %}
         </div>
     </div>
+
 </div>
 
 <div class="row">
 
-    <div class="col-md-6">
-        <h2>Branches</h2>
-        <p>See branch status:</p>
-        <div>
-            {% for branch in branches %}
-                <a class="btn btn-default btn-xs" disabled="disabled" href="{{ branchRoute }}/{{ branch.name }}" role="button">{{ branch.name }}</a>
-            {% endfor %}
-        </div>
+    <div class="col-md-1">
     </div>
 
     <div class="col-md-4">
-        <h2>Tests</h2>
-        <p>See top failure lists or single testset results:</p>
+        <hr>
+        <h2>Projects</h2>
+        <p>See testset status for a project:</p>
         <div>
-            <a class="btn btn-default btn-xs" href="{{ testRoute }}/top" role="button">top failures</a>
-            <a class="btn btn-default btn-xs" href="{{ testRoute }}/flaky" role="button">flaky testsets</a>
+            <form class="form-horizontal" role="form" method="post">
+            <div class="input-group input-group-sm">
+                <input id="projectInput" name="projectInputValue" type="text" class="form-control" placeholder="project name...">
+                <span class="input-group-btn">
+                    <input id="projectInputSubmit" name="projectInputSubmit" type="submit" class="btn btn-primary" value="Show">
+                </span>
+            </div>
+            </form>
         </div>
+    </div>
+
+    <div class="col-md-1">
+    </div>
+
+    <div class="col-md-4">
+        <hr>
+        <h2>Tests</h2>
+        <p>See results for a testset:</p>
         <div>
             <form class="form-horizontal" role="form" method="post">
             <div class="input-group input-group-sm">
                 <input id="testsetInput" name="testsetInputValue" type="text" class="form-control" placeholder="testset name...">
                 <span class="input-group-btn">
-                    <input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-default" value="Show">
+                    <input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-primary" value="Show">
                 </span>
-            </div> {# /input-group #}
+            </div>
             </form>
         </div>
+        <br>
+        <p>See testset lists:</p>
+        <div>
+            <a class="btn btn-primary btn-xs" href="{{ testRoute }}/top" role="button">top failures</a>
+            <a class="btn btn-primary btn-xs" href="{{ testRoute }}/flaky" role="button">flaky testsets</a>
+        </div>
     </div>
+
 </div>
 
 <div class="row">
 
-    <div class="col-md-6">
-        <h2>Projects</h2>
-        <p>See project status:</p>
+    <div class="col-md-1">
+    </div>
+
+    <div class="col-md-4">
+        <hr>
+        <h2>Branches</h2>
+        <p>See branch status:</p>
         <div>
-            {% for project in projects %}
-                {# Show button color based on project status (according to the latest build results) #}
-                {% if project.getStatus == constant('ProjectRun::RESULT_SUCCESS') %}
-                    {% set buttonStatus = 'btn-success' %}
-                {% elseif project.getStatus == constant('ProjectRun::RESULT_FAILURE') %}
-                    {% set buttonStatus = 'btn-danger' %}
-                {% else %}
-                    {% set buttonStatus = 'btn-default' %}
-                {% endif %}
-                {# Show only valid projects #}
-                {% if project.getStatus != constant('ProjectRun::RESULT_EMPTY') %}
-                    <a class="btn {{ buttonStatus }} btn-xs" disabled="disabled" href="{{ overviewRoute }}/state/{{ project.getName }}" role="button">{{ project.getName }}</a>
-                {% endif %}
+            {% for branch in branches %}
+                <a class="btn btn-primary btn-xs" disabled="disabled" href="{{ branchRoute }}/{{ branch.name }}" role="button">{{ branch.name }}</a>
             {% endfor %}
         </div>
     </div>
+
+    <div class="col-md-1">
+    </div>
+
+    <div class="col-md-4">
+        <hr>
+    </div>
+
 </div>
 
 <br>
@@ -166,6 +192,7 @@
 {% include "footer.html" %}
 
 {# Local scripts for this page #}
+<script src="scripts/project_autocomplete.js"></script>
 <script src="scripts/testset_autocomplete.js"></script>
 
 {% include "close.html" %}

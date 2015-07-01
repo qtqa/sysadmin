@@ -1,4 +1,4 @@
-<!--
+<?php
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,15 +33,32 @@
 #############################################################################
 
 /**
- * About window content
- * @version   0.7
+ * Project autocomplete search
+ * @version   0.1
  * @since     30-06-2015
  * @author    Juha Sippola
  */
 
--->
+header('Content-Type: application/json');
+require 'src/Factory.php';
 
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.7 (30-Jun-2015)</small></p>
+// Get the filter and make database search
+if (isset($_GET['term'])) {
+    $list = array();
+    $rows = Factory::getProjectsFiltered($_GET['term']);
+    foreach ($rows as $row) {
+        foreach ($row as $key => $value) {
+            if ($key === 'name')
+                $name = $value;
+        }
+        $list[] = $name;
+    }
+    // Return list as json string
+    echo json_encode($list);
+
+// Return empty string if filter not set
+} else {
+    echo json_encode([]);
+}
+
+?>

@@ -1,4 +1,4 @@
-<!--
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,15 +33,52 @@
 #############################################################################
 
 /**
- * About window content
- * @version   0.7
+ * Project autocomplete
+ * @version   0.1
  * @since     30-06-2015
  * @author    Juha Sippola
  */
 
--->
+$(function() {
+    var cache = {};
+    $( "#projectInput" ).autocomplete({
+        minLength: 2,
 
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.7 (30-Jun-2015)</small></p>
+        // get the filtered list (cached)
+        source: function( request, response ) {
+            var term = request.term;
+            if ( term in cache ) {
+                response( cache[ term ] );
+                return;
+            }
+            $.getJSON( "project_search.php", request, function( data, status, xhr ) {
+                cache[ term ] = data;
+                response( data );
+            });
+        },
+
+        // detect the case without any matches
+        response: function (event, ui) {
+            if (ui.content.length === 0) {
+                ui.content.push({
+                    'label': '(no match)',
+                    'value': ''
+                });
+            }
+        }
+    })
+
+    // fill the list
+    .data("ui-autocomplete")._renderItem = function (ul, item) {
+        if (item.value === '') {
+            // 'no match' case
+            return $('<li class="ui-state-disabled">'+item.label+'</li>')
+            .appendTo(ul);
+        } else {
+            // list of matches
+            return $("<li>")
+            .append("<a>" + item.label + "</a>")
+            .appendTo(ul);
+        }
+    };
+});

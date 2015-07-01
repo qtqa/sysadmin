@@ -34,14 +34,15 @@
 
 /**
  * Factory class
- * @version   0.3
- * @since     23-06-2015
+ * @version   0.4
+ * @since     30-06-2015
  * @author    Juha Sippola
  */
 
 require_once 'Database.php';
 require_once 'Project.php';
 require_once 'ProjectRun.php';
+require_once 'ConfRun.php';
 require_once 'Testset.php';
 require_once 'TestsetRun.php';
 
@@ -125,6 +126,17 @@ class Factory {
     }
 
     /**
+     * Get list of projects matching the filter string.
+     * @param string $filter
+     * @return array (string name)
+     */
+    public static function getProjectsFiltered($filter)
+    {
+        $result = Factory::db()->getProjectsFiltered($filter);
+        return $result;
+    }
+
+    /**
      * Get list of testsets matching the filter string.
      * @param string $filter
      * @return array (string name)
@@ -136,21 +148,17 @@ class Factory {
     }
 
     /**
-     * Create Project objects for those in database
+     * Create Project object for that in database
+     * @param string $project
      * @param string $runProject
      * @param string $runState
-     * @return array Project objects
+     * @return array Project object
      */
-    public static function createProjects($runProject, $runState)
+    public static function createProject($project, $runProject, $runState)
     {
-        $objects = array();
-        $dbEntries = self::db()->getProjects();
-        foreach($dbEntries as $entry) {
-            $obj = new Project($entry['name']);
-            $obj->setStatus($runProject, $runState);
-            $objects[] = $obj;
-        }
-        return $objects;
+        $obj = new Project($project);
+        $obj->setStatus($runProject, $runState);
+        return $obj;
     }
 
     /**
@@ -224,6 +232,35 @@ class Factory {
                 $obj->setTestsetFlakyCounts($detail['flaky'], $detail['total']);
         }
         return $obj;
+    }
+
+/* NEW */
+    /**
+     * Create ConfRun objects for those in database
+     * @param string $runProject
+     * @param string $runState
+     * @return array ConfRun objects
+     */
+    public static function createConfRuns($runProject, $runState)
+    {
+        $objects = array();
+        $dbEntries = self::db()->getConfBuildsByBranch($runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new ConfRun(
+                $entry['conf'],
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                $entry['result'],
+                $entry['forcesuccess'],
+                $entry['insignificant'],
+                $entry['timestamp'],
+                $entry['duration']
+            );
+            $objects[] = $obj;
+        }
+        return $objects;
     }
 
     /**

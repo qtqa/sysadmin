@@ -33,45 +33,35 @@
 #############################################################################
 
 /**
- * TestsetRun class
- * @version   0.4
+ * ConfRun class
+ * @version   0.1
  * @since     30-06-2015
  * @author    Juha Sippola
  */
 
-class TestsetRun extends ProjectRun {
+class ConfRun extends ProjectRun {
 
     /**
-     * Testset build results (these must follow the enumeration in the database; excluding the insignificance flag)
+     * Conf build results (these must follow the enumeration in the database)
      */
     const RESULT_NOT_SET = NULL;
     const RESULT_EMPTY   = "";
-    const RESULT_SUCCESS = "passed";
-    const RESULT_FAILURE = "failed";
+    const RESULT_SUCCESS = "SUCCESS";
+    const RESULT_FAILURE = "FAILURE";
+    const RESULT_ABORTED = "ABORTED";
+    const RESULT_UNDEF = "undef";
 
     /**
-     * Testset name.
+     * Conf name.
      * @var string
      */
     private $name;
 
     /**
-     * Testset project name.
-     * @var string
+     * Forcesuccess flag (true = forcesuccess on).
+     * @var bool
      */
-    private $testsetProjectName;
-
-    /**
-     * Configuration name.
-     * @var string
-     */
-    private $confName;
-
-    /**
-     * Run number (a failed test is repeated).
-     * @var int
-     */
-    private $run;
+    private $forcesuccess;
 
     /**
      * Insignificance flag (true = insignificant).
@@ -80,31 +70,27 @@ class TestsetRun extends ProjectRun {
     private $insignificant;
 
     /**
-     * TestsetRun constructor.
+     * ConfRun constructor.
      * @param string $name
-     * @param string $testsetProjectName
      * @param string $projectName
      * @param string $branchName
      * @param string $stateName
      * @param int $buildKey
-     * @param string $confName
-     * @param int $run (ordinal number)
-     * @param string $result (plain result without any possible flags)
+     * @param string $result
+     * @param bool $forcesuccess (true = forcesuccess on)
      * @param bool $insignificant (true = insignificant)
      * @param int $timestamp
-     * @param int $duration (in deciseconds)
+     * @param int $duration
      */
-    public function __construct($name, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {
+    public function __construct($name, $projectName, $branchName, $stateName, $buildKey, $result, $forcesuccess, $insignificant, $timestamp, $duration) {
         parent::__construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration);
         $this->name = $name;
-        $this->$testsetProjectName = $testsetProjectName;
-        $this->confName = $confName;
-        $this->run = $run;
+        $this->forcesuccess = $forcesuccess;
         $this->insignificant = $insignificant;
     }
 
     /**
-     * Get name of the testset.
+     * Get name of the conf.
      * @return string
      */
     public function getName()
@@ -113,21 +99,12 @@ class TestsetRun extends ProjectRun {
     }
 
     /**
-     * Get configuration name.
-     * @return string
+     * Get forcesuccess flag.
+     * @return bool (true = forcesuccess on)
      */
-    public function getConfName()
+    public function getForcesuccess()
     {
-        return $this->confName;
-    }
-
-    /**
-     * Get run number.
-     * @return int
-     */
-    public function getRun()
-    {
-        return $this->run;
+        return $this->forcesuccess;
     }
 
     /**
@@ -137,31 +114,6 @@ class TestsetRun extends ProjectRun {
     public function getInsignificant()
     {
         return $this->insignificant;
-    }
-
-    /**
-     * Strip the result from the combined insignificance-result string
-     * @param string $resultString
-     * @return string
-     */
-    public static function stripResult($resultString)
-    {
-        $resultString = str_replace('ipass', 'pass', $resultString);        // remove the possible insignificant flag
-        $resultString = str_replace('ifail', 'fail', $resultString);        // remove the possible insignificant flag
-        return $resultString;
-    }
-
-    /**
-     * Check the insignificance flag from the combined insignificance-result string
-     * @param string $resultString
-     * @return bool (true = insignificant)
-     */
-    public static function isInsignificant($resultString)
-    {
-        $flag = false;
-        if (strpos($resultString, 'i') === 0)                               // begins with 'i'
-            $flag = true;
-        return $flag;
     }
 
 }

@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.3
- * @since     23-06-2015
+ * @version   0.4
+ * @since     30-06-2015
  * @author    Juha Sippola
  */
 
@@ -100,6 +100,29 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getProjectsFiltered
+     * @dataProvider testGetProjectsFilteredData
+     */
+    public function testGetProjectsFiltered($project, $exp_count)
+    {
+        $result = Factory::getProjectsFiltered($project);
+        $this->assertEquals($exp_count, count($result));
+    }
+    public function testGetProjectsFilteredData()
+    {
+        return array(
+            array('', 35),                          // test data includes 35 projects
+            array('qt',35),                         // all
+            array('ba', 3),
+            array('bas', 1),
+            array('base', 1),
+            array('qtbase', 1),
+            array('QtBase', 1),
+            array('invalid-name', 0)
+        );
+    }
+
+    /**
      * Test getTestsetsFiltered
      * @dataProvider testGetTestsetsFilteredData
      */
@@ -125,23 +148,21 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test createProjects
-     * @dataProvider testCreateProjectsData
+     * Test createProject
+     * @dataProvider testCreateProjectData
      */
-    public function testCreateProjects($runProject, $runState)
+    public function testCreateProject($project, $runProject, $runState)
     {
-        $projects = Factory::createProjects($runProject, $runState);
-        foreach($projects as $project) {
-            $this->assertTrue($project instanceof Project);
-            if ($project->getName() === $runProject) {                  // check only the projects with project_run data
-                $this->assertNotEmpty($project->getStatus());
-            }
+        $project = Factory::createProject($project, $runProject, $runState);
+        $this->assertTrue($project instanceof Project);
+        if ($project->getName() === $runProject) {                      // check only the projects with project_run data
+            $this->assertNotEmpty($project->getStatus());
         }
     }
-    public function testCreateProjectsData()
+    public function testCreateProjectData()
     {
         return array(
-            array('Qt5', 'state',)                                      // project with project_run data
+            array('Qt5', 'Qt5', 'state',)                               // project with project_run data
         );
     }
 
@@ -220,12 +241,31 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test createConfRuns
+     * @dataProvider testCreateConfRunsData
+     */
+    public function testCreateConfRuns($name, $projectName, $branchName, $stateName, $buildKey, $result, $insignificant, $forcesuccess, $timestamp, $duration)
+    {
+        $runs = Factory::createConfRuns($name, $projectName, $branchName, $stateName, $buildKey, $result, $insignificant, $forcesuccess, $timestamp, $duration);
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof ConfRun);
+        }
+    }
+    public function testCreateConfRunsData()
+    {
+        return array(
+            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', 'Qt5', 'stable', 'state', '1348', 'failed', true, false, '28.5.2013 0:54', 8130),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345', 'failed', false, true, '28.5.2013 0:54', 8130)
+        );
+    }
+
+    /**
      * Test createTestsetRuns
      * @dataProvider testCreateTestsetRunsData
      */
-    public function testCreateTestsetRuns($name, $projectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration)
+    public function testCreateTestsetRuns($name, $testsetProject, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration)
     {
-        $runs = Factory::createTestsetRuns($name, $projectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration);
+        $runs = Factory::createTestsetRuns($name, $testsetProject, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration);
         foreach($runs as $run) {
             $this->assertTrue($run instanceof TestsetRun);
         }

@@ -38,8 +38,8 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.4
- * @since     23-06-2015
+ * @version   0.6
+ * @since     30-06-2015
  * @author    Juha Sippola
  */
 
@@ -113,6 +113,29 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('state')
+        );
+    }
+
+    /**
+     * Test getProjectsFiltered
+     * @dataProvider testGetProjectsFilteredData
+     */
+    public function testGetProjectsFiltered($filter, $exp_match_count_min)
+    {
+        $db = Factory::db();
+        $result = $db->getProjectsFiltered($filter);
+        $this->assertGreaterThanOrEqual($exp_match_count_min, count($result));
+        foreach($result as $row) {
+            $this->assertArrayHasKey('name', $row);
+        }
+    }
+    public function testGetProjectsFilteredData()
+    {
+        return array(
+            array('base', 1),
+            array('ba', 3),
+            array('qt', 35),
+            array('invalid-name', 0)
         );
     }
 
@@ -265,6 +288,9 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
             $this->assertArrayHasKey('result', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('duration', $row);
             $this->assertContains($row['result'], $exp_results);
             $branches[] = $row['name'];
         }
@@ -278,14 +304,68 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test getLatestTestsetConfBuildResults
-     * @dataProvider testGetLatestTestsetConfBuildResultsData
+     * Test getLatestProjectBranchTestsetResults
+     * @dataProvider testGetLatestProjectBranchTestsetResultsData
      */
-    public function testGetLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $state, $exp_conf, $exp_branches, $exp_results)
+    public function testGetLatestProjectBranchTestsetResults($runProject, $runState, $exp_branches)
     {
         $confs = array();
         $db = Factory::db();
-        $result = $db->getLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $state);
+        $result = $db->getLatestProjectBranchTestsetResults($runProject, $runState);
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertContains($row['branch'], $exp_branches);
+        }
+    }
+    public function testGetLatestProjectBranchTestsetResultsData()
+    {
+        return array(
+            array('Qt5', 'state', array('dev', 'stable', 'master'))
+        );
+    }
+
+    /**
+     * Test getLatestTestsetProjectBranchTestsetResults
+     * @dataProvider testGetLatestTestsetProjectBranchTestsetResultsData
+     */
+    public function testGetLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState, $exp_branches)
+    {
+        $confs = array();
+        $db = Factory::db();
+        $result = $db->getLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState);
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertContains($row['branch'], $exp_branches);
+        }
+    }
+    public function testGetLatestTestsetProjectBranchTestsetResultsData()
+    {
+        return array(
+            array('qtbase', 'Qt5', 'state', array('dev', 'stable', 'master'))
+        );
+    }
+
+    /**
+     * Test getLatestTestsetConfBuildResults
+     * @dataProvider testGetLatestTestsetConfBuildResultsData
+     */
+    public function testGetLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState, $exp_conf, $exp_branches, $exp_results)
+    {
+        $confs = array();
+        $db = Factory::db();
+        $result = $db->getLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState);
         $this->assertNotEmpty($result);
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
@@ -497,6 +577,54 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getConfBuildsByBranch
+     * @dataProvider testGetConfBuildsByBranchData
+     */
+    public function testGetConfBuildsByBranch($runProject, $runState, $exp_branch, $exp_conf, $exp_key, $exp_result, $has_data)
+    {
+        $branches = array();
+        $confs = array();
+        $keys = array();
+        $results = array();
+        $db = Factory::db();
+        $result = $db->getConfBuildsByBranch($runProject, $runState);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('forcesuccess', $row);
+            $this->assertArrayHasKey('insignificant', $row);
+            $this->assertArrayHasKey('result', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('duration', $row);
+            $branches[] = $row['branch'];
+            $confs[] = $row['conf'];
+            $keys[] = $row['buildKey'];
+            $results[] = $row['result'];
+        }
+        if ($has_data) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_conf, $confs);
+            $this->assertContains($exp_key, $keys);
+            $this->assertContains($exp_result, $results);
+        } else {
+            $this->assertEmpty($result);
+        }
+    }
+    public function testGetConfBuildsByBranchData()
+    {
+        return array(
+            array('Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 1),
+            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 1),
+            array('Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1),
+            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 1),
+            array('Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 1),
+            array('Qt5', 'invalid', '', '', '', '', 0)
+        );
+    }
+
+    /**
      * Test getTestsetResultsByBranchConf
      * @dataProvider testGetTestsetResultsByBranchConfData
      */
@@ -540,6 +668,51 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'failed', 1),
             array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'passed', 1),
             array('tst_qfont', 'QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'failed', 1)
+        );
+    }
+
+    /**
+     * Test getTestsetProjectResultsByBranchConf
+     * @dataProvider testGetTestsetProjectResultsByBranchConfData
+     */
+    public function testGetTestsetProjectResultsByBranchConf($testsetProject, $runProject, $runState, $exp_branch, $exp_conf, $exp_key, $has_data)
+    {
+        $branches = array();
+        $confs = array();
+        $keys = array();
+        $results = array();
+        $db = Factory::db();
+        $result = $db->getTestsetProjectResultsByBranchConf($testsetProject, $runProject, $runState);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('ipassed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertArrayHasKey('ifailed', $row);
+            $branches[] = $row['branch'];
+            $confs[] = $row['conf'];
+            $keys[] = $row['buildKey'];
+        }
+        if ($has_data) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_conf, $confs);
+            $this->assertContains($exp_key, $keys);
+        } else {
+            $this->assertEmpty($result);
+        }
+    }
+    public function testGetTestsetProjectResultsByBranchConfData()
+    {
+        return array(
+            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 1),
+            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 1),
+            array('Qt5', 'Qt5', 'invalid', '', '', '', '', 0)
         );
     }
 
