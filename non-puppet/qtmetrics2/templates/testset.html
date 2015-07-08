@@ -34,8 +34,8 @@
 
 /**
  * Testset page
- * @version   0.5
- * @since     30-06-2015
+ * @version   0.6
+ * @since     06-07-2015
  * @author    Juha Sippola
  */
 
@@ -180,6 +180,7 @@
 
                                         {# Show flaky #}
                                         {% set flaky = testset.getTestsetFlakyCounts.flaky %}
+                                        {% set total = testset.getTestsetFlakyCounts.total %}
                                         <td class="leftBorder center">{{ flaky }}<span class ="gray"> ({{ total }})</span></td>
                                         {# Show results as bars (scaled to BAR_AREA px) #}
                                         {% set flakyBar = ((BAR_AREA/maxCount)*flaky)|round(0, 'floor') %}
