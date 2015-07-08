@@ -1130,6 +1130,10 @@ sub sql_create_tables
         );
 
         $dbh->do (
+            "CREATE INDEX by_project_run ON conf_run (project_run_id DESC, result)"
+        );
+
+        $dbh->do (
             "CREATE TABLE IF NOT EXISTS phase (
                 id                    TINYINT UNSIGNED      NOT NULL  AUTO_INCREMENT,
                 name                  VARCHAR(100)          NOT NULL,
@@ -1182,6 +1186,14 @@ sub sql_create_tables
                 UNIQUE INDEX unique_project_run (project_id,branch_id,state_id,build_key),
                 CONSTRAINT project_run_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"
+        );
+
+        $dbh->do (
+            "CREATE INDEX by_timestamp ON project_run (timestamp, state_id, project_id)"
+        );
+
+        $dbh->do (
+            "CREATE INDEX by_state ON project_run (state_id, project_id, timestamp)"
         );
 
         $dbh->do (
@@ -1257,6 +1269,18 @@ sub sql_create_tables
                 total_blacklisted     SMALLINT UNSIGNED     NOT NULL,
                 CONSTRAINT testset_run_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"
+        );
+
+        $dbh->do (
+            "CREATE INDEX by_conf_run ON testset_run (conf_run_id DESC, run, result)"
+        );
+
+        $dbh->do (
+            "CREATE INDEX by_testset ON testset_run (testset_id, result)"
+        );
+
+        $dbh->do (
+            "CREATE INDEX by_run ON testset_run (run, result)"
         );
 
         $dbh->commit;   # commit the changes if we get this far
