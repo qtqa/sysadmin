@@ -34,8 +34,8 @@
 
 /**
  * Overview page
- * @version   0.2
- * @since     01-07-2015
+ * @version   0.3
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
@@ -47,187 +47,184 @@
 {% set BAR_AREA = 60 %}
 
 <ol class="breadcrumb">
-    {% for link in breadcrumb %}
-        <li><a href="{{ link.link }}">{{ link.name }}</a></li>
-    {% endfor %}
-    <li class="active">overview</li>
+{% for link in breadcrumb %}
+<li><a href="{{ link.link }}">{{ link.name }}</a></li>
+{% endfor %}
+<li class="active">overview</li>
 </ol>
 
 <div class="container-fluid">
-    <div class="row">
+<div class="row">
 
-        <div class="col-sm-12 col-md-12 main">
+<div class="col-sm-12 col-md-12 main">
 
-            {##### Title #####}
+{##### Title #####}
 
-            <h1 class="page-header">
-                Overview
-                <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-                    <span class="glyphicon glyphicon-info-sign"></span>
-                </button>
-                <small>{{ refreshed }}</small>
-            </h1>
+<h1 class="page-header">
+Overview
+<button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+<span class="glyphicon glyphicon-info-sign"></span>
+</button>
+<small>{{ refreshed }}</small>
+</h1>
 
-            {##### Info well #####}
+{##### Info well #####}
 
-            <div class="collapse" id="info">
-                <div class="well infoWell">
-                    <span class="glyphicon glyphicon-info-sign"></span> <strong>Overview</strong><br>
-                    <ul>
-                        <li><strong>Latest {{ masterProject }} {{ masterState }} Build Status</strong> shows
-                            the overall result of the latest <strong>{{ masterProject }} {{ masterState }}</strong>
-                            builds themselves by branch; details on the runs are available as tooltip on result icon.</li>
-                        <li><strong>Latest {{ masterProject }} {{ masterState }} Testing Status</strong> shows
-                            the status based on testset results in the latest <strong>{{ masterProject }}
-                            {{ masterState }}</strong> builds in any configuration by testset project across all branches.</li>
-                    </ul>
-                </div>
-            </div>
+<div class="collapse" id="info">
+<div class="well infoWell">
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Overview</strong><br>
+<ul>
+<li><strong>Latest {{ masterProject }} {{ masterState }} Build Status</strong> shows
+the overall result of the latest <strong>{{ masterProject }} {{ masterState }}</strong>
+builds themselves by branch; details on the runs are available as tooltip on result icon.</li>
+<li><strong>Latest {{ masterProject }} {{ masterState }} Testing Status</strong> shows
+the status based on testset results in the latest <strong>{{ masterProject }}
+{{ masterState }}</strong> builds in any configuration by testset project across all branches.</li>
+</ul>
+</div>
+</div>
 
-            {##### Latest Build Status #####}
+{##### Latest Build Status #####}
 
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Build Status</h4>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th class="rightBorder">project</th>
-                                    {% for branch in latestProjectRuns %}
-                                        <th class="center">{{ branch.name }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    {# Project name #}
-                                    <td class="rightBorder"><a href="{{ buildProjectRoute }}">{{ masterProject }}</a></td>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Build Status</h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="rightBorder">project</th>
+{% for branch in latestProjectRuns %}
+<th class="center">{{ branch.name }}</th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+<tr>
+{# Project name #}
+<td class="rightBorder"><a href="{{ buildProjectRoute }}">{{ masterProject }}</a></td>
 
-                                    {# Result (by branch) #}
-                                    {% for run in latestProjectRuns %}
-                                        {% if run.result == constant('projectRun::RESULT_SUCCESS') %}
-                                            {% set resultIcon = 'glyphicon glyphicon-ok green' %}
-                                        {% elseif run.result == constant('projectRun::RESULT_FAILURE') %}
-                                            {% set resultIcon = 'glyphicon glyphicon-remove red' %}
-                                        {% else %}
-                                            {% set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
-                                        {% endif %}
-                                        <td class="center">
-                                            <span class="spaceHorizontal {{ resultIcon }} clickOnTouch"
-                                                data-toggle="tooltip" data-placement="top" data-html="true"
-                                                title="<table>
-                                                        <tr><th>Branch: </td><td>{{ run.name }}</td></tr>
-                                                        <tr><th>Build key: </td><td>{{ run.buildKey }}</td></tr>
-                                                        <tr><th>Timestamp: </td><td>{{ run.timestamp }}</td></tr>
-                                                        <tr><th>Result: </td><td>{{ run.result }}</td></tr>
-                                                        <tr><th>Duration: </td><td>{{ run.duration}}</td></tr>
-                                                    </table>">
-                                            </span>
-                                        </td>
-                                    {% endfor %}
-                                </tr>
+{# Result (by branch) #}
+{% for run in latestProjectRuns %}
+{%      if run.result == constant('projectRun::RESULT_SUCCESS') %}
+{%          set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%      elseif run.result == constant('projectRun::RESULT_FAILURE') %}
+{%          set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%      else %}
+{%          set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
+{%      endif %}
+<td class="center">
+<span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>Branch: </td><td>{{ run.name }}</td></tr>
+<tr><th>Build key: </td><td>{{ run.buildKey }}</td></tr>
+<tr><th>Timestamp: </td><td>{{ run.timestamp }}</td></tr>
+<tr><th>Result: </td><td>{{ run.result }}</td></tr>
+<tr><th>Duration: </td><td>{{ run.duration}}</td></tr></table>">
+</span></td>
+{% endfor %}
+</tr>
 
-                            </tbody>
-                        </table>
-                    </div> {# /table-responsive #}
-                </div> {# /panel-body #}
-            </div> {# /panel... #}
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
 
-            {##### Latest Testing Status #####}
+{##### Latest Testing Status #####}
 
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Testing Status</h4>
-                </div>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Testing Status</h4>
+</div>
 
-                {# Get branches and projects #}
-                {% set branches = [] %}
-                {% set projects = [] %}
-                {% for run in latestTestsetRuns %}
-                    {% if run.branch not in branches %}
-                        {% set branches = branches|merge([run.branch]) %}
-                    {% endif %}
-                    {% if run.project not in projects %}
-                        {% set projects = projects|merge([run.project]) %}
-                    {% endif %}
-                {% endfor %}
+{# Get branches and projects #}
+{% set branches = [] %}
+{% set projects = [] %}
+{% for run in latestTestsetRuns %}
+{%      if run.branch not in branches %}
+{%          set branches = branches|merge([run.branch]) %}
+{%      endif %}
+{%      if run.project not in projects %}
+{%          set projects = projects|merge([run.project]) %}
+{%      endif %}
+{% endfor %}
 
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th class="rightBorder">testset project</th>
-                                    {% for branch in branches %}
-                                        <th class="center">{{ branch }}<br>
-                                            <small>failed <span class ="gray">(total)</span></small>
-                                        </th>
-                                        <th class="showInLargeDisplay"></th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {# Calculate max failed result count for the bar #}
-                                {% set maxCount = 1 %}
-                                {% for run in latestTestsetRuns %}
-                                    {% if run.failed > maxCount %}
-                                        {% set maxCount = run.failed %}
-                                    {% endif %}
-                                {% endfor %}
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="rightBorder">testset project</th>
+{% for branch in branches %}
+<th class="center">{{ branch }}<br>
+<small>failed <span class ="gray">(total)</span></small>
+</th>
+<th class="showInLargeDisplay"></th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{# Calculate max failed result count for the bar #}
+{% set maxCount = 1 %}
+{% for run in latestTestsetRuns %}
+{%      if run.failed > maxCount %}
+{%          set maxCount = run.failed %}
+{%      endif %}
+{% endfor %}
 
-                                {% for project in projects %}
-                                    <tr>
-                                        {# Project name #}
-                                        <td class="rightBorder"><a href="{{ testsetProjectRoute }}/{{ project }}">{{ project }}</a></td>
+{% for project in projects %}
+<tr>
+{# Project name #}
+<td class="rightBorder"><a href="{{ testsetProjectRoute }}/{{ project }}">{{ project }}</a></td>
 
-                                        {# Result (by branch) #}
-                                        {% for branch in branches %}
-                                            {% for run in latestTestsetRuns if project == run.project and branch == run.branch %}
+{# Result (by branch) #}
+{%      for branch in branches %}
+{%          for run in latestTestsetRuns if project == run.project and branch == run.branch %}
 
-                                                {# Show results #}
-                                                {% set failed = run.failed %}
-                                                {% set passed = run.passed %}
-                                                {% set total = passed + failed %}
-                                                <td class="center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
+{# Show results #}
+{%              set failed = run.failed %}
+{%              set passed = run.passed %}
+{%              set total = passed + failed %}
+<td class="center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
 
-                                                {# Show results as bars (scaled to BAR_AREA px) #}
-                                                {% set failedBar = ((BAR_AREA/maxCount) * failed)|round(0, 'floor') %}
-                                                {% if (failed > 0) and (failedBar == 0) %}
-                                                    {% set failedBar = 1 %}
-                                                {% endif %}
-                                                {% if failed == 0 %}
-                                                    {% set failed = '' %}
-                                                {% endif %}
-                                                {% if (passed > 0) and (failed == 0) %}
-                                                    {% set passedBar = maxCount %}
-                                                {% else %}
-                                                    {% set passed = '' %}
-                                                {% endif %}
-                                                <td class="center showInLargeDisplay">
-                                                    <div>
-                                                        <div class="floatLeft redBackground" style="width: {{ failedBar }}px"><small>{{ failed }}</small></div>
-                                                        <div class="floatLeft greenBackground" style="width: {{ passedBar }}px"><small>{{ passed }}</small></div>
-                                                    </div>
-                                                </td>
-                                            {% else %}
-                                                <td></td>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div> {# /table-responsive #}
-                </div> {# /panel-body #}
-            </div> {# /panel... #}
+{# Show results as bars (scaled to BAR_AREA px) #}
+{%              set failedBar = ((BAR_AREA/maxCount) * failed)|round(0, 'floor') %}
+{%              if (failed > 0) and (failedBar == 0) %}
+{%                  set failedBar = 1 %}
+{%              endif %}
+{%              if failed == 0 %}
+{%                  set failed = '' %}
+{%              endif %}
+{%              if (passed > 0) and (failed == 0) %}
+{%                  set passedBar = maxCount %}
+{%              else %}
+{%                  set passed = '' %}
+{%              endif %}
+<td class="center showInLargeDisplay">
+<div>
+<div class="floatLeft redBackground" style="width: {{ failedBar }}px"><small>{{ failed }}</small></div>
+<div class="floatLeft greenBackground" style="width: {{ passedBar }}px"><small>{{ passed }}</small></div>
+</div>
+</td>
+{%          else %}{# run #}
+<td></td>
+<td></td>
+{%          endfor %}{# run #}
+{%      endfor %}{# branch #}
+</tr>
+{% endfor %}{# project #}
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
 
-        </div> {# /col... #}
-    </div> {# /row #}
-
-</div> {# /container-fluid #}
+</div> {# .col... #}
+</div> {# .row #}
+</div> {# .container-fluid #}
 
 {% include "footer.html" %}
 

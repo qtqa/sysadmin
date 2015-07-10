@@ -35,171 +35,149 @@
 
 /**
  * Qt Metrics style sheet
- * @version   0.3
- * @since     08-07-2015
+ * @version   0.4
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
 /*
  * Brand logo and text alignment
  */
-
 .navbar-brand img {
-    height: 30px;
-    width: auto;
+  height: 30px;
+  width: auto;
 }
 
 /*
  * Load home page image (from www.qt.io) with text color adjustments in tablets and bigger devices only (typically using faster connection)
  */
-
 @media screen and (min-width: 768px) {
-    .jumbotron {
-        background-image: url("https://d3hp9ud7yvwzy0.cloudfront.net/wp-content/uploads/2014/06/Qt-in-nutshell-hero2.jpg");
-        background-size: cover;
-    }
-    .jumbotron h1 {
-        color: black;
-        text-shadow: 0 0 8px white;
-    }
+  .jumbotron {
+    background-image: url("https://d3hp9ud7yvwzy0.cloudfront.net/wp-content/uploads/2014/06/Qt-in-nutshell-hero2.jpg");
+    background-size: cover;
+  }
+  .jumbotron h1 {
+    color: black;
+    text-shadow: 0 0 8px white;
+  }
 }
 
 /*
  * The master version on home page
  */
-
 .masterVersion {
-    color: forestgreen;
-    text-shadow: 0 0 8px black;
+  color: forestgreen;
+  text-shadow: 0 0 8px black;
 }
 
 /*
  * Include UI elements and behavior in tablets and bigger devices only (typically using faster connection)
  */
-
 @media screen and (max-width: 768px) {
-    .showInLargeDisplay {
-        display: none;
-    }
+  .showInLargeDisplay {
+    display: none;
+  }
 }
 
 /*
  * Make space between buttons next to and above each others
  */
-
 .btn {
-    margin: 0 3px 3px 0;
+  margin: 0 3px 3px 0;
 }
 
 /*
  * Make the tooltip align left, respect new lines and prevent text from wrapping
  */
 .tooltip-inner {
-    text-align: left;
-    white-space: pre;
-    max-width: none;
-    background-color: #12293E;
+  text-align: left;
+  white-space: pre;
+  max-width: none;
+  background-color: #12293E;
 }
 
 /*
  * Make space horizontally outside an element
  */
-
 .spaceHorizontal {
-    margin: 0 5px 0 5px;
+  margin: 0 5px 0 5px;
 }
 
 /*
  * Animation shown while loading a page from a link
  */
-
 #link_loading {
-    position: relative;
-    left: 10px;
-    top: 18px;
-    width: 60px;
+  position: relative;
+  left: 10px;
+  top: 18px;
+  width: 60px;
 }
-
 #link_loading .progress-bar {
-    width: 100%;
+  width: 100%;
 }
 
 /*
  * Animation shown while loading data in autocomplete input field
  */
-
 .ui-autocomplete-loading {
-    background: white url("../images/ui-anim_basic_16x16.gif") right center no-repeat;
+  background: white url("../images/ui-anim_basic_16x16.gif") right center no-repeat;
 }
 
 /*
  * Autocomplete input field
  */
-
 .ui-autocomplete.ui-menu {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 /*
  * Metrics page description well
  */
-
 .infoWell{
-    background: lightblue;
+  background: lightblue;
 }
 
 /*
  * Table formatting
  */
-
 .leftBorder {
-    border-left: 2px solid lightgrey;
+  border-left: 2px solid lightgrey;
 }
-
 .rightBorder {
-    border-right: 2px solid lightgrey;
+  border-right: 2px solid lightgrey;
 }
-
 .center {
-    text-align: center
+  text-align: center
 }
 
 /*
  * Coloring
  */
-
 .green {
-    color: green;
+  color: green;
 }
-
 .red {
-    color: red;
+  color: red;
 }
-
 .gray {
-    color: gray;
+  color: gray;
 }
-
 .greenBackground {
-    background-color: lightgreen;
+  background-color: lightgreen;
 }
-
 .redBackground {
-    background-color: indianred;
+  background-color: indianred;
 }
 
 /*
  * Placing and sizing
  */
-
 .floatLeft {
-    float: left;
+  float: left;
 }
-
 .textSmall {
-    font-size: small;
+  font-size: small;
 }
-
 .bold {
-    font-weight: bold;
+  font-weight: bold;
 }

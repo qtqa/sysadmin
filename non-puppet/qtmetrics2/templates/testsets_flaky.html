@@ -34,8 +34,8 @@
 
 /**
  * Flaky testsets page
- * @version   0.3
- * @since     24-06-2015
+ * @version   0.4
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
@@ -53,101 +53,101 @@
 #}
 
 <ol class="breadcrumb">
-    {% for link in breadcrumb %}
-        <li><a href="{{ link.link }}">{{ link.name }}</a></li>
-    {% endfor %}
-    <li class="active">flaky testsets</li>
+{% for link in breadcrumb %}
+<li><a href="{{ link.link }}">{{ link.name }}</a></li>
+{% endfor %}
+<li class="active">flaky testsets</li>
 </ol>
 
 <div class="container-fluid">
-    <div class="row">
+<div class="row">
 
-        <div class="col-sm-12 col-md-12 main">
+<div class="col-sm-12 col-md-12 main">
 
-            {##### Title #####}
+{##### Title #####}
 
-            <h1 class="page-header">
-                Top {{ topN }} Flaky Testsets
-                <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-                    <span class="glyphicon glyphicon-info-sign"></span>
-                </button>
-                <small>{{ refreshed }}</small>
-            </h1>
+<h1 class="page-header">
+Top {{ topN }} Flaky Testsets
+<button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+<span class="glyphicon glyphicon-info-sign"></span>
+</button>
+<small>{{ refreshed }}</small>
+</h1>
 
-            {##### Info well #####}
+{##### Info well #####}
 
-            <div class="collapse" id="info">
-                <div class="well infoWell">
-                    <span class="glyphicon glyphicon-info-sign"></span> <strong>Flaky testsets</strong><br>
-                    <ul>
-                        <li>Flaky testsets are those that fail on the first run but, when rerun, they pass.</li>
-                        <li><strong>flaky</strong> count shows the number of <strong>all</strong> builds where
-                            the testset is flaky (during the last {{ lastDays }} days).</li>
-                    </ul>
-                </div>
-            </div>
+<div class="collapse" id="info">
+<div class="well infoWell">
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Flaky testsets</strong><br>
+<ul>
+<li>Flaky testsets are those that fail on the first run but, when rerun, they pass.</li>
+<li><strong>flaky</strong> count shows the number of <strong>all</strong> builds where
+the testset is flaky (during the last {{ lastDays }} days).</li>
+</ul>
+</div>
+</div>
 
-            {##### Flaky list #####}
+{##### Flaky list #####}
 
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title bold">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h4>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>testset</th>
-                                    <th>project</th>
-                                    <th class="leftBorder center">flaky <span class ="gray">(total)</span></th>
-                                    <th class="showInLargeDisplay">flaky</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {# Calculate max result count for the bar #}
-                                {% set maxCount = 1 %}
-                                {% for testset in testsets %}
-                                    {% if testset.getTestsetFlakyCounts.flaky > maxCount %}
-                                        {% set maxCount = testset.getTestsetFlakyCounts.flaky %}
-                                    {% endif %}
-                                {% endfor %}
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>testset</th>
+<th>project</th>
+<th class="leftBorder center">flaky <span class ="gray">(total)</span></th>
+<th class="showInLargeDisplay">flaky</th>
+</tr>
+</thead>
+<tbody>
+{# Calculate max result count for the bar #}
+{% set maxCount = 1 %}
+{% for testset in testsets %}
+{%      if testset.getTestsetFlakyCounts.flaky > maxCount %}
+{%          set maxCount = testset.getTestsetFlakyCounts.flaky %}
+{%      endif %}
+{% endfor %}
 
-                                {# Print testsets #}
-                                {% for testset in testsets %}
-                                    <tr>
-                                        {# Testset name #}
-                                        <td><a href="{{ testsetRoute }}/{{ testset.getName }}/{{ testset.getProjectName }}">{{ testset.getName }}</a></td>
+{# Print testsets #}
+{% for testset in testsets %}
+<tr>
+{# Testset name #}
+<td><a href="{{ testsetRoute }}/{{ testset.getName }}/{{ testset.getProjectName }}">{{ testset.getName }}</a></td>
 
-                                        {# Project name #}
-                                        <td>{{ testset.getProjectName }}</td>
+{# Project name #}
+<td>{{ testset.getProjectName }}</td>
 
-                                        {# Show results as numbers #}
-                                        {% set flaky = testset.getTestsetFlakyCounts.flaky %}
-                                        {% set total = testset.getTestsetFlakyCounts.total %}
-                                        <td class="leftBorder center">{{ flaky }}<span class ="gray"> ({{ total }})</span></td>
+{# Show results as numbers #}
+{%      set flaky = testset.getTestsetFlakyCounts.flaky %}
+{%      set total = testset.getTestsetFlakyCounts.total %}
+<td class="leftBorder center">{{ flaky }}<span class ="gray"> ({{ total }})</span></td>
 
-                                        {# Show results as bars (scaled to BAR_AREA px) #}
-                                        {% set flakyBar = ((BAR_AREA/maxCount)*flaky)|round(0, 'floor') %}
-                                        {% if (flaky > 0) and (flakyBar == 0) %}
-                                            {% set flakyBar = 1 %}
-                                        {% endif %}
-                                        <td class="center showInLargeDisplay">
-                                            <div>
-                                                <div class="floatLeft redBackground" style="width: {{ flakyBar }}px">&nbsp;</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div> {# /table-responsive #}
-                </div> {# /panel-body #}
-            </div> {# /panel... #}
+{# Show results as bars (scaled to BAR_AREA px) #}
+{%      set flakyBar = ((BAR_AREA/maxCount)*flaky)|round(0, 'floor') %}
+{%      if (flaky > 0) and (flakyBar == 0) %}
+{%          set flakyBar = 1 %}
+{%      endif %}
+<td class="center showInLargeDisplay">
+<div>
+<div class="floatLeft redBackground" style="width: {{ flakyBar }}px">&nbsp;</div>
+</div>
+</td>
+</tr>
+{% endfor %}{# testset #}
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
 
-        </div> {# /col... #}
-    </div> {# /row #}
-</div> {# /container-fluid #}
+</div> {# .col... #}
+</div> {# .row #}
+</div> {# .container-fluid #}
 
 {% include "footer.html" %}
 

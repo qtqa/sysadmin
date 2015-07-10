@@ -34,8 +34,8 @@
 
 /**
  * Home page
- * @version   0.5
- * @since     01-07-2015
+ * @version   0.6
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
@@ -44,116 +44,116 @@
 {% include "header.html" %}
 
 <div class="jumbotron">
-    <div class="container">
-        <div class="col-md-9">
-            <h1>Qt Metrics <sup class="masterVersion">2</sup></h1>
-        </div>
-        <div class="col-md-3">
-            <div class="well well-sm">
-                <p>Data updated:</p>
-                {{ refreshed }}
-            </div>
-        </div>
-    </div>
+<div class="container">
+<div class="col-md-9">
+<h1>Qt Metrics <sup class="masterVersion">2</sup></h1>
+</div>
+<div class="col-md-3">
+<div class="well well-sm">
+<p>Data updated:</p>
+{{ refreshed }}
+</div>
+</div>
+</div>
 </div>
 
 <div class="row">
 
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-        <h2>Overview</h2>
-        <p>See the latest build status across the branches:</p>
-        <div>
-            <a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">{{ masterProject }} {{ masterState }}</a>
-        </div>
-    </div>
-
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-        <h2>Platforms</h2>
-        <p>See target platform status:</p>
-        <div>
-            {% for platform in platforms %}
-                <div class="btn-group">
-                    <a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
+<div class="col-md-1">
 </div>
+
+<div class="col-md-4">
+<hr>
+<h2>Overview</h2>
+<p>See the latest build status across the branches:</p>
+<div>
+<a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">{{ masterProject }} {{ masterState }}</a>
+</div>
+</div>
+
+<div class="col-md-1">
+</div>
+
+<div class="col-md-4">
+<hr>
+<h2>Platforms</h2>
+<p>See target platform status:</p>
+<div>
+{% for platform in platforms %}
+<div class="btn-group">
+<a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
+</div>
+{% endfor %}
+</div>
+</div> {# .col-md... #}
+
+</div> {# .row #}
 
 <div class="row">
 
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-        <h2>Projects</h2>
-        <p>See testset status for a project:</p>
-        <div>
-            <form class="form-horizontal" role="form" method="post">
-            <div class="input-group input-group-sm">
-                <input id="projectInput" name="projectInputValue" type="text" class="form-control" placeholder="project name...">
-                <span class="input-group-btn">
-                    <input id="projectInputSubmit" name="projectInputSubmit" type="submit" class="btn btn-primary" value="Show">
-                </span>
-            </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-        <h2>Tests</h2>
-        <p>See results for a testset:</p>
-        <div>
-            <form class="form-horizontal" role="form" method="post">
-            <div class="input-group input-group-sm">
-                <input id="testsetInput" name="testsetInputValue" type="text" class="form-control" placeholder="testset name...">
-                <span class="input-group-btn">
-                    <input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-primary" value="Show">
-                </span>
-            </div>
-            </form>
-        </div>
-        <br>
-        <p>See testset lists:</p>
-        <div>
-            <a class="btn btn-primary btn-xs" href="{{ topRoute }}" role="button">top failures</a>
-            <a class="btn btn-primary btn-xs" href="{{ flakyRoute }}" role="button">flaky testsets</a>
-        </div>
-    </div>
-
+<div class="col-md-1">
 </div>
+
+<div class="col-md-4">
+<hr>
+<h2>Projects</h2>
+<p>See testset status for a project:</p>
+<div>
+<form class="form-horizontal" role="form" method="post">
+<div class="input-group input-group-sm">
+<input id="projectInput" name="projectInputValue" type="text" class="form-control" placeholder="project name...">
+<span class="input-group-btn">
+<input id="projectInputSubmit" name="projectInputSubmit" type="submit" class="btn btn-primary" value="Show">
+</span>
+</div>
+</form>
+</div>
+</div> {# .col-md... #}
+
+<div class="col-md-1">
+</div>
+
+<div class="col-md-4">
+<hr>
+<h2>Tests</h2>
+<p>See results for a testset:</p>
+<div>
+<form class="form-horizontal" role="form" method="post">
+<div class="input-group input-group-sm">
+<input id="testsetInput" name="testsetInputValue" type="text" class="form-control" placeholder="testset name...">
+<span class="input-group-btn">
+<input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-primary" value="Show">
+</span>
+</div>
+</form>
+</div>
+<br>
+<p>See testset lists:</p>
+<div>
+<a class="btn btn-primary btn-xs" href="{{ topRoute }}" role="button">top failures</a>
+<a class="btn btn-primary btn-xs" href="{{ flakyRoute }}" role="button">flaky testsets</a>
+</div>
+</div> {# .col-md... #}
+
+</div> {# .row #}
 
 <div class="row">
 
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-    </div>
-
-    <div class="col-md-1">
-    </div>
-
-    <div class="col-md-4">
-        <hr>
-    </div>
-
+<div class="col-md-1">
 </div>
+
+<div class="col-md-4">
+<hr>
+</div>
+
+<div class="col-md-1">
+</div>
+
+<div class="col-md-4">
+<hr>
+</div>
+
+</div> {# .row #}
 
 {% include "footer.html" %}
 

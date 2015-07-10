@@ -34,8 +34,8 @@
 
 /**
  * Testset project page
- * @version   0.1
- * @since     30-06-2015
+ * @version   0.2
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
@@ -47,296 +47,286 @@
 {% set BAR_AREA = 60 %}
 
 <ol class="breadcrumb">
-    {% for link in breadcrumb %}
-        <li><a href="{{ link.link }}">{{ link.name }}</a></li>
-    {% endfor %}
-    <li class="active">{{ project }}</li>
+{% for link in breadcrumb %}
+<li><a href="{{ link.link }}">{{ link.name }}</a></li>
+{% endfor %}
+<li class="active">{{ project }}</li>
 </ol>
 
 <div class="container-fluid">
-    <div class="row">
+<div class="row">
 
-        <div class="col-sm-12 col-md-12 main">
+<div class="col-sm-12 col-md-12 main">
 
-            {# Check if any runs available #}
-            {% set runsAvailable = 0 %}
-            {% for run in confBuilds %}
-                {% set runsAvailable = 1 %}
-            {% endfor %}
+{# Check if any runs available #}
+{% set runsAvailable = 0 %}
+{% for run in confBuilds %}
+{%      set runsAvailable = 1 %}
+{% endfor %}
 
-            {##### Title #####}
+{##### Title #####}
 
-            <h1 class="page-header">
-                {{ project }}
-                <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-                    <span class="glyphicon glyphicon-info-sign"></span>
-                </button>
-                <small>{{ refreshed }}</small>
-            </h1>
+<h1 class="page-header">
+{{ project }}
+<button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+<span class="glyphicon glyphicon-info-sign"></span>
+</button>
+<small>{{ refreshed }}</small>
+</h1>
 
-            {##### Info well #####}
+{##### Info well #####}
 
-            <div class="collapse" id="info">
-                <div class="well infoWell">
-                    <span class="glyphicon glyphicon-info-sign"></span> <strong>Testset project</strong><br>
-                    <ul>
-                        <li><strong>Latest Status</strong> shows the status based on the results of {{ project }}
-                            testsets in the latest <strong>{{ masterProject }} {{ masterState }}</strong> builds
-                            in any configuration across all branches.</li>
-                        <li><strong>Results in Branches</strong> shows the results of {{ project }} testsets by branch
-                            and their configuration in <strong>{{ masterProject }} {{ masterState }}</strong> builds
-                            ( <button type="button" class="btn btn-xs btn-success"><span class="badge">n</span></button> = all n testsets passed,
-                            <button type="button" class="btn btn-xs btn-danger"><span class="badge">n</span></button> = n testsets failed);
-                            details are available as tooltip on result icon.</li>
-                    </ul>
-                </div>
-            </div>
+<div class="collapse" id="info">
+<div class="well infoWell">
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Testset project</strong><br>
+<ul>
+<li><strong>Latest Status</strong> shows the status based on the results of {{ project }}
+testsets in the latest <strong>{{ masterProject }} {{ masterState }}</strong> builds
+in any configuration across all branches.</li>
+<li><strong>Results in Branches</strong> shows the results of {{ project }} testsets by branch
+and their configuration in <strong>{{ masterProject }} {{ masterState }}</strong> builds
+( <button type="button" class="btn btn-xs btn-success"><span class="badge">n</span></button> = all n testsets passed,
+<button type="button" class="btn btn-xs btn-danger"><span class="badge">n</span></button> = n testsets failed);
+details are available as tooltip on result icon.</li>
+</ul>
+</div>
+</div>
 
-            {% if runsAvailable %}
+{% if runsAvailable %}
 
-                {##### Latest Status #####}
+{##### Latest Status #####}
 
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h4 class="panel-title bold">Latest Status</h4>
-                    </div>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest Status</h4>
+</div>
 
-                    {# Get branches #}
-                    {% set branches = [] %}
-                    {% for run in latestTestsetRuns %}
-                        {% if run.branch not in branches %}
-                            {% set branches = branches|merge([run.branch]) %}
-                        {% endif %}
-                    {% endfor %}
+{# Get branches #}
+{%      set branches = [] %}
+{%      for run in latestTestsetRuns %}
+{%          if run.branch not in branches %}
+{%              set branches = branches|merge([run.branch]) %}
+{%          endif %}
+{%      endfor %}
 
-                    <div class="panel-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th class="rightBorder">testset project</th>
-                                        {% for branch in branches %}
-                                            <th class="center">{{ branch }}<br>
-                                                <small>failed <span class ="gray">(total)</span></small>
-                                            </th>
-                                            <th class="showInLargeDisplay"></th>
-                                        {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {# Calculate max failed result count for the bar #}
-                                    {% set maxCount = 1 %}
-                                    {% for run in latestTestsetRuns %}
-                                        {% if run.failed > maxCount %}
-                                            {% set maxCount = run.failed %}
-                                        {% endif %}
-                                    {% endfor %}
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="rightBorder">testset project</th>
+{%      for branch in branches %}
+<th class="center">{{ branch }}<br>
+<small>failed <span class ="gray">(total)</span></small>
+</th>
+<th class="showInLargeDisplay"></th>
+{%      endfor %}
+</tr>
+</thead>
+<tbody>
+{# Calculate max failed result count for the bar #}
+{%      set maxCount = 1 %}
+{%      for run in latestTestsetRuns %}
+{%          if run.failed > maxCount %}
+{%              set maxCount = run.failed %}
+{%          endif %}
+{%      endfor %}
 
-                                    <tr>
-                                        {# Project name #}
-                                        <td class="rightBorder">{{ project }}</td>
+<tr>
+{# Project name #}
+<td class="rightBorder">{{ project }}</td>
 
-                                        {# Result (by branch) #}
-                                        {% for branch in branches %}
-                                            {% for run in latestTestsetRuns if project == run.project and branch == run.branch %}
+{# Result (by branch) #}
+{%      for branch in branches %}
+{%          for run in latestTestsetRuns if project == run.project and branch == run.branch %}
 
-                                                {# Show results #}
-                                                {% set failed = run.failed %}
-                                                {% set passed = run.passed %}
-                                                {% set total = passed + failed %}
-                                                <td class="center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
+{# Show results #}
+{%              set failed = run.failed %}
+{%              set passed = run.passed %}
+{%              set total = passed + failed %}
+<td class="center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
 
-                                                {# Show results as bars (scaled to BAR_AREA px) #}
-                                                {% set failedBar = ((BAR_AREA/maxCount) * failed)|round(0, 'floor') %}
-                                                {% if (failed > 0) and (failedBar == 0) %}
-                                                    {% set failedBar = 1 %}
-                                                {% endif %}
-                                                {% if failed == 0 %}
-                                                    {% set failed = '' %}
-                                                {% endif %}
-                                                {% if (passed > 0) and (failed == 0) %}
-                                                    {% set passedBar = BAR_AREA %}
-                                                {% else %}
-                                                    {% set passed = '' %}
-                                                {% endif %}
-                                                <td class="center showInLargeDisplay">
-                                                    <div>
-                                                        <div class="floatLeft redBackground" style="width: {{ failedBar }}px">{{ failed }}</div>
-                                                        <div class="floatLeft greenBackground" style="width: {{ passedBar }}px">{{ passed }}</div>
-                                                    </div>
-                                                </td>
-                                            {% else %}
-                                                <td></td>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div> {# /table-responsive #}
-                    </div> {# /panel-body #}
-                </div> {# /panel... #}
+{# Show results as bars (scaled to BAR_AREA px) #}
+{%              set failedBar = ((BAR_AREA/maxCount) * failed)|round(0, 'floor') %}
+{%              if (failed > 0) and (failedBar == 0) %}
+{%                  set failedBar = 1 %}
+{%              endif %}
+{%              if failed == 0 %}
+{%                  set failed = '' %}
+{%              endif %}
+{%              if (passed > 0) and (failed == 0) %}
+{%                  set passedBar = BAR_AREA %}
+{%              else %}
+{%                  set passed = '' %}
+{%              endif %}
+<td class="center showInLargeDisplay">
+<div>
+<div class="floatLeft redBackground" style="width: {{ failedBar }}px">{{ failed }}</div>
+<div class="floatLeft greenBackground" style="width: {{ passedBar }}px">{{ passed }}</div>
+</div>
+</td>
+{%          else %}{# for #}
+<td></td>
+{%          endfor %}
+{%      endfor %}
+</tr>
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
 
-                {##### Results in Branches #####}
+{##### Results in Branches #####}
 
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h4 class="panel-title bold">Results in Branches</h4>
-                    </div>
-                </div>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Results in Branches</h4>
+</div>
+</div>
 
-                {# Get branches #}
-                {% set branches = [] %}
-                {% for run in projectBuilds %}
-                    {% if run.branch not in branches %}
-                        {% set branches = branches|merge([run.branch]) %}
-                    {% endif %}
-                {% endfor %}
+{# Get branches #}
+{%      set branches = [] %}
+{%      for run in projectBuilds %}
+{%          if run.branch not in branches %}
+{%              set branches = branches|merge([run.branch]) %}
+{%          endif %}
+{%      endfor %}
 
-                {# Loop all the branches #}
-                {% for branch in branches %}
+{# Loop all the branches #}
+{%      for branch in branches %}
 
-                    {# Get all build keys #}
-                    {% set buildKey = '' %}
-                    {% set buildKeys = [] %}
-                    {% set dates = [] %}
-                    {% for run in projectBuilds %}
-                        {% if run.branch == branch %}
-                            {% if buildKey != run.buildKey %}
-                                {% set buildKey = run.buildKey %}
-                                {% set buildKeys = buildKeys|merge([run.buildKey]) %}
-                                {% set dates = dates|merge([run.timestamp]) %}
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
+{# Get all build keys #}
+{%          set buildKey = '' %}
+{%          set buildKeys = [] %}
+{%          set dates = [] %}
+{%          for run in projectBuilds %}
+{%              if run.branch == branch %}
+{%                  if buildKey != run.buildKey %}
+{%                      set buildKey = run.buildKey %}
+{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
+{%                      set dates = dates|merge([run.timestamp]) %}
+{%                  endif %}
+{%              endif %}
+{%          endfor %}
 
-                    {# Check if testsets run for this branch #}
-                    {% set testsetBranch = 0 %}
-                    {% for run in confBuilds if run.branch == branch %}
-                        {% set testsetBranch = 1 %}
-                    {% endfor %}
+{# Check if testsets run for this branch #}
+{%          set testsetBranch = 0 %}
+{%          for run in confBuilds if run.branch == branch %}
+{%              set testsetBranch = 1 %}
+{%          endfor %}
 
-                    {# Show branch if testsets run for it #}
-                    {% if testsetBranch %}
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                <h4 class="panel-title bold">{{ branch }}</h4>
-                            </div>
-                            <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="bold rightBorder">{{ project }}</th>
-                                                {% for key, buildKey in buildKeys %}
-                                                    <th class="center">
-                                                        {% if buildKey|length > 6 %}
-                                                            <span class="clickOnTouch" data-toggle="tooltip" data-placement="top"
-                                                                title="{{ buildKey }}">{{ buildKey|slice(0, 4) }}...
-                                                            </span>
-                                                        {% else %}
-                                                            {{ buildKey }}
-                                                        {% endif %}
-                                                        <br>
-                                                        <span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
-                                                    </th>
-                                                {% endfor %}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% set confPrev = '' %}
-                                            {% set buildKeyIndexPrinted = -1 %}
-                                            {% set buildKeyFound = 0 %}
-                                            {% for run in confBuilds if run.branch == branch %}
+{# Show branch if testsets run for it #}
+{%          if testsetBranch %}
+<div class="panel panel-info">
+<div class="panel-heading">
+<h4 class="panel-title bold">{{ branch }}</h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="bold rightBorder">{{ project }}</th>
+{%              for key, buildKey in buildKeys %}
+<th class="center">
+{%                  if buildKey|length > 6 %}
+<span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ buildKey }}">{{ buildKey|slice(0, 4) }}...</span><br>
+{%                  else %}
+{{ buildKey }}<br>
+{%                  endif %}
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+</th>
+{%              endfor %}
+</tr>
+</thead>
+<tbody>
+{%              set confPrev = '' %}
+{%              set buildKeyIndexPrinted = -1 %}
+{%              set buildKeyFound = 0 %}
+{%              for run in confBuilds if run.branch == branch %}
 
-                                                {# New row for each conf #}
-                                                {% if confPrev != run.conf %}
-                                                    {# Close previous row #}
-                                                    {% if confPrev != '' %}
-                                                        {# Fill empty cells at the end of the row #}
-                                                        {% for key, buildKey in buildKeys %}
-                                                            {% if key > buildKeyIndexPrinted %}
-                                                                    <td></td>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        </tr>
-                                                    {% endif %}
-                                                    <tr>
-                                                        <td class="rightBorder"><small>{{ run.conf }}</small></td>
-                                                    {% set buildKeyIndexPrinted = -1 %}
-                                                {% endif %}
+{# New row for each conf #}
+{%                  if confPrev != run.conf %}
+{# Close previous row #}
+{%                      if confPrev != '' %}
+{# Fill empty cells at the end of the row #}
+{%                          for key, buildKey in buildKeys %}
+{%                              if key > buildKeyIndexPrinted %}
+<td></td>
+{%                              endif %}
+{%                          endfor %}
+</tr>
+{%                      endif %}
+<tr>
+<td class="rightBorder"><small>{{ run.conf }}</small></td>
+{%                      set buildKeyIndexPrinted = -1 %}
+{%                  endif %}
 
-                                                {# Result per build key #}
-                                                {% set buildKeyFound = 0 %}
-                                                {% for key, buildKey in buildKeys %}
-                                                    {# Print each column only once (checked based on column index key and buildKeyFound flag) #}
-                                                    {% if key > buildKeyIndexPrinted and not buildKeyFound %}
-                                                        {% if buildKey == run.buildKey %}
-                                                            {# Print results #}
-                                                            <td class="center">
-                                                                {% if (run.failed + run.ifailed) > 0 %}
-                                                                    <button type="button" class="btn btn-xs btn-danger clickOnTouch"
-                                                                        data-toggle="tooltip" data-placement="top" data-html="true"
-                                                                        title="<table>
-                                                                                <tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
-                                                                                <tr><th>Configuration: </th><td>{{ run.conf }}</td></tr>
-                                                                                <tr><th>Testsets passed: </th><td>{{ run.passed }}</td></tr>
-                                                                                <tr><th>Testsets passed (insignificant): </th><td>{{ run.ipassed }}</td></tr>
-                                                                                <tr><th>Testsets failed: </th><td>{{ run.failed }}</td></tr>
-                                                                                <tr><th>Testsets failed (insignificant): </th><td>{{ run.ifailed }}</td></tr>
-                                                                            </table>">
-                                                                        <span class="badge">{{ run.failed + run.ifailed }}</span>
-                                                                    </button>
-                                                                {% elseif (run.passed + run.ipassed) > 0 %}
-                                                                    <button type="button" class="btn btn-xs btn-success clickOnTouch"
-                                                                        data-toggle="tooltip" data-placement="top" data-html="true"
-                                                                        title="<table>
-                                                                                <tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
-                                                                                <tr><th>Configuration: </th><td>{{ run.conf }}</td></tr>
-                                                                                <tr><th>Testsets passed: </th><td>{{ run.passed }}</td></tr>
-                                                                                <tr><th>Testsets passed (insignificant): </th><td>{{ run.ipassed }}</td></tr>
-                                                                                <tr><th>Testsets failed: </th><td>{{ run.failed }}</td></tr>
-                                                                                <tr><th>Testsets failed (insignificant): </th><td>{{ run.ifailed }}</td></tr>
-                                                                            </table>">
-                                                                        <span class="badge"><small>{{ run.passed + run.ipassed }}</small></span>
-                                                                    </button>
-                                                                {% endif %}
-                                                            </td>
-                                                            {% set buildKeyFound = 1 %}
-                                                        {% else %}
-                                                            {# Print empty cell #}
-                                                            <td></td>
-                                                        {% endif %}
-                                                        {% set buildKeyIndexPrinted = key %}
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {% set confPrev = run.conf %}
-                                            {% endfor %}
+{# Result per build key #}
+{%                  set buildKeyFound = 0 %}
+{%                  for key, buildKey in buildKeys %}
+{# Print each column only once (checked based on column index key and buildKeyFound flag) #}
+{%                      if key > buildKeyIndexPrinted and not buildKeyFound %}
+{%                          if buildKey == run.buildKey %}
+{# Print results #}
+<td class="center">
+{%                              if (run.failed + run.ifailed) > 0 %}
+<button type="button" class="btn btn-xs btn-danger clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
+<tr><th>Configuration: </th><td>{{ run.conf }}</td></tr>
+<tr><th>Testsets passed: </th><td>{{ run.passed }}</td></tr>
+<tr><th>Testsets passed (insignificant): </th><td>{{ run.ipassed }}</td></tr>
+<tr><th>Testsets failed: </th><td>{{ run.failed }}</td></tr>
+<tr><th>Testsets failed (insignificant): </th><td>{{ run.ifailed }}</td></tr></table>">
+<span class="badge">{{ run.failed + run.ifailed }}</span></button>
+{%                              elseif (run.passed + run.ipassed) > 0 %}
+<button type="button" class="btn btn-xs btn-success clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
+<tr><th>Configuration: </th><td>{{ run.conf }}</td></tr>
+<tr><th>Testsets passed: </th><td>{{ run.passed }}</td></tr>
+<tr><th>Testsets passed (insignificant): </th><td>{{ run.ipassed }}</td></tr>
+<tr><th>Testsets failed: </th><td>{{ run.failed }}</td></tr>
+<tr><th>Testsets failed (insignificant): </th><td>{{ run.ifailed }}</td></tr></table>">
+<span class="badge"><small>{{ run.passed + run.ipassed }}</small></span></button>
+{%                              endif %}
+</td>
+{%                              set buildKeyFound = 1 %}
+{%                          else %}
+{# Print empty cell #}
+<td></td>
+{%                          endif %}
+{%                          set buildKeyIndexPrinted = key %}
+{%                      endif %}
+{%                  endfor %}
+{%                  set confPrev = run.conf %}
+{%              endfor %}
 
-                                            {# Close last row (also fill empty cells at the end of the row) #}
-                                            {% for key, buildKey in buildKeys %}
-                                                {% if key > buildKeyIndexPrinted %}
-                                                        <td></td>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div> {# /table-responsive #}
-                            </div> {# /panel-body #}
-                        </div> {# /panel... #}
-                    {% endif %} {# testsetBranch #}
-                {% endfor %}
+{# Close last row (also fill empty cells at the end of the row) #}
+{%              for key, buildKey in buildKeys %}
+{%                  if key > buildKeyIndexPrinted %}
+<td></td>
+{%                  endif %}
+{%              endfor %}
+</tr>
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
+{%          endif %}{# testsetBranch #}
+{%      endfor %}{# branch #}
 
-            {% else %} {# runsAvailable #}
-                <div class="alert alert-danger" role="alert">
-                    No test result data available for project {{ project }}!
-                </div>
-            {% endif %}
+{% else %}{# runsAvailable #}
+<div class="alert alert-danger" role="alert">
+No test result data available for project {{ project }}!
+</div>
+{% endif %}{# runsAvailable #}
 
-        </div> {# /col... #}
-    </div> {# /row #}
-
-</div> {# /container-fluid #}
+</div> {# .col... #}
+</div> {# .row #}
+</div> {# .container-fluid #}
 
 {% include "footer.html" %}
 

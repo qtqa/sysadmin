@@ -34,8 +34,8 @@
 
 /**
  * Build project page
- * @version   0.2
- * @since     01-07-2015
+ * @version   0.3
+ * @since     10-07-2015
  * @author    Juha Sippola
  */
 
@@ -59,326 +59,308 @@
 #}
 
 <ol class="breadcrumb">
-    {% for link in breadcrumb %}
-        <li><a href="{{ link.link }}">{{ link.name }}</a></li>
-    {% endfor %}
-    {% if targetOs == '' and conf == '' %}
-        <li class="active">{{ project.getName }}</li>
-    {% elseif targetOs != '' %}
-        <li class="active">{{ targetOs }}</li>
-    {% elseif conf != '' %}
-        <li class="active">{{ conf }}</li>
-    {% endif %}
+{% for link in breadcrumb %}
+<li><a href="{{ link.link }}">{{ link.name }}</a></li>
+{% endfor %}
+{% if targetOs == '' and conf == '' %}
+<li class="active">{{ project.getName }}</li>
+{% elseif targetOs != '' %}
+<li class="active">{{ targetOs }}</li>
+{% elseif conf != '' %}
+<li class="active">{{ conf }}</li>
+{% endif %}
 </ol>
 
 <div class="container-fluid">
-    <div class="row">
+<div class="row">
 
-        <div class="col-sm-12 col-md-12 main">
+<div class="col-sm-12 col-md-12 main">
 
-            {# Check if any runs available #}
-            {% set runsAvailable = 0 %}
-            {% for run in latestProjectRuns %}
-                {% set runsAvailable = 1 %}
-            {% endfor %}
+{# Check if any runs available #}
+{% set runsAvailable = 0 %}
+{% for run in latestProjectRuns %}
+{%      set runsAvailable = 1 %}
+{% endfor %}
 
-            {##### Title #####}
+{##### Title #####}
 
-            <h1 class="page-header">
-                {{ project.getName }}
-                <button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-                    <span class="glyphicon glyphicon-info-sign"></span>
-                </button>
-                <small>{{ refreshed }}</small>
-            </h1>
+<h1 class="page-header">
+{{ project.getName }}
+<button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+<span class="glyphicon glyphicon-info-sign"></span>
+</button>
+<small>{{ refreshed }}</small>
+</h1>
 
-            {##### Platform buttons #####}
+{##### Platform buttons #####}
 
-            <div>
-                {% for platform in platforms %}
-                    {% if platform.os == targetOs %}
-                        {% set buttonStyle = 'btn-primary' %}
-                    {% else %}
-                        {% set buttonStyle = 'btn-default' %}
-                    {% endif %}
-                    <div class="btn-group">
-                        <a class="btn {{ buttonStyle }} btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
-                    </div>
-                {% endfor %}
-                {% if conf != '' %}
-                    {% set link = confRoute ~ '/' ~ conf|url_encode %}
-                    <div class="btn-group">
-                        <a class="btn btn-info btn-xs" href="{{ link }}" role="button">{{ conf }}</a>
-                    </div>
-                {% endif %}
-            </div>
-            <hr>
+<div>
+{% for platform in platforms %}
+{%      if platform.os == targetOs %}
+{%          set buttonStyle = 'btn-primary' %}
+{%      else %}
+{%          set buttonStyle = 'btn-default' %}
+{%      endif %}
+<div class="btn-group">
+<a class="btn {{ buttonStyle }} btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
+</div>
+{% endfor %}
+{% if conf != '' %}
+{%      set link = confRoute ~ '/' ~ conf|url_encode %}
+<div class="btn-group">
+<a class="btn btn-info btn-xs" href="{{ link }}" role="button">{{ conf }}</a>
+</div>
+{% endif %}
+</div>
+<hr>
 
-            {##### Info well #####}
+{##### Info well #####}
 
-            <div class="collapse" id="info">
-                <div class="well infoWell">
-                    <span class="glyphicon glyphicon-info-sign"></span> <strong>Build Project</strong><br>
-                    <ul>
-                        <li>In <strong>Latest Status</strong>, the <strong>latest result</strong> shows the overall project status based on the
-                            latest <strong>{{ masterProject }} {{ masterState }}</strong> builds across all branches,
-                            and the <strong>branch</strong> results across all configurations (both show failed if failed
-                            in one or in several builds).</li>
-                        <li><strong>Results in Branches</strong> shows the {{ project.getName }} run results by branch
-                            and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong> builds
-                            (<span class="glyphicon glyphicon-ok green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }},
-                            <span class="glyphicon glyphicon-ok-sign green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }} as forcesuccess,
-                            <span class="glyphicon glyphicon-remove red"></span> = {{ constant('ConfRun::RESULT_FAILURE') }},
-                            <span class="glyphicon glyphicon-ban-circle gray"></span> = {{ constant('ConfRun::RESULT_UNDEF') }});
-                            details on the runs are available as tooltip on result icon.</li>
-                    </ul>
-                </div>
-            </div>
+<div class="collapse" id="info">
+<div class="well infoWell">
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Build Project</strong><br>
+<ul>
+<li>In <strong>Latest Status</strong>, the <strong>latest result</strong> shows the overall project status based on the
+latest <strong>{{ masterProject }} {{ masterState }}</strong> builds across all branches,
+and the <strong>branch</strong> results across all configurations (both show failed if failed
+in one or in several builds).</li>
+<li><strong>Results in Branches</strong> shows the {{ project.getName }} run results by branch
+and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong> builds
+(<span class="glyphicon glyphicon-ok green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }},
+<span class="glyphicon glyphicon-ok-sign green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }} as forcesuccess,
+<span class="glyphicon glyphicon-remove red"></span> = {{ constant('ConfRun::RESULT_FAILURE') }},
+<span class="glyphicon glyphicon-ban-circle gray"></span> = {{ constant('ConfRun::RESULT_UNDEF') }});
+details on the runs are available as tooltip on result icon.</li>
+</ul>
+</div>
+</div>
 
-            {% if runsAvailable %}
+{% if runsAvailable %}
 
-                {##### Latest Status #####}
+{##### Latest Status #####}
 
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h4 class="panel-title bold">Latest Status</h4>
-                    </div>
-                    <div class="panel-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>project</th>
-                                        <th class="rightBorder">latest result</th>
-                                        {% for branch in latestProjectRuns %}
-                                            <th class="center">{{ branch.name }}</th>
-                                        {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        {# Project name #}
-                                        <td>{{ project.getName }}</td>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest Status</h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>project</th>
+<th class="rightBorder">latest result</th>
+{%      for branch in latestProjectRuns %}
+<th class="center">{{ branch.name }}</th>
+{%      endfor %}
+</tr>
+</thead>
+<tbody>
+<tr>
+{# Project name #}
+<td>{{ project.getName }}</td>
 
-                                        {# Testset status according to the latest build results #}
-                                        {% if project.getStatus == constant('ConfRun::RESULT_SUCCESS') %}
-                                            {% set resultIcon = 'glyphicon glyphicon-ok green' %}
-                                        {% elseif project.getStatus == constant('ConfRun::RESULT_FAILURE') %}
-                                            {% set resultIcon = 'glyphicon glyphicon-remove red' %}
-                                        {% else %}
-                                            {% set resultIcon = '' %}
-                                        {% endif %}
-                                        <td class="rightBorder"><span class="spaceHorizontal {{ resultIcon }}"></span>{{ project.getStatus }}</td>
+{# Testset status according to the latest build results #}
+{%      if project.getStatus == constant('ConfRun::RESULT_SUCCESS') %}
+{%          set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%      elseif project.getStatus == constant('ConfRun::RESULT_FAILURE') %}
+{%          set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%      else %}
+{%          set resultIcon = '' %}
+{%      endif %}
+<td class="rightBorder"><span class="spaceHorizontal {{ resultIcon }}"></span>{{ project.getStatus }}</td>
 
-                                        {# Result (by branch) #}
-                                        {% for run in latestProjectRuns %}
-                                            {% if run.result == constant('ConfRun::RESULT_SUCCESS') %}
-                                                {% set resultIcon = 'glyphicon glyphicon-ok green' %}
-                                            {% elseif run.result == constant('ConfRun::RESULT_FAILURE') %}
-                                                {% set resultIcon = 'glyphicon glyphicon-remove red' %}
-                                            {% else %}
-                                                {% set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
-                                            {% endif %}
-                                            <td class="center">
-                                                <span class="spaceHorizontal {{ resultIcon }} clickOnTouch"
-                                                    data-toggle="tooltip" data-placement="top" data-html="true"
-                                                    title="<table>
-                                                            <tr><th>Branch: </td><td>{{ run.name }}</td></tr>
-                                                            <tr><th>Build key: </td><td>{{ run.buildKey }}</td></tr>
-                                                            <tr><th>Timestamp: </td><td>{{ run.timestamp }}</td></tr>
-                                                            <tr><th>Result: </td><td>{{ run.result }}</td></tr>
-                                                            <tr><th>Duration: </td><td>{{ run.duration}}</td></tr>
-                                                        </table>">
-                                                </span>
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div> {# /table-responsive #}
-                    </div> {# /panel-body #}
-                </div> {# /panel... #}
+{# Result (by branch) #}
+{%      for run in latestProjectRuns %}
+{%          if run.result == constant('ConfRun::RESULT_SUCCESS') %}
+{%              set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%          elseif run.result == constant('ConfRun::RESULT_FAILURE') %}
+{%              set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%          else %}
+{%              set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
+{%          endif %}
+<td class="center">
+<span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>Branch: </td><td>{{ run.name }}</td></tr>
+<tr><th>Build key: </td><td>{{ run.buildKey }}</td></tr>
+<tr><th>Timestamp: </td><td>{{ run.timestamp }}</td></tr>
+<tr><th>Result: </td><td>{{ run.result }}</td></tr>
+<tr><th>Duration: </td><td>{{ run.duration}}</td></tr></table>">
+</span></td>
+{%      endfor %}{# run #}
+</tr>
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
 
-                {##### Results in Branches #####}
+{##### Results in Branches #####}
 
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h4 class="panel-title bold">Results in Branches</h4>
-                    </div>
-                </div>
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Results in Branches</h4>
+</div>
+</div>
 
-                {# Get branches #}
-                {% set branches = [] %}
-                {% for run in projectBuilds %}
-                    {% if run.branch not in branches %}
-                        {% set branches = branches|merge([run.branch]) %}
-                    {% endif %}
-                {% endfor %}
+{# Get branches #}
+{%      set branches = [] %}
+{%      for run in projectBuilds %}
+{%          if run.branch not in branches %}
+{%              set branches = branches|merge([run.branch]) %}
+{%          endif %}
+{%      endfor %}
 
-                {# Loop all the branches #}
-                {% for branch in branches %}
+{# Loop all the branches #}
+{%      for branch in branches %}
 
-                    {# Get all build keys #}
-                    {% set buildKey = '' %}
-                    {% set buildKeys = [] %}
-                    {% set dates = [] %}
-                    {% for run in projectBuilds %}
-                        {% if run.branch == branch %}
-                            {% if buildKey != run.buildKey %}
-                                {% set buildKey = run.buildKey %}
-                                {% set buildKeys = buildKeys|merge([run.buildKey]) %}
-                                {% set dates = dates|merge([run.timestamp]) %}
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
+{# Get all build keys #}
+{%          set buildKey = '' %}
+{%          set buildKeys = [] %}
+{%          set dates = [] %}
+{%          for run in projectBuilds %}
+{%              if run.branch == branch %}
+{%                  if buildKey != run.buildKey %}
+{%                      set buildKey = run.buildKey %}
+{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
+{%                      set dates = dates|merge([run.timestamp]) %}
+{%                  endif %}
+{%              endif %}
+{%          endfor %}
 
-                    {# Check if conf run for this branch #}
-                    {% set confBranch = 0 %}
-                    {% for run in confRuns if run.getBranchName == branch %}
-                        {% set confBranch = 1 %}
-                    {% endfor %}
+{# Check if conf run for this branch #}
+{%          set confBranch = 0 %}
+{%          for run in confRuns if run.getBranchName == branch %}
+{%              set confBranch = 1 %}
+{%          endfor %}
 
-                    {# Show branch if conf run for it #}
-                    {% if confBranch %}
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                <h4 class="panel-title bold">{{ branch }}</h4>
-                            </div>
-                            <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="bold rightBorder">{{ project.getName }}</th>
-                                                {% for key, buildKey in buildKeys %}
-                                                    <th class="center">
-                                                        {% if buildKey|length > 6 %}
-                                                            <span class="clickOnTouch" data-toggle="tooltip" data-placement="top"
-                                                                title="{{ buildKey }}">{{ buildKey|slice(0, 4) }}...
-                                                            </span>
-                                                        {% else %}
-                                                            {{ buildKey }}
-                                                        {% endif %}
-                                                        <br>
-                                                        <span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
-                                                    </th>
-                                                {% endfor %}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% set confPrev = '' %}
-                                            {% set buildKeyIndexPrinted = -1 %}
-                                            {% set buildKeyFound = 0 %}
-                                            {% for run in confRuns if run.getBranchName == branch %}
+{# Show branch if conf run for it #}
+{%          if confBranch %}
+<div class="panel panel-info">
+<div class="panel-heading">
+<h4 class="panel-title bold">{{ branch }}</h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="bold rightBorder">{{ project.getName }}</th>
+{%              for key, buildKey in buildKeys %}
+<th class="center">
+{%                  if buildKey|length > 6 %}
+<span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ buildKey }}">{{ buildKey|slice(0, 4) }}...</span><br>
+{%                  else %}
+{{ buildKey }}<br>
+{%                  endif %}
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+</th>
+{%              endfor %}
+</tr>
+</thead>
+<tbody>
+{%              set confPrev = '' %}
+{%              set buildKeyIndexPrinted = -1 %}
+{%              set buildKeyFound = 0 %}
+{%              for run in confRuns if run.getBranchName == branch %}
 
-                                                {# New row for each conf #}
-                                                {% if confPrev != run.getName %}
-                                                    {# Close previous row #}
-                                                    {% if confPrev != '' %}
-                                                        {# Fill empty cells at the end of the row #}
-                                                        {% for key, buildKey in buildKeys %}
-                                                            {% if key > buildKeyIndexPrinted %}
-                                                                    <td></td>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        </tr>
-                                                    {% endif %}
-                                                    <tr>
-                                                        {% if conf == '' %}
-                                                            {% set link = confRoute ~ '/' ~ run.getName|url_encode %}
-                                                            {% set tooltip = 'click to filter this configuration' %}
-                                                            <td class="rightBorder">
-                                                                <a href="{{ link }}">
-                                                                    <small>
-                                                                        <span data-toggle="tooltip" data-placement="top" title="{{ tooltip }}">
-                                                                            {{ run.getName }}
-                                                                        </span>
-                                                                    </small>
-                                                                </a>
-                                                            </td>
-                                                        {% else %}
-                                                            <td class="rightBorder">
-                                                                <small>
-                                                                    {{ run.getName }}
-                                                                </small>
-                                                            </td>
-                                                        {% endif %}
-                                                    {% set buildKeyIndexPrinted = -1 %}
-                                                {% endif %}
+{# New row for each conf #}
+{%                  if confPrev != run.getName %}
+{# Close previous row #}
+{%                      if confPrev != '' %}
+{# Fill empty cells at the end of the row #}
+{%                          for key, buildKey in buildKeys %}
+{%                              if key > buildKeyIndexPrinted %}
+<td></td>
+{%                              endif %}
+{%                          endfor %}
+</tr>
+{%                      endif %}
+<tr>
+{%                      if conf == '' %}
+{%                          set link = confRoute ~ '/' ~ run.getName|url_encode %}
+{%                          set tooltip = 'click to filter this configuration' %}
+<td class="rightBorder">
+<a href="{{ link }}"><small><span data-toggle="tooltip" data-placement="top" title="{{ tooltip }}">{{ run.getName }}</span></small></a>
+</td>
+{%                      else %}
+<td class="rightBorder">
+<small>{{ run.getName }}</small>
+</td>
+{%                      endif %}
+{%                      set buildKeyIndexPrinted = -1 %}
+{%                  endif %}
 
-                                                {# Result per build key #}
-                                                {% set buildKeyFound = 0 %}
-                                                {% for key, buildKey in buildKeys %}
-                                                    {# Print each column only once (checked based on column index key and buildKeyFound flag) #}
-                                                    {% if key > buildKeyIndexPrinted and not buildKeyFound %}
-                                                        {% if buildKey == run.getBuildKey %}
-                                                            {# Print result #}
-                                                            {% set forcesuccess = '' %}
-                                                            {% if run.getResult == constant('ConfRun::RESULT_SUCCESS') %}
-                                                                {% if run.getForcesuccess == 0 %}
-                                                                    {% set resultIcon = 'glyphicon glyphicon-ok green' %}
-                                                                {% else %}
-                                                                    {# Forcesuccess #}
-                                                                    {% set resultIcon = 'glyphicon glyphicon-ok-sign green' %}
-                                                                    {% set forcesuccess = ' (as forcesuccess)' %}
-                                                                {% endif %}
-                                                            {% elseif run.getResult == constant('ConfRun::RESULT_FAILURE') %}
-                                                                {% set resultIcon = 'glyphicon glyphicon-remove red' %}
-                                                            {% elseif run.getResult == constant('ConfRun::RESULT_UNDEF') %}
-                                                                {% set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
-                                                            {% else %}
-                                                                {% set resultIcon = '' %}
-                                                            {% endif %}
-                                                            <td class="center">
-                                                                <span class="spaceHorizontal {{ resultIcon }} clickOnTouch"
-                                                                    data-toggle="tooltip" data-placement="top" data-html="true"
-                                                                    title="<table>
-                                                                            <tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
-                                                                            <tr><th>Configuration: </th><td>{{ run.getName }}</td></tr>
-                                                                            <tr><th>Timestamp: </th><td>{{ run.getTimestamp }}</td></tr>
-                                                                            <tr><th>Result: </th><td>{{ run.getResult }} {{ forcesuccess }}</td></tr>
-                                                                            <tr><th>Duration: </th><td>{{ run.getDuration }}</td></tr>
-                                                                            <tr><th>Forcesuccess: </th><td>{% if run.getForcesuccess %}yes{% else %}no{% endif %}</td></tr>
-                                                                            <tr><th>Insignificant: </th><td>{% if run.getInsignificant %}yes{% else %}no{% endif %}</td></tr>
-                                                                        </table>">
-                                                                </span>
-                                                            </td>
-                                                            {% set buildKeyFound = 1 %}
-                                                        {% else %}
-                                                            {# Print empty cell #}
-                                                            <td></td>
-                                                        {% endif %}
-                                                        {% set buildKeyIndexPrinted = key %}
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {% set confPrev = run.getName %}
-                                            {% endfor %}
+{# Result per build key #}
+{%                  set buildKeyFound = 0 %}
+{%                  for key, buildKey in buildKeys %}
+{# Print each column only once (checked based on column index key and buildKeyFound flag) #}
+{%                      if key > buildKeyIndexPrinted and not buildKeyFound %}
+{%                          if buildKey == run.getBuildKey %}
+{# Print result #}
+{%                              set forcesuccess = '' %}
+{%                              if run.getResult == constant('ConfRun::RESULT_SUCCESS') %}
+{%                                  if run.getForcesuccess == 0 %}
+{%                                      set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%                                  else %}
+{# Forcesuccess #}
+{%                                      set resultIcon = 'glyphicon glyphicon-ok-sign green' %}
+{%                                      set forcesuccess = ' (as forcesuccess)' %}
+{%                                  endif %}
+{%                              elseif run.getResult == constant('ConfRun::RESULT_FAILURE') %}
+{%                                  set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%                              elseif run.getResult == constant('ConfRun::RESULT_UNDEF') %}
+{%                                  set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
+{%                              else %}
+{%                                  set resultIcon = '' %}
+{%                              endif %}
+<td class="center">
+<span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
+<tr><th>Configuration: </th><td>{{ run.getName }}</td></tr>
+<tr><th>Timestamp: </th><td>{{ run.getTimestamp }}</td></tr>
+<tr><th>Result: </th><td>{{ run.getResult }} {{ forcesuccess }}</td></tr>
+<tr><th>Duration: </th><td>{{ run.getDuration }}</td></tr>
+<tr><th>Forcesuccess: </th><td>{% if run.getForcesuccess %}yes{% else %}no{% endif %}</td></tr>
+<tr><th>Insignificant: </th><td>{% if run.getInsignificant %}yes{% else %}no{% endif %}</td></tr></table>">
+</span></td>
+{%                              set buildKeyFound = 1 %}
+{%                          else %}{# buildKey #}
+{# Print empty cell #}
+<td></td>
+{%                          endif %}{# buildKey #}
+{%                          set buildKeyIndexPrinted = key %}
+{%                      endif %}{# key #}
+{%                  endfor %}{# key #}
+{%                  set confPrev = run.getName %}
+{%              endfor %}{# run #}
 
-                                            {# Close last row (also fill empty cells at the end of the row) #}
-                                            {% for key, buildKey in buildKeys %}
-                                                {% if key > buildKeyIndexPrinted %}
-                                                        <td></td>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div> {# /table-responsive #}
-                            </div> {# /panel-body #}
-                        </div> {# /panel... #}
-                    {% endif %} {# testsetBranch #}
-                {% endfor %}
+{# Close last row (also fill empty cells at the end of the row) #}
+{%              for key, buildKey in buildKeys %}
+{%                  if key > buildKeyIndexPrinted %}
+<td></td>
+{%                  endif %}
+{%              endfor %}
+</tr>
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
+{%          endif %}{# confBranch #}
+{%      endfor %}{# branch #}
 
-            {% else %} {# runsAvailable #}
-                <div class="alert alert-danger" role="alert">
-                    No build data available for project {{ project.getName }}!
-                </div>
-            {% endif %}
+{% else %}{# runsAvailable #}
+<div class="alert alert-danger" role="alert">
+No build data available for project {{ project.getName }}!
+</div>
+{% endif %}{# runsAvailable #}
 
-        </div> {# /col... #}
-    </div> {# /row #}
-
-</div> {# /container-fluid #}
+</div> {# .col... #}
+</div> {# .row #}
+</div> {# .container-fluid #}
 
 {% include "footer.html" %}
 
