@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.7
- * @since     01-07-2015
+ * @version   0.8
+ * @since     06-07-2015
  * @author    Juha Sippola
  */
 
@@ -517,14 +517,14 @@ class Database {
 
     /**
      * Get counts of all passed and failed runs for a testset in specified builds since specified date
-     * If several testsets found with the same name in different projects, all are listed
      * @param string $testset
+     * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
      * @param string $date
      * @return array (string name, string project, int passed, int failed)
      */
-    public function getTestsetResultCounts($testset, $runProject, $runState, $date)
+    public function getTestsetResultCounts($testset, $testsetProject, $runProject, $runState, $date)
     {
         $result = array();
         $query = $this->db->prepare("
@@ -540,6 +540,7 @@ class Database {
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
                 INNER JOIN state ON project_run.state_id = state.id
             WHERE
+                project.name = ? AND
                 testset.name = ? AND
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
@@ -548,6 +549,7 @@ class Database {
             ORDER BY project.name;
         ");
         $query->execute(array(
+            $testsetProject,
             $testset,
             $runProject,
             $runState,
@@ -575,34 +577,65 @@ class Database {
     public function getTestsetsFlakyCounts($date, $limit)
     {
         $result = array();
-        $query = $this->db->prepare('
+        // Get all flaky test runs
+        $query = $this->db->prepare("
             SELECT
                 testset.name AS testset,
-                project.name AS project,
-                COUNT(CASE WHEN testset_run.run > 1 AND (testset_run.result = "passed" OR testset_run.result = "ipassed") THEN testset_run.run END) AS flaky,
-                COUNT(testset_run.id) AS total
+                project.name AS project
             FROM testset_run
                 INNER JOIN testset ON testset_run.testset_id = testset.id
                 INNER JOIN project ON testset.project_id = project.id
                 INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
-            WHERE project_run.timestamp >= ?
-            GROUP BY testset.name
-            ORDER BY flaky DESC, testset.name ASC
-            LIMIT ?;
-        ');
-        $query->bindParam(1, $date);
-        $query->bindParam(2, $limit, PDO::PARAM_INT);       // int data type must be separately set
-        $query->execute();
+            WHERE
+                project_run.timestamp >= ? AND
+                testset_run.run > 1 AND
+                testset_run.result LIKE '%passed'
+            ORDER BY project.name, testset.name;
+        ");
+        $query->execute(array(
+            $date
+        ));
+        // Calculate flaky count per testset (calculated here instead of in the query above for performance reasons)
+        $testset = '';
+        $testsets = array();
+        $projects = array();
+        $counts = array();
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
-            if ($row['flaky'] > 0) {                        // return only those where flaky identified
-                $result[] = array(
-                    'name' => $row['testset'],
-                    'project' => $row['project'],
-                    'flaky' => $row['flaky'],
-                    'total' => $row['total']
-                );
+            if ($testset === '') {                                                  // Initialize
+                $key = 0;
+                $flaky = 0;
+                $testset = $row['testset'];
+                $project = $row['project'];
             }
+            if ($row['testset'] !== $testset OR $row['project'] !== $project) {    // New testset
+                $key++;
+                $flaky = 0;
+                $testset = $row['testset'];
+                $project = $row['project'];
+            }
+            $flaky++;
+            $testsets[$key] = $row['testset'];
+            $projects[$key] = $row['project'];
+            $counts[$key] = $flaky;
+        }
+        // List top n flaky testsets
+        arsort($counts);
+        $i = 0;
+        foreach ($counts as $key => $value) {
+            $data = self::getTestsetFlakyCounts($testsets[$key], $projects[$key], $date);
+            foreach($data as $row) {
+                $total = $row['total'];
+            }
+            $result[] = array(
+                'name' => $testsets[$key],
+                'project' => $projects[$key],
+                'flaky' => $value,
+                'total' => $total
+            );
+            $i++;
+            if ($i >= $limit)
+                break;
         }
         return $result;
     }
@@ -611,10 +644,11 @@ class Database {
      * Get counts of flaky runs for a testset since specified date
      * Scope is all builds (state and any)
      * @param string $testset
+     * @param string $testsetProject
      * @param string $date
      * @return array (string name, string project, int flaky, int total)
      */
-    public function getTestsetFlakyCounts($testset, $date)
+    public function getTestsetFlakyCounts($testset, $testsetProject, $date)
     {
         $result = array();
         $query = $this->db->prepare('
@@ -628,11 +662,15 @@ class Database {
                 INNER JOIN project ON testset.project_id = project.id
                 INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
-            WHERE testset.name = ? AND project_run.timestamp >= ?
+            WHERE
+                project.name = ? AND
+                testset.name = ? AND
+                project_run.timestamp >= ?
             GROUP BY testset.name
             ORDER BY project.name;
         ');
         $query->execute(array(
+            $testsetProject,
             $testset,
             $date
         ));

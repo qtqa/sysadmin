@@ -38,8 +38,8 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.7
- * @since     01-07-2015
+ * @version   0.8
+ * @since     06-07-2015
  * @author    Juha Sippola
  */
 
@@ -422,12 +422,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getTestsetResultCounts
      * @dataProvider testGetTestsetResultCountsData
      */
-    public function testGetTestsetResultCounts($testset, $runProject, $runState, $date, $exp_project, $exp_testset_count_min, $exp_failed_min)
+    public function testGetTestsetResultCounts($testset, $testsetProject, $runProject, $runState, $date, $exp_project, $exp_testset_count_min, $exp_failed_min)
     {
         $testsets = array();
         $failed = 0;
         $db = Factory::db();
-        $result = $db->getTestsetResultCounts($testset, $runProject, $runState, $date);
+        $result = $db->getTestsetResultCounts($testset, $testsetProject, $runProject, $runState, $date);
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
             $this->assertArrayHasKey('project', $row);
@@ -448,13 +448,14 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetResultCountsData()
     {
         return array(
-            array('tst_qftp', 'Qt5', 'state', '2013-05-01', 'qtbase', 1, 1),
-            array('tst_qftp', 'Qt5', 'state', '2013-05-28', 'qtbase', 1, 1),
-            array('tst_qftp', 'Qt5', 'state', '2013-05-29', 'qtbase', 0, 0),
-            array('tst_qftp', 'Qt5', 'state', '2999-05-29', 'qtbase', 0, 0),
-            array('tst_qftp', 'qtbase', 'state', '2013-05-01', '', 0, 0),               // QtBase build not run (Qt5 only)
-            array('tst_networkselftest', 'Qt5', 'state', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not failed
-            array('invalid-name', 'Qt5', 'state', '2013-05-29', '', 0, 0)
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', '2013-05-01', 'qtbase', 1, 1),
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', '2013-05-28', 'qtbase', 1, 1),
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', '2013-05-29', 'qtbase', 0, 0),
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', '2999-05-29', 'qtbase', 0, 0),
+            array('tst_qftp', 'qtbase', 'qtbase', 'state', '2013-05-01', '', 0, 0),               // QtBase build not run (Qt5 only)
+            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not failed
+            array('invalid-name', 'qtbase', 'Qt5', 'state', '2013-05-29', '', 0, 0),
+            array('tst_qftp', 'invalid-name', 'Qt5', 'state', '2013-05-29', '', 0, 0)
         );
     }
 
@@ -488,8 +489,8 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('2013-05-01', 10, 'tst_qfont', 'tst_networkselftest', 2, 1),  // in test data only tst_qfont and tst_qftp are flaky
-            array('2013-05-01', 1, 'tst_qfont', 'tst_networkselftest', 1, 1),
-            array('2013-05-28', 10, 'tst_qfont', 'tst_qftp', 1, 1),             // in test data only tst_qfont is flaky
+            array('2013-05-28', 10, 'tst_qfont', 'tst_networkselftest', 1, 1),
+            array('2013-05-01', 1, 'tst_qftp', 'tst_networkselftest', 1, 2),
             array('2013-05-29', 10, '', '', 0, 0),
             array('2999-05-29', 10, '', '', 0, 0)
         );
@@ -499,12 +500,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getTestsetFlakyCounts
      * @dataProvider testGetTestsetFlakyCountsData
      */
-    public function testGetTestsetFlakyCounts($testset, $date, $exp_project, $exp_testset_count_min, $exp_flaky_min)
+    public function testGetTestsetFlakyCounts($testset, $testsetProject, $date, $exp_project, $exp_testset_count_min, $exp_flaky_min)
     {
         $testsets = array();
         $flaky = 0;
         $db = Factory::db();
-        $result = $db->getTestsetFlakyCounts($testset, $date);
+        $result = $db->getTestsetFlakyCounts($testset, $testsetProject, $date);
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
             $this->assertArrayHasKey('project', $row);
@@ -525,12 +526,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetFlakyCountsData()
     {
         return array(
-            array('tst_qfont', '2013-05-01', 'qtbase', 1, 1),
-            array('tst_qfont', '2013-05-28', 'qtbase', 1, 1),
-            array('tst_qfont', '2013-05-29', 'qtbase', 0, 0),
-            array('tst_qfont', '2999-05-29', 'qtbase', 0, 0),
-            array('tst_networkselftest', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not flaky
-            array('invalid-name', '2013-05-29', '', 0, 0)
+            array('tst_qfont', 'qtbase', '2013-05-01', 'qtbase', 1, 1),
+            array('tst_qfont', 'qtbase', '2013-05-28', 'qtbase', 1, 1),
+            array('tst_qfont', 'qtbase', '2013-05-29', 'qtbase', 0, 0),
+            array('tst_qfont', 'qtbase', '2999-05-29', 'qtbase', 0, 0),
+            array('tst_networkselftest', 'qtbase', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not flaky
+            array('invalid-name', 'qtbase', '2013-05-29', '', 0, 0),
+            array('tst_qfont', 'invalid-name', '2013-05-29', '', 0, 0)
         );
     }
 

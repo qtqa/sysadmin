@@ -34,8 +34,8 @@
 
 /**
  * Factory class
- * @version   0.5
- * @since     01-07-2015
+ * @version   0.6
+ * @since     06-07-2015
  * @author    Juha Sippola
  */
 
@@ -218,23 +218,20 @@ class Factory {
         // Failure result counts (from specified builds only)
         $days = intval($ini['top_failures_last_days']) - 1;
         $since = self::getSinceDate($days);
-        $dbTestsetDetails = self::db()->getTestsetResultCounts($name, $runProject, $runState, $since);
+        $dbTestsetDetails = self::db()->getTestsetResultCounts($name, $testsetProject, $runProject, $runState, $since);
         foreach($dbTestsetDetails as $detail) {
-            if ($detail['project'] === $testsetProject)
-                $obj->setTestsetResultCounts($detail['passed'], $detail['failed']);
+            $obj->setTestsetResultCounts($detail['passed'], $detail['failed']);
         }
         // Flaky counts (all builds)
         $days = intval($ini['flaky_testsets_last_days']) - 1;
         $since = self::getSinceDate($days);
-        $dbTestsetDetails = self::db()->getTestsetFlakyCounts($name, $since);
+        $dbTestsetDetails = self::db()->getTestsetFlakyCounts($name, $testsetProject, $since);
         foreach($dbTestsetDetails as $detail) {
-            if ($detail['project'] === $testsetProject)
-                $obj->setTestsetFlakyCounts($detail['flaky'], $detail['total']);
+            $obj->setTestsetFlakyCounts($detail['flaky'], $detail['total']);
         }
         return $obj;
     }
 
-/* NEW */
     /**
      * Create ConfRun objects for those in database
      * @param string $runProject
