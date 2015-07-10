@@ -34,8 +34,8 @@
 
 /**
  * Header section of html page including the meta data and style sheets
- * @version   0.3
- * @since     18-06-2015
+ * @version   0.4
+ * @since     08-07-2015
  * @author    Juha Sippola
  */
 
@@ -87,12 +87,19 @@
                     <span class="icon-bar"></span>
                 </button>
 
+                <div>
                     <a class="navbar-brand" href="">
                         <span>
                             <img src="images/Qt-logo-small.png" alt="Qt"> &nbsp; Qt Metrics
                         </span>
                     </a>
+                    <div id="link_loading" class="progress">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div id="navbar" class="navbar-collapse collapse">
                 <nav>
                     <ul class="nav nav-pills pull-right">

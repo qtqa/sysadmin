@@ -35,8 +35,8 @@
 
 /**
  * Qt Metrics style sheet
- * @version   0.2
- * @since     22-06-2015
+ * @version   0.3
+ * @since     08-07-2015
  * @author    Juha Sippola
  */
 
@@ -107,6 +107,21 @@
 
 .spaceHorizontal {
     margin: 0 5px 0 5px;
+}
+
+/*
+ * Animation shown while loading a page from a link
+ */
+
+#link_loading {
+    position: relative;
+    left: 10px;
+    top: 18px;
+    width: 60px;
+}
+
+#link_loading .progress-bar {
+    width: 100%;
 }
 
 /*

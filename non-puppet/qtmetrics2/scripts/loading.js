@@ -1,4 +1,4 @@
-<!--
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,15 +33,35 @@
 #############################################################################
 
 /**
- * About window content
- * @version   0.11
+ * Show loading progress bar
+ * @version   0.1
  * @since     08-07-2015
  * @author    Juha Sippola
  */
 
--->
+// Hide the progress bar when page loaded
+$(window).load(function() {
+    $('#link_loading').hide();
+});
 
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.11 (08-Jul-2015)</small></p>
+// Show the progress bar when reloading the page (this also hides the progress bar when pressing back/forward button)
+$(window).on('beforeunload', function() {
+    setTimeout(function() {
+        $('#link_loading').fadeIn();
+    }, 1000); // wait for 1s
+});
+
+// Show the progress bar when internal link clicked
+$(function(){
+    $('a').on('click', function(e) {
+        if ( $(this).attr('target') !== '_blank' && $(this).attr('href') !== "" && $(this).attr('href') !== "#") {
+            setTimeout(function() {
+                $('#link_loading').fadeIn();
+            }, 1000); // wait for 1s
+        }
+        // Fallback: hide after a timeout so that never left on by accident (e.g. due to browser differences)
+        setTimeout(function() {
+            $('#link_loading').fadeOut();
+        }, 10000); // wait for 10s
+    });
+});
