@@ -32,8 +32,8 @@
 #############################################################################
 
 # Qt Metrics configuration
-# @version   0.2
-# @since     17-06-2015
+# @version   0.3
+# @since     09-07-2015
 # @author    Juha Sippola
 
 # Turn on the rewriting engine
@@ -49,6 +49,21 @@ RewriteEngine On
     Header set X-Frame-Options "SAMEORIGIN"
     # Provide protection against Cross-Site Scripting
     Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Compress all output labeled with one of the following media types
+<IfModule mod_deflate.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE \
+            "application/javascript" \
+            "application/json" \
+            "application/xml" \
+            "text/css" \
+            "text/html" \
+            "text/javascript" \
+            "text/plain" \
+            "text/xml"
+    </IfModule>
 </IfModule>
 
 # If the requested file does not exist, show link to index.php
