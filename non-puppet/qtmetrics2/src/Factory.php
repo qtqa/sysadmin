@@ -34,14 +34,15 @@
 
 /**
  * Factory class
- * @version   0.6
- * @since     06-07-2015
+ * @version   0.7
+ * @since     20-07-2015
  * @author    Juha Sippola
  */
 
 require_once 'Database.php';
 require_once 'Project.php';
 require_once 'ProjectRun.php';
+require_once 'Conf.php';
 require_once 'ConfRun.php';
 require_once 'Testset.php';
 require_once 'TestsetRun.php';
@@ -157,6 +158,20 @@ class Factory {
     public static function createProject($project, $runProject, $runState)
     {
         $obj = new Project($project);
+        $obj->setStatus($runProject, $runState);
+        return $obj;
+    }
+
+    /**
+     * Create Configuration object for that in database
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array Conf object
+     */
+    public static function createConf($conf, $runProject, $runState)
+    {
+        $obj = new Conf($conf);
         $obj->setStatus($runProject, $runState);
         return $obj;
     }
@@ -287,6 +302,41 @@ class Factory {
                 $runState,
                 $entry['buildKey'],
                 $entry['conf'],
+                $entry['run'],
+                TestsetRun::stripResult($entry['result']),
+                TestsetRun::isInsignificant($entry['result']),
+                $entry['timestamp'],
+                $entry['duration']
+            );
+            $objects[] = $obj;
+        }
+        return $objects;
+    }
+
+    /**
+     * Create TestsetRun objects in a configuration for those in database
+     * @param string $conf
+     * @param string $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestsetRun objects
+     */
+    public static function createTestsetRunsInConf($conf, $testsetProject, $runProject, $runState)
+    {
+        $objects = array();
+        if (empty($testsetProject))
+            $dbEntries = self::db()->getTestsetConfResultsByBranch($conf, $runProject, $runState);
+        else
+            $dbEntries = self::db()->getTestsetConfProjectResultsByBranch($conf, $testsetProject, $runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new TestsetRun(
+                $entry['testset'],
+                $entry['project'],
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                $conf,
                 $entry['run'],
                 TestsetRun::stripResult($entry['result']),
                 TestsetRun::isInsignificant($entry['result']),

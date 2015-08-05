@@ -34,8 +34,8 @@
 
 /**
  * TestsetRun class
- * @version   0.4
- * @since     30-06-2015
+ * @version   0.5
+ * @since     15-07-2015
  * @author    Juha Sippola
  */
 
@@ -97,7 +97,7 @@ class TestsetRun extends ProjectRun {
     public function __construct($name, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {
         parent::__construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration);
         $this->name = $name;
-        $this->$testsetProjectName = $testsetProjectName;
+        $this->testsetProjectName = $testsetProjectName;
         $this->confName = $confName;
         $this->run = $run;
         $this->insignificant = $insignificant;
@@ -110,6 +110,15 @@ class TestsetRun extends ProjectRun {
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get name of the testset project.
+     * @return string
+     */
+    public function getTestsetProjectName()
+    {
+        return $this->testsetProjectName;
     }
 
     /**

@@ -34,8 +34,8 @@
 
 /**
  * Database class
- * @version   0.8
- * @since     06-07-2015
+ * @version   0.9
+ * @since     21-07-2015
  * @author    Juha Sippola
  */
 
@@ -298,6 +298,60 @@ class Database {
                     'name' => $row['name'],
                     'result' => $row['result'],
                     'buildKey' => $row['build_key'],
+                    'timestamp' => $row['timestamp'],
+                    'duration' => $row['duration']
+                );
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Get the latest configuration build result by branch for given project and state
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string name, string result, string buildKey, string timestamp, string duration)
+     */
+    public function getLatestConfBranchBuildResults($conf, $runProject, $runState)
+    {
+        $result = array();
+        $builds = self::getLatestProjectBranchBuildKeys($runProject, $runState);
+        foreach ($builds as $build) {
+            $query = $this->db->prepare("
+                SELECT
+                    branch.name,
+                    conf_run.result,
+                    project_run.build_key,
+                    conf_run.forcesuccess,
+                    conf_run.insignificant,
+                    conf_run.timestamp,
+                    conf_run.duration
+                FROM conf_run
+                    INNER JOIN conf ON conf_run.conf_id = conf.id
+                    INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                    INNER JOIN branch ON project_run.branch_id = branch.id
+                WHERE
+                    conf.name = ? AND
+                    project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                    project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                    project_run.branch_id = (SELECT id from branch WHERE name = ?) AND
+                    project_run.build_key = ?;
+            ");
+            $query->execute(array(
+                $conf,
+                $runProject,
+                $runState,
+                $build['name'],
+                $build['key']
+            ));
+            while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $result[] = array(
+                    'name' => $row['name'],
+                    'result' => $row['result'],
+                    'buildKey' => $row['build_key'],
+                    'forcesuccess' => $row['forcesuccess'],
+                    'insignificant' => $row['insignificant'],
                     'timestamp' => $row['timestamp'],
                     'duration' => $row['duration']
                 );
@@ -968,6 +1022,119 @@ class Database {
                 'ipassed' => $row['ipassed'],
                 'failed' => $row['failed'],
                 'ifailed' => $row['ifailed']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get results for failed testsets in specified configuration builds by branch
+     * Only the failures are listed
+     * @param $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
+     */
+    public function getTestsetConfResultsByBranch($conf, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                project_run.build_key,
+                testset.name AS testset,
+                project.name AS project,
+                testset_run.result,
+                project_run.timestamp,
+                testset_run.duration,
+                testset_run.run
+            FROM testset_run
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                testset_run.result LIKE '%failed' AND
+                conf.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, project.name, testset.name, project_run.build_key DESC;
+        ");
+        $query->execute(array(
+            $conf,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'buildKey' => $row['build_key'],
+                'testset' => $row['testset'],
+                'project' => $row['project'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration'],
+                'run' => $row['run']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get results for failed testsets in specified configuration builds and project by branch
+     * Only the failures are listed
+     * @param $conf
+     * @param $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
+     */
+    public function getTestsetConfProjectResultsByBranch($conf, $testsetProject, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                project_run.build_key,
+                testset.name AS testset,
+                project.name AS project,
+                testset_run.result,
+                project_run.timestamp,
+                testset_run.duration,
+                testset_run.run
+            FROM testset_run
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                testset_run.result LIKE '%failed' AND
+                project.name = ? AND
+                conf.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, project.name, testset.name, project_run.build_key DESC;
+        ");
+        $query->execute(array(
+            $testsetProject,
+            $conf,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'buildKey' => $row['build_key'],
+                'testset' => $row['testset'],
+                'project' => $row['project'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration'],
+                'run' => $row['run']
             );
         }
         return $result;

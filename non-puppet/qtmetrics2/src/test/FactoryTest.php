@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.5
- * @since     01-07-2015
+ * @version   0.6
+ * @since     20-07-2015
  * @author    Juha Sippola
  */
 
@@ -163,6 +163,23 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('Qt5', 'Qt5', 'state',)                               // project with project_run data
+        );
+    }
+
+    /**
+     * Test createConf
+     * @dataProvider testCreateConfData
+     */
+    public function testCreateConf($conf, $runProject, $runState)
+    {
+        $conf = Factory::createConf($conf, $runProject, $runState);
+        $this->assertTrue($conf instanceof Conf);
+        $this->assertNotEmpty($conf->getStatus());
+    }
+    public function testCreateConfData()
+    {
+        return array(
+            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state',)
         );
     }
 
@@ -310,7 +327,44 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             array('tst_qftp', 'qtbase', 'Qt5', 'state', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
             array('tst_qfont', 'qtbase', 'Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
             array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', 0),
-            array('tst_qftp', 'invalid', 'Qt5', 'state', '', '', '', 0),
+            array('tst_qftp', 'invalid', 'Qt5', 'state', '', '', '', 0)
+        );
+    }
+
+    /**
+     * Test createTestsetRunsInConf
+     * @dataProvider testCreateTestsetRunsInConfData
+     */
+    public function testCreateTestsetRunsInConf($conf, $testsetProject, $runProject, $runState, $exp_branch, $exp_buildKey, $exp_testset, $has_data)
+    {
+        $branches = array();
+        $buildKeys = array();
+        $testsets = array();
+        $runs = Factory::createTestsetRunsInConf($conf, $testsetProject, $runProject, $runState);
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof TestsetRun);
+            $branches[] = $run->getBranchName();
+            $buildKeys[] = $run->getBuildKey();
+            $testsets[] = $run->getName();
+        }
+        if ($has_data) {
+            $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_buildKey, $buildKeys);
+            $this->assertContains($exp_testset, $testsets);
+        } else {
+            $this->assertEmpty($runs);
+        }
+    }
+    public function testCreateTestsetRunsInConfData()
+    {
+        return array(
+            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', '', 'Qt5', 'state', 'stable', '1348', 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', '', 'Qt5', 'state', 'stable', 'BuildKeyInStringFormat12345', 'tst_qftp', 1),
+            array('invalid', '', 'Qt5', 'state', '', '', '', 0),
+            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', 'qtbase', 'Qt5', 'state', 'stable', '1348', 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 'BuildKeyInStringFormat12345', 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', '', '', 0),
+            array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', 0)
         );
     }
 
