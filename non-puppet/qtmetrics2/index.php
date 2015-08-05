@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.8
- * @since     01-07-2015
+ * @version   0.9
+ * @since     21-07-2015
  * @author    Juha Sippola
  */
 
@@ -60,11 +60,11 @@ $app = new Slim\Slim(array(
 $app->get('/', function() use($app)
 {
     $ini = Factory::conf();
-    $platformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
+    $buildProjectPlatformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
     $app->render('home.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'overviewRoute' => Slim\Slim::getInstance()->urlFor('overview'),
-        'platformRoute' => $platformRoute,
+        'platformRoute' => $buildProjectPlatformRoute,
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
@@ -115,19 +115,18 @@ $app->get('/buildproject', function() use($app)
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview'))
     );
-    $platformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
-    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('buildproject_conf'));
+    $buildProjectPlatformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
+    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('build_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'platformRoute' => $platformRoute,
+        'buildPlatformRoute' => $buildProjectPlatformRoute,
         'confRoute' => $confRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'platforms' => Factory::db()->getTargetPlatformOs(),
         'targetOs' => '',
-        'conf' => '',
         'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
             $ini['master_build_project'],
             $ini['master_build_state']),
@@ -161,19 +160,18 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
         array('name' => $ini['master_build_project'], 'link' => $buildProjectRoute)
     );
-    $platformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
-    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('buildproject_conf'));
+    $buildProjectPlatformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
+    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('build_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'platformRoute' => $platformRoute,
+        'buildPlatformRoute' => $buildProjectPlatformRoute,
         'confRoute' => $confRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'platforms' => Factory::db()->getTargetPlatformOs(),
         'targetOs' => $targetOs,
-        'conf' => '',
         'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
             $ini['master_build_project'],
             $ini['master_build_state']),
@@ -193,52 +191,6 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
 })->name('buildproject_platform');
 
 /**
- * UI route: /buildproject/:project/conf (GET)
- * Similar to /buildproject but filtered with conf
- */
-
-$app->get('/buildproject/conf/:conf', function($conf) use($app)
-{
-    $conf = strip_tags($conf);
-    $ini = Factory::conf();
-    $buildProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('buildproject'));
-    $breadcrumb = array(
-        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
-        array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
-        array('name' => $ini['master_build_project'], 'link' => $buildProjectRoute)
-    );
-    $platformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
-    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('buildproject_conf'));
-    $app->render('build_project.html', array(
-        'root' => Slim\Slim::getInstance()->urlFor('root'),
-        'breadcrumb' => $breadcrumb,
-        'platformRoute' => $platformRoute,
-        'confRoute' => $confRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
-        'masterProject' => $ini['master_build_project'],
-        'masterState' => $ini['master_build_state'],
-        'platforms' => Factory::db()->getTargetPlatformOs(),
-        'targetOs' => '',
-        'conf' => $conf,
-        'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
-            $ini['master_build_project'],
-            $ini['master_build_state']),
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
-            $ini['master_build_project'],
-            $ini['master_build_state']),
-        'project' => Factory::createProject(
-            $ini['master_build_project'],
-            $ini['master_build_project'],
-            $ini['master_build_state']),                // managed as object
-        'confRuns' => Factory::createConfRuns(
-            $ini['master_build_project'],
-            $ini['master_build_state'],
-            '',
-            $conf)                                      // managed as objects
-    ));
-})->name('buildproject_conf');
-
-/**
  * UI route: /testsetproject (GET)
  */
 
@@ -250,9 +202,11 @@ $app->get('/testsetproject/:project', function($project) use($app)
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview'))
     );
+    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('testset_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
+        'confRoute' => $confRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
@@ -270,6 +224,97 @@ $app->get('/testsetproject/:project', function($project) use($app)
             $ini['master_build_state'])
     ));
 })->name('testsetproject');
+
+/**
+ * UI route: /conf/:conf (GET)
+ */
+
+$app->get('/conf/:conf', function($conf) use($app)
+{
+    $conf = strip_tags($conf);
+    $ini = Factory::conf();
+    $buildProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('buildproject'));
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+        array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
+        array('name' => $ini['master_build_project'], 'link' => $buildProjectRoute)
+    );
+    $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+    $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
+    $app->render('conf.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'testsetRoute' => $testsetRoute,
+        'testsetProjectRoute' => $testsetProjectRoute,
+        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state'],
+        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+            $ini['master_build_project'],
+            $ini['master_build_state']),
+        'testsetProject' => '',
+        'latestConfRuns' => Factory::db()->getLatestConfBranchBuildResults(
+            $conf,
+            $ini['master_build_project'],
+            $ini['master_build_state']),
+        'conf' => Factory::createConf(
+            $conf,
+            $ini['master_build_project'],
+            $ini['master_build_state']),                // managed as object
+        'confRuns' => Factory::createConfRuns(
+            $ini['master_build_project'],
+            $ini['master_build_state'],
+            '',
+            $conf),                                     // managed as objects
+        'testsetRuns' => Factory::createTestsetRunsInConf(
+            $conf,
+            '',
+            $ini['master_build_project'],
+            $ini['master_build_state'])                 // managed as objects
+    ));
+})->name('conf');
+
+/**
+ * UI route: /conf/:conf/:testsetproject (GET)
+ */
+
+$app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($app)
+{
+    $conf = strip_tags($conf);
+    $testsetProject = strip_tags($testsetProject);
+    $ini = Factory::conf();
+    $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+        array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
+        array('name' => $testsetProject, 'link' => $testsetProjectRoute . '/' . $testsetProject)
+    );
+    $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+    $app->render('conf.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'testsetRoute' => $testsetRoute,
+        'testsetProjectRoute' => $testsetProjectRoute,
+        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state'],
+        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+            $ini['master_build_project'],
+            $ini['master_build_state']),
+        'testsetProject' => $testsetProject,
+        'latestConfRuns' => null,                       // not used
+        'conf' => Factory::createConf(
+            $conf,
+            $ini['master_build_project'],
+            $ini['master_build_state']),                // managed as object
+        'confRuns' => null,                             // not used
+        'testsetRuns' => Factory::createTestsetRunsInConf(
+            $conf,
+            $testsetProject,
+            $ini['master_build_project'],
+            $ini['master_build_state'])                 // managed as objects
+    ));
+})->name('conf_testsetproject');
 
 /**
  * UI route: /test/top (GET)
@@ -296,7 +341,7 @@ $app->get('/test/top', function() use($app)
         'testsets' => Factory::createTestsets(
             Factory::LIST_FAILURES,
             $ini['master_build_project'],
-            $ini['master_build_state'])                     // managed as objects
+            $ini['master_build_state'])                 // managed as objects
     ));
 })->name('top');
 
@@ -323,7 +368,7 @@ $app->get('/test/flaky', function() use($app)
         'testsets' => Factory::createTestsets(
             Factory::LIST_FLAKY,
             null,
-            null)                                           // managed as objects
+            null)                                       // managed as objects
     ));
 })->name('flaky');
 

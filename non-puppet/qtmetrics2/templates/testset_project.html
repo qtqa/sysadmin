@@ -34,8 +34,8 @@
 
 /**
  * Testset project page
- * @version   0.2
- * @since     10-07-2015
+ * @version   0.3
+ * @since     20-07-2015
  * @author    Juha Sippola
  */
 
@@ -258,7 +258,8 @@ details are available as tooltip on result icon.</li>
 </tr>
 {%                      endif %}
 <tr>
-<td class="rightBorder"><small>{{ run.conf }}</small></td>
+{%                      set link = confRoute ~ '/' ~ run.conf|url_encode  ~ '/' ~ project|url_encode %}
+<td class="rightBorder"><a href="{{ link }}"><small>{{ run.conf }}</small></a></td>
 {%                      set buildKeyIndexPrinted = -1 %}
 {%                  endif %}
 
