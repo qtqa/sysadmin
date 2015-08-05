@@ -116,6 +116,16 @@ class Factory {
     }
 
     /**
+     * Get the CI log path.
+     * @return string
+     */
+    public static function getCiLogPath()
+    {
+        $ini = self::conf();
+        return $ini['ci_log_path'];
+    }
+
+    /**
      * Check if the testset exists in the database
      * @param string $name
      * @return boolean

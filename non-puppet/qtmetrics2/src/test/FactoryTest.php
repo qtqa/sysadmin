@@ -79,6 +79,22 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getCiLogPath
+     * @dataProvider testGetCiLogPathData
+     */
+    public function testGetCiLogPath($exp_path)
+    {
+        $path = Factory::getCiLogPath();
+        $this->assertEquals($exp_path, $path);
+    }
+    public function testGetCiLogPathData()
+    {
+        return array(
+            array('http://testresults.qt.io/ci/')
+        );
+    }
+
+    /**
      * Test checkTestset
      * @dataProvider testCheckTestsetData
      */

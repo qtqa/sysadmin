@@ -34,8 +34,8 @@
 
 /**
  * ConfRun class
- * @version   0.1
- * @since     30-06-2015
+ * @version   0.2
+ * @since     24-07-2015
  * @author    Juha Sippola
  */
 
@@ -114,6 +114,19 @@ class ConfRun extends ProjectRun {
     public function getInsignificant()
     {
         return $this->insignificant;
+    }
+
+    /**
+     * Get log file link.
+     * @return string
+     */
+    public function getLogLink()
+    {
+        return Factory::getCiLogPath()
+            . urlencode(parent::getFullProjectName())
+            . '/build_' . parent::getBuildKeyString()
+            . '/' . urlencode($this->name)
+            . '/log.txt.gz';
     }
 
 }

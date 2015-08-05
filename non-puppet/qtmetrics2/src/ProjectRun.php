@@ -186,6 +186,38 @@ class ProjectRun {
         return $this->duration;
     }
 
+    /**
+     * Convert the numeric build key to a five digit string needed for directory links (e.g. 123 to 00123)
+     * @return string
+     */
+    public function getBuildKeyString()
+    {
+        $buildString = $this->buildKey;
+        if (is_numeric($buildString)) {
+            if ($this->buildKey < 10000)
+                $buildString = '0' . $this->buildKey;
+            if ($this->buildKey < 1000)
+                $buildString = '00' . $this->buildKey;
+            if ($this->buildKey < 100)
+                $buildString = '000' . $this->buildKey;
+            if ($this->buildKey < 10)
+                $buildString = '0000' . $this->buildKey;
+        }
+        return $buildString;
+    }
+
+    /**
+     * Get log file link.
+     * @return string
+     */
+    public function getLogLink()
+    {
+        return Factory::getCiLogPath()
+            . urlencode(self::getFullProjectName())
+            . '/build_' . self::getBuildKeyString()
+            . '/log.txt.gz';
+    }
+
 }
 
 ?>
