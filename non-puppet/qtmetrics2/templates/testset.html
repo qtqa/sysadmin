@@ -152,7 +152,7 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 {# Print summary #}
 <tr>
 {# Project name #}
-<td><a href="{{ testsetProjectRoute }}/{{ testset.getProjectName }}">{{ testset.getProjectName }}</a></td>
+<td><a href="{{ testsetProjectRoute }}/{{ testset.getProjectName|url_encode }}">{{ testset.getProjectName }}</a></td>
 
 {# Testset status according to the latest build results #}
 {%      if testset.getStatus == constant('TestsetRun::RESULT_SUCCESS') %}
@@ -292,7 +292,7 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 </tr>
 {%                      endif %}
 <tr>
-{%                      set link = confProjectRoute ~ '/' ~ run.getConfName|url_encode ~ '/' ~ testset.getProjectName %}
+{%                      set link = confProjectRoute ~ '/' ~ run.getConfName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
 <td class="rightBorder"><a href="{{ link }}"><small>{{ run.getConfName }}</small></a></td>
 {# Flags for the latest build #}
 <td class="center rightBorder">

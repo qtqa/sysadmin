@@ -96,7 +96,7 @@
 {%          set buttonStyle = 'btn-default' %}
 {%      endif %}
 <div class="btn-group">
-<a class="btn {{ buttonStyle }} btn-xs" href="{{ buildPlatformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
+<a class="btn {{ buttonStyle }} btn-xs" href="{{ buildPlatformRoute }}/{{ platform.os|url_encode }}" role="button">{{ platform.os }}</a>
 </div>
 {% endfor %}
 </div>

@@ -34,8 +34,7 @@
 
 /**
  * Flaky testsets page
- * @version   0.4
- * @since     10-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -117,7 +116,7 @@ the testset is flaky (during the last {{ lastDays }} days).</li>
 {% for testset in testsets %}
 <tr>
 {# Testset name #}
-<td><a href="{{ testsetRoute }}/{{ testset.getName }}/{{ testset.getProjectName }}">{{ testset.getName }}</a></td>
+<td><a href="{{ testsetRoute }}/{{ testset.getName|url_encode }}/{{ testset.getProjectName|url_encode }}">{{ testset.getName }}</a></td>
 
 {# Project name #}
 <td>{{ testset.getProjectName }}</td>

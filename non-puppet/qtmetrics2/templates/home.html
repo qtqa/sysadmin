@@ -34,8 +34,7 @@
 
 /**
  * Home page
- * @version   0.6
- * @since     10-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -81,7 +80,7 @@
 <div>
 {% for platform in platforms %}
 <div class="btn-group">
-<a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os }}" role="button">{{ platform.os }}</a>
+<a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os|url_encode }}" role="button">{{ platform.os }}</a>
 </div>
 {% endfor %}
 </div>

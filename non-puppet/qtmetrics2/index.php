@@ -457,7 +457,7 @@ if (isset($_POST["projectInputSubmit"])) {
     }
     if (isset($_POST["projectInputValue"])) {
         $project = htmlspecialchars($_POST['projectInputValue']);
-        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testsetproject/' . $project);
+        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testsetproject/' . urlencode($project));
         exit();
     }
 }
@@ -475,7 +475,7 @@ if (isset($_POST["testsetInputSubmit"])) {
         $string = explode(' (in ', htmlspecialchars($_POST['testsetInputValue']));     // the separator must match with that used in testset_search.php
         $testset = $string[0];
         $project = str_replace(')', '', $string[1]);
-        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testset/' . $testset . '/' . $project);
+        header('Location: ' . Slim\Slim::getInstance()->urlFor('root') . 'testset/' . urlencode($testset) . '/' . urlencode($project));
         exit();
     }
 }

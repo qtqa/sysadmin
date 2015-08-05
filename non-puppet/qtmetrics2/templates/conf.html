@@ -499,8 +499,8 @@ title="<table>
 {%                      endif %}
 <tr>
 {# Testset and project name #}
-<td><a href="{{ testsetRoute }}/{{ run.getName }}/{{ run.getTestsetProjectName }}"><small>{{ run.getName }}</small></a></td>
-<td><a href="{{ testsetProjectRoute }}/{{ run.getTestsetProjectName }}"><small>{{ run.getTestsetProjectName }}</small></a></td>
+<td><a href="{{ testsetRoute }}/{{ run.getName|url_encode }}/{{ run.getTestsetProjectName|url_encode }}"><small>{{ run.getName }}</small></a></td>
+<td><a href="{{ testsetProjectRoute }}/{{ run.getTestsetProjectName|url_encode }}"><small>{{ run.getTestsetProjectName }}</small></a></td>
 {# Flags for the latest build #}
 <td class="center rightBorder">
 {%                      if run.getInsignificant %}

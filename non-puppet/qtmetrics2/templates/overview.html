@@ -177,7 +177,7 @@ title="<table>
 {% for project in projects %}
 <tr>
 {# Project name #}
-<td class="rightBorder"><a href="{{ testsetProjectRoute }}/{{ project }}">{{ project }}</a></td>
+<td class="rightBorder"><a href="{{ testsetProjectRoute }}/{{ project|url_encode }}">{{ project }}</a></td>
 
 {# Result (by branch) #}
 {%      for branch in branches %}
