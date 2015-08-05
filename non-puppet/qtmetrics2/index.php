@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.10
- * @since     22-07-2015
+ * @version   0.11
+ * @since     23-07-2015
  * @author    Juha Sippola
  */
 
@@ -421,6 +421,24 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         $app->response()->status(404);
     }
 })->name('testset');
+
+/**
+ * UI route: /sitemap (GET)
+ */
+
+$app->get('/sitemap', function() use($app)
+{
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+    );
+    $app->render('image.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'title' => 'Site Map',
+        'navi_title' => 'site map',
+        'image' => 'images/site_map.png'
+    ));
+})->name('sitemap');
 
 $app->run();
 
