@@ -37,8 +37,8 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.6
- * @since     20-07-2015
+ * @version   0.7
+ * @since     24-07-2015
  * @author    Juha Sippola
  */
 
@@ -258,6 +258,37 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test createProjectRuns
+     * @dataProvider testCreateProjectRunsData
+     */
+    public function testCreateProjectRuns($runProject, $runState, $exp_branch, $exp_buildKey, $has_data)
+    {
+        $branches = array();
+        $buildKeys = array();
+        $runs = Factory::createProjectRuns($runProject, $runState);
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof ProjectRun);
+            $branches[] = $run->getBranchName();
+            $buildKeys[] = $run->getBuildKey();
+        }
+        if ($has_data) {
+            $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_buildKey, $buildKeys);
+        } else {
+            $this->assertEmpty($runs);
+        }
+    }
+    public function testCreateProjectRunsData()
+    {
+        return array(
+            array('Qt5', 'state', 'stable', '1348', 1),
+            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 1),
+            array('invalid', 'state', '', '', '', 0),
+            array('Qt5', 'invalid', '', '', '', 0)
+        );
+    }
+
+    /**
      * Test createConfRuns
      * @dataProvider testCreateConfRunsData
      */
@@ -293,7 +324,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             array('Qt5', 'state', '', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
             array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'stable', '1348', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
             array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', '', 'invalid', '', '', '', 0),
+            array('Qt5', 'state', '', 'invalid', '', '', '', 0)
         );
     }
 

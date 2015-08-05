@@ -34,8 +34,8 @@
 
 /**
  * Factory class
- * @version   0.7
- * @since     20-07-2015
+ * @version   0.8
+ * @since     23-07-2015
  * @author    Juha Sippola
  */
 
@@ -248,10 +248,36 @@ class Factory {
     }
 
     /**
+     * Create ProjectRun objects for those in database
+     * @param string $runProject
+     * @param string $runState
+     * @return array ProjectRun objects
+     */
+    public static function createProjectRuns($runProject, $runState)
+    {
+        $objects = array();
+        $dbEntries = self::db()->getProjectBuildsByBranch($runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new ProjectRun(
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                null,
+                $entry['timestamp'],
+                null
+            );
+            $objects[] = $obj;
+        }
+        return $objects;
+    }
+
+    /**
      * Create ConfRun objects for those in database
      * @param string $runProject
      * @param string $runState
      * @param string $targetOs
+     * @param string $conf
      * @return array ConfRun objects
      */
     public static function createConfRuns($runProject, $runState, $targetOs, $conf)
