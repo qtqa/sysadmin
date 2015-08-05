@@ -34,8 +34,7 @@
 
 /**
  * Testset project page
- * @version   0.3
- * @since     20-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -85,9 +84,12 @@ testsets in the latest <strong>{{ masterProject }} {{ masterState }}</strong> bu
 in any configuration across all branches.</li>
 <li><strong>Results in Branches</strong> shows the results of {{ project }} testsets by branch
 and their configuration in <strong>{{ masterProject }} {{ masterState }}</strong> builds
-( <button type="button" class="btn btn-xs btn-success"><span class="badge">n</span></button> = all n testsets passed,
-<button type="button" class="btn btn-xs btn-danger"><span class="badge">n</span></button> = n testsets failed);
-details are available as tooltip on result icon.</li>
+<ul>
+<li>log file: <span class="glyphicon glyphicon-file blue"></span> = link to {{ masterProject }} {{ masterState }} build log file</li>
+<li>results: <button type="button" class="btn btn-xs btn-success"><span class="badge">n</span></button> = all n testsets passed,
+<button type="button" class="btn btn-xs btn-danger"><span class="badge">n</span></button> = n testsets failed</li>
+</ul>
+<li>Details are available as tooltip on result icon</li>
 </ul>
 </div>
 </div>
@@ -186,25 +188,27 @@ details are available as tooltip on result icon.</li>
 
 {# Get branches #}
 {%      set branches = [] %}
-{%      for run in projectBuilds %}
-{%          if run.branch not in branches %}
-{%              set branches = branches|merge([run.branch]) %}
+{%      for run in projectRuns %}
+{%          if run.getBranchName not in branches %}
+{%              set branches = branches|merge([run.getBranchName]) %}
 {%          endif %}
 {%      endfor %}
 
 {# Loop all the branches #}
 {%      for branch in branches %}
 
-{# Get all build keys #}
+{# Get all build keys, dates and log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
 {%          set dates = [] %}
-{%          for run in projectBuilds %}
-{%              if run.branch == branch %}
-{%                  if buildKey != run.buildKey %}
-{%                      set buildKey = run.buildKey %}
-{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
-{%                      set dates = dates|merge([run.timestamp]) %}
+{%          set logLinks = [] %}
+{%          for run in projectRuns %}
+{%              if run.getBranchName == branch %}
+{%                  if buildKey != run.getBuildKey %}
+{%                      set buildKey = run.getBuildKey %}
+{%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set dates = dates|merge([run.getTimestamp]) %}
+{%                      set logLinks = logLinks|merge([run.getLogLink]) %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}
@@ -234,7 +238,8 @@ details are available as tooltip on result icon.</li>
 {%                  else %}
 {{ buildKey }}<br>
 {%                  endif %}
-<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span><br>
+<a href="{{ logLinks[key] }}" target="_blank"><span class="glyphicon glyphicon-file"></span></a>
 </th>
 {%              endfor %}
 </tr>

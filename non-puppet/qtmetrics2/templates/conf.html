@@ -34,8 +34,7 @@
 
 /**
  * Configuration page
- * @version   0.1
- * @since     21-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -102,6 +101,7 @@ and the <strong>branch</strong> results in each branch (both show failed if fail
 <li><strong>Build Results in Branches</strong> shows the results of {{ conf.getName }} builds by branch on
 <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
+<li>log file: <span class="glyphicon glyphicon-file blue"></span> = link to configuration build log file</li>
 <li>flags: <span class="label label-success">f</span> = forcesuccess and
 <span class="label label-default">i</span> = insignificant flag set for the configuration on the latest build</li>
 <li>results: <span class="glyphicon glyphicon-ok green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }},
@@ -114,6 +114,7 @@ and the <strong>branch</strong> results in each branch (both show failed if fail
 <li><strong>Testset Results in Branches</strong> shows the testset <strong>failures</strong> in {{ conf.getName }}
 by branch on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
+<li>log file: <span class="glyphicon glyphicon-file blue"></span> = link to configuration build log file</li>
 <li>flags: <span class="label label-default">i</span> = insignificant flag set for the testset on the latest build</li>
 <li>results: <span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestsetRun::RESULT_FAILURE') }}</li>
 </ul>
@@ -216,9 +217,9 @@ title="insignificant">i</span>
 
 {# Get branches #}
 {% set branches = [] %}
-{% for run in projectBuilds %}
-{%      if run.branch not in branches %}
-{%          set branches = branches|merge([run.branch]) %}
+{% for run in projectRuns %}
+{%      if run.getBranchName not in branches %}
+{%          set branches = branches|merge([run.getBranchName]) %}
 {%      endif %}
 {% endfor %}
 
@@ -228,7 +229,7 @@ title="insignificant">i</span>
 {%      set confRunsAvailable = 1 %}
 {% endfor %}
 
-{% if confRunsAvailable %}
+{% if confRunsAvailable and (testsetProject == '') %}
 
 <div class="panel panel-primary">
 <div class="panel-heading">
@@ -239,16 +240,25 @@ title="insignificant">i</span>
 {# Loop all the branches #}
 {%      for branch in branches %}
 
-{# Get all build keys #}
+{# Get all build keys, dates and log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
 {%          set dates = [] %}
-{%          for run in projectBuilds %}
-{%              if run.branch == branch %}
-{%                  if buildKey != run.buildKey %}
-{%                      set buildKey = run.buildKey %}
-{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
-{%                      set dates = dates|merge([run.timestamp]) %}
+{%          set logLinks = [] %}
+{%          for run in projectRuns %}
+{%              if run.getBranchName == branch %}
+{%                  if buildKey != run.getBuildKey %}
+{%                      set buildKey = run.getBuildKey %}
+{%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set dates = dates|merge([run.getTimestamp]) %}
+{%                      set confRunFound = 0 %}
+{%                      for confRun in confRuns if (confRun.getBranchName == branch) and (confRun.getBuildKey == buildKey) %}
+{%                          set logLinks = logLinks|merge([confRun.getLogLink]) %}
+{%                          set confRunFound = 1 %}
+{%                      endfor %}
+{%                      if not confRunFound %}
+{%                          set logLinks = logLinks|merge(['']) %}
+{%                      endif %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}
@@ -279,7 +289,12 @@ title="insignificant">i</span>
 {%                  else %}
 {{ buildKey }}<br>
 {%                  endif %}
-<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span><br>
+{%                  if logLinks[key] != '' %}
+<a href="{{ logLinks[key] }}" target="_blank"><span class="glyphicon glyphicon-file"></span></a>
+{%                  else %}
+&nbsp;
+{%                  endif %}
 </th>
 {%              endfor %}
 </tr>
@@ -403,16 +418,25 @@ title="<table>
 {# Loop all the branches #}
 {%      for branch in branches %}
 
-{# Get all build keys #}
+{# Get all build keys, dates and conf log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
 {%          set dates = [] %}
-{%          for run in projectBuilds %}
-{%              if run.branch == branch %}
-{%                  if buildKey != run.buildKey %}
-{%                      set buildKey = run.buildKey %}
-{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
-{%                      set dates = dates|merge([run.timestamp]) %}
+{%          set logLinks = [] %}
+{%          for run in projectRuns %}
+{%              if run.getBranchName == branch %}
+{%                  if buildKey != run.getBuildKey %}
+{%                      set buildKey = run.getBuildKey %}
+{%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set dates = dates|merge([run.getTimestamp]) %}
+{%                      set confRunFound = 0 %}
+{%                      for confRun in confRuns if (confRun.getBranchName == branch) and (confRun.getBuildKey == buildKey) %}
+{%                          set logLinks = logLinks|merge([confRun.getLogLink]) %}
+{%                          set confRunFound = 1 %}
+{%                      endfor %}
+{%                      if not confRunFound %}
+{%                          set logLinks = logLinks|merge(['']) %}
+{%                      endif %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}
@@ -445,7 +469,12 @@ title="<table>
 {%                  else %}
 {{ buildKey }}<br>
 {%                  endif %}
-<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span><br>
+{%                  if logLinks[key] != '' %}
+<a href="{{ logLinks[key] }}" target="_blank"><span class="glyphicon glyphicon-file"></span></a>
+{%                  else %}
+&nbsp;
+{%                  endif %}
 </th>
 {%              endfor %}
 </tr>

@@ -34,8 +34,7 @@
 
 /**
  * Qt Metrics API
- * @version   0.11
- * @since     23-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -130,9 +129,9 @@ $app->get('/buildproject', function() use($app)
         'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
             $ini['master_build_project'],
             $ini['master_build_state']),
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+        'projectRuns' => Factory::createProjectRuns(
             $ini['master_build_project'],
-            $ini['master_build_state']),
+            $ini['master_build_state']),                // managed as objects
         'project' => Factory::createProject(
             $ini['master_build_project'],
             $ini['master_build_project'],
@@ -175,9 +174,9 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
         'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
             $ini['master_build_project'],
             $ini['master_build_state']),
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+        'projectRuns' => Factory::createProjectRuns(
             $ini['master_build_project'],
-            $ini['master_build_state']),
+            $ini['master_build_state']),                // managed as objects
         'project' => Factory::createProject(
             $ini['master_build_project'],
             $ini['master_build_project'],
@@ -215,9 +214,9 @@ $app->get('/testsetproject/:project', function($project) use($app)
             $project,
             $ini['master_build_project'],
             $ini['master_build_state']),
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+        'projectRuns' => Factory::createProjectRuns(
             $ini['master_build_project'],
-            $ini['master_build_state']),
+            $ini['master_build_state']),                // managed as objects
         'confBuilds' => Factory::db()->getTestsetProjectResultsByBranchConf(
             $project,
             $ini['master_build_project'],
@@ -249,14 +248,14 @@ $app->get('/conf/:conf', function($conf) use($app)
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
-            $ini['master_build_project'],
-            $ini['master_build_state']),
         'testsetProject' => '',
         'latestConfRuns' => Factory::db()->getLatestConfBranchBuildResults(
             $conf,
             $ini['master_build_project'],
             $ini['master_build_state']),
+        'projectRuns' => Factory::createProjectRuns(
+            $ini['master_build_project'],
+            $ini['master_build_state']),                // managed as objects
         'conf' => Factory::createConf(
             $conf,
             $ini['master_build_project'],
@@ -298,16 +297,20 @@ $app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($a
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
-        'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
-            $ini['master_build_project'],
-            $ini['master_build_state']),
         'testsetProject' => $testsetProject,
         'latestConfRuns' => null,                       // not used
+        'projectRuns' => Factory::createProjectRuns(
+            $ini['master_build_project'],
+            $ini['master_build_state']),                // managed as objects
         'conf' => Factory::createConf(
             $conf,
             $ini['master_build_project'],
             $ini['master_build_state']),                // managed as object
-        'confRuns' => null,                             // not used
+        'confRuns' => Factory::createConfRuns(
+            $ini['master_build_project'],
+            $ini['master_build_state'],
+            '',
+            $conf),                                     // managed as objects
         'testsetRuns' => Factory::createTestsetRunsInConf(
             $conf,
             $testsetProject,
@@ -399,9 +402,9 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
             'sinceDateFlaky' => Factory::getSinceDate(intval($ini['flaky_testsets_last_days']) - 1),
             'masterProject' => $ini['master_build_project'],
             'masterState' => $ini['master_build_state'],
-            'projectBuilds' => Factory::db()->getProjectBuildsByBranch(
+            'projectRuns' => Factory::createProjectRuns(
                 $ini['master_build_project'],
-                $ini['master_build_state']),
+                $ini['master_build_state']),                // managed as objects
             'testset' => Factory::createTestset(
                 $testset,
                 $project,

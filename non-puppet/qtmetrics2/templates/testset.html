@@ -34,8 +34,7 @@
 
 /**
  * Testset page
- * @version   0.8
- * @since     22-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -220,25 +219,25 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 
 {# Get branches #}
 {%      set branches = [] %}
-{%      for run in projectBuilds %}
-{%          if run.branch not in branches %}
-{%              set branches = branches|merge([run.branch]) %}
+{%      for run in projectRuns %}
+{%          if run.getBranchName not in branches %}
+{%              set branches = branches|merge([run.getBranchName]) %}
 {%          endif %}
 {%      endfor %}
 
 {# Loop all the branches #}
 {%      for branch in branches %}
 
-{# Get all build keys #}
+{# Get all build keys, dates and log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
 {%          set dates = [] %}
-{%          for run in projectBuilds %}
-{%              if run.branch == branch %}
-{%                  if buildKey != run.buildKey %}
-{%                      set buildKey = run.buildKey %}
-{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
-{%                      set dates = dates|merge([run.timestamp]) %}
+{%          for run in projectRuns %}
+{%              if run.getBranchName == branch %}
+{%                  if buildKey != run.getBuildKey %}
+{%                      set buildKey = run.getBuildKey %}
+{%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set dates = dates|merge([run.getTimestamp]) %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}

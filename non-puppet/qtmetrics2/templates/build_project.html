@@ -34,8 +34,7 @@
 
 /**
  * Build project page
- * @version   0.4
- * @since     20-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -116,6 +115,7 @@ in one or in several builds).</li>
 <li><strong>Results in Branches</strong> shows the {{ project.getName }} run results by branch
 and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
+<li>log file: <span class="glyphicon glyphicon-file blue"></span> = link to build log file</li>
 <li>flags: <span class="label label-success">f</span> = forcesuccess and
 <span class="label label-default">i</span> = insignificant flag set for the configuration on the latest build</li>
 <li>results: <span class="glyphicon glyphicon-ok green"></span> = {{ constant('ConfRun::RESULT_SUCCESS') }},
@@ -200,25 +200,27 @@ title="<table>
 
 {# Get branches #}
 {%      set branches = [] %}
-{%      for run in projectBuilds %}
-{%          if run.branch not in branches %}
-{%              set branches = branches|merge([run.branch]) %}
+{%      for run in projectRuns %}
+{%          if run.getBranchName not in branches %}
+{%              set branches = branches|merge([run.getBranchName]) %}
 {%          endif %}
 {%      endfor %}
 
 {# Loop all the branches #}
 {%      for branch in branches %}
 
-{# Get all build keys #}
+{# Get all build keys, dates and log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
 {%          set dates = [] %}
-{%          for run in projectBuilds %}
-{%              if run.branch == branch %}
-{%                  if buildKey != run.buildKey %}
-{%                      set buildKey = run.buildKey %}
-{%                      set buildKeys = buildKeys|merge([run.buildKey]) %}
-{%                      set dates = dates|merge([run.timestamp]) %}
+{%          set logLinks = [] %}
+{%          for run in projectRuns %}
+{%              if run.getBranchName == branch %}
+{%                  if buildKey != run.getBuildKey %}
+{%                      set buildKey = run.getBuildKey %}
+{%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set dates = dates|merge([run.getTimestamp]) %}
+{%                      set logLinks = logLinks|merge([run.getLogLink]) %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}
@@ -249,7 +251,8 @@ title="<table>
 {%                  else %}
 {{ buildKey }}<br>
 {%                  endif %}
-<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
+<span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span><br>
+<a href="{{ logLinks[key] }}" target="_blank"><span class="glyphicon glyphicon-file"></span></a>
 </th>
 {%              endfor %}
 </tr>

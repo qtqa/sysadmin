@@ -35,8 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @version   0.4
- * @since     10-07-2015
+ * @since     03-08-2015
  * @author    Juha Sippola
  */
 
@@ -149,6 +148,9 @@
 .center {
   text-align: center
 }
+thead {
+  white-space: nowrap;
+}
 
 /*
  * Coloring
@@ -161,6 +163,9 @@
 }
 .gray {
   color: gray;
+}
+.blue {
+  color: #337AB7;
 }
 .greenBackground {
   background-color: lightgreen;
