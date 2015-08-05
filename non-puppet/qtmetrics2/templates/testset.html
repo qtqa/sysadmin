@@ -34,8 +34,8 @@
 
 /**
  * Testset page
- * @version   0.7
- * @since     10-07-2015
+ * @version   0.8
+ * @since     22-07-2015
  * @author    Juha Sippola
  */
 
@@ -92,21 +92,29 @@
 <div class="well infoWell">
 <span class="glyphicon glyphicon-info-sign"></span> <strong>Testset</strong><br>
 <ul>
-<li><strong>latest result</strong> shows the overall testset status based on the latest
-<strong>{{ masterProject }} {{ masterState }}</strong> builds across all branches
-(shows failed if failed in one or in several).</li>
-<li><strong>failed</strong> count shows the number of <strong>{{ masterProject }} {{ masterState }}</strong>
+<li><strong>Latest Status</strong> shows the overall testset status across all branches
+<ul>
+<li>latest result: overall testset status based on the latest
+<strong>{{ masterProject }} {{ masterState }}</strong> builds
+(shows failed if failed in one or in several)</li>
+<li>failed: number of <strong>{{ masterProject }} {{ masterState }}</strong>
 builds where {{ testset.getName }} failed during the last {{ lastDaysFailures }} days
-(since {{ sinceDateFailures }}).</li>
-<li><strong>flaky</strong> count shows the number of <strong>all</strong> builds where
-{{ testset.getName }} failed on the first run but, when rerun, it passed
-(during the last {{ lastDaysFlaky }} days, since {{ sinceDateFlaky }}).</li>
+(since {{ sinceDateFailures }})</li>
+<li>flaky: number of <strong>all</strong> builds where {{ testset.getName }} failed
+on the first run but, when rerun, it passed (during the last {{ lastDaysFlaky }} days,
+since {{ sinceDateFlaky }})</li>
+</ul>
+</li>
 <li><strong>Results in Branches</strong> shows the {{ testset.getName }} run results by branch
 and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong> builds
-(<span class="glyphicon glyphicon-ok green"></span> = {{ constant('TestsetRun::RESULT_SUCCESS') }},
+<ul>
+<li>flags: <span class="label label-default">i</span> = insignificant flag set for the testset on the latest build of the configuration</li>
+<li>results: <span class="glyphicon glyphicon-ok green"></span> = {{ constant('TestsetRun::RESULT_SUCCESS') }},
 <span class="glyphicon glyphicon-ok-sign green"></span> = {{ constant('TestsetRun::RESULT_SUCCESS') }} as flaky,
-<span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestsetRun::RESULT_FAILURE') }});
-details on the runs are available as tooltip on result icon.</li>
+<span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestsetRun::RESULT_FAILURE') }}</li>
+</ul>
+</li>
+<li>Details on the runs are available as tooltip on result icon</li>
 </ul>
 </div>
 </div>
@@ -145,7 +153,7 @@ details on the runs are available as tooltip on result icon.</li>
 {# Print summary #}
 <tr>
 {# Project name #}
-<td>{{ testset.getProjectName }}</td>
+<td><a href="{{ testsetProjectRoute }}/{{ testset.getProjectName }}">{{ testset.getProjectName }}</a></td>
 
 {# Testset status according to the latest build results #}
 {%      if testset.getStatus == constant('TestsetRun::RESULT_SUCCESS') %}
@@ -252,7 +260,8 @@ details on the runs are available as tooltip on result icon.</li>
 <table class="table table-striped">
 <thead>
 <tr>
-<th class="bold rightBorder">{{ testset.getName }}</th>
+<th class="bold">{{ testset.getName }}</th>
+<th class="bold rightBorder">flags</th>
 {%              for key, buildKey in buildKeys %}
 <th class="center">
 {%                  if buildKey|length > 6 %}
@@ -284,7 +293,14 @@ details on the runs are available as tooltip on result icon.</li>
 </tr>
 {%                      endif %}
 <tr>
-<td class="rightBorder"><small>{{ run.getConfName }}</small></td>
+{%                      set link = confProjectRoute ~ '/' ~ run.getConfName|url_encode ~ '/' ~ testset.getProjectName %}
+<td class="rightBorder"><a href="{{ link }}"><small>{{ run.getConfName }}</small></a></td>
+{# Flags for the latest build #}
+<td class="center rightBorder">
+{%                      if run.getInsignificant %}
+<span class="label label-default">i</span>
+{%                      endif %}
+</td>
 {%                      set buildKeyIndexPrinted = -1 %}
 {%                  endif %}
 

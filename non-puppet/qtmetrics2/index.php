@@ -34,8 +34,8 @@
 
 /**
  * Qt Metrics API
- * @version   0.9
- * @since     21-07-2015
+ * @version   0.10
+ * @since     22-07-2015
  * @author    Juha Sippola
  */
 
@@ -380,14 +380,18 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
 {
     $testset = strip_tags($testset);
     $project = strip_tags($project);
-    $ini = Factory::conf();
-    $breadcrumb = array(
-        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
-    );
     if (Factory::checkTestset($testset)) {
+        $ini = Factory::conf();
+        $breadcrumb = array(
+            array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+        );
+        $confProjectRoute = str_replace('/:conf/:testsetproject', '', Slim\Slim::getInstance()->urlFor('conf_testsetproject'));
+        $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
         $app->render('testset.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
             'breadcrumb' => $breadcrumb,
+            'confProjectRoute' => $confProjectRoute,
+            'testsetProjectRoute' => $testsetProjectRoute,
             'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
@@ -417,7 +421,6 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         $app->response()->status(404);
     }
 })->name('testset');
-
 
 $app->run();
 
