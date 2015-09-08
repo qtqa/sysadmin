@@ -1,0 +1,136 @@
+{#
+#############################################################################
+##
+## Copyright (C) 2015 The Qt Company Ltd.
+## Contact: http://www.qt.io/licensing/
+##
+## This file is part of the Quality Assurance module of the Qt Toolkit.
+##
+## $QT_BEGIN_LICENSE:LGPL21$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see http://www.qt.io/terms-conditions. For further
+## information use the contact form at http://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 or version 3 as published by the Free
+## Software Foundation and appearing in the file LICENSE.LGPLv21 and
+## LICENSE.LGPLv3 included in the packaging of this file. Please review the
+## following information to ensure the GNU Lesser General Public License
+## requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## As a special exception, The Qt Company gives you certain additional
+## rights. These rights are described in The Qt Company LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+
+/**
+ * Testset project latest data
+ * @since     04-08-2015
+ * @author    Juha Sippola
+ */
+
+#}
+
+{# Failed/passed bar area size in px #}
+{% set BAR_AREA = 60 %}
+
+{# Check if any runs available #}
+{% set runsAvailable = 0 %}
+{% for run in latestTestsetRuns %}
+{%      set runsAvailable = 1 %}
+{% endfor %}
+
+{% if runsAvailable %}
+
+{##### Latest Status #####}
+
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest Status</h4>
+</div>
+
+{# Get branches #}
+{%      set branches = [] %}
+{%      for run in latestTestsetRuns %}
+{%          if run.branch not in branches %}
+{%              set branches = branches|merge([run.branch]) %}
+{%          endif %}
+{%      endfor %}
+
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th class="rightBorder">testset project</th>
+{%      for branch in branches %}
+<th class="center">{{ branch }}<br>
+<small>failed <span class ="gray">(total)</span></small>
+</th>
+<th class="showInLargeDisplay"></th>
+{%      endfor %}
+</tr>
+</thead>
+<tbody>
+{# Calculate max failed result count for the bar #}
+{%      set maxCount = 1 %}
+{%      for run in latestTestsetRuns %}
+{%          if run.failed > maxCount %}
+{%              set maxCount = run.failed %}
+{%          endif %}
+{%      endfor %}
+
+<tr>
+{# Project name #}
+<td class="rightBorder">{{ project }}</td>
+
+{# Result (by branch) #}
+{%      for branch in branches %}
+{%          for run in latestTestsetRuns if project == run.project and branch == run.branch %}
+
+{# Show results #}
+{%              set failed = run.failed %}
+{%              set passed = run.passed %}
+{%              set total = passed + failed %}
+<td class="center">{{ failed }}<span class ="gray"> ({{ total }})</span></td>
+
+{# Show results as bars (scaled to BAR_AREA px) #}
+{%              set failedBar = ((BAR_AREA/maxCount) * failed)|round(0, 'floor') %}
+{%              if (failed > 0) and (failedBar == 0) %}
+{%                  set failedBar = 1 %}
+{%              endif %}
+{%              if failed == 0 %}
+{%                  set failed = '' %}
+{%              endif %}
+{%              if (passed > 0) and (failed == 0) %}
+{%                  set passedBar = BAR_AREA %}
+{%              else %}
+{%                  set passed = '' %}
+{%              endif %}
+<td class="center showInLargeDisplay">
+<div>
+<div class="floatLeft redBackground" style="width: {{ failedBar }}px">{{ failed }}</div>
+<div class="floatLeft greenBackground" style="width: {{ passedBar }}px">{{ passed }}</div>
+</div>
+</td>
+{%          else %}{# for #}
+<td></td>
+{%          endfor %}
+{%      endfor %}
+</tr>
+</tbody>
+</table>
+</div> {# .table-responsive #}
+</div> {# .panel-body #}
+</div> {# .panel... #}
+
+{% endif %}{# runsAvailable #}

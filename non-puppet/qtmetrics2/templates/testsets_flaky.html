@@ -34,22 +34,13 @@
 
 /**
  * Flaky testsets page
- * @since     03-08-2015
+ * @since     05-08-2015
  * @author    Juha Sippola
  */
 
 #}
 
 {% include "header.html" %}
-
-{# Failed/passed bar area size in px #}
-{% set BAR_AREA = 120 %}
-
-{# testsets as Testset objects
-/**
- * @var Testset[] testsets
- */
-#}
 
 <ol class="breadcrumb">
 {% for link in breadcrumb %}
@@ -88,61 +79,17 @@ the testset is flaky (during the last {{ lastDays }} days).</li>
 
 {##### Flaky list #####}
 
+<div id="flaky_testsets_data">
 <div class="panel panel-primary">
 <div class="panel-heading">
 <h4 class="panel-title bold">Last {{ lastDays }} days <small>(since {{ sinceDate }})</small></h4>
 </div>
-<div class="panel-body">
-<div class="table-responsive">
-<table class="table table-striped">
-<thead>
-<tr>
-<th>testset</th>
-<th>project</th>
-<th class="leftBorder center">flaky <span class ="gray">(total)</span></th>
-<th class="showInLargeDisplay">flaky</th>
-</tr>
-</thead>
-<tbody>
-{# Calculate max result count for the bar #}
-{% set maxCount = 1 %}
-{% for testset in testsets %}
-{%      if testset.getTestsetFlakyCounts.flaky > maxCount %}
-{%          set maxCount = testset.getTestsetFlakyCounts.flaky %}
-{%      endif %}
-{% endfor %}
-
-{# Print testsets #}
-{% for testset in testsets %}
-<tr>
-{# Testset name #}
-<td><a href="{{ testsetRoute }}/{{ testset.getName|url_encode }}/{{ testset.getProjectName|url_encode }}">{{ testset.getName }}</a></td>
-
-{# Project name #}
-<td>{{ testset.getProjectName }}</td>
-
-{# Show results as numbers #}
-{%      set flaky = testset.getTestsetFlakyCounts.flaky %}
-{%      set total = testset.getTestsetFlakyCounts.total %}
-<td class="leftBorder center">{{ flaky }}<span class ="gray"> ({{ total }})</span></td>
-
-{# Show results as bars (scaled to BAR_AREA px) #}
-{%      set flakyBar = ((BAR_AREA/maxCount)*flaky)|round(0, 'floor') %}
-{%      if (flaky > 0) and (flakyBar == 0) %}
-{%          set flakyBar = 1 %}
-{%      endif %}
-<td class="center showInLargeDisplay">
-<div>
-<div class="floatLeft redBackground" style="width: {{ flakyBar }}px">&nbsp;</div>
 </div>
-</td>
-</tr>
-{% endfor %}{# testset #}
-</tbody>
-</table>
-</div> {# .table-responsive #}
-</div> {# .panel-body #}
-</div> {# .panel... #}
+<div class="progress data_loading">
+<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+</div>
+</div>
+</div> {# flaky_testsets_data #}
 
 </div> {# .col... #}
 </div> {# .row #}
@@ -151,6 +98,6 @@ the testset is flaky (during the last {{ lastDays }} days).</li>
 {% include "footer.html" %}
 
 {# Local scripts for this page #}
-{# (none) #}
+<script src="scripts/ajax.js"></script>
 
 {% include "close.html" %}

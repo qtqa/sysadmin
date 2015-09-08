@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     03-08-2015
+ * @since     05-08-2015
  * @author    Juha Sippola
  */
 
@@ -201,19 +201,37 @@ $app->get('/testsetproject/:project', function($project) use($app)
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview'))
     );
-    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('testset_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'confRoute' => $confRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
+        'project' => $project
+    ));
+})->name('testsetproject');
+
+$app->get('/data/testsetproject/latest/:project', function($project) use($app)
+{
+$project = strip_tags($project);
+    $ini = Factory::conf();
+    $app->render('testset_project_data_latest.html', array(
         'project' => $project,
         'latestTestsetRuns' => Factory::db()->getLatestTestsetProjectBranchTestsetResults(
             $project,
             $ini['master_build_project'],
-            $ini['master_build_state']),
+            $ini['master_build_state'])
+    ));
+});
+
+$app->get('/data/testsetproject/results/:project', function($project) use($app)
+{
+$project = strip_tags($project);
+    $ini = Factory::conf();
+    $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
+    $app->render('testset_project_data_results.html', array(
+        'confRoute' => $confRoute,
+        'project' => $project,
         'projectRuns' => Factory::createProjectRuns(
             $ini['master_build_project'],
             $ini['master_build_state']),                // managed as objects
@@ -222,7 +240,7 @@ $app->get('/testsetproject/:project', function($project) use($app)
             $ini['master_build_project'],
             $ini['master_build_state'])
     ));
-})->name('testsetproject');
+});
 
 /**
  * UI route: /conf/:conf (GET)
@@ -334,19 +352,30 @@ $app->get('/test/top', function() use($app)
     $app->render('testsets_top.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'topN' => $ini['top_failures_n'],
         'lastDays' => $ini['top_failures_last_days'],
         'sinceDate' => $since,
         'masterProject' => $ini['master_build_project'],
-        'masterState' => $ini['master_build_state'],
+        'masterState' => $ini['master_build_state']
+    ));
+})->name('top');
+
+$app->get('/data/test/top', function() use($app)
+{
+    $ini = Factory::conf();
+    $days = intval($ini['top_failures_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $app->render('testsets_top_data.html', array(
+        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
+        'lastDays' => $ini['top_failures_last_days'],
+        'sinceDate' => $since,
         'testsets' => Factory::createTestsets(
             Factory::LIST_FAILURES,
             $ini['master_build_project'],
             $ini['master_build_state'])                 // managed as objects
     ));
-})->name('top');
+});
 
 /**
  * UI route: /test/flaky (GET)
@@ -363,9 +392,20 @@ $app->get('/test/flaky', function() use($app)
     $app->render('testsets_flaky.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'topN' => $ini['flaky_testsets_n'],
+        'lastDays' => $ini['flaky_testsets_last_days'],
+        'sinceDate' => $since
+    ));
+})->name('flaky');
+
+$app->get('/data/test/flaky', function() use($app)
+{
+    $ini = Factory::conf();
+    $days = intval($ini['flaky_testsets_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $app->render('testsets_flaky_data.html', array(
+        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
         'lastDays' => $ini['flaky_testsets_last_days'],
         'sinceDate' => $since,
         'testsets' => Factory::createTestsets(
@@ -373,7 +413,7 @@ $app->get('/test/flaky', function() use($app)
             null,
             null)                                       // managed as objects
     ));
-})->name('flaky');
+});
 
 /**
  * UI route: /testset/:testset/:project (GET)
