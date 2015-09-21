@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     09-09-2015
+ * @since     15-09-2015
  * @author    Juha Sippola
  */
 
@@ -62,14 +62,16 @@ $app = new Slim\Slim(array(
 $app->get('/', function() use($app)
 {
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $buildProjectPlatformRoute = str_replace('/:targetOs', '', Slim\Slim::getInstance()->urlFor('buildproject_platform'));
     $app->render('home.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'overviewRoute' => Slim\Slim::getInstance()->urlFor('overview'),
         'platformRoute' => $buildProjectPlatformRoute,
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'branches' => Factory::db()->getBranches(),
@@ -84,6 +86,7 @@ $app->get('/', function() use($app)
 $app->get('/overview', function() use($app)
 {
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
@@ -91,10 +94,11 @@ $app->get('/overview', function() use($app)
     $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
     $app->render('overview.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'buildProjectRoute' => $buildProjectRoute,
         'testsetProjectRoute' => $testsetProjectRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
@@ -113,6 +117,7 @@ $app->get('/overview', function() use($app)
 $app->get('/buildproject', function() use($app)
 {
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview'))
@@ -121,10 +126,11 @@ $app->get('/buildproject', function() use($app)
     $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('build_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'buildPlatformRoute' => $buildProjectPlatformRoute,
         'confRoute' => $confRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'platforms' => Factory::db()->getTargetPlatformOs(),
@@ -156,6 +162,7 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
 {
     $targetOs = strip_tags($targetOs);
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $buildProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('buildproject'));
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
@@ -166,10 +173,11 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
     $confRoute = str_replace('/:conf', '', Slim\Slim::getInstance()->urlFor('conf'));
     $app->render('build_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'buildPlatformRoute' => $buildProjectPlatformRoute,
         'confRoute' => $confRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'platforms' => Factory::db()->getTargetPlatformOs(),
@@ -200,14 +208,16 @@ $app->get('/testsetproject/:project', function($project) use($app)
 {
     $project = strip_tags($project);
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview'))
     );
     $app->render('testset_project.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'project' => $project
@@ -253,6 +263,7 @@ $app->get('/conf/:conf', function($conf) use($app)
 {
     $conf = strip_tags($conf);
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $buildProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('buildproject'));
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
@@ -263,10 +274,11 @@ $app->get('/conf/:conf', function($conf) use($app)
     $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
     $app->render('conf.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
         'testsetProjectRoute' => $testsetProjectRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'testsetProject' => '',
@@ -303,6 +315,7 @@ $app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($a
     $conf = strip_tags($conf);
     $testsetProject = strip_tags($testsetProject);
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
@@ -312,10 +325,11 @@ $app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($a
     $testsetTestfunctionsRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
     $app->render('conf.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
         'testsetProjectRoute' => $testsetProjectRoute,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'testsetProject' => $testsetProject,
@@ -347,6 +361,7 @@ $app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($a
 $app->get('/test/top', function() use($app)
 {
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $days = intval($ini['top_failures_last_days']) - 1;
     $since = Factory::getSinceDate($days);
     $breadcrumb = array(
@@ -354,8 +369,9 @@ $app->get('/test/top', function() use($app)
     );
     $app->render('testsets_top.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'topN' => $ini['top_failures_n'],
         'lastDays' => $ini['top_failures_last_days'],
         'sinceDate' => $since,
@@ -387,6 +403,7 @@ $app->get('/data/test/top', function() use($app)
 $app->get('/test/flaky', function() use($app)
 {
     $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $days = intval($ini['flaky_testsets_last_days']) - 1;
     $since = Factory::getSinceDate($days);
     $breadcrumb = array(
@@ -394,8 +411,9 @@ $app->get('/test/flaky', function() use($app)
     );
     $app->render('testsets_flaky.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
-        'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'topN' => $ini['flaky_testsets_n'],
         'lastDays' => $ini['flaky_testsets_last_days'],
         'sinceDate' => $since
@@ -426,6 +444,7 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
 {
     $testset = strip_tags($testset);
     $project = strip_tags($project);
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     if (Factory::checkTestset($testset)) {
         $ini = Factory::conf();
         $breadcrumb = array(
@@ -435,10 +454,11 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
         $app->render('testset.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
+            'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
             'breadcrumb' => $breadcrumb,
             'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
             'testsetProjectRoute' => $testsetProjectRoute,
-            'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
             'sinceDateFailures' => Factory::getSinceDate(intval($ini['top_failures_last_days']) - 1),
@@ -462,6 +482,7 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
     } else {
         $app->render('empty.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
             'message' => '404 Not Found'
         ));
         $app->response()->status(404);
@@ -477,6 +498,7 @@ $app->get('/testset/:testset/:project/:conf', function($testset, $project, $conf
     $testset = strip_tags($testset);
     $project = strip_tags($project);
     $conf = strip_tags($conf);
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     if (Factory::checkTestset($testset)) {
         $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
         $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
@@ -491,9 +513,10 @@ $app->get('/testset/:testset/:project/:conf', function($testset, $project, $conf
         $testfunctionRoute = str_replace('/:testfunction/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testfunction'));
         $app->render('testset_testfunctions.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
+            'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
             'breadcrumb' => $breadcrumb,
             'testfunctionRoute' => $testfunctionRoute,
-            'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'masterProject' => $ini['master_build_project'],
             'masterState' => $ini['master_build_state'],
             'conf' => $conf,
@@ -515,6 +538,7 @@ $app->get('/testset/:testset/:project/:conf', function($testset, $project, $conf
     } else {
         $app->render('empty.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
             'message' => '404 Not Found'
         ));
         $app->response()->status(404);
@@ -531,6 +555,7 @@ $app->get('/testfunction/:testfunction/:testset/:project/:conf', function($testf
     $testset = strip_tags($testset);
     $project = strip_tags($project);
     $conf = strip_tags($conf);
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     if (Factory::checkTestset($testset)) {
         $testsetTestfunctionRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
         $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
@@ -546,8 +571,9 @@ $app->get('/testfunction/:testfunction/:testset/:project/:conf', function($testf
         );
         $app->render('testfunction.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
+            'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
             'breadcrumb' => $breadcrumb,
-            'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'masterProject' => $ini['master_build_project'],
             'masterState' => $ini['master_build_state'],
             'conf' => $conf,
@@ -567,6 +593,7 @@ $app->get('/testfunction/:testfunction/:testset/:project/:conf', function($testf
     } else {
         $app->render('empty.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
             'message' => '404 Not Found'
         ));
         $app->response()->status(404);
@@ -579,11 +606,13 @@ $app->get('/testfunction/:testfunction/:testset/:project/:conf', function($testf
 
 $app->get('/sitemap', function() use($app)
 {
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
     $app->render('image.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
         'breadcrumb' => $breadcrumb,
         'title' => 'Site Map',
         'navi_title' => 'site map',
@@ -598,11 +627,13 @@ $app->get('/sitemap', function() use($app)
 $app->add(new HttpBasicAuthRoute('Protected Area', 'admin'));
 $app->get('/admin', function() use($app)
 {
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
     );
     $app->render('admin.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
         'breadcrumb' => $breadcrumb,
         'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
         'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),
@@ -618,12 +649,14 @@ $app->get('/admin', function() use($app)
 $app->add(new HttpBasicAuthRoute('Protected Area', 'admin/branches'));
 $app->get('/admin/branches', function() use($app)
 {
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'admin', 'link' => Slim\Slim::getInstance()->urlFor('admin'))
     );
     $app->render('admin_branches.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
         'breadcrumb' => $breadcrumb,
         'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
         'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),
@@ -639,12 +672,14 @@ $app->get('/admin/branches', function() use($app)
 $app->add(new HttpBasicAuthRoute('Protected Area', 'admin/data'));
 $app->get('/admin/data', function() use($app)
 {
+    $dbStatus = Factory::db()->getDbRefreshStatus();
     $breadcrumb = array(
         array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
         array('name' => 'admin', 'link' => Slim\Slim::getInstance()->urlFor('admin'))
     );
     $app->render('admin_data.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
         'breadcrumb' => $breadcrumb,
         'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
         'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),

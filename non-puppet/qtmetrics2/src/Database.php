@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     09-09-2015
+ * @since     15-09-2015
  * @author    Juha Sippola
  */
 
@@ -1266,11 +1266,37 @@ class Database {
      */
     public function getDbRefreshed()
     {
-        $query = $this->db->prepare("SELECT refreshed FROM db_status ORDER BY refreshed DESC LIMIT 1");
+        $query = $this->db->prepare("
+            SELECT refreshed
+            FROM db_status
+            ORDER BY refreshed DESC LIMIT 1");
         $query->execute(array());
         $row = $query->fetch(PDO::FETCH_ASSOC);
         $timestamp = $row['refreshed'];
         return $timestamp;
+    }
+
+    /**
+     * Get the database refresh status
+     * @return array (bool in_progress, int current, int total)
+     */
+    public function getDbRefreshStatus()
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT refreshed, refresh_in_progress, logs_current, logs_total
+            FROM db_status
+            ORDER BY refreshed DESC LIMIT 1;
+        ");
+        $query->execute(array());
+        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $result = array(
+            'refreshed' => $row['refreshed'],
+            'in_progress' => $row['refresh_in_progress'],
+            'current' => $row['logs_current'],
+            'total' => $row['logs_total']
+        );
+        return $result;
     }
 
 }

@@ -34,8 +34,7 @@
 
 /**
  * Header section of html page including the meta data and style sheets
- * @version   0.6
- * @since     23-07-2015
+ * @since     15-09-2015
  * @author    Juha Sippola
  */
 
@@ -103,6 +102,21 @@
 <div id="navbar" class="navbar-collapse collapse">
 <nav>
 <ul class="nav nav-pills pull-right">
+{# Indicate the database update status and possible refresh in progress #}
+{% if dbStatus.in_progress %}
+{%     set statusIcon = 'glyphicon glyphicon-refresh green' %}
+{%     if dbStatus.total <= 1 %}
+{%         set statusText = 'Updating data (parsing logs) ...' %}
+{%     else %}
+{%         set statusText = 'Updating data (saving ' ~ dbStatus.current ~ '/' ~ dbStatus.total ~ ') ...' %}
+{%     endif %}
+{% else %}
+{%     set statusIcon = 'glyphicon glyphicon-dashboard green' %}
+{%     set statusText = 'Last update on ' ~ dbStatus.refreshed ~ ' (GMT)' %}
+{% endif %}
+<li role="presentation" class="navbar-btn reload_page" title="{{ statusText }}">
+<a><span class="{{ statusIcon }}"></span></a>
+</li>
 <li role="presentation" class=" navbar-btn dropdown">
 <a id="doc-drop" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
 Documentation

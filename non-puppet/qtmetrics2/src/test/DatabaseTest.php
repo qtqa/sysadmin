@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     09-09-2015
+ * @since     15-09-2015
  * @author    Juha Sippola
  */
 
@@ -1035,7 +1035,33 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         $timestamp = $db->getDbRefreshed();
         $this->assertNotEmpty($timestamp);
         $this->assertStringStartsWith('20', $timestamp);
-        $this->assertEquals(19, strlen($timestamp));                // e.g. "2015-05-04 10:00:00"
+        $this->assertEquals(19, strlen($timestamp));                    // e.g. "2015-05-04 10:00:00"
+    }
+
+    /**
+     * Test getDbRefreshStatus
+     * @dataProvider testGetDbRefreshStatusData
+     */
+    public function testGetDbRefreshStatus($exp_in_progress, $exp_current, $exp_total)
+    {
+        $items = array();
+        $db = Factory::db();
+        $result = $db->getDbRefreshStatus();
+        $this->assertNotEmpty($result);
+        $this->assertArrayHasKey('refreshed', $result);
+        $this->assertArrayHasKey('in_progress', $result);
+        $this->assertArrayHasKey('current', $result);
+        $this->assertArrayHasKey('total', $result);
+        $this->assertEquals(19, strlen($result['refreshed']));          // e.g. "2015-05-04 10:00:00"
+        $this->assertEquals($exp_in_progress, $result['in_progress']);
+        $this->assertEquals($exp_current, $result['current']);
+        $this->assertEquals($exp_total, $result['total']);
+    }
+    public function testGetDbRefreshStatusData()
+    {
+        return array(
+            array(0, 0, 0)
+        );
     }
 
 }

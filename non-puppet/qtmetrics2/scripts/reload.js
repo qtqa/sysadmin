@@ -1,4 +1,4 @@
-<!--
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,14 +33,11 @@
 #############################################################################
 
 /**
- * About window content
+ * Show About window
  * @since     15-09-2015
  * @author    Juha Sippola
  */
 
--->
-
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.24 (15-Sep-2015)</small></p>
+$('.reload_page').click(function(e){
+    window.location.reload();
+});
