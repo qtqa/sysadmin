@@ -1251,6 +1251,7 @@ sub sql_create_tables
             "CREATE TABLE IF NOT EXISTS branch (
                 id                    TINYINT UNSIGNED      NOT NULL  AUTO_INCREMENT,
                 name                  VARCHAR(20)           NOT NULL,
+                archived              BOOL                  NOT NULL  DEFAULT 0,
                 UNIQUE INDEX unique_branch (name),
                 CONSTRAINT branch_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"

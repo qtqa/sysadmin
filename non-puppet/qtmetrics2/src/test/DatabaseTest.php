@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     15-09-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -73,7 +73,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getBranches
      * @dataProvider testGetBranchesData
      */
-    public function testGetBranches($exp_branch)
+    public function testGetBranches($exp_branch, $exp_archived)
     {
         $items = array();
         $db = Factory::db();
@@ -81,14 +81,19 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($result);
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('archived', $row);
             $items[] = $row['name'];
+            if ($row['name'] === $exp_branch)
+                $this->assertEquals($exp_archived, $row['archived']);
         }
         $this->assertContains($exp_branch, $items);
     }
     public function testGetBranchesData()
     {
         return array(
-            array('dev')
+            array('dev', 0),
+            array('stable', 0),
+            array('release', 1)
         );
     }
 
@@ -222,7 +227,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchBuildKeys
      * @dataProvider testGetLatestProjectBranchBuildKeysData
      */
-    public function testGetLatestProjectBranchBuildKeys($project, $state, $exp_branch, $exp_build_key)
+    public function testGetLatestProjectBranchBuildKeys($project, $state, $exp_branch, $exp_build_key, $exp_archived)
     {
         $branches = array();
         $db = Factory::db();
@@ -236,15 +241,18 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
                 $branches[] = $row['name'];
             }
         }
-        $this->assertContains($exp_branch, $branches);
+        if ($exp_archived)
+            $this->assertNotContains($exp_branch, $branches);
+        else
+            $this->assertContains($exp_branch, $branches);
     }
     public function testGetLatestProjectBranchBuildKeysData()
     {
         return array(
-            array('Qt5', 'state', 'master', '4777'),                    // based on test data
-            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345'),
-            array('Qt5', 'state', 'release', '157'),
-            array('Qt5', 'state', 'stable', '1348')
+            array('Qt5', 'state', 'master', '4777', 0),                         // based on test data
+            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 0),
+            array('Qt5', 'state', 'release', '157', 1),
+            array('Qt5', 'state', 'stable', '1348', 0)
         );
     }
 
@@ -252,20 +260,24 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchBuildKey
      * @dataProvider testGetLatestProjectBranchBuildKeyData
      */
-    public function testGetLatestProjectBranchBuildKey($project, $branch, $state, $exp_build_key)
+    public function testGetLatestProjectBranchBuildKey($project, $branch, $state, $exp_build_key, $exp_archived)
     {
         $db = Factory::db();
         $result = $db->getLatestProjectBranchBuildKey($project, $branch, $state);
-        $this->assertNotEmpty($result);
-        $this->assertEquals($exp_build_key, $result);
+        if ($exp_archived) {
+            $this->assertEmpty($result);
+        } else {
+            $this->assertNotEmpty($result);
+            $this->assertEquals($exp_build_key, $result);
+        }
     }
     public function testGetLatestProjectBranchBuildKeyData()
     {
         return array(
-            array('Qt5', 'master', 'state', '4777'),                    // based on test data
-            array('Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345'),
-            array('Qt5', 'release', 'state', '157'),
-            array('Qt5', 'stable', 'state', '1348')
+            array('Qt5', 'master', 'state', '4777', 0),                         // based on test data
+            array('Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345', 0),
+            array('Qt5', 'release', 'state', '157', 1),
+            array('Qt5', 'stable', 'state', '1348', 0)
         );
     }
 
@@ -273,7 +285,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchBuildResults
      * @dataProvider testGetLatestProjectBranchBuildResultsData
      */
-    public function testGetLatestProjectBranchBuildResults($project, $state, $exp_branch, $exp_results)
+    public function testGetLatestProjectBranchBuildResults($project, $state, $exp_branch, $exp_results, $exp_archived)
     {
         $branches = array();
         $db = Factory::db();
@@ -288,12 +300,16 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertContains($row['result'], $exp_results);
             $branches[] = $row['name'];
         }
-        $this->assertContains($exp_branch, $branches);
+        if ($exp_archived)
+            $this->assertNotContains($exp_branch, $branches);
+        else
+            $this->assertContains($exp_branch, $branches);
     }
     public function testGetLatestProjectBranchBuildResultsData()
     {
         return array(
-            array('Qt5', 'state', 'dev', array('SUCCESS', 'FAILURE', 'ABORTED'))
+            array('Qt5', 'state', 'dev', array('SUCCESS', 'FAILURE', 'ABORTED'), 0),
+            array('Qt5', 'state', 'release', array('SUCCESS', 'FAILURE', 'ABORTED'), 1)
         );
     }
 
@@ -301,7 +317,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestConfBranchBuildResults
      * @dataProvider testGetLatestConfBranchBuildResultsData
      */
-    public function testGetLatestConfBranchBuildResults($conf, $project, $state, $exp_branch, $exp_results)
+    public function testGetLatestConfBranchBuildResults($conf, $project, $state, $exp_branch, $exp_results, $exp_archived)
     {
         $branches = array();
         $db = Factory::db();
@@ -318,15 +334,18 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertContains($row['result'], $exp_results);
             $branches[] = $row['name'];
         }
-        $this->assertContains($exp_branch, $branches);
+        if ($exp_archived)
+            $this->assertNotContains($exp_branch, $branches);
+        else
+            $this->assertContains($exp_branch, $branches);
     }
     public function testGetLatestConfBranchBuildResultsData()
     {
         return array(
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'dev', array('SUCCESS', 'FAILURE', 'ABORTED')),
-            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'master', array('SUCCESS', 'FAILURE', 'ABORTED')),
-            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'release', array('SUCCESS', 'FAILURE', 'ABORTED')),
-            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'stable', array('SUCCESS', 'FAILURE', 'ABORTED'))
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'dev', array('SUCCESS', 'FAILURE', 'ABORTED'), 0),
+            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'master', array('SUCCESS', 'FAILURE', 'ABORTED'), 0),
+            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'release', array('SUCCESS', 'FAILURE', 'ABORTED'), 1),
+            array('win32-msvc2010_developer-build_angle_Windows_7', 'Qt5', 'state', 'stable', array('SUCCESS', 'FAILURE', 'ABORTED'), 0)
         );
     }
 
@@ -334,7 +353,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchTestsetResults
      * @dataProvider testGetLatestProjectBranchTestsetResultsData
      */
-    public function testGetLatestProjectBranchTestsetResults($runProject, $runState, $exp_branches)
+    public function testGetLatestProjectBranchTestsetResults($runProject, $runState, $exp_branches, $exp_achived_branches)
     {
         $confs = array();
         $db = Factory::db();
@@ -348,12 +367,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('passed', $row);
             $this->assertArrayHasKey('failed', $row);
             $this->assertContains($row['branch'], $exp_branches);
+            $this->assertNotContains($row['branch'], $exp_achived_branches);
         }
     }
     public function testGetLatestProjectBranchTestsetResultsData()
     {
         return array(
-            array('Qt5', 'state', array('dev', 'stable', 'master'))
+            array('Qt5', 'state', array('dev', 'stable', 'master'), array('release'))
         );
     }
 
@@ -361,7 +381,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestTestsetProjectBranchTestsetResults
      * @dataProvider testGetLatestTestsetProjectBranchTestsetResultsData
      */
-    public function testGetLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState, $exp_branches)
+    public function testGetLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState, $exp_branches, $exp_achived_branches)
     {
         $confs = array();
         $db = Factory::db();
@@ -375,12 +395,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('passed', $row);
             $this->assertArrayHasKey('failed', $row);
             $this->assertContains($row['branch'], $exp_branches);
+            $this->assertNotContains($row['branch'], $exp_achived_branches);
         }
     }
     public function testGetLatestTestsetProjectBranchTestsetResultsData()
     {
         return array(
-            array('qtbase', 'Qt5', 'state', array('dev', 'stable', 'master'))
+            array('qtbase', 'Qt5', 'state', array('dev', 'stable', 'master'), array('release'))
         );
     }
 
@@ -388,7 +409,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestTestsetConfBuildResults
      * @dataProvider testGetLatestTestsetConfBuildResultsData
      */
-    public function testGetLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState, $exp_conf, $exp_branches, $exp_results)
+    public function testGetLatestTestsetConfBuildResults($testset, $testsetProject, $runProject, $runState, $exp_conf, $exp_branches, $exp_achived_branches, $exp_results)
     {
         $confs = array();
         $db = Factory::db();
@@ -399,6 +420,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('branch', $row);
             $this->assertArrayHasKey('result', $row);
             $this->assertContains($row['branch'], $exp_branches);
+            $this->assertNotContains($row['branch'], $exp_achived_branches);
             $this->assertContains($row['result'], $exp_results);
             $confs[] = $row['name'];
         }
@@ -407,9 +429,18 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetLatestTestsetConfBuildResultsData()
     {
         return array(
-            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', array('dev', 'stable', 'master'), array('passed', 'failed', 'ipassed', 'ifailed')),
-            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', array('dev', 'stable', 'master'), array('passed', 'failed', 'ipassed', 'ifailed')),
-            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'macx-clang_developer-build_OSX_10.8', array('dev', 'stable', 'master'), array('passed', 'failed', 'ipassed', 'ifailed'))
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64',
+                array('dev', 'stable', 'master'),
+                array('release'),
+                array('passed', 'failed', 'ipassed', 'ifailed')),
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64',
+                array('dev', 'stable', 'master'),
+                array('release'),
+                array('passed', 'failed', 'ipassed', 'ifailed')),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'macx-clang_developer-build_OSX_10.8',
+                array('dev', 'stable', 'master'),
+                array('release'),
+                array('passed', 'failed', 'ipassed', 'ifailed'))
         );
     }
 
@@ -572,7 +603,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getProjectBuildsByBranch
      * @dataProvider testGetProjectBuildsByBranchData
      */
-    public function testGetProjectBuildsByBranch($runProject, $runState, $exp_branch, $exp_key, $has_data)
+    public function testGetProjectBuildsByBranch($runProject, $runState, $exp_branch, $exp_key, $exp_archived, $has_data)
     {
         $branches = array();
         $keys = array();
@@ -587,8 +618,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         }
         if ($has_data) {
             $this->assertNotEmpty($result);
-            $this->assertContains($exp_branch, $branches);
-            $this->assertContains($exp_key, $keys);
+            if ($exp_archived) {
+                $this->assertNotContains($exp_branch, $branches);
+            } else {
+                $this->assertContains($exp_branch, $branches);
+                $this->assertContains($exp_key, $keys);
+            }
         } else {
             $this->assertEmpty($result);
         }
@@ -596,12 +631,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetProjectBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'dev', '1023', 1),
-            array('Qt5', 'state', 'stable', '1348', 1),
-            array('Qt5', 'state', 'stable', '1348', 1),
-            array('Qt5', 'state', 'stable', '1348', 1),
-            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 1),
-            array('Qt5', 'invalid', '', '', 0)
+            array('Qt5', 'state', 'dev', '1023', 0, 1),
+            array('Qt5', 'state', 'stable', '1348', 0, 1),
+            array('Qt5', 'state', 'stable', '1348', 0, 1),
+            array('Qt5', 'state', 'stable', '1348', 0, 1),
+            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 0, 1),
+            array('Qt5', 'state', 'release', '157', 1, 1),
+            array('Qt5', 'invalid', '', '', 0, 0)
         );
     }
 
@@ -609,7 +645,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getConfBuildsByBranch
      * @dataProvider testGetConfBuildsByBranchData
      */
-    public function testGetConfBuildsByBranch($runProject, $runState, $exp_branch, $exp_conf, $exp_key, $exp_result, $has_data)
+    public function testGetConfBuildsByBranch($runProject, $runState, $exp_branch, $exp_conf, $exp_key, $exp_result, $exp_archived, $has_data)
     {
         $branches = array();
         $confs = array();
@@ -633,10 +669,14 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         }
         if ($has_data) {
             $this->assertNotEmpty($result);
-            $this->assertContains($exp_branch, $branches);
-            $this->assertContains($exp_conf, $confs);
-            $this->assertContains($exp_key, $keys);
-            $this->assertContains($exp_result, $results);
+            if ($exp_archived) {
+                $this->assertNotContains($exp_branch, $branches);
+            } else {
+                $this->assertContains($exp_branch, $branches);
+                $this->assertContains($exp_conf, $confs);
+                $this->assertContains($exp_key, $keys);
+                $this->assertContains($exp_result, $results);
+            }
         } else {
             $this->assertEmpty($result);
         }
@@ -644,11 +684,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 1),
-            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 1),
-            array('Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1),
-            array('Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 1),
-            array('Qt5', 'invalid', '', '', '', '', 0)
+            array('Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1),
+            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1),
+            array('Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1),
+            array('Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1),
+            array('Qt5', 'state', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1),
+            array('Qt5', 'invalid', '', '', '', '', 0, 0)
         );
     }
 
@@ -656,7 +697,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getConfOsBuildsByBranch
      * @dataProvider testGetConfOsBuildsByBranchData
      */
-    public function testGetConfOsBuildsByBranch($runProject, $runState, $targetOs, $exp_branch, $exp_conf, $exp_key, $exp_result, $has_data, $has_conf)
+    public function testGetConfOsBuildsByBranch($runProject, $runState, $targetOs, $exp_branch, $exp_conf, $exp_key, $exp_result, $exp_archived, $has_data, $has_conf)
     {
         $branches = array();
         $confs = array();
@@ -680,13 +721,17 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         }
         if ($has_data) {
             $this->assertNotEmpty($result);
-            $this->assertContains($exp_branch, $branches);
-            if ($has_conf)
-                $this->assertContains($exp_conf, $confs);
-            else
-                $this->assertNotContains($exp_conf, $confs);
-            $this->assertContains($exp_key, $keys);
-            $this->assertContains($exp_result, $results);
+            if ($exp_archived) {
+                $this->assertNotContains($exp_branch, $branches);
+            } else {
+                $this->assertContains($exp_branch, $branches);
+                if ($has_conf)
+                    $this->assertContains($exp_conf, $confs);
+                else
+                    $this->assertNotContains($exp_conf, $confs);
+                $this->assertContains($exp_key, $keys);
+                $this->assertContains($exp_result, $results);
+            }
         } else {
             $this->assertEmpty($result);
         }
@@ -694,12 +739,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfOsBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'linux', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 1, 1),
-            array('Qt5', 'state', 'linux', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 1, 1),
-            array('Qt5', 'state', 'windows', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 1, 1),
-            array('Qt5', 'state', 'osx', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1, 1),
-            array('Qt5', 'state', 'linux', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1, 0),
-            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0)
+            array('Qt5', 'state', 'linux', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'linux', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'windows', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'osx', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'linux', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 0),
+            array('Qt5', 'state', 'linux', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1, 1),
+            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0, 0)
         );
     }
 
@@ -707,7 +753,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getConfBuildByBranch
      * @dataProvider testGetConfBuildByBranchData
      */
-    public function testGetConfBuildByBranch($runProject, $runState, $conf, $exp_branch, $exp_conf, $exp_key, $exp_result, $has_data, $has_conf)
+    public function testGetConfBuildByBranch($runProject, $runState, $conf, $exp_branch, $exp_conf, $exp_key, $exp_result, $exp_archived, $has_data, $has_conf)
     {
         $branches = array();
         $confs = array();
@@ -731,13 +777,17 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         }
         if ($has_data) {
             $this->assertNotEmpty($result);
-            $this->assertContains($exp_branch, $branches);
-            if ($has_conf)
-                $this->assertContains($exp_conf, $confs);
-            else
-                $this->assertNotContains($exp_conf, $confs);
-            $this->assertContains($exp_key, $keys);
-            $this->assertContains($exp_result, $results);
+            if ($exp_archived) {
+                $this->assertNotContains($exp_branch, $branches);
+            } else {
+                $this->assertContains($exp_branch, $branches);
+                if ($has_conf)
+                    $this->assertContains($exp_conf, $confs);
+                else
+                    $this->assertNotContains($exp_conf, $confs);
+                $this->assertContains($exp_key, $keys);
+                $this->assertContains($exp_result, $results);
+            }
         } else {
             $this->assertEmpty($result);
         }
@@ -745,12 +795,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfBuildByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 1, 1),
-            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 1, 1),
-            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 1, 1),
-            array('Qt5', 'state', 'macx-clang_developer-build_OSX_10.8', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1, 1),
-            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 1, 0),
-            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0)
+            array('Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'macx-clang_developer-build_OSX_10.8', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 0),
+            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1, 0),
+            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0, 0)
         );
     }
 

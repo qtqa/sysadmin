@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * DatabaseAdmin unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     19-08-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -108,6 +108,7 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($result);
         foreach($result as $row) {
             $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('archived', $row);
             $this->assertArrayHasKey('runCount', $row);
             $this->assertArrayHasKey('latestRun', $row);
             $items[] = $row['name'];
@@ -353,7 +354,7 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
             $db = Factory::db();
             $dbAdmin = Factory::dbAdmin();
             // Check that xxx_run tables have data initially
-            if ($step == 'first') {
+            if ($step === 'first') {
                 $result = $dbAdmin->getTablesStatistics();
                 foreach($result as $row) {
                     if (strpos($row['name'],'_run') !== false) {
@@ -407,7 +408,7 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
             }
             $this->assertNotContains($branch, $branches);
             // Check that xxx_run tables are empty
-            if ($step == 'last') {
+            if ($step === 'last') {
                 $result = $dbAdmin->getTablesStatistics();
                 foreach($result as $row) {
                     if (strpos($row['name'],'_run') !== false) {
@@ -429,6 +430,54 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test archiveBranch and restoreBranch
+     * @dataProvider testArchiveRestoreBranchData
+     */
+    public function testArchiveRestoreBranch($branch, $originalArchived)
+    {
+        $db = Factory::db();
+        $dbAdmin = Factory::dbAdmin();
+        // Set restored to start testing
+        $result = $dbAdmin->restoreBranch($branch);
+        $result = $db->getBranches();
+        foreach($result as $row) {
+            if ($row['name'] === $branch)
+                $this->assertEquals(0, $row['archived']);
+        }
+        // Test archiveBranch
+        $result = $dbAdmin->archiveBranch($branch);
+        $this->assertTrue($result);
+        $result = $db->getBranches();
+        foreach($result as $row) {
+            if ($row['name'] === $branch)
+                $this->assertEquals(1, $row['archived']);
+        }
+        // Test restoreBranch
+        $result = $dbAdmin->restoreBranch($branch);
+        $this->assertTrue($result);
+        $result = $db->getBranches();
+        foreach($result as $row) {
+            if ($row['name'] === $branch)
+                $this->assertEquals(0, $row['archived']);
+        }
+        // Revert to original value (to not prevent other testing)
+        if ($originalArchived)
+            $result = $dbAdmin->archiveBranch($branch);
+        else
+            $result = $dbAdmin->restoreBranch($branch);
+    }
+    public function testArchiveRestoreBranchData()
+    {
+        return array(
+            array('dev', 0),
+            array('stable', 0),
+            array('release', 1),
+            array('master', 0),
+            array('1.2.3', 0)
+        );
+    }
+
+    /**
      * Test deleteRunsData and deleteProjectRunData
      * @dataProvider testDeleteRunsDataData
      */
@@ -437,7 +486,7 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
         if (self::DELETE_TEST_TYPE === self::DELETE_RUN_DATA) {
             $db = Factory::db();
             $dbAdmin = Factory::dbAdmin();
-            if ($step == 'first') {
+            if ($step === 'first') {
                 // Check that xxx_run tables have data
                 $result = $dbAdmin->getTablesStatistics();
                 foreach($result as $row) {
@@ -464,7 +513,7 @@ class DatabaseAdminTest extends PHPUnit_Framework_TestCase
                 $dates[] = substr($row['timestamp'], 0, strlen('2015-08-01'));
             }
             $this->assertNotContains($date, $dates);
-            if ($step == 'last') {
+            if ($step === 'last') {
                 // Check that xxx_run tables are empty
                 $result = $dbAdmin->getTablesStatistics();
                 foreach($result as $row) {

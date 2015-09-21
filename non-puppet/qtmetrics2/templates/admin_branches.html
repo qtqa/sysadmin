@@ -34,7 +34,7 @@
 
 /**
  * Admin page: Branches
- * @since     19-08-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -92,6 +92,7 @@
 <thead>
 <tr>
 <th>branch</th>
+<th></th>
 <th class="rightBorder"></th>
 <th class="center">latest run</th>
 <th class="center">total runs</th>
@@ -103,11 +104,22 @@
 {% for branch in branches %}
 <tr>
 {# Branch name #}
-<td>{{ branch.name }}</td>
+{% if branch.archived %}
+<td><span class="glyphicon glyphicon-eye-close gray"></span> <span class="gray">{{ branch.name }}</span></td>
+{% else %}
+<td><span class="glyphicon glyphicon-eye-open"></span> {{ branch.name }}</td>
+{% endif %}
 {%      set branchTag = branch.name|replace({'.': '-'}) %}{# '.' not allowed in id #}
 
-{# Button (opens a confirmation modal) #}
-<td id="{{ branchTag }}Button" class="rightBorder"><button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#{{ branchTag }}Modal">Remove</button></td>
+{# Archive button (opens a confirmation modal) #}
+{% if branch.archived %}
+<td id="{{ branchTag }}ArchiveButton"><button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#{{ branchTag }}RestoreModal">Restore</button></td>
+{% else %}
+<td id="{{ branchTag }}ArchiveButton"><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#{{ branchTag }}ArchiveModal">Archive</button></td>
+{% endif %}
+
+{# Remove button (opens a confirmation modal) #}
+<td id="{{ branchTag }}RemoveButton" class="rightBorder"><button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#{{ branchTag }}RemoveModal">Remove</button></td>
 
 {# Latest project_run #}
 <td class="center">{{ branch.latestRun }}</td>
@@ -134,25 +146,68 @@
 </div> {# .panel-body #}
 </div> {# .panel... #}
 
-{# Modals for remove confirmation #}
-{% set message = "Removing the branch will also delete all related items from the xxx_run tables. THIS OPERATION CANNOT BE UNDONE!" %}
+{# Modals for remove/archive/restore confirmations #}
+{% set removeMessage = "Removing the branch will delete it from the database permanently. This will also delete all related items from the xxx_run tables. THIS OPERATION CANNOT BE UNDONE!" %}
+{% set archiveMessage = "Archiving the branch will tag it so that it will not show up on the views. This will NOT delete the branch nor its related items from the database. Archived branch can be restored or removed." %}
+{% set restoreMessage = "Restoring the branch will clear the archived tag so that the branch will show up on the views again." %}
 {% for branch in branches %}
 {%      set branchTag = branch.name|replace({'.': '-'}) %}{# '.' not allowed in id #}
-<div class="modal fade" id="{{ branchTag }}Modal" tabindex="-1" role="dialog" aria-labelledby="{{ branchTag }}ModalLabel" aria-hidden="true">
+
+{# Remove confirmation #}
+<div class="modal fade" id="{{ branchTag }}RemoveModal" tabindex="-1" role="dialog" aria-labelledby="{{ branchTag }}RemoveModalLabel" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-<h4 class="modal-title" id="{{ branchTag }}ModalLabel">Remove branch "{{ branch.name }}"</h4>
+<h4 class="modal-title" id="{{ branchTag }}RemoveModalLabel">Remove branch "{{ branch.name }}"</h4>
 </div>
-<div class="modal-body">{{ message }}</div>
+<div class="modal-body">{{ removeMessage }}</div>
 <div class="modal-footer">
 <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_branch_remove_{{ branch.name }}">Cancel</button>
-<button type="button" class="btn btn-danger remove_branch" data-dismiss="modal" id="confirm_branch_remove_{{ branchTag }}" name="{{ branch.name }}">Remove</button>
+<button type="button" class="btn btn-danger" data-dismiss="modal" id="confirm_branch_remove_{{ branchTag }}" name="{{ branch.name }}">Remove</button>
 </div>
 </div>
 </div>
 </div> {# .modal #}
+
+{# Archive confirmation #}
+{% if not branch.archived %}
+<div class="modal fade" id="{{ branchTag }}ArchiveModal" tabindex="-1" role="dialog" aria-labelledby="{{ branchTag }}ArchiveModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<h4 class="modal-title" id="{{ branchTag }}ArchiveModalLabel">Archive branch "{{ branch.name }}"</h4>
+</div>
+<div class="modal-body">{{ archiveMessage }}</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_branch_archive_{{ branch.name }}">Cancel</button>
+<button type="button" class="btn btn-primary" data-dismiss="modal" id="confirm_branch_archive_{{ branchTag }}" name="{{ branch.name }}">Archive</button>
+</div>
+</div>
+</div>
+</div> {# .modal #}
+{% endif %}
+
+{# Restore confirmation #}
+{% if branch.archived %}
+<div class="modal fade" id="{{ branchTag }}RestoreModal" tabindex="-1" role="dialog" aria-labelledby="{{ branchTag }}RestoreModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<h4 class="modal-title" id="{{ branchTag }}RestoreModalLabel">Restore branch "{{ branch.name }}"</h4>
+</div>
+<div class="modal-body">{{ restoreMessage }}</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_branch_restore_{{ branch.name }}">Cancel</button>
+<button type="button" class="btn btn-primary" data-dismiss="modal" id="confirm_branch_restore_{{ branchTag }}" name="{{ branch.name }}">Restore</button>
+</div>
+</div>
+</div>
+</div> {# .modal #}
+{% endif %}
+
 {% endfor %}{# branch #}
 
 </div> {# .col... #}

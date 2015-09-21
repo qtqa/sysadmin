@@ -34,7 +34,7 @@
 
 /**
  * DatabaseAdmin class
- * @since     17-08-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -129,6 +129,7 @@ class DatabaseAdmin {
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'name' => $branch['name'],
+                    'archived' => $branch['archived'],
                     'runCount' => $row['runCount'],
                     'latestRun' => $row['latestRun']
                 );
@@ -443,6 +444,38 @@ class DatabaseAdmin {
         ));
         if (!$result2)
             $result = false;
+        return $result;
+    }
+
+    /**
+     * Set archived flag for the branch
+     * @param string $branch
+     * @return bool
+     */
+    public function archiveBranch($branch)
+    {
+        $query = $this->db->prepare("
+            UPDATE branch SET archived = 1 WHERE name = ?
+        ");
+        $result = $query->execute(array(
+            $branch
+        ));
+        return $result;
+    }
+
+    /**
+     * Clear archived flag for the branch
+     * @param string $branch
+     * @return bool
+     */
+    public function restoreBranch($branch)
+    {
+        $query = $this->db->prepare("
+            UPDATE branch SET archived = 0 WHERE name = ?
+        ");
+        $result = $query->execute(array(
+            $branch
+        ));
         return $result;
     }
 

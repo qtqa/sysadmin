@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     15-09-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -711,6 +711,54 @@ $app->delete('/api/branch/:branch', function($branch) use($app)
         $app->response()->status(404);
     }
 })->name('delete_branch');
+
+/**
+ * API route: /api/branch/archive (PUT) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'api/branch/archive'));
+$app->put('/api/branch/archive/:branch', function($branch) use($app)
+{
+    $branch = strip_tags($branch);
+    $branches = array();
+    $query = Factory::db()->getBranches();
+    foreach($query as $item) {
+        $branches[] = $item['name'];
+    }
+    if (in_array($branch, $branches)) {
+        $result = Factory::dbAdmin()->archiveBranch($branch);
+        if ($result)
+            $app->response()->status(200);
+        else
+            $app->response()->status(404);
+    } else {
+        $app->response()->status(404);
+    }
+})->name('archive_branch');
+
+/**
+ * API route: /api/branch/restore (PUT) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'api/branch/restore'));
+$app->put('/api/branch/restore/:branch', function($branch) use($app)
+{
+    $branch = strip_tags($branch);
+    $branches = array();
+    $query = Factory::db()->getBranches();
+    foreach($query as $item) {
+        $branches[] = $item['name'];
+    }
+    if (in_array($branch, $branches)) {
+        $result = Factory::dbAdmin()->restoreBranch($branch);
+        if ($result)
+            $app->response()->status(200);
+        else
+            $app->response()->status(404);
+    } else {
+        $app->response()->status(404);
+    }
+})->name('restore_branch');
 
 /**
  * API route: /api/data (DELETE) - authenticated

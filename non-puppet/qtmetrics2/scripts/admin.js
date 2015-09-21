@@ -34,33 +34,80 @@
 
 /**
  * Admin functions
- * @since     19-08-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
 // Catch action confirmation from the modal
 $('.modal .modal-footer button').on('click', function (e) {
-    var buttonDiv;
+    var branchTag;
+    var branchName;
+    var removeButtonDiv;
+    var archiveButtonDiv;
     var $target = $(e.target);
     $(this).closest('.modal').on('hidden.bs.modal', function (e) {
 
         // Remove branch
         if ($target[0].id.search("confirm_branch_remove") === 0) {
-            var branchTag = $target[0].id.substring($target[0].id.lastIndexOf('_') + 1);
-            var branchName = $target[0].name;
-            buttonDiv = '#' + branchTag + 'Button';
-            $(buttonDiv).html("Removing...");
-            // Send delete request and handle the response
+            branchTag = $target[0].id.substring($target[0].id.lastIndexOf('_') + 1);
+            branchName = $target[0].name;
+            removeButtonDiv = '#' + branchTag + 'RemoveButton';
+            archiveButtonDiv = '#' + branchTag + 'ArchiveButton';
+            $(removeButtonDiv).html("Removing...");
+            // Send request and handle the response
             $.ajax({
                 url: "api/branch/" + branchName,
                 type: 'DELETE',
                 success: function(result) {
                     console.log(this.type + ": " + this.url + " done");
-                    $(buttonDiv).html("Removed");
+                    $(removeButtonDiv).html("Removed");
+                    $(archiveButtonDiv).html("");
                 },
                 error: function (request, status, error) {
                     console.log(this.type + ": " + this.url + " error (" + error + ")");
-                    $(buttonDiv).html("Error!");
+                    $(removeButtonDiv).html("Error!");
+                }
+            });
+        }
+
+        // Archive branch
+        if ($target[0].id.search("confirm_branch_archive") === 0) {
+            branchTag = $target[0].id.substring($target[0].id.lastIndexOf('_') + 1);
+            branchName = $target[0].name;
+            archiveButtonDiv = '#' + branchTag + 'ArchiveButton';
+            $(archiveButtonDiv).html("Archiving...");
+            // Send request and handle the response
+            $.ajax({
+                url: "api/branch/archive/" + branchName,
+                type: 'PUT',
+                success: function(result) {
+                    console.log(this.type + ": " + this.url + " done");
+                    $(archiveButtonDiv).html("Archived");
+                },
+                error: function (request, status, error) {
+                    console.log(this.type + ": " + this.url + " error (" + error + ")");
+                    $(archiveButtonDiv).html("Error!");
+                }
+            });
+        }
+
+        // Restore branch
+        if ($target[0].id.search("confirm_branch_restore") === 0) {
+            branchTag = $target[0].id.substring($target[0].id.lastIndexOf('_') + 1);
+            branchName = $target[0].name;
+            archiveButtonDiv = '#' + branchTag + 'ArchiveButton';
+            $(archiveButtonDiv).html("Restoring...");
+            // Send request and handle the response
+            $.ajax({
+                url: "api/branch/restore/" + branchName,
+                type: 'PUT',
+                success: function(result) {
+                    console.log(this.type + ": " + this.url + " done");
+                    $(archiveButtonDiv).html("Restored");
+                },
+                error: function (request, status, error) {
+                    console.log(this.type + ": " + this.url + " error (" + error + ")");
+                    $(archiveButtonDiv).html("Error!");
                 }
             });
         }
@@ -69,19 +116,19 @@ $('.modal .modal-footer button').on('click', function (e) {
         if ($target[0].id.search("confirm_data_remove") === 0) {
             var dataDate = $target[0].id.substring($target[0].id.lastIndexOf('_') + 1);
             var dataState = $target[0].name;
-            buttonDiv = '#' + dataState + '-' + dataDate + 'Button';
-            $(buttonDiv).html("Removing...");
+            removeButtonDiv = '#' + dataState + '-' + dataDate + 'Button';
+            $(removeButtonDiv).html("Removing...");
             // Send delete request and handle the response
             $.ajax({
                 url: "api/data/" + dataState + "/" + dataDate,
                 type: 'DELETE',
                 success: function(result) {
                     console.log(this.type + ": " + this.url + " done");
-                    $(buttonDiv).html("Removed");
+                    $(removeButtonDiv).html("Removed");
                 },
                 error: function (request, status, error) {
                     console.log(this.type + ": " + this.url + " error (" + error + ")");
-                    $(buttonDiv).html("Error!");
+                    $(removeButtonDiv).html("Error!");
                 }
             });
         }
