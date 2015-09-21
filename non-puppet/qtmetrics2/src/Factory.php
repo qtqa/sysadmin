@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     08-09-2015
+ * @since     09-09-2015
  * @author    Juha Sippola
  */
 
@@ -47,6 +47,7 @@ require_once 'ConfRun.php';
 require_once 'Testset.php';
 require_once 'TestsetRun.php';
 require_once 'TestfunctionRun.php';
+require_once 'TestrowRun.php';
 
 class Factory {
 
@@ -431,6 +432,40 @@ class Factory {
                 TestfunctionRun::isBlacklisted($entry['result']),
                 $entry['timestamp'],
                 $entry['duration']
+            );
+            $objects[] = $obj;
+        }
+        return $objects;
+    }
+
+    /**
+     * Create TestrowRun objects in a configuration for those in database
+     * @param string $testfunction
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestfunctionRun objects
+     */
+    public static function createTestrowRunsInConf($testfunction, $testset, $testsetProject, $conf, $runProject, $runState)
+    {
+        $objects = array();
+        $dbEntries = self::db()->getTestrowConfResultsByBranch($testfunction, $testset, $testsetProject, $conf, $runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new TestrowRun(
+                $entry['testrow'],
+                $testfunction,
+                $testset,
+                $testsetProject,
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                $conf,
+                TestrowRun::stripResult($entry['result']),
+                TestrowRun::isBlacklisted($entry['result']),
+                $entry['timestamp']
             );
             $objects[] = $obj;
         }

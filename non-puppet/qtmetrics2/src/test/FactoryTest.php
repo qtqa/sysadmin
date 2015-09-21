@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     08-09-2015
+ * @since     09-09-2015
  * @author    Juha Sippola
  */
 
@@ -455,6 +455,42 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1348', 'smbServer', 1),    // skip
             array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),                                  // no fail or skip
             array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
+        );
+    }
+
+    /**
+     * Test createTestrowRunsInConf
+     * @dataProvider testCreateTestrowRunsInConfData
+     */
+    public function testCreateTestrowRunsInConf($testfunction, $testset, $testsetProject, $conf, $runProject, $runState, $exp_branch, $exp_buildKey, $exp_testrow, $has_data)
+    {
+        $branches = array();
+        $buildKeys = array();
+        $testrows = array();
+        $runs = Factory::createTestrowRunsInConf($testfunction, $testset, $testsetProject, $conf, $runProject, $runState);
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof TestfunctionRun);
+            $branches[] = $run->getBranchName();
+            $buildKeys[] = $run->getBuildKey();
+            $testrows[] = $run->getName();
+        }
+        if ($has_data) {
+            $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_buildKey, $buildKeys);
+            $this->assertContains($exp_testrow, $testrows);
+        } else {
+            $this->assertEmpty($runs);
+        }
+    }
+    public function testCreateTestrowRunsInConfData()
+    {
+        return array(
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'monospace', 1),     // xpass
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'sans-serif', 1),    // xfail
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'serif', 1),         // bskip
+            array('binaryAscii', 'tst_qftp', 'qtbase', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', '1023', 'WithSocks5ProxyAndSession', 1), // fail
+            array('httpServerFiles', 'tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),            // no fail or skip
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
         );
     }
 

@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     08-09-2015
+ * @since     09-09-2015
  * @author    Juha Sippola
  */
 
@@ -1193,6 +1193,68 @@ class Database {
                 'result' => $row['result'],
                 'timestamp' => $row['timestamp'],
                 'duration' => $row['duration']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get results for failed and skipped testrows in specified configuration builds and project by branch
+     * Only the fail/skip and xpass/xfail results are listed
+     * @param string $testfunction
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string build_key, string testrow, string result, string timestamp)
+     */
+    public function getTestrowConfResultsByBranch($testfunction, $testset, $testsetProject, $conf, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                project_run.build_key,
+                testrow.name AS testrow,
+                testrow_run.result,
+                project_run.timestamp
+            FROM testrow_run
+                INNER JOIN testrow ON testrow_run.testrow_id = testrow.id
+                INNER JOIN testfunction_run ON testrow_run.testfunction_run_id = testfunction_run.id
+                INNER JOIN testfunction ON testfunction_run.testfunction_id = testfunction.id
+                INNER JOIN testset_run ON testfunction_run.testset_run_id = testset_run.id
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                (testrow_run.result LIKE '%fail' OR testrow_run.result LIKE '%skip' OR testrow_run.result LIKE '%x%') AND
+                testfunction.name = ? AND
+                testset.name = ? AND
+                project.name = ? AND
+                conf.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, testrow.name, project_run.build_key DESC;
+        ");
+        $query->execute(array(
+            $testfunction,
+            $testset,
+            $testsetProject,
+            $conf,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'buildKey' => $row['build_key'],
+                'testrow' => $row['testrow'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp']
             );
         }
         return $result;
