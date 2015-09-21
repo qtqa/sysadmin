@@ -81,7 +81,7 @@ class Database {
     public function getBranches()
     {
         $result = array();
-        $query = $this->db->prepare("SELECT name, archived FROM branch ORDER BY name");
+        $query = $this->db->prepare("SELECT name, archived FROM branch ORDER BY name DESC");
         $query->execute(array());
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $result[] = array(
@@ -890,7 +890,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, project_run.timestamp DESC;
+            ORDER BY branch.name DESC, project_run.timestamp DESC;
         ");
         $query->execute(array(
             $runProject,
@@ -933,7 +933,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, conf, project_run.timestamp DESC;
+            ORDER BY branch.name DESC, conf, project_run.timestamp DESC;
         ");
         $query->execute(array(
             $runProject,
@@ -983,7 +983,7 @@ class Database {
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 conf.target_id IN (SELECT id FROM platform WHERE os = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, conf, project_run.timestamp DESC;
+            ORDER BY branch.name DESC, conf, project_run.timestamp DESC;
         ");
         $query->execute(array(
             $runProject,
@@ -1034,7 +1034,7 @@ class Database {
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 conf.name = ? AND
                 branch.archived = 0
-            ORDER BY branch.name, conf, project_run.timestamp DESC;
+            ORDER BY branch.name DESC, conf, project_run.timestamp DESC;
         ");
         $query->execute(array(
             $runProject,
@@ -1089,7 +1089,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, conf.name, project_run.timestamp DESC;
+            ORDER BY branch.name DESC, conf.name, project_run.timestamp DESC;
         ");
         $query->execute(array(
             $testset,
@@ -1143,7 +1143,7 @@ class Database {
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
             GROUP BY branch.name, project_run.build_key, conf.name
-            ORDER BY branch.name, conf.name, project_run.build_key DESC;
+            ORDER BY branch.name DESC, conf.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $testsetProject,
@@ -1198,7 +1198,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, project.name, testset.name, project_run.build_key DESC;
+            ORDER BY branch.name DESC, project.name, testset.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $conf,
@@ -1256,7 +1256,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, testset.name, project_run.build_key DESC;
+            ORDER BY branch.name DESC, testset.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $testsetProject,
@@ -1317,7 +1317,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, testfunction.name, project_run.build_key DESC;
+            ORDER BY branch.name DESC, testfunction.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $testset,
@@ -1380,7 +1380,7 @@ class Database {
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
                 branch.archived = 0
-            ORDER BY branch.name, testrow.name, project_run.build_key DESC;
+            ORDER BY branch.name DESC, testrow.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $testfunction,
