@@ -34,8 +34,7 @@
 
 /**
  * TestsetRun class
- * @version   0.5
- * @since     15-07-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -171,6 +170,18 @@ class TestsetRun extends ProjectRun {
         if (strpos($resultString, 'i') === 0)                               // begins with 'i'
             $flag = true;
         return $flag;
+    }
+
+    /**
+     * Get build directory link.
+     * @return string
+     */
+    public function getBuildLink()
+    {
+        return Factory::getCiLogPath()
+            . urlencode(parent::getFullProjectName())
+            . '/build_' . parent::getBuildKeyString()
+            . '/' . urlencode($this->confName);
     }
 
 }

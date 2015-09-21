@@ -34,7 +34,7 @@
 
 /**
  * Test function page (list of test rows)
- * @since     16-09-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -127,13 +127,26 @@
 {# Get all build keys, dates and log links #}
 {%          set buildKey = '' %}
 {%          set buildKeys = [] %}
+{%          set buildKeysShort = [] %}
 {%          set dates = [] %}
+{%          set buildLinks = [] %}
 {%          for run in projectRuns %}
 {%              if run.getBranchName == branch %}
 {%                  if buildKey != run.getBuildKey %}
 {%                      set buildKey = run.getBuildKey %}
 {%                      set buildKeys = buildKeys|merge([run.getBuildKey]) %}
+{%                      set buildKeysShort = buildKeysShort|merge([run.getShortBuildKey]) %}
 {%                      set dates = dates|merge([run.getTimestamp]) %}
+{%                      set testrowRunFound = 0 %}
+{%                      for testrowRun in testrowRuns if (testrowRun.getBranchName == branch) and (testrowRun.getBuildKey == buildKey) %}
+{%                          if not testrowRunFound %}
+{%                              set buildLinks = buildLinks|merge([testrowRun.getBuildLink]) %}
+{%                          endif %}
+{%                          set testrowRunFound = 1 %}
+{%                      endfor %}
+{%                      if not testrowRunFound %}
+{%                          set buildLinks = buildLinks|merge(['']) %}
+{%                      endif %}
 {%                  endif %}
 {%              endif %}
 {%          endfor %}
@@ -159,10 +172,18 @@
 <th class="bold rightBorder">flags</th>
 {%              for key, buildKey in buildKeys %}
 <th class="center">
-{%                  if buildKey|length > 6 %}
-<span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ buildKey }}">{{ buildKey|slice(0, 4) }}...</span><br>
+{%                  if buildLinks[key] != '' %}
+{%                      if buildKey == buildKeysShort[key] %}
+<a href="{{ buildLinks[key] }}" target="_blank">{{ buildKey }}</a><br>
+{%                      else %}
+<a href="{{ buildLinks[key] }}" target="_blank"><span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ buildKey }}">{{ buildKeysShort[key] }}</span></a><br>
+{%                      endif %}
 {%                  else %}
+{%                      if buildKey == buildKeysShort[key] %}
 {{ buildKey }}<br>
+{%                      else %}
+<span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ buildKey }}">{{ buildKeysShort[key] }}</span><br>
+{%                      endif %}
 {%                  endif %}
 <span class="gray"><small>{{ dates[key]|date("m-d") }}</small></span>
 </th>

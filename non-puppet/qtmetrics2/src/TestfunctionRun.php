@@ -34,7 +34,7 @@
 
 /**
  * TestfunctionRun class
- * @since     16-09-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -229,6 +229,18 @@ class TestfunctionRun extends ProjectRun {
         if (strpos($resultString, 'tr_') === 0)                             // calculated testrow results begin with 'tr_'
             $flag = true;
         return $flag;
+    }
+
+    /**
+     * Get build directory link.
+     * @return string
+     */
+    public function getBuildLink()
+    {
+        return Factory::getCiLogPath()
+            . urlencode(parent::getFullProjectName())
+            . '/build_' . parent::getBuildKeyString()
+            . '/' . urlencode($this->confName);
     }
 
 }

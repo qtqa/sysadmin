@@ -34,8 +34,7 @@
 
 /**
  * ProjectRun class
- * @version   0.2
- * @since     12-05-2015
+ * @since     17-09-2015
  * @author    Juha Sippola
  */
 
@@ -49,6 +48,11 @@ class ProjectRun {
     const RESULT_SUCCESS = "SUCCESS";
     const RESULT_FAILURE = "FAILURE";
     const RESULT_ABORTED = "ABORTED";
+
+    /**
+     * If the build key is long, a shorter version of the key can be requested
+     */
+    const SHORT_BUILDKEY_LENGTH = 6;
 
     /**
      * Project name.
@@ -160,6 +164,18 @@ class ProjectRun {
     }
 
     /**
+     * Get build key short version.
+     * @return string
+     */
+    public function getShortBuildKey()
+    {
+        if (strlen($this->buildKey) > self::SHORT_BUILDKEY_LENGTH)
+            return substr($this->buildKey, 0, self::SHORT_BUILDKEY_LENGTH - 2) . '...';
+        else
+            return $this->buildKey;
+    }
+
+    /**
      * Get result (plain result without any possible flags).
      * @return string
      */
@@ -204,6 +220,17 @@ class ProjectRun {
                 $buildString = '0000' . $this->buildKey;
         }
         return $buildString;
+    }
+
+    /**
+     * Get build directory link.
+     * @return string
+     */
+    public function getBuildLink()
+    {
+        return Factory::getCiLogPath()
+            . urlencode(self::getFullProjectName())
+            . '/build_' . self::getBuildKeyString();
     }
 
     /**
