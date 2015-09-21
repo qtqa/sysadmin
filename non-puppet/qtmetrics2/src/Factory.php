@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     17-08-2015
+ * @since     08-09-2015
  * @author    Juha Sippola
  */
 
@@ -46,6 +46,7 @@ require_once 'Conf.php';
 require_once 'ConfRun.php';
 require_once 'Testset.php';
 require_once 'TestsetRun.php';
+require_once 'TestfunctionRun.php';
 
 class Factory {
 
@@ -395,6 +396,39 @@ class Factory {
                 $entry['run'],
                 TestsetRun::stripResult($entry['result']),
                 TestsetRun::isInsignificant($entry['result']),
+                $entry['timestamp'],
+                $entry['duration']
+            );
+            $objects[] = $obj;
+        }
+        return $objects;
+    }
+
+    /**
+     * Create TestfunctionRun objects in a configuration for those in database
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestfunctionRun objects
+     */
+    public static function createTestfunctionRunsInConf($testset, $testsetProject, $conf, $runProject, $runState)
+    {
+        $objects = array();
+        $dbEntries = self::db()->getTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState);
+        foreach($dbEntries as $entry) {
+            $obj = new TestfunctionRun(
+                $entry['testfunction'],
+                $testset,
+                $testsetProject,
+                $runProject,
+                $entry['branch'],
+                $runState,
+                $entry['buildKey'],
+                $conf,
+                TestfunctionRun::stripResult($entry['result']),
+                TestfunctionRun::isBlacklisted($entry['result']),
                 $entry['timestamp'],
                 $entry['duration']
             );

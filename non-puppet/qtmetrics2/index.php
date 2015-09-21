@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     10-08-2015
+ * @since     08-09-2015
  * @author    Juha Sippola
  */
 
@@ -467,6 +467,61 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         $app->response()->status(404);
     }
 })->name('testset');
+
+/**
+ * UI route: /testset/:testset/:project/:conf (GET)
+ */
+
+$app->get('/testset/:testset/:project/:conf', function($testset, $project, $conf) use($app)
+{
+    $testset = strip_tags($testset);
+    $project = strip_tags($project);
+    $conf = strip_tags($conf);
+    if (Factory::checkTestset($testset)) {
+        $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+        $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
+        $confProjectRoute = str_replace('/:conf/:testsetproject', '', Slim\Slim::getInstance()->urlFor('conf_testsetproject'));
+        $ini = Factory::conf();
+        $breadcrumb = array(
+            array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+            array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
+            array('name' => $project, 'link' => $testsetProjectRoute . '/' . $project),
+            array('name' => $conf, 'link' => $confProjectRoute . '/' . urlencode($conf) . '/' . $project),
+            array('name' => $testset, 'link' => $testsetRoute . '/' . $testset. '/' . $project)
+        );
+        $confProjectRoute = str_replace('/:conf/:testsetproject', '', Slim\Slim::getInstance()->urlFor('conf_testsetproject'));
+        $testfunctionRoute = 'testfunction';                // TODO: Replace later with $testfunctionRoute = str_replace('/:testfunction', '', Slim\Slim::getInstance()->urlFor('testfunction'));
+        $app->render('testset_testfunctions.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'breadcrumb' => $breadcrumb,
+            'testfunctionRoute' => $testfunctionRoute,
+            'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
+            'masterProject' => $ini['master_build_project'],
+            'masterState' => $ini['master_build_state'],
+            'conf' => $conf,
+            'projectRuns' => Factory::createProjectRuns(
+                $ini['master_build_project'],
+                $ini['master_build_state']),                // managed as objects
+            'testset' => Factory::createTestset(
+                $testset,
+                $project,
+                $ini['master_build_project'],
+                $ini['master_build_state']),                // managed as object
+            'testfunctionRuns' => Factory::createTestfunctionRunsInConf(
+                $testset,
+                $project,
+                $conf,
+                $ini['master_build_project'],
+                $ini['master_build_state'])                 // managed as objects
+        ));
+    } else {
+        $app->render('empty.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'message' => '404 Not Found'
+        ));
+        $app->response()->status(404);
+    }
+})->name('testset_testfunctions');
 
 /**
  * UI route: /sitemap (GET)

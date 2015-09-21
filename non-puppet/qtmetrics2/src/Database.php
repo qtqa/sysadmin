@@ -34,8 +34,7 @@
 
 /**
  * Database class
- * @version   0.9
- * @since     21-07-2015
+ * @since     08-09-2015
  * @author    Juha Sippola
  */
 
@@ -924,7 +923,7 @@ class Database {
     /**
      * Get run results for a testset in specified builds by branch and configuration
      * @param string $testset
-     * @param $testsetProject
+     * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
      * @return array (string branch, string conf, string build_key, string result, string timestamp, string duration, int run)
@@ -977,7 +976,7 @@ class Database {
 
     /**
      * Get result counts for a testset project in specified builds by branch and configuration
-     * @param $testsetProject
+     * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
      * @return array (string branch, string conf, string build_key, int passed, int ipassed, int failed, int ifailed)
@@ -1030,7 +1029,7 @@ class Database {
     /**
      * Get results for failed testsets in specified configuration builds by branch
      * Only the failures are listed
-     * @param $conf
+     * @param string $conf
      * @param string $runProject
      * @param string $runState
      * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
@@ -1085,8 +1084,8 @@ class Database {
     /**
      * Get results for failed testsets in specified configuration builds and project by branch
      * Only the failures are listed
-     * @param $conf
-     * @param $testsetProject
+     * @param string $conf
+     * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
      * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
@@ -1117,7 +1116,7 @@ class Database {
                 conf.name = ? AND
                 project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
                 project_run.state_id = (SELECT id FROM state WHERE name = ?)
-            ORDER BY branch.name, project.name, testset.name, project_run.build_key DESC;
+            ORDER BY branch.name, testset.name, project_run.build_key DESC;
         ");
         $query->execute(array(
             $testsetProject,
@@ -1135,6 +1134,65 @@ class Database {
                 'timestamp' => $row['timestamp'],
                 'duration' => $row['duration'],
                 'run' => $row['run']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get results for failed and skipped testfunctions in specified configuration builds and project by branch
+     * Only the fail/skip and xpass/xfail results are listed
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $conf
+     * @param string $runProject
+     * @param string $runState
+     * @return array (string branch, string build_key, string testfunction, string result, string timestamp, string duration)
+     */
+    public function getTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                branch.name AS branch,
+                project_run.build_key,
+                testfunction.name AS testfunction,
+                testfunction_run.result,
+                project_run.timestamp,
+                testfunction_run.duration
+            FROM testfunction_run
+                INNER JOIN testfunction ON testfunction_run.testfunction_id = testfunction.id
+                INNER JOIN testset_run ON testfunction_run.testset_run_id = testset_run.id
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+            WHERE
+                (testfunction_run.result LIKE '%fail' OR testfunction_run.result LIKE '%skip' OR testfunction_run.result LIKE '%x%') AND
+                testset.name = ? AND
+                project.name = ? AND
+                conf.name = ? AND
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?)
+            ORDER BY branch.name, testfunction.name, project_run.build_key DESC;
+        ");
+        $query->execute(array(
+            $testset,
+            $testsetProject,
+            $conf,
+            $runProject,
+            $runState
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'branch' => $row['branch'],
+                'buildKey' => $row['build_key'],
+                'testfunction' => $row['testfunction'],
+                'result' => $row['result'],
+                'timestamp' => $row['timestamp'],
+                'duration' => $row['duration']
             );
         }
         return $result;
