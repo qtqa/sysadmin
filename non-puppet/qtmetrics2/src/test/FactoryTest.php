@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -285,9 +285,9 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createTestfunctions
      * @dataProvider testCreateTestfunctionsData
      */
-    public function testCreateTestfunctions($runProject, $runState)
+    public function testCreateTestfunctions($listType, $runProject, $runState)
     {
-        $testfunctions = Factory::createTestfunctions($runProject, $runState);
+        $testfunctions = Factory::createTestfunctions($listType, $runProject, $runState);
         foreach($testfunctions as $testfunction) {
             $this->assertTrue($testfunction instanceof Testfunction);
             $result = $testfunction->getResultCounts();
@@ -295,12 +295,17 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('passed', $result);
             $this->assertArrayHasKey('failed', $result);
             $this->assertArrayHasKey('skipped', $result);
+            $blacklisted = $testfunction->getBlacklistedCounts();
+            $this->assertNotNull($blacklisted);
+            $this->assertArrayHasKey('bpassed', $blacklisted);
+            $this->assertArrayHasKey('btotal', $blacklisted);
         }
     }
     public function testCreateTestfunctionsData()
     {
         return array(
-            array('Qt5', 'state')
+            array(Factory::LIST_FAILURES, 'Qt5', 'state'),
+            array(Factory::LIST_BPASSES, 'Qt5', 'state')
         );
     }
 

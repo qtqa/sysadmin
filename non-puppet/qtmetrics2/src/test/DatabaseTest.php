@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     20-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -639,6 +639,45 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getTestfunctionsBlacklistedPassedCounts
+     * @dataProvider testGetTestfunctionsBlacklistedPassedCountsData
+     */
+    public function testGetTestfunctionsBlacklistedPassedCounts($runProject, $runState, $date, $exp_testfunction, $exp_excluded_testfunction, $exp_testfunction_count_min, $exp_bpassed_min)
+    {
+        $testfunctions = array();
+        $bpassed = 0;
+        $db = Factory::db();
+        $result = $db->getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $date);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('testset', $row);
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('bpassed', $row);
+            $this->assertArrayHasKey('btotal', $row);
+            $this->assertEquals($row['btotal'], $row['bpassed']);
+            $testfunctions[] = $row['name'];
+            $bpassed += $row['bpassed'];
+        }
+        $this->assertGreaterThanOrEqual($exp_testfunction_count_min, count($testfunctions));
+        if ($exp_testfunction_count_min > 0) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_testfunction, $testfunctions);
+            $this->assertNotContains($exp_excluded_testfunction, $testfunctions);
+            $this->assertGreaterThanOrEqual($exp_bpassed_min, $bpassed);
+        }
+    }
+    public function testGetTestfunctionsBlacklistedPassedCountsData()
+    {
+        return array(
+            array('Qt5', 'state', '2013-05-01', 'lastResortFont', 'resetFont', 1, 1),     // in test data lastResortFont has bpassed and resetFont doesn't
+            array('Qt5', 'state', '2013-05-01', 'lastResortFont', 'styleName', 1, 1),     // in test data lastResortFont has bpassed and styleName has bskipped as well
+            array('Qt5', 'state', '2013-05-29', '', '', 0, 0),
+            array('Qt5', 'state', '2999-05-29', '', '', 0, 0)
+        );
+    }
+
+    /**
      * Test getProjectBuildsByBranch
      * @dataProvider testGetProjectBuildsByBranchData
      */
@@ -1036,9 +1075,10 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getTestfunctionConfResultsByBranch
      * @dataProvider testGetTestfunctionConfResultsByBranchData
      */
-    public function testGetTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState, $exp_branch, $exp_testfunction, $exp_key, $has_data)
+    public function testGetTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState, $exp_branch, $exp_testfunction, $exp_result, $exp_key, $has_data)
     {
         $branches = array();
+        $results = array();
         $keys = array();
         $testfunctions = array();
         $db = Factory::db();
@@ -1051,12 +1091,14 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('timestamp', $row);
             $this->assertArrayHasKey('duration', $row);
             $branches[] = $row['branch'];
+            $results[] = $row['result'];
             $keys[] = $row['buildKey'];
             $testfunctions[] = $row['testfunction'];
         }
         if ($has_data) {
             $this->assertNotEmpty($result);
             $this->assertContains($exp_branch, $branches);
+            $this->assertContains($exp_result, $results);
             $this->assertContains($exp_key, $keys);
             $this->assertContains($exp_testfunction, $testfunctions);
         } else {
@@ -1066,11 +1108,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestfunctionConfResultsByBranchData()
     {
         return array(
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'exactMatch', '1348', 1),             // fail
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', '1348', 1),         // skip
-            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'smbServer', '1348', 1),    // skip
-            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),                                  // no fail or skip
-            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'exactMatch', 'fail', '1348', 1),
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'skip', '1348', 1),
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'bpass', '1346', 1),
+            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'smbServer', 'skip', '1348', 1),
+            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', '', 0),                                      // no fail or skip
+            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', '', 0)
         );
     }
 

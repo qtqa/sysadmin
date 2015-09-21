@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Testfunction unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -45,23 +45,39 @@ class TestfunctionTest extends PHPUnit_Framework_TestCase
 {
 
     /**
-     * Test getName, getShortName, getTestsetName, getTestsetProjectName
+     * Test getName, getShortName, getTestsetName, getTestsetProjectName, getConfName
      * @dataProvider testGetNameData
      */
-    public function testGetName($name, $shortName, $testset, $project)
+    public function testGetName($name, $shortName, $testset, $project, $conf)
     {
-        $testfunction = new Testfunction($name, $testset, $project);
+        $testfunction = new Testfunction($name, $testset, $project, $conf);
         $this->assertEquals($name, $testfunction->getName());
         $this->assertEquals($shortName, $testfunction->getShortName());
         $this->assertEquals($testset, $testfunction->getTestsetName());
         $this->assertEquals($project, $testfunction->getTestsetProjectName());
+        $this->assertEquals($conf, $testfunction->getConfName());
     }
     public function testGetNameData()
     {
         return array(
-            array('cleanupTestCase', 'cleanupTestCase', 'tst_qftp', 'QtBase'),
-            array('my_testfunction', 'my_testfunction', 'my_testset', 'my_project'),
-            array('my_long_testfunction_name_that_has_over_50_letters_in_it', 'my_long_testfunction_name_that_has_over_...s_in_it', 'my_testset', 'my_project')
+            array(
+                'cleanupTestCase',
+                'cleanupTestCase',
+                'tst_qftp',
+                'QtBase',
+                'macx-clang_developer-build_OSX_10.8'),
+            array(
+                'my_testfunction',
+                'my_testfunction',
+                'my_testset',
+                'my_project',
+                'my_conf'),
+            array(
+                'my_long_testfunction_name_that_has_over_50_letters_in_it',
+                'my_long_testfunction_name_that_has_over_...s_in_it',
+                'my_testset',
+                'my_project',
+                'my_conf')
         );
     }
 
@@ -69,9 +85,10 @@ class TestfunctionTest extends PHPUnit_Framework_TestCase
      * Test setResultCounts and getResultCounts
      * @dataProvider testGetResultCountsData
      */
-    public function testGetTestsetResultCounts($name, $testset, $project, $passed, $failed, $skipped)
+    public function testGetTestsetResultCounts($name, $testset, $project, $conf, $passed, $failed, $skipped)
     {
-        $testfunction = new Testfunction($name, $testset, $project);
+        $testfunction = new Testfunction($name, $testset, $project, $conf);
+        $this->assertTrue($testfunction instanceof Testfunction);
         // Counts not set
         $result = $testfunction->getResultCounts();
         $this->assertArrayHasKey('passed', $result);
@@ -93,9 +110,40 @@ class TestfunctionTest extends PHPUnit_Framework_TestCase
     public function testGetResultCountsData()
     {
         return array(
-            array('cleanupTestCase', 'tst_qftp', 'QtBase', 1, 2, 3),
-            array('cleanupTestCase', 'tst_qftp', 'Qt5', 123456, 654321, 111222),
-            array('my_testfunction', 'my_testfunction', 'my_project', 7, 14, 7)
+            array('cleanupTestCase', 'tst_qftp', 'QtBase', 'macx-clang_developer-build_OSX_10.8', 1, 2, 3),
+            array('cleanupTestCase', 'tst_qftp', 'Qt5', 'macx-clang_developer-build_OSX_10.8', 123456, 654321, 111222),
+            array('my_testfunction', 'my_testfunction', 'my_project', 'my_conf', 7, 14, 7)
+        );
+    }
+
+    /**
+     * Test setBlacklistedCounts and getBlacklistedCounts
+     * @dataProvider testGetBlacklistedCountsData
+     */
+    public function testGetBlacklistedCounts($name, $testset, $project, $conf, $bpassed, $btotal)
+    {
+        $testfunction = new Testfunction($name, $testset, $project, $conf);
+        $this->assertTrue($testfunction instanceof Testfunction);
+        // Counts not set
+        $result = $testfunction->getBlacklistedCounts();
+        $this->assertArrayHasKey('bpassed', $result);
+        $this->assertArrayHasKey('btotal', $result);
+        $this->assertNull($result['bpassed']);
+        $this->assertNull($result['btotal']);
+        // Counts set
+        $testfunction->setBlacklistedCounts($bpassed, $btotal);
+        $result = $testfunction->getBlacklistedCounts();
+        $this->assertArrayHasKey('bpassed', $result);
+        $this->assertArrayHasKey('btotal', $result);
+        $this->assertEquals($bpassed, $result['bpassed']);
+        $this->assertEquals($btotal, $result['btotal']);
+    }
+    public function testGetBlacklistedCountsData()
+    {
+        return array(
+            array('cleanupTestCase', 'tst_qftp', 'QtBase', 'macx-clang_developer-build_OSX_10.8', 1, 2),
+            array('cleanupTestCase', 'tst_qftp', 'Qt5', 'macx-clang_developer-build_OSX_10.8', 123456, 654321),
+            array('my_testfunction', 'my_testfunction', 'my_project', 'my_conf', 7, 14)
         );
     }
 

@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -57,6 +57,7 @@ class Factory {
      */
     const LIST_FAILURES  = 1;
     const LIST_FLAKY     = 2;
+    const LIST_BPASSES   = 3;
 
     /**
      * Configuration settings as specified in the ini file.
@@ -280,24 +281,39 @@ class Factory {
     }
 
     /**
-     * Create Testfunction objects for those in database
+     * Create Testfunction objects for those in database (with either failed or bpassed counts)
      * List is limited by date (since) and length, and for specified builds only
+     * @param int $listType
      * @param string $runProject
      * @param string $runState
      * @return array Testfunction objects
      */
-    public static function createTestfunctions($runProject, $runState)
+    public static function createTestfunctions($listType, $runProject, $runState)
     {
         $objects = array();
         $ini = self::conf();
-        $days = intval($ini['top_failures_last_days']) - 1;
-        $since = self::getSinceDate($days);
-        $limit = intval($ini['top_failures_n']);
-        $dbEntries = self::db()->getTestfunctionsResultCounts($runProject, $runState, $since, $limit);
-        foreach($dbEntries as $entry) {
-            $obj = new Testfunction($entry['name'], $entry['testset'], $entry['project']);
-            $obj->setResultCounts($entry['passed'], $entry['failed'], $entry['skipped']);
-            $objects[] = $obj;
+        // Failure result list (from specified builds only)
+        if ($listType === self::LIST_FAILURES) {
+            $days = intval($ini['top_failures_last_days']) - 1;
+            $since = self::getSinceDate($days);
+            $limit = intval($ini['top_failures_n']);
+            $dbEntries = self::db()->getTestfunctionsResultCounts($runProject, $runState, $since, $limit);
+            foreach($dbEntries as $entry) {
+                $obj = new Testfunction($entry['name'], $entry['testset'], $entry['project'], null);
+                $obj->setResultCounts($entry['passed'], $entry['failed'], $entry['skipped']);
+                $objects[] = $obj;
+            }
+        }
+        // Blacklisted passed list (from specified builds only)
+        if ($listType === self::LIST_BPASSES) {
+            $days = intval($ini['blacklisted_pass_last_days']) - 1;
+            $since = self::getSinceDate($days);
+            $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $since);
+            foreach($dbEntries as $entry) {
+                $obj = new Testfunction($entry['name'], $entry['testset'], $entry['project'], $entry['conf']);
+                $obj->setBlacklistedCounts($entry['bpassed'], $entry['btotal']);
+                $objects[] = $obj;
+            }
         }
         return $objects;
     }

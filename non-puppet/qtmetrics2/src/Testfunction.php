@@ -34,7 +34,7 @@
 
 /**
  * Test function class
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -52,7 +52,7 @@ class Testfunction {
     private $name;
 
     /**
-     * testset name the testfunction belongs to.
+     * Testset name the testfunction belongs to.
      * @var string
      */
     private $testsetName;
@@ -64,10 +64,22 @@ class Testfunction {
     private $testsetProjectName;
 
     /**
+     * Configuration name.
+     * @var string
+     */
+    private $confName;
+
+    /**
      * Count of testfunction results in the Project builds run since the last n days (all configurations).
      * @var array (int passed, int failed, int skipped)
      */
     private $resultCounts;
+
+    /**
+     * Count of testfunction blacklisted results in the Project builds run since the last n days (all configurations).
+     * @var array (int bpassed, int btotal)
+     */
+    private $blacklistedCounts;
 
     /**
      * Testfunction constructor.
@@ -75,12 +87,14 @@ class Testfunction {
      * @param string $testsetName
      * @param string $testsetProjectName
      */
-    public function __construct($name, $testsetName, $testsetProjectName)
+    public function __construct($name, $testsetName, $testsetProjectName, $confName)
     {
         $this->name = $name;
         $this->testsetName = $testsetName;
         $this->testsetProjectName = $testsetProjectName;
+        $this->confName = $confName;
         $this->resultCounts = array('passed' => null, 'failed' => null, 'skipped' => null); // not initially set
+        $this->blacklistedCounts = array('bpassed' => null, 'btotal' => null);              // not initially set
     }
 
     /**
@@ -123,6 +137,15 @@ class Testfunction {
     }
 
     /**
+     * Get conf name.
+     * @return string
+     */
+    public function getConfName()
+    {
+        return $this->confName;
+    }
+
+    /**
      * Get count of testfunction results in latest Project builds (all configurations, specified builds only).
      * @return array (int passed, int failed, int skipped)
      */
@@ -132,11 +155,29 @@ class Testfunction {
     }
 
     /**
-     * Set count of testset results in latest Project builds (all configurations, specified builds only).
+     * Set count of testfunction results in latest Project builds (all configurations, specified builds only).
      */
     public function setResultCounts($passed, $failed, $skipped)
     {
         $this->resultCounts = array('passed' => $passed, 'failed' => $failed, 'skipped' => $skipped);
+        return;
+    }
+
+    /**
+     * Get count of testfunction blacklisted results in latest Project builds (all configurations, specified builds only).
+     * @return array (int bpassed, int btotal)
+     */
+    public function getBlacklistedCounts()
+    {
+        return $this->blacklistedCounts;
+    }
+
+    /**
+     * Set count of testfunction blacklisted results in latest Project builds (all configurations, specified builds only).
+     */
+    public function setBlacklistedCounts($bpassed, $btotal)
+    {
+        $this->blacklistedCounts = array('bpassed' => $bpassed, 'btotal' => $btotal);
         return;
     }
 

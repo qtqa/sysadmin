@@ -34,7 +34,7 @@
 
 /**
  * Ajax route calls
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -110,6 +110,19 @@ $(function () {
         .done(function( html ) {
             console.log(this.url + " done");
             $('#testfunctions_top_data').html(html);
+        });
+    }
+
+    // Blacklisted passed testfunctions
+    if ($.inArray('testfunctions_blacklisted_passed_data', divs) > -1) {
+        $.ajax({
+            url: "data/test/bpassedtestfunctions",
+            dataType: "html",
+            cache: true
+        })
+        .done(function( html ) {
+            console.log(this.url + " done");
+            $('#testfunctions_blacklisted_passed_data').html(html);
         });
     }
 

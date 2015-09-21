@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     18-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -73,6 +73,7 @@ $app->get('/', function() use($app)
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
         'topTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('toptestfunctions'),
+        'bpassedTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('bpassedtestfunctions'),
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'branches' => Factory::db()->getBranches(),
@@ -473,6 +474,48 @@ $app->get('/data/test/toptestfunctions', function() use($app)
         'lastDays' => $ini['top_failures_last_days'],
         'sinceDate' => $since,
         'testfunctions' => Factory::createTestfunctions(
+            Factory::LIST_FAILURES,
+            $ini['master_build_project'],
+            $ini['master_build_state'])                 // managed as objects
+    ));
+});
+
+/**
+ * UI route: /test/bpassedtestfunctions (GET)
+ */
+
+$app->get('/test/bpassedtestfunctions', function() use($app)
+{
+    $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
+    $days = intval($ini['blacklisted_pass_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+    );
+    $app->render('testfunctions_bpass.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
+        'breadcrumb' => $breadcrumb,
+        'lastDays' => $ini['blacklisted_pass_last_days'],
+        'sinceDate' => $since,
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state']
+    ));
+})->name('bpassedtestfunctions');
+
+$app->get('/data/test/bpassedtestfunctions', function() use($app)
+{
+    $ini = Factory::conf();
+    $days = intval($ini['blacklisted_pass_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $app->render('testfunctions_bpass_data.html', array(
+        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
+        'lastDays' => $ini['blacklisted_pass_last_days'],
+        'sinceDate' => $since,
+        'testfunctions' => Factory::createTestfunctions(
+            Factory::LIST_BPASSES,
             $ini['master_build_project'],
             $ini['master_build_state'])                 // managed as objects
     ));

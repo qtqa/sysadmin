@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     20-09-2015
+ * @since     21-09-2015
  * @author    Juha Sippola
  */
 
@@ -815,6 +815,62 @@ class Database {
     }
 
     /**
+     * Get counts of blacklisted passed testfunctions in specified builds since specified date
+     * Only the testfunctions that are blacklisted, are only passed and have been run since the specified date are listed
+     * @param string $runProject
+     * @param string $runState
+     * @param string $date
+     * @return array (string name, string testset, string project, string conf, int bpassed, int btotal)
+     */
+    public function getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $date)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                testfunction.name AS testfunction,
+                testset.name AS testset,
+                project.name AS project,
+                conf.name AS conf,
+                COUNT(CASE WHEN testfunction_run.result IN ('bpass', 'bxfail') THEN testfunction_run.result END) AS bpassed,
+                COUNT(CASE WHEN testfunction_run.result LIKE '%' THEN testfunction_run.result END) AS btotal
+            FROM testfunction_run
+                INNER JOIN testfunction ON testfunction_run.testfunction_id = testfunction.id
+                INNER JOIN testset_run ON testfunction_run.testset_run_id = testset_run.id
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+                INNER JOIN state ON project_run.state_id = state.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                project_run.timestamp >= ? AND
+                branch.archived = 0
+            GROUP BY testfunction.name, testset.name, project.name, conf.name
+            ORDER BY project.name, testset.name, testfunction.name, conf.name;
+        ");
+        $query->bindParam(1, $runProject);
+        $query->bindParam(2, $runState);
+        $query->bindParam(3, $date);
+        $query->execute();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['bpassed'] === $row['btotal']) {       // return only those where only bpasses
+                $result[] = array(
+                    'name' => $row['testfunction'],
+                    'testset' => $row['testset'],
+                    'project' => $row['project'],
+                    'conf' => $row['conf'],
+                    'bpassed' => $row['bpassed'],
+                    'btotal' => $row['btotal']
+                );
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Get project run data by branch
      * @param string $runProject
      * @param string $runState
@@ -1225,7 +1281,7 @@ class Database {
 
     /**
      * Get results for failed and skipped testfunctions in specified configuration builds and project by branch
-     * Only the fail/skip and xpass/xfail results are listed
+     * Only the fail/skip and xpass/xfail and bpass results are listed
      * @param string $testset
      * @param string $testsetProject
      * @param string $conf
@@ -1254,7 +1310,7 @@ class Database {
                 INNER JOIN project_run ON conf_run.project_run_id = project_run.id
                 INNER JOIN branch ON project_run.branch_id = branch.id
             WHERE
-                (testfunction_run.result LIKE '%fail' OR testfunction_run.result LIKE '%skip' OR testfunction_run.result LIKE '%x%') AND
+                (testfunction_run.result LIKE '%fail' OR testfunction_run.result LIKE '%skip' OR testfunction_run.result LIKE '%x%' OR testfunction_run.result LIKE 'b%') AND
                 testset.name = ? AND
                 project.name = ? AND
                 conf.name = ? AND
