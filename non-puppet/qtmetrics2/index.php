@@ -259,12 +259,12 @@ $app->get('/conf/:conf', function($conf) use($app)
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
         array('name' => $ini['master_build_project'], 'link' => $buildProjectRoute)
     );
-    $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+    $testsetTestfunctionsRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
     $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
     $app->render('conf.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'testsetRoute' => $testsetRoute,
+        'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
         'testsetProjectRoute' => $testsetProjectRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
@@ -309,11 +309,11 @@ $app->get('/conf/:conf/:testsetproject', function($conf, $testsetProject) use($a
         array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
         array('name' => $testsetProject, 'link' => $testsetProjectRoute . '/' . $testsetProject)
     );
-    $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+    $testsetTestfunctionsRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
     $app->render('conf.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
         'breadcrumb' => $breadcrumb,
-        'testsetRoute' => $testsetRoute,
+        'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
         'testsetProjectRoute' => $testsetProjectRoute,
         'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
         'masterProject' => $ini['master_build_project'],
@@ -431,12 +431,12 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         $breadcrumb = array(
             array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
         );
-        $confProjectRoute = str_replace('/:conf/:testsetproject', '', Slim\Slim::getInstance()->urlFor('conf_testsetproject'));
+        $testsetTestfunctionsRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
         $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
         $app->render('testset.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
             'breadcrumb' => $breadcrumb,
-            'confProjectRoute' => $confProjectRoute,
+            'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
             'testsetProjectRoute' => $testsetProjectRoute,
             'refreshed' => Factory::db()->getDbRefreshed() . ' (GMT)',
             'lastDaysFailures' => $ini['top_failures_last_days'],
@@ -486,8 +486,7 @@ $app->get('/testset/:testset/:project/:conf', function($testset, $project, $conf
             array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
             array('name' => 'overview', 'link' => Slim\Slim::getInstance()->urlFor('overview')),
             array('name' => $project, 'link' => $testsetProjectRoute . '/' . $project),
-            array('name' => $conf, 'link' => $confProjectRoute . '/' . urlencode($conf) . '/' . $project),
-            array('name' => $testset, 'link' => $testsetRoute . '/' . $testset. '/' . $project)
+            array('name' => $conf, 'link' => $confProjectRoute . '/' . urlencode($conf) . '/' . $project)
         );
         $confProjectRoute = str_replace('/:conf/:testsetproject', '', Slim\Slim::getInstance()->urlFor('conf_testsetproject'));
         $testfunctionRoute = 'testfunction';                // TODO: Replace later with $testfunctionRoute = str_replace('/:testfunction', '', Slim\Slim::getInstance()->urlFor('testfunction'));

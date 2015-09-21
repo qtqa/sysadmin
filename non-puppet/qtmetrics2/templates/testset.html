@@ -292,7 +292,7 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 </tr>
 {%                      endif %}
 <tr>
-{%                      set link = confProjectRoute ~ '/' ~ run.getConfName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
+{%                      set link = testsetTestfunctionsRoute ~ '/' ~ run.getName|url_encode ~ '/' ~ run.getTestsetProjectName|url_encode ~ '/' ~ run.getConfName|url_encode %}
 <td class="rightBorder"><a href="{{ link }}"><small>{{ run.getConfName }}</small></a></td>
 {# Flags for the latest build #}
 <td class="center rightBorder">
