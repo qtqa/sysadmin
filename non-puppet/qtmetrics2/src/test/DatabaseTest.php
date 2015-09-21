@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     17-09-2015
+ * @since     20-09-2015
  * @author    Juha Sippola
  */
 
@@ -596,6 +596,45 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             array('tst_networkselftest', 'qtbase', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not flaky
             array('invalid-name', 'qtbase', '2013-05-29', '', 0, 0),
             array('tst_qfont', 'invalid-name', '2013-05-29', '', 0, 0)
+        );
+    }
+
+    /**
+     * Test getTestfunctionsResultCounts
+     * @dataProvider testGetTestfunctionsResultCountsData
+     */
+    public function testGetTestfunctionsResultCounts($runProject, $runState, $date, $limit, $exp_testfunction, $exp_excluded_testfunction, $exp_testfunction_count_min, $exp_failed_min)
+    {
+        $testfunctions = array();
+        $failed = 0;
+        $db = Factory::db();
+        $result = $db->getTestfunctionsResultCounts($runProject, $runState, $date, $limit);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('testset', $row);
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertArrayHasKey('skipped', $row);
+            $testfunctions[] = $row['name'];
+            $failed += $row['failed'];
+        }
+        $this->assertGreaterThanOrEqual($exp_testfunction_count_min, count($testfunctions));
+        if ($exp_testfunction_count_min > 0) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_testfunction, $testfunctions);
+            $this->assertNotContains($exp_excluded_testfunction, $testfunctions);
+            $this->assertGreaterThanOrEqual($exp_failed_min, $failed);
+        }
+    }
+    public function testGetTestfunctionsResultCountsData()
+    {
+        return array(
+            array('Qt5', 'state', '2013-05-01', 10, 'exactMatch', 'commandSequence', 2, 1),     // in test data exactMatch has failures and commandSequence doesn't
+            array('Qt5', 'state', '2013-05-01', 1, 'defaultFamily', 'commandSequence', 1, 1),   // defaultFamily is the first
+            array('Qt5', 'state', '2013-05-28', 10, 'exactMatch', 'commandSequence', 2, 1),
+            array('Qt5', 'state', '2013-05-29', 10, '', '', 0, 0),
+            array('Qt5', 'state', '2999-05-29', 10, '', '', 0, 0)
         );
     }
 

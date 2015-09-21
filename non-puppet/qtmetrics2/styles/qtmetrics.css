@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @since     06-08-2015
+ * @since     20-09-2015
  * @author    Juha Sippola
  */
 
@@ -100,6 +100,13 @@
  */
 .spaceHorizontal {
   margin: 0 5px 0 5px;
+}
+
+/*
+ * Make space horizontally inside an element
+ */
+.paddingHorizontal {
+  padding: 0 5px 0 5px;
 }
 
 /*
@@ -181,6 +188,9 @@ thead {
 }
 .blueBackground {
   background-color: #337AB7;
+}
+.grayBackground {
+  background-color: lightgray;
 }
 
 /*

@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     09-09-2015
+ * @since     18-09-2015
  * @author    Juha Sippola
  */
 
@@ -278,6 +278,29 @@ class FactoryTest extends PHPUnit_Framework_TestCase
         return array(
             array('tst_qftp', 'qtbase', 'Qt5', 'state',),               // testset with testset_run data
             array('tst_qfont', 'qtbase', 'Qt5', 'state',)               // testset with testset_run data
+        );
+    }
+
+    /**
+     * Test createTestfunctions
+     * @dataProvider testCreateTestfunctionsData
+     */
+    public function testCreateTestfunctions($runProject, $runState)
+    {
+        $testfunctions = Factory::createTestfunctions($runProject, $runState);
+        foreach($testfunctions as $testfunction) {
+            $this->assertTrue($testfunction instanceof Testfunction);
+            $result = $testfunction->getResultCounts();
+            $this->assertNotNull($result);
+            $this->assertArrayHasKey('passed', $result);
+            $this->assertArrayHasKey('failed', $result);
+            $this->assertArrayHasKey('skipped', $result);
+        }
+    }
+    public function testCreateTestfunctionsData()
+    {
+        return array(
+            array('Qt5', 'state')
         );
     }
 

@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     17-09-2015
+ * @since     20-09-2015
  * @author    Juha Sippola
  */
 
@@ -752,6 +752,64 @@ class Database {
                 'flaky' => $row['flaky'],
                 'total' => $row['total']
             );
+        }
+        return $result;
+    }
+
+    /**
+     * Get counts of all passed, failed and skipped runs by testfunction in specified builds since specified date (list length limited)
+     * Only the testfunctions that have failed since the specified date are listed
+     * @param string $runProject
+     * @param string $runState
+     * @param string $date
+     * @param int $limit
+     * @return array (string name, string testset, string project, int passed, int failed, int skipped)
+     */
+    public function getTestfunctionsResultCounts($runProject, $runState, $date, $limit)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                testfunction.name AS testfunction,
+                testset.name AS testset,
+                project.name AS project,
+                COUNT(CASE WHEN testfunction_run.result IN ('pass', 'xfail', 'bpass', 'bxfail', 'tr_pass') THEN testfunction_run.result END) AS passed,
+                COUNT(CASE WHEN testfunction_run.result IN ('fail', 'xpass', 'bfail', 'bxpass', 'tr_fail') THEN testfunction_run.result END) AS failed,
+                COUNT(CASE WHEN testfunction_run.result LIKE '%skip' THEN testfunction_run.result END) AS skipped
+            FROM testfunction_run
+                INNER JOIN testfunction ON testfunction_run.testfunction_id = testfunction.id
+                INNER JOIN testset_run ON testfunction_run.testset_run_id = testset_run.id
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+                INNER JOIN state ON project_run.state_id = state.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                project_run.timestamp >= ? AND
+                branch.archived = 0
+            GROUP BY testfunction.name, testset.name
+            ORDER BY failed DESC, testfunction.name ASC
+            LIMIT ?;
+        ");
+        $query->bindParam(1, $runProject);
+        $query->bindParam(2, $runState);
+        $query->bindParam(3, $date);
+        $query->bindParam(4, $limit, PDO::PARAM_INT);       // int data type must be separately set
+        $query->execute();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['failed'] > 0) {                       // return only those where failures identified
+                $result[] = array(
+                    'name' => $row['testfunction'],
+                    'testset' => $row['testset'],
+                    'project' => $row['project'],
+                    'passed' => $row['passed'],
+                    'failed' => $row['failed'],
+                    'skipped' => $row['skipped']
+                );
+            }
         }
         return $result;
     }

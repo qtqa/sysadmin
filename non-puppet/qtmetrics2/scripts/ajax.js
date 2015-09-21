@@ -34,7 +34,7 @@
 
 /**
  * Ajax route calls
- * @since     05-08-2015
+ * @since     18-09-2015
  * @author    Juha Sippola
  */
 
@@ -74,7 +74,7 @@ $(function () {
         });
     }
 
-    // Top failures
+    // Top testset failures
     if ($.inArray('testsets_top_data', divs) > -1) {
         $.ajax({
             url: "data/test/top",
@@ -97,6 +97,19 @@ $(function () {
         .done(function( html ) {
             console.log(this.url + " done");
             $('#flaky_testsets_data').html(html);
+        });
+    }
+
+    // Top testfunction failures
+    if ($.inArray('testfunctions_top_data', divs) > -1) {
+        $.ajax({
+            url: "data/test/toptestfunctions",
+            dataType: "html",
+            cache: true
+        })
+        .done(function( html ) {
+            console.log(this.url + " done");
+            $('#testfunctions_top_data').html(html);
         });
     }
 

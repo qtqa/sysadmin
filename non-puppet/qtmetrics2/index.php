@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     17-09-2015
+ * @since     18-09-2015
  * @author    Juha Sippola
  */
 
@@ -72,6 +72,7 @@ $app->get('/', function() use($app)
         'platformRoute' => $buildProjectPlatformRoute,
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
+        'topTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('toptestfunctions'),
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'branches' => Factory::db()->getBranches(),
@@ -433,6 +434,47 @@ $app->get('/data/test/flaky', function() use($app)
             Factory::LIST_FLAKY,
             null,
             null)                                       // managed as objects
+    ));
+});
+
+/**
+ * UI route: /test/toptestfunctions (GET)
+ */
+
+$app->get('/test/toptestfunctions', function() use($app)
+{
+    $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
+    $days = intval($ini['top_failures_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+    );
+    $app->render('testfunctions_top.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
+        'breadcrumb' => $breadcrumb,
+        'topN' => $ini['top_failures_n'],
+        'lastDays' => $ini['top_failures_last_days'],
+        'sinceDate' => $since,
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state']
+    ));
+})->name('toptestfunctions');
+
+$app->get('/data/test/toptestfunctions', function() use($app)
+{
+    $ini = Factory::conf();
+    $days = intval($ini['top_failures_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $app->render('testfunctions_top_data.html', array(
+        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
+        'lastDays' => $ini['top_failures_last_days'],
+        'sinceDate' => $since,
+        'testfunctions' => Factory::createTestfunctions(
+            $ini['master_build_project'],
+            $ini['master_build_state'])                 // managed as objects
     ));
 });
 
