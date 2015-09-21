@@ -34,15 +34,18 @@
 
 /**
  * Qt Metrics API
- * @since     05-08-2015
+ * @since     10-08-2015
  * @author    Juha Sippola
  */
 
-require_once 'src/Factory.php';
 require_once 'lib/Slim/Slim/Slim.php';
 require_once 'lib/Slim/Slim/View.php';
+require_once 'lib/Slim/Slim/Middleware.php';
 require_once 'lib/Slim/Slim/Views/Twig.php';
 require_once 'lib/Twig/lib/Twig/Autoloader.php';
+require_once 'src/Factory.php';
+require_once 'src/HttpBasicAuth.php';
+require_once 'src/HttpBasicAuthRoute.php';
 
 \Slim\Slim::registerAutoloader();
 Twig_Autoloader::register();
@@ -482,6 +485,113 @@ $app->get('/sitemap', function() use($app)
         'image' => 'images/site_map.png'
     ));
 })->name('sitemap');
+
+/**
+ * UI route: /admin (GET) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'admin'));
+$app->get('/admin', function() use($app)
+{
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+    );
+    $app->render('admin.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
+        'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),
+        'adminDataRoute' => Slim\Slim::getInstance()->urlFor('admin_data'),
+        'tables' => Factory::dbAdmin()->getTablesStatistics()
+    ));
+})->name('admin');
+
+/**
+ * UI route: /admin/branches (GET) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'admin/branches'));
+$app->get('/admin/branches', function() use($app)
+{
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+        array('name' => 'admin', 'link' => Slim\Slim::getInstance()->urlFor('admin'))
+    );
+    $app->render('admin_branches.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
+        'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),
+        'adminDataRoute' => Slim\Slim::getInstance()->urlFor('admin_data'),
+        'branches' => Factory::dbAdmin()->getBranchesStatistics()
+    ));
+})->name('admin_branches');
+
+/**
+ * UI route: /admin/data (GET) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'admin/data'));
+$app->get('/admin/data', function() use($app)
+{
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+        array('name' => 'admin', 'link' => Slim\Slim::getInstance()->urlFor('admin'))
+    );
+    $app->render('admin_data.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'breadcrumb' => $breadcrumb,
+        'adminRoute' => Slim\Slim::getInstance()->urlFor('admin'),
+        'adminBranchesRoute' => Slim\Slim::getInstance()->urlFor('admin_branches'),
+        'adminDataRoute' => Slim\Slim::getInstance()->urlFor('admin_data'),
+        'projectRuns' => Factory::dbAdmin()->getProjectRunsStatistics()
+    ));
+})->name('admin_data');
+
+/**
+ * API route: /api/branch (DELETE) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'api/branch'));
+$app->delete('/api/branch/:branch', function($branch) use($app)
+{
+    $branch = strip_tags($branch);
+    $branches = array();
+    $query = Factory::db()->getBranches();
+    foreach($query as $item) {
+        $branches[] = $item['name'];
+    }
+    if (in_array($branch, $branches)) {
+        $result = Factory::dbAdmin()->deleteBranch($branch);
+        if ($result)
+            $app->response()->status(200);
+        else
+            $app->response()->status(404);
+    } else {
+        $app->response()->status(404);
+    }
+})->name('delete_branch');
+
+/**
+ * API route: /api/data (DELETE) - authenticated
+ */
+
+$app->add(new HttpBasicAuthRoute('Protected Area', 'api/data'));
+$app->delete('/api/data/:state/:date', function($state, $date) use($app)
+{
+    $state = strip_tags($state);
+    $date = strip_tags($date);
+    $result = Factory::dbAdmin()->deleteRunsData($state, $date);
+    if ($result)
+        $app->response()->status(200);
+    else
+        $app->response()->status(404);
+})->name('delete_data');
+
+
+/**
+ * Start Slim
+ */
 
 $app->run();
 

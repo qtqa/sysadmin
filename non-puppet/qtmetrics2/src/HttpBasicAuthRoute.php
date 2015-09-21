@@ -1,4 +1,4 @@
-<!--
+<?php
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -33,14 +33,37 @@
 #############################################################################
 
 /**
- * About window content
- * @since     19-08-2015
+ * Basic HTTP authentication for a route
+ * @since     06-08-2015
  * @author    Juha Sippola
  */
 
--->
+class HttpBasicAuthRoute extends HttpBasicAuth {
 
-<p>This is Qt Metrics revision 2 with redesigned UI and database.</p>
-<p>These pages are still <strong>under construction</strong> and therefore the views and functionality is limited.</p>
-<p>See the <a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a> for development items currently identified or in progress.</p>
-<p><small>Version 0.20 (19-Aug-2015)</small></p>
+    /**
+     * @var string
+     */
+    protected $route;
+
+    /**
+     * Constructor
+     * @param   string  $realm      The HTTP Authentication realm
+     * @param   string  route       The route for authentication
+     */
+    public function __construct($realm = 'Protected Area', $route = '') {
+        $this->route = $route;
+        parent::__construct($realm);
+    }
+
+    /**
+     * Call
+     * This method will check if the requested route needs authentication.
+     */
+    public function call() {
+        if(strpos($this->app->request()->getPathInfo(), $this->route) !== false) {
+            parent::call();
+            return;
+        }
+        $this->next->call();
+    }
+}

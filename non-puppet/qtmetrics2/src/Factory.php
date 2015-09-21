@@ -34,12 +34,12 @@
 
 /**
  * Factory class
- * @version   0.8
- * @since     23-07-2015
+ * @since     17-08-2015
  * @author    Juha Sippola
  */
 
 require_once 'Database.php';
+require_once 'DatabaseAdmin.php';
 require_once 'Project.php';
 require_once 'ProjectRun.php';
 require_once 'Conf.php';
@@ -66,6 +66,12 @@ class Factory {
      * @var Database
      */
     private $db;
+
+    /**
+     * DatabaseAdmin instance.
+     * @var DatabaseAdmin
+     */
+    private $dbAdmin;
 
     /**
      * Create Factory instance
@@ -102,6 +108,19 @@ class Factory {
             $instance->db = new Database;
         }
         return $instance->db;
+    }
+
+    /**
+     * Get databaseAdmin instance
+     * @return DatabaseAdmin
+     */
+    public static function dbAdmin()
+    {
+        $instance = self::singleton();
+        if (!$instance->dbAdmin) {
+            $instance->dbAdmin = new DatabaseAdmin;
+        }
+        return $instance->dbAdmin;
     }
 
     /**

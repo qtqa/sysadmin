@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @since     05-08-2015
+ * @since     06-08-2015
  * @author    Juha Sippola
  */
 
@@ -149,7 +149,10 @@
   border-right: 2px solid lightgrey;
 }
 .center {
-  text-align: center
+  text-align: center;
+}
+.right {
+  text-align: right;
 }
 thead {
   white-space: nowrap;
@@ -175,6 +178,9 @@ thead {
 }
 .redBackground {
   background-color: indianred;
+}
+.blueBackground {
+  background-color: #337AB7;
 }
 
 /*

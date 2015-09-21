@@ -37,8 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.7
- * @since     24-07-2015
+ * @since     17-08-2015
  * @author    Juha Sippola
  */
 
@@ -76,6 +75,15 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     {
         $db = Factory::db();
         $this->assertTrue($db instanceof Database);
+    }
+
+    /**
+     * Test dbAdmin
+     */
+    public function testDbAdmin()
+    {
+        $db = Factory::dbAdmin();
+        $this->assertTrue($db instanceof DatabaseAdmin);
     }
 
     /**
