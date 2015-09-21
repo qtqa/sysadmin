@@ -34,7 +34,7 @@
 
 /**
  * Testfunctions page
- * @since     08-09-2015
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -97,6 +97,7 @@
 <li><strong>Testfunction Results in Branches</strong> shows the {{ testset.getName }} <strong>failed and skipped</strong> results in configuration
 {{ conf }} by branch on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
+<li>testfunction name has link to list of testrows if testrows are available</li>
 <li>flags: <span class="label label-default">b</span> = blacklisted flag set for the testfunction on the latest build shown</li>
 <li>results: <span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestfunctionRun::RESULT_FAILURE') }},
 <span class="glyphicon glyphicon-ok-sign red"></span> = {{ constant('TestfunctionRun::RESULT_SUCCESS_UNEXPECTED') }},
@@ -194,14 +195,20 @@
 </tr>
 {%                      endif %}
 <tr>
-{%                      set link = testfunctionRoute ~ '/' ~ run.getName|url_encode ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode ~ '/' ~ run.getConfName|url_encode %}
-<td><a href="{{ link }}"><small>
+<td><small>
+{%                      if run.getChildren %}
+{%                          set link = testfunctionRoute ~ '/' ~ run.getName|url_encode ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode ~ '/' ~ run.getConfName|url_encode %}
+<a href="{{ link }}">
+{%                      endif %}
 {%                      if run.getName|length > constant('TestfunctionRun::SHORT_NAME_LENGTH') %}
 <span class="clickOnTouch" data-toggle="tooltip" data-placement="top" title="{{ run.getName }}">{{ run.getShortName }}</span>
 {%                      else %}
 {{ run.getName }}
 {%                      endif %}
-</small></a></td>
+{%                      if run.getChildren %}
+</a>
+{%                      endif %}
+</small></td>
 
 {# Flags for the latest build #}
 <td class="center rightBorder">
@@ -235,13 +242,18 @@
 {%                              else %}
 {%                                   set durationFormatted = '' %}
 {%                              endif %}
+{%                              if run.getChildren %}
+{%                                  set testrowResult = '(in testrows)' %}
+{%                              else %}
+{%                                  set testrowResult = '' %}
+{%                              endif %}
 <td class="center">
 <span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
 title="<table>
 <tr><th>Build key: </th><td>{{ buildKey }}</td></tr>
 <tr><th>Configuration: </th><td>{{ run.getConfName }}</td></tr>
 <tr><th>Timestamp: </th><td>{{ run.getTimestamp }}</td></tr>
-<tr><th>Result: </th><td>{{ run.getResult }}</td></tr>
+<tr><th>Result: </th><td>{{ run.getResult }} {{ testrowResult }}</td></tr>
 <tr><th>Duration: </th><td>{{ run.getDuration / 10 }} s {{ durationFormatted }}</td></tr>
 <tr><th>Blacklisted: </th><td>{% if run.getBlacklisted %}yes{% else %}no{% endif %}</td></tr></table>">
 </span></td>

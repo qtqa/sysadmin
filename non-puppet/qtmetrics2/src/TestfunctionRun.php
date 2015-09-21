@@ -34,7 +34,7 @@
 
 /**
  * TestfunctionRun class
- * @since     08-09-2015
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -51,6 +51,9 @@ class TestfunctionRun extends ProjectRun {
     const RESULT_FAILURE            = "fail";
     const RESULT_FAILURE_EXPECTED   = "xfail";
     const RESULT_SKIP               = "skip";
+    const RESULT_TESTROW_SUCCESS    = "tr_pass";
+    const RESULT_TESTROW_FAILURE    = "tr_fail";
+    const RESULT_TESTROW_SKIP       = "tr_skip";
 
     /**
      * If the testfunction name long, a shorter version of the name can be requested
@@ -88,6 +91,12 @@ class TestfunctionRun extends ProjectRun {
     private $blacklisted;
 
     /**
+     * Children (true = has children).
+     * @var bool
+     */
+    private $children;
+
+    /**
      * TestfunctionRun constructor.
      * @param string $name
      * @param string $testsetName
@@ -99,16 +108,18 @@ class TestfunctionRun extends ProjectRun {
      * @param string $confName
      * @param string $result (plain result without any possible flags)
      * @param bool $blacklisted (true = blacklisted)
+     * @param bool $children (true = has children)
      * @param string $timestamp
      * @param int $duration (in deciseconds)
      */
-    public function __construct($name, $testsetName, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $result, $blacklisted, $timestamp, $duration) {
+    public function __construct($name, $testsetName, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $result, $blacklisted, $children, $timestamp, $duration) {
         parent::__construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration);
         $this->name = $name;
         $this->testsetName = $testsetName;
         $this->testsetProjectName = $testsetProjectName;
         $this->confName = $confName;
         $this->blacklisted = $blacklisted;
+        $this->children = $children;
     }
 
     /**
@@ -169,7 +180,16 @@ class TestfunctionRun extends ProjectRun {
     }
 
     /**
-     * Strip the result from the combined blacklisted-result string
+     * Get indication if children exist.
+     * @return bool (true = has $children)
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * Strip the result in database from the combined blacklisted-result string or testrow-result string
      * @param string $resultString
      * @return string
      */
@@ -179,6 +199,9 @@ class TestfunctionRun extends ProjectRun {
         $resultString = str_replace('bfail', 'fail', $resultString);        // remove the possible blacklisted flag
         $resultString = str_replace('bx', 'x', $resultString);              // remove the possible blacklisted flag
         $resultString = str_replace('bskip', 'skip', $resultString);        // remove the possible blacklisted flag
+        $resultString = str_replace('tr_pass', 'pass', $resultString);      // replace the possible calculated testrow result
+        $resultString = str_replace('tr_fail', 'fail', $resultString);      // replace the possible calculated testrow result
+        $resultString = str_replace('tr_skip', 'skip', $resultString);      // replace the possible calculated testrow result
         return $resultString;
     }
 
@@ -191,6 +214,19 @@ class TestfunctionRun extends ProjectRun {
     {
         $flag = false;
         if (strpos($resultString, 'b') === 0)                               // begins with 'b'
+            $flag = true;
+        return $flag;
+    }
+
+    /**
+     * Check if the testfunction has children (testrows)
+     * @param string $resultString
+     * @return bool (true = has children)
+     */
+    public static function hasChildren($resultString)
+    {
+        $flag = false;
+        if (strpos($resultString, 'tr_') === 0)                             // calculated testrow results begin with 'tr_'
             $flag = true;
         return $flag;
     }

@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     09-09-2015
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -430,6 +430,7 @@ class Factory {
                 $conf,
                 TestfunctionRun::stripResult($entry['result']),
                 TestfunctionRun::isBlacklisted($entry['result']),
+                TestfunctionRun::hasChildren($entry['result']),
                 $entry['timestamp'],
                 $entry['duration']
             );

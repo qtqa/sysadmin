@@ -1398,7 +1398,7 @@ sub sql_create_tables
                 id                    INT UNSIGNED          NOT NULL  AUTO_INCREMENT,
                 testfunction_id       MEDIUMINT UNSIGNED    NOT NULL,
                 testset_run_id        INT UNSIGNED          NOT NULL,
-                result                ENUM('na','pass','fail','xpass','xfail','skip','bpass','bfail','bxpass','bxfail','bskip')    NOT NULL    DEFAULT 'na',
+                result                ENUM('na','pass','fail','xpass','xfail','skip','bpass','bfail','bxpass','bxfail','bskip','tr_pass','tr_fail','tr_skip') NOT NULL DEFAULT 'na',
                 duration              SMALLINT UNSIGNED     NOT NULL,
                 CONSTRAINT testfunction_run_pk PRIMARY KEY (id)
             ) ENGINE MyISAM"
@@ -1827,16 +1827,16 @@ sub sql
                                 } else {
                                     # calculate the result from the testrow results, if any (use just the plain pass/fail/skip values)
                                     my $testrow_result = "na";              # assume the testrow result is not available
-                                    my $result = "pass";                    # calculate the 'worst' result from the testrow results
+                                    my $result = "tr_pass";                 # calculate the 'worst' result from the testrow results
                                     foreach my $testrow (keys %{$datahash{cfg}{$cfg}{testresults}{all_tests}{$testset_project}{$test}{testfunctions}{$testfunction}{DataTags}}) {
                                         $testrow_result = $datahash{cfg}{$cfg}{testresults}{all_tests}{$testset_project}{$test}{testfunctions}{$testfunction}{DataTags}{$testrow}{result};
                                         # "skip" to overwrite "pass"
-                                        if ($result eq "pass") {
-                                            $result = "skip" if ($testrow_result eq "skip" or $testrow_result eq "bskip");
+                                        if ($result eq "tr_pass") {
+                                            $result = "tr_skip" if ($testrow_result eq "skip" or $testrow_result eq "bskip");
                                         }
                                         # "fail" to overwrite others
-                                        if ($result ne "fail") {
-                                            $result = "fail" if ($testrow_result eq "fail" or $testrow_result eq "bfail" or $testrow_result eq "xpass" or $testrow_result eq "bxpass");
+                                        if ($result ne "tr_fail") {
+                                            $result = "tr_fail" if ($testrow_result eq "fail" or $testrow_result eq "bfail" or $testrow_result eq "xpass" or $testrow_result eq "bxpass");
                                         }
                                     }
                                     if ($testrow_result eq "na") {

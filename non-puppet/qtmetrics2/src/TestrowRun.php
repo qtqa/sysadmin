@@ -34,7 +34,7 @@
 
 /**
  * TestrowRun class
- * @since     09-09-2015
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -62,7 +62,7 @@ class TestrowRun extends TestfunctionRun {
      * @param string $timestamp
      */
     public function __construct($name, $testfunctionName, $testsetName, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $result, $blacklisted, $timestamp) {
-        parent::__construct($testfunctionName, $testsetName, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $result, $blacklisted, $timestamp, 0);
+        parent::__construct($testfunctionName, $testsetName, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $result, $blacklisted, false, $timestamp, 0);
         $this->name = $name;
         $this->testfunctionName = $testfunctionName;
     }
