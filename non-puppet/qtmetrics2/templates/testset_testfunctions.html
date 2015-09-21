@@ -33,7 +33,7 @@
 #############################################################################
 
 /**
- * Testfunctions page
+ * Testset page (list of test functions)
  * @since     16-09-2015
  * @author    Juha Sippola
  */
@@ -94,11 +94,11 @@
 <div class="well infoWell">
 <span class="glyphicon glyphicon-info-sign"></span> <strong>Testset</strong><br>
 <ul>
-<li><strong>Testfunction Results in Branches</strong> shows the {{ testset.getName }} <strong>failed and skipped</strong> results in configuration
+<li><strong>Test Function Results in Branches</strong> shows the {{ testset.getName }} <strong>failed and skipped</strong> results in configuration
 {{ conf }} by branch on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
-<li>testfunction name has link to list of testrows if testrows are available</li>
-<li>flags: <span class="label label-default">b</span> = blacklisted flag set for the testfunction on the latest build shown</li>
+<li>test function name has link to list of test rows if test rows are available</li>
+<li>flags: <span class="label label-default">b</span> = blacklisted flag set for the test function on the latest build shown</li>
 <li>results: <span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestfunctionRun::RESULT_FAILURE') }},
 <span class="glyphicon glyphicon-ok-sign red"></span> = {{ constant('TestfunctionRun::RESULT_SUCCESS_UNEXPECTED') }},
 <span class="glyphicon glyphicon-remove-sign green"></span> = {{ constant('TestfunctionRun::RESULT_FAILURE_EXPECTED') }},
@@ -116,7 +116,7 @@
 
 <div class="panel panel-primary">
 <div class="panel-heading">
-<h4 class="panel-title bold">Testfunction Results in Branches <small>(failures and skipped only)</small></h4>
+<h4 class="panel-title bold">Test Function Results in Branches <small>(failures and skipped only)</small></h4>
 </div>
 </div>
 
@@ -162,7 +162,7 @@
 <table class="table table-striped">
 <thead>
 <tr>
-<th class="bold">{{ testset.getName }}</th>
+<th class="bold">test function</th>
 <th class="bold rightBorder">flags</th>
 {%              for key, buildKey in buildKeys %}
 <th class="center">
@@ -243,7 +243,7 @@
 {%                                   set durationFormatted = '' %}
 {%                              endif %}
 {%                              if run.getChildren %}
-{%                                  set testrowResult = '(in testrows)' %}
+{%                                  set testrowResult = '(in test rows)' %}
 {%                              else %}
 {%                                  set testrowResult = '' %}
 {%                              endif %}
@@ -285,7 +285,7 @@ title="<table>
 
 {% else %}{# runsAvailable #}
 <div class="alert alert-success" role="alert">
-No failed or skipped testfunctions in testset {{ testset.getName }} in project {{ testset.getProjectName }} and configuration {{ conf }}!
+No failed or skipped test functions in testset {{ testset.getName }} in project {{ testset.getProjectName }} and configuration {{ conf }}!
 </div>
 {% endif %}{# runsAvailable #}
 </div> {# .col... #}

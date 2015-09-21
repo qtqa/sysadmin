@@ -33,8 +33,8 @@
 #############################################################################
 
 /**
- * Testfunction page
- * @since     09-09-2015
+ * Test function page (list of test rows)
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -86,12 +86,12 @@
 
 <div class="collapse" id="info">
 <div class="well infoWell">
-<span class="glyphicon glyphicon-info-sign"></span> <strong>Testfunction</strong><br>
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Test Function</strong><br>
 <ul>
-<li><strong>Testrow Results in Branches</strong> shows the {{ testfunction }} <strong>failed and skipped</strong> results in configuration
+<li><strong>Test Row Results in Branches</strong> shows the {{ testfunction }} <strong>failed and skipped</strong> results in configuration
 {{ conf }} by branch on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
-<li>flags: <span class="label label-default">b</span> = blacklisted flag set for the testrow on the latest build shown</li>
+<li>flags: <span class="label label-default">b</span> = blacklisted flag set for the test row on the latest build shown</li>
 <li>results: <span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestrowRun::RESULT_FAILURE') }},
 <span class="glyphicon glyphicon-ok-sign red"></span> = {{ constant('TestrowRun::RESULT_SUCCESS_UNEXPECTED') }},
 <span class="glyphicon glyphicon-remove-sign green"></span> = {{ constant('TestrowRun::RESULT_FAILURE_EXPECTED') }},
@@ -109,7 +109,7 @@
 
 <div class="panel panel-primary">
 <div class="panel-heading">
-<h4 class="panel-title bold">Testrow Results in Branches <small>(failures and skipped only)</small></h4>
+<h4 class="panel-title bold">Test Row Results in Branches <small>(failures and skipped only)</small></h4>
 </div>
 </div>
 
@@ -155,7 +155,7 @@
 <table class="table table-striped">
 <thead>
 <tr>
-<th class="bold">{{ testfunction }}</th>
+<th class="bold">test row</th>
 <th class="bold rightBorder">flags</th>
 {%              for key, buildKey in buildKeys %}
 <th class="center">
@@ -265,7 +265,7 @@ title="<table>
 
 {% else %}{# runsAvailable #}
 <div class="alert alert-success" role="alert">
-No failed or skipped testrows in testfunction {{ testfunction }} in testset {{ testset }} in configuration {{ conf }}!
+No failed or skipped test rows in test function {{ testfunction }} in testset {{ testset }} in configuration {{ conf }}!
 </div>
 {% endif %}{# runsAvailable #}
 </div> {# .col... #}

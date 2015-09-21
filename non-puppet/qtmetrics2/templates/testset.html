@@ -33,8 +33,8 @@
 #############################################################################
 
 /**
- * Testset page
- * @since     03-08-2015
+ * Testset page (list of configurations)
+ * @since     16-09-2015
  * @author    Juha Sippola
  */
 
@@ -259,7 +259,7 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 <table class="table table-striped">
 <thead>
 <tr>
-<th class="bold">{{ testset.getName }}</th>
+<th class="bold">configuration</th>
 <th class="bold rightBorder">flags</th>
 {%              for key, buildKey in buildKeys %}
 <th class="center">
