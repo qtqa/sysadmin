@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -674,6 +674,46 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             array('Qt5', 'state', '2013-05-01', 'lastResortFont', 'styleName', 1, 1),     // in test data lastResortFont has bpassed and styleName has bskipped as well
             array('Qt5', 'state', '2013-05-29', '', '', 0, 0),
             array('Qt5', 'state', '2999-05-29', '', '', 0, 0)
+        );
+    }
+
+    /**
+     * Test getTestfunctionsBlacklistedPassedCountsTestset
+     * @dataProvider testGetTestfunctionsBlacklistedPassedCountsTestsetData
+     */
+    public function testGetTestfunctionsBlacklistedPassedCountsTestset($testset, $project, $runProject, $runState, $date, $exp_testfunction, $exp_excluded_testfunction, $exp_testfunction_count_min, $exp_bpassed_min)
+    {
+        $testfunctions = array();
+        $bpassed = 0;
+        $db = Factory::db();
+        $result = $db->getTestfunctionsBlacklistedPassedCountsTestset($testset, $project, $runProject, $runState, $date);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('testset', $row);
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('bpassed', $row);
+            $this->assertArrayHasKey('btotal', $row);
+            $this->assertEquals($row['btotal'], $row['bpassed']);
+            $testfunctions[] = $row['name'];
+            $bpassed += $row['bpassed'];
+        }
+        $this->assertGreaterThanOrEqual($exp_testfunction_count_min, count($testfunctions));
+        if ($exp_testfunction_count_min > 0) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_testfunction, $testfunctions);
+            $this->assertNotContains($exp_excluded_testfunction, $testfunctions);
+            $this->assertGreaterThanOrEqual($exp_bpassed_min, $bpassed);
+        }
+    }
+    public function testGetTestfunctionsBlacklistedPassedCountsTestsetData()
+    {
+        return array(
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', '2013-05-01', 'lastResortFont', 'resetFont', 1, 1),     // in test data lastResortFont has bpassed and resetFont doesn't
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', '2013-05-01', 'lastResortFont', 'styleName', 1, 1),     // in test data lastResortFont has bpassed and styleName has bskipped as well
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', '2013-05-01', 'lastResortFont', 'styleName', 0, 0),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', '2013-05-29', '', '', 0, 0),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', '2999-05-29', '', '', 0, 0)
         );
     }
 

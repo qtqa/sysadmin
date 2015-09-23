@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -285,9 +285,9 @@ class FactoryTest extends PHPUnit_Framework_TestCase
      * Test createTestfunctions
      * @dataProvider testCreateTestfunctionsData
      */
-    public function testCreateTestfunctions($listType, $runProject, $runState)
+    public function testCreateTestfunctions($listType, $testset, $project, $runProject, $runState)
     {
-        $testfunctions = Factory::createTestfunctions($listType, $runProject, $runState);
+        $testfunctions = Factory::createTestfunctions($listType, $testset, $project, $runProject, $runState);
         foreach($testfunctions as $testfunction) {
             $this->assertTrue($testfunction instanceof Testfunction);
             $result = $testfunction->getResultCounts();
@@ -304,8 +304,12 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestfunctionsData()
     {
         return array(
-            array(Factory::LIST_FAILURES, 'Qt5', 'state'),
-            array(Factory::LIST_BPASSES, 'Qt5', 'state')
+            array(Factory::LIST_FAILURES, 'tst_qfont', 'qtbase', 'Qt5', 'state'),
+            array(Factory::LIST_FAILURES, 'tst_qftp', 'qtbase', 'Qt5', 'state'),
+            array(Factory::LIST_FAILURES, '', '', 'Qt5', 'state'),
+            array(Factory::LIST_BPASSES, 'tst_qfont', 'qtbase', 'Qt5', 'state'),
+            array(Factory::LIST_BPASSES, 'tst_qftp', 'qtbase', 'Qt5', 'state'),
+            array(Factory::LIST_BPASSES, '', '', 'Qt5', 'state')
         );
     }
 

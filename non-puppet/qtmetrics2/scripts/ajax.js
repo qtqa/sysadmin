@@ -34,7 +34,7 @@
 
 /**
  * Ajax route calls
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -47,6 +47,7 @@ $(function () {
 
     // Testset project / latest status
     var project;
+    var testset;
     if ($.inArray('testset_project_data_latest', divs) > -1) {
         project = $('#project').html();
         $.ajax({
@@ -103,7 +104,7 @@ $(function () {
     // Top testfunction failures
     if ($.inArray('testfunctions_top_data', divs) > -1) {
         $.ajax({
-            url: "data/test/toptestfunctions",
+            url: "data/test/top/testfunctions",
             dataType: "html",
             cache: true
         })
@@ -115,8 +116,16 @@ $(function () {
 
     // Blacklisted passed testfunctions
     if ($.inArray('testfunctions_blacklisted_passed_data', divs) > -1) {
+        testset = $('#testset').html();
+        project = $('#project').html();
+        var url;
+        if (testset === '') {
+            url = "data/test/bpassed";
+        } else {
+            url = "data/test/bpassed/" + testset + "/" + project;
+        }
         $.ajax({
-            url: "data/test/bpassedtestfunctions",
+            url: url,
             dataType: "html",
             cache: true
         })

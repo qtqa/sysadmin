@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @since     20-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -204,4 +204,7 @@ thead {
 }
 .bold {
   font-weight: bold;
+}
+.hidden {
+  visibility: hidden;
 }

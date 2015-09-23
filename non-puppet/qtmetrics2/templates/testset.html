@@ -34,7 +34,7 @@
 
 /**
  * Testset page (list of configurations)
- * @since     17-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -91,6 +91,7 @@
 <div class="well infoWell">
 <span class="glyphicon glyphicon-info-sign"></span> <strong>Testset</strong><br>
 <ul>
+<li><strong>Buttons</strong> open a detailed list for the {{ testset.getName }} testset</li>
 <li><strong>Latest Status</strong> shows the overall testset status across all branches
 <ul>
 <li>latest result: overall testset status based on the latest
@@ -117,6 +118,16 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 </ul>
 </div>
 </div>
+
+{##### Buttons #####}
+
+<div>
+<div class="btn-group">
+{% set link = bpassedTestsetRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">test function blacklisted passes</a>
+</div>
+</div>
+<hr>
 
 {% if runsAvailable %}
 

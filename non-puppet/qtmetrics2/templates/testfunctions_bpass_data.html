@@ -34,7 +34,7 @@
 
 /**
  * Blacklisted passes (testfunctions) data
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -49,24 +49,6 @@
  */
 #}
 
-{##### Summary #####}
-
-<div class="panel panel-primary">
-<div class="panel-heading">
-<h4 class="panel-title bold">Summary <small>(last {{ lastDays }} days since {{ sinceDate }})</small></h4>
-</div>
-<div class="panel-body">
-<div class="table-responsive">
-<table class="table table-striped">
-<thead>
-<tr>
-<th>testset</th>
-<th>project</th>
-<th class="leftBorder center">count</th>
-<th class="showInLargeDisplay"></th>
-</tr>
-</thead>
-<tbody>
 {# Calculate max result count for the bar #}
 {% set prevTestsetName = '' %}
 {% set prevProjectName = '' %}
@@ -84,27 +66,73 @@
 {%      set prevTestsetName = testfunction.getTestsetName %}
 {%      set prevProjectName = testfunction.getTestsetProjectName %}
 {% endfor %}
+{% if testfunctionCount > maxCount %}
+{%      set maxCount = testfunctionCount %}
+{% endif %}
+
+{##### Summary #####}
+
+{% if testfunctionCount > 0 %}
+
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Summary <small>(last {{ lastDays }} days since {{ sinceDate }})</small></h4>
+</div>
+<div class="panel-body">
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>testset</th>
+<th>project</th>
+<th class="leftBorder center">count</th>
+<th class="showInLargeDisplay"></th>
+</tr>
+</thead>
+<tbody>
 
 {# Print testsets #}
-{% set prevTestsetName = '' %}
-{% set prevProjectName = '' %}
-{% set testfunctionCount = 0 %}
-{% set bar = 0 %}
-{% for testfunction in testfunctions %}
+{%      set prevTestsetName = '' %}
+{%      set prevProjectName = '' %}
+{%      set testfunctionCount = 0 %}
+{%      set bar = 0 %}
+{%      for testfunction in testfunctions %}
 
 {# First row #}
-{%      if prevTestsetName == '' %}
+{%          if prevTestsetName == '' %}
 <tr>
 <td>{{ testfunction.getTestsetName }}</td>
 <td>{{ testfunction.getTestsetProjectName }}</td>
-{%          set testfunctionCount = 1 %}
+{%              set testfunctionCount = 1 %}
 
 {# Same testset: Increase the counter #}
-{%      elseif (testfunction.getTestsetName == prevTestsetName) and (testfunction.getTestsetProjectName == prevProjectName) %}
-{%          set testfunctionCount = testfunctionCount + 1 %}
+{%          elseif (testfunction.getTestsetName == prevTestsetName) and (testfunction.getTestsetProjectName == prevProjectName) %}
+{%              set testfunctionCount = testfunctionCount + 1 %}
 
 {# New testset: Print count for previous one and start new row #}
-{%      else %}
+{%          else %}
+{%              set bar = ((BAR_AREA/maxCount) * testfunctionCount)|round(0, 'floor') %}
+{%              if (testfunctionCount > 0) and (bar == 0) %}
+{%                  set bar = 1 %}
+{%              endif %}
+<td class="leftBorder center">{{ testfunctionCount }}</td>
+<td class="center showInLargeDisplay">
+<div>
+<div class="floatLeft blueBackground" style="width: {{ bar }}px">&nbsp;</div>
+</div>
+</td>
+</tr>
+<tr>
+<td>{{ testfunction.getTestsetName }}</td>
+<td>{{ testfunction.getTestsetProjectName }}</td>
+{%              set testfunctionCount = 1 %}
+{%          endif %}
+{%          set prevTestsetName = testfunction.getTestsetName %}
+{%          set prevProjectName = testfunction.getTestsetProjectName %}
+{%      endfor %}{# testfunction #}
+
+{# Print count for last one #}
+{%      if testfunctionCount > 0 %}
 {%          set bar = ((BAR_AREA/maxCount) * testfunctionCount)|round(0, 'floor') %}
 {%          if (testfunctionCount > 0) and (bar == 0) %}
 {%              set bar = 1 %}
@@ -115,36 +143,16 @@
 <div class="floatLeft blueBackground" style="width: {{ bar }}px">&nbsp;</div>
 </div>
 </td>
-</tr>
-<tr>
-<td>{{ testfunction.getTestsetName }}</td>
-<td>{{ testfunction.getTestsetProjectName }}</td>
-{%          set testfunctionCount = 1 %}
-{%      endif %}
-{%      set prevTestsetName = testfunction.getTestsetName %}
-{%      set prevProjectName = testfunction.getTestsetProjectName %}
-{% endfor %}{# testfunction #}
-
-{# Print count for last one #}
-{% if testfunctionCount > 0 %}
-{%      set bar = ((BAR_AREA/maxCount) * testfunctionCount)|round(0, 'floor') %}
-{%      if (testfunctionCount > 0) and (bar == 0) %}
-{%          set bar = 1 %}
-{%      endif %}
-<td class="leftBorder center">{{ testfunctionCount }}</td>
-<td class="center showInLargeDisplay">
-<div>
-<div class="floatLeft blueBackground" style="width: {{ bar }}px">&nbsp;</div>
-</div>
-</td>
 
 </tr>
-{% endif %}
+{%      endif %}
 </tbody>
 </table>
 </div> {# .table-responsive #}
 </div> {# .panel-body #}
 </div> {# .panel... #}
+
+{% endif %}{# testfunctionCount #}
 
 {##### List #####}
 
@@ -152,6 +160,9 @@
 <div class="panel-heading">
 <h4 class="panel-title bold">Blacklisted Passes <small>(last {{ lastDays }} days since {{ sinceDate }})</small></h4>
 </div>
+
+{% if testfunctionCount > 0 %}
+
 <div class="panel-body">
 <div class="table-responsive">
 <table class="table table-striped">
@@ -191,4 +202,14 @@
 </table>
 </div> {# .table-responsive #}
 </div> {# .panel-body #}
+
+{% endif %}{# testfunctionCount #}
+
 </div> {# .panel... #}
+
+{% if testfunctionCount == 0 %}
+<div class="alert alert-info" role="alert">
+The testset {{ testset }} ({{ project }}) either does not have any blacklisted test functions,
+or there are failed or skipped blacklisted test functions since {{ sinceDate }}!
+</div>
+{% endif %}{# testfunctionCount #}

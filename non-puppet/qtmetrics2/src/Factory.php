@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -284,11 +284,13 @@ class Factory {
      * Create Testfunction objects for those in database (with either failed or bpassed counts)
      * List is limited by date (since) and length, and for specified builds only
      * @param int $listType
+     * @param string $testset
+     * @param string $project
      * @param string $runProject
      * @param string $runState
      * @return array Testfunction objects
      */
-    public static function createTestfunctions($listType, $runProject, $runState)
+    public static function createTestfunctions($listType, $testset, $project, $runProject, $runState)
     {
         $objects = array();
         $ini = self::conf();
@@ -308,7 +310,10 @@ class Factory {
         if ($listType === self::LIST_BPASSES) {
             $days = intval($ini['blacklisted_pass_last_days']) - 1;
             $since = self::getSinceDate($days);
-            $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $since);
+            if ($testset === '')
+                $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $since);
+            else
+                $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCountsTestset($testset, $project, $runProject, $runState, $since);
             foreach($dbEntries as $entry) {
                 $obj = new Testfunction($entry['name'], $entry['testset'], $entry['project'], $entry['conf']);
                 $obj->setBlacklistedCounts($entry['bpassed'], $entry['btotal']);

@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     21-09-2015
+ * @since     22-09-2015
  * @author    Juha Sippola
  */
 
@@ -73,7 +73,7 @@ $app->get('/', function() use($app)
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
         'topTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('toptestfunctions'),
-        'bpassedTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('bpassedtestfunctions'),
+        'bpassedTestfunctionsRoute' => Slim\Slim::getInstance()->urlFor('bpassed'),
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'branches' => Factory::db()->getBranches(),
@@ -439,10 +439,10 @@ $app->get('/data/test/flaky', function() use($app)
 });
 
 /**
- * UI route: /test/toptestfunctions (GET)
+ * UI route: /test/top/testfunctions (GET)
  */
 
-$app->get('/test/toptestfunctions', function() use($app)
+$app->get('/test/top/testfunctions', function() use($app)
 {
     $ini = Factory::conf();
     $dbStatus = Factory::db()->getDbRefreshStatus();
@@ -464,7 +464,7 @@ $app->get('/test/toptestfunctions', function() use($app)
     ));
 })->name('toptestfunctions');
 
-$app->get('/data/test/toptestfunctions', function() use($app)
+$app->get('/data/test/top/testfunctions', function() use($app)
 {
     $ini = Factory::conf();
     $days = intval($ini['top_failures_last_days']) - 1;
@@ -475,16 +475,18 @@ $app->get('/data/test/toptestfunctions', function() use($app)
         'sinceDate' => $since,
         'testfunctions' => Factory::createTestfunctions(
             Factory::LIST_FAILURES,
+            '',
+            '',
             $ini['master_build_project'],
             $ini['master_build_state'])                 // managed as objects
     ));
 });
 
 /**
- * UI route: /test/bpassedtestfunctions (GET)
+ * UI route: /test/bpassed (GET)
  */
 
-$app->get('/test/bpassedtestfunctions', function() use($app)
+$app->get('/test/bpassed', function() use($app)
 {
     $ini = Factory::conf();
     $dbStatus = Factory::db()->getDbRefreshStatus();
@@ -500,12 +502,14 @@ $app->get('/test/bpassedtestfunctions', function() use($app)
         'breadcrumb' => $breadcrumb,
         'lastDays' => $ini['blacklisted_pass_last_days'],
         'sinceDate' => $since,
+        'testset' => '',
+        'project' => '',
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state']
     ));
-})->name('bpassedtestfunctions');
+})->name('bpassed');
 
-$app->get('/data/test/bpassedtestfunctions', function() use($app)
+$app->get('/data/test/bpassed', function() use($app)
 {
     $ini = Factory::conf();
     $days = intval($ini['blacklisted_pass_last_days']) - 1;
@@ -516,6 +520,66 @@ $app->get('/data/test/bpassedtestfunctions', function() use($app)
         'sinceDate' => $since,
         'testfunctions' => Factory::createTestfunctions(
             Factory::LIST_BPASSES,
+            '',
+            '',
+            $ini['master_build_project'],
+            $ini['master_build_state'])                 // managed as objects
+    ));
+});
+
+/**
+ * UI route: /test/bpassed/:testset/:project (GET)
+ */
+
+$app->get('/test/bpassed/:testset/:project', function($testset, $project) use($app)
+{
+    $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
+    if (Factory::checkTestset($testset)) {
+        $days = intval($ini['blacklisted_pass_last_days']) - 1;
+        $since = Factory::getSinceDate($days);
+        $testsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('testset'));
+        $breadcrumb = array(
+            array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root')),
+            array('name' => $testset, 'link' => $testsetRoute . '/' . $testset . '/' . $project)
+        );
+        $app->render('testfunctions_bpass.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
+            'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
+            'breadcrumb' => $breadcrumb,
+            'lastDays' => $ini['blacklisted_pass_last_days'],
+            'sinceDate' => $since,
+            'testset' => $testset,
+            'project' => $project,
+            'masterProject' => $ini['master_build_project'],
+            'masterState' => $ini['master_build_state']
+        ));
+    } else {
+        $app->render('empty.html', array(
+            'root' => Slim\Slim::getInstance()->urlFor('root'),
+            'dbStatus' => $dbStatus,
+            'message' => '404 Not Found'
+        ));
+        $app->response()->status(404);
+    }
+})->name('bpassedtestset');
+
+$app->get('/data/test/bpassed/:testset/:project', function($testset, $project) use($app)
+{
+    $ini = Factory::conf();
+    $days = intval($ini['blacklisted_pass_last_days']) - 1;
+    $since = Factory::getSinceDate($days);
+    $app->render('testfunctions_bpass_data.html', array(
+        'testsetRoute' => Slim\Slim::getInstance()->urlFor('root') . 'testset',
+        'lastDays' => $ini['blacklisted_pass_last_days'],
+        'sinceDate' => $since,
+        'testset' => $testset,
+        'project' => $project,
+        'testfunctions' => Factory::createTestfunctions(
+            Factory::LIST_BPASSES,
+            $testset,
+            $project,
             $ini['master_build_project'],
             $ini['master_build_state'])                 // managed as objects
     ));
@@ -537,6 +601,7 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
         );
         $testsetTestfunctionsRoute = str_replace('/:testset/:project/:conf', '', Slim\Slim::getInstance()->urlFor('testset_testfunctions'));
         $testsetProjectRoute = str_replace('/:project', '', Slim\Slim::getInstance()->urlFor('testsetproject'));
+        $bpassedTestsetRoute = str_replace('/:testset/:project', '', Slim\Slim::getInstance()->urlFor('bpassedtestset'));
         $app->render('testset.html', array(
             'root' => Slim\Slim::getInstance()->urlFor('root'),
             'dbStatus' => $dbStatus,
@@ -544,6 +609,7 @@ $app->get('/testset/:testset/:project', function($testset, $project) use($app)
             'breadcrumb' => $breadcrumb,
             'testsetTestfunctionsRoute' => $testsetTestfunctionsRoute,
             'testsetProjectRoute' => $testsetProjectRoute,
+            'bpassedTestsetRoute' => $bpassedTestsetRoute,
             'lastDaysFailures' => $ini['top_failures_last_days'],
             'lastDaysFlaky' => $ini['flaky_testsets_last_days'],
             'sinceDateFailures' => Factory::getSinceDate(intval($ini['top_failures_last_days']) - 1),
