@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     22-09-2015
+ * @since     23-09-2015
  * @author    Juha Sippola
  */
 
@@ -310,6 +310,29 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             array(Factory::LIST_BPASSES, 'tst_qfont', 'qtbase', 'Qt5', 'state'),
             array(Factory::LIST_BPASSES, 'tst_qftp', 'qtbase', 'Qt5', 'state'),
             array(Factory::LIST_BPASSES, '', '', 'Qt5', 'state')
+        );
+    }
+
+    /**
+     * Test createTestrows
+     * @dataProvider testCreateTestrowsData
+     */
+    public function testCreateTestrows($testset, $project, $runProject, $runState)
+    {
+        $testrows = Factory::createTestrows($testset, $project, $runProject, $runState);
+        foreach($testrows as $testrow) {
+            $this->assertTrue($testrow instanceof Testrow);
+            $blacklisted = $testrow->getBlacklistedCounts();
+            $this->assertNotNull($blacklisted);
+            $this->assertArrayHasKey('bpassed', $blacklisted);
+            $this->assertArrayHasKey('btotal', $blacklisted);
+        }
+    }
+    public function testCreateTestrowsData()
+    {
+        return array(
+            array('tst_qfont', 'qtbase', 'Qt5', 'state'),
+            array('tst_qftp', 'qtbase', 'Qt5', 'state')
         );
     }
 

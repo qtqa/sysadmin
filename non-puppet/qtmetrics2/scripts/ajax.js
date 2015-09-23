@@ -34,20 +34,22 @@
 
 /**
  * Ajax route calls
- * @since     22-09-2015
+ * @since     23-09-2015
  * @author    Juha Sippola
  */
 
 $(function () {
 
-    // Get all div ids on a page to call correct routes
     var div;
     var divs = [];
+    var project;
+    var testset;
+    var url;
+
+    // Get all div ids on a page to call correct routes
     $(".container-fluid").find("div").each(function(){ divs.push(this.id); });
 
     // Testset project / latest status
-    var project;
-    var testset;
     if ($.inArray('testset_project_data_latest', divs) > -1) {
         project = $('#project').html();
         $.ajax({
@@ -118,7 +120,6 @@ $(function () {
     if ($.inArray('testfunctions_blacklisted_passed_data', divs) > -1) {
         testset = $('#testset').html();
         project = $('#project').html();
-        var url;
         if (testset === '') {
             url = "data/test/bpassed";
         } else {
@@ -132,6 +133,22 @@ $(function () {
         .done(function( html ) {
             console.log(this.url + " done");
             $('#testfunctions_blacklisted_passed_data').html(html);
+        });
+    }
+
+    // Blacklisted passed testrows
+    if ($.inArray('testrows_blacklisted_passed_data', divs) > -1) {
+        testset = $('#testset').html();
+        project = $('#project').html();
+        url = "data/test/bpassed/testrows/" + testset + "/" + project;
+        $.ajax({
+            url: url,
+            dataType: "html",
+            cache: true
+        })
+        .done(function( html ) {
+            console.log(this.url + " done");
+            $('#testrows_blacklisted_passed_data').html(html);
         });
     }
 

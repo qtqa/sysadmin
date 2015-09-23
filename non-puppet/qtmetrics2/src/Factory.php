@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     22-09-2015
+ * @since     23-09-2015
  * @author    Juha Sippola
  */
 
@@ -48,6 +48,7 @@ require_once 'Testset.php';
 require_once 'TestsetRun.php';
 require_once 'Testfunction.php';
 require_once 'TestfunctionRun.php';
+require_once 'Testrow.php';
 require_once 'TestrowRun.php';
 
 class Factory {
@@ -310,7 +311,7 @@ class Factory {
         if ($listType === self::LIST_BPASSES) {
             $days = intval($ini['blacklisted_pass_last_days']) - 1;
             $since = self::getSinceDate($days);
-            if ($testset === '')
+            if (empty($testset))
                 $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCounts($runProject, $runState, $since);
             else
                 $dbEntries = self::db()->getTestfunctionsBlacklistedPassedCountsTestset($testset, $project, $runProject, $runState, $since);
@@ -319,6 +320,31 @@ class Factory {
                 $obj->setBlacklistedCounts($entry['bpassed'], $entry['btotal']);
                 $objects[] = $obj;
             }
+        }
+        return $objects;
+    }
+
+    /**
+     * Create Testrow objects for those in database (with bpassed counts)
+     * List is limited by date (since) and length, and for specified builds only
+     * @param string $testset
+     * @param string $project
+     * @param string $runProject
+     * @param string $runState
+     * @return array Testfunction objects
+     */
+    public static function createTestrows($testset, $project, $runProject, $runState)
+    {
+        $objects = array();
+        $ini = self::conf();
+        // Blacklisted passed list (from specified builds only)
+        $days = intval($ini['blacklisted_pass_last_days']) - 1;
+        $since = self::getSinceDate($days);
+        $dbEntries = self::db()->getTestrowsBlacklistedPassedCountsTestset($testset, $project, $runProject, $runState, $since);
+        foreach($dbEntries as $entry) {
+            $obj = new Testrow($entry['name'], $entry['testfunction'], $entry['testset'], $entry['project'], $entry['conf']);
+            $obj->setBlacklistedCounts($entry['bpassed'], $entry['btotal']);
+            $objects[] = $obj;
         }
         return $objects;
     }

@@ -34,7 +34,7 @@
 
 /**
  * Testset page (list of configurations)
- * @since     22-09-2015
+ * @since     23-09-2015
  * @author    Juha Sippola
  */
 
@@ -124,7 +124,11 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 <div>
 <div class="btn-group">
 {% set link = bpassedTestsetRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
-<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">test function blacklisted passes</a>
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">blacklisted passes for<br>test functions</a>
+</div>
+<div class="btn-group">
+{% set link = bpassedtestsetTestrowsRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">blacklisted passes for<br>test rows</a>
 </div>
 </div>
 <hr>

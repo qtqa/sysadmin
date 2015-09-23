@@ -34,7 +34,7 @@
 
 /**
  * Test function page (list of test rows)
- * @since     17-09-2015
+ * @since     23-09-2015
  * @author    Juha Sippola
  */
 
@@ -95,7 +95,8 @@
 <li>results: <span class="glyphicon glyphicon-remove red"></span> = {{ constant('TestrowRun::RESULT_FAILURE') }},
 <span class="glyphicon glyphicon-ok-sign red"></span> = {{ constant('TestrowRun::RESULT_SUCCESS_UNEXPECTED') }},
 <span class="glyphicon glyphicon-remove-sign green"></span> = {{ constant('TestrowRun::RESULT_FAILURE_EXPECTED') }},
-<span class="glyphicon glyphicon-ban-circle gray"></span> = {{ constant('TestrowRun::RESULT_SKIP') }}</li>
+<span class="glyphicon glyphicon-ban-circle gray"></span> = {{ constant('TestrowRun::RESULT_SKIP') }},
+<span class="glyphicon glyphicon-ok green"></span> = {{ constant('TestrowRun::RESULT_SUCCESS') }} (blacklisted only)</li>
 </ul>
 </li>
 <li>Details on the runs are available as tooltip on result icon</li>
@@ -109,7 +110,7 @@
 
 <div class="panel panel-primary">
 <div class="panel-heading">
-<h4 class="panel-title bold">Test Row Results in Branches <small>(failures and skipped only)</small></h4>
+<h4 class="panel-title bold">Test Row Results in Branches <small>(failures, skipped or blacklisted only)</small></h4>
 </div>
 </div>
 
@@ -233,7 +234,9 @@
 {%                      if key > buildKeyIndexPrinted and not buildKeyFound %}
 {%                          if buildKey == run.getBuildKey %}
 {# Print result #}
-{%                              if run.getResult == constant('TestfunctionRun::RESULT_FAILURE') %}
+{%                              if run.getResult == constant('TestfunctionRun::RESULT_SUCCESS') %}
+{%                                   set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%                              elseif run.getResult == constant('TestfunctionRun::RESULT_FAILURE') %}
 {%                                   set resultIcon = 'glyphicon glyphicon-remove red' %}
 {%                              elseif run.getResult == constant('TestfunctionRun::RESULT_FAILURE_EXPECTED') %}
 {%                                   set resultIcon = 'glyphicon glyphicon-remove-sign green' %}
