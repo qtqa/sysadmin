@@ -34,7 +34,7 @@
 
 /**
  * TestsetRun class
- * @since     17-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -47,6 +47,11 @@ class TestsetRun extends ProjectRun {
     const RESULT_EMPTY   = "";
     const RESULT_SUCCESS = "passed";
     const RESULT_FAILURE = "failed";
+
+    /**
+     * If the tesset name is long, a shorter version of the name can be requested
+     */
+    const SHORT_NAME_LENGTH = 25;
 
     /**
      * Testset name.
@@ -109,6 +114,18 @@ class TestsetRun extends ProjectRun {
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get short name.
+     * @return string
+     */
+    public function getShortName()
+    {
+        if (strlen($this->name) > self::SHORT_NAME_LENGTH)
+            return substr($this->name, 0, self::SHORT_NAME_LENGTH - 10) . '...' . substr($this->name, -7);
+        else
+            return $this->name;
     }
 
     /**

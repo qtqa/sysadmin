@@ -34,7 +34,7 @@
 
 /**
  * Factory class
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -473,6 +473,101 @@ class Factory {
             );
             $objects[] = $obj;
         }
+        return $objects;
+    }
+
+    /**
+     * Create TestsetRun objects with the longest duration for each testset
+     * Object list is sorted descending by duration
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestsetRun objects
+     */
+    public static function createTestsetRunsMaxDuration($runProject, $runState)
+    {
+        $objects = array();
+        $ini = self::conf();
+        $days = intval($ini['top_duration_last_days']) - 1;
+        $since = self::getSinceDate($days);
+        $durationLimitSec = intval($ini['testset_top_duration_limit_sec']);
+        $testsets = self::db()->getTestsets();
+        foreach($testsets as $testset) {
+            $dbEntries = self::db()->getTestsetMaxDuration($testset['id'], $runProject, $runState, $since, $durationLimitSec);
+            foreach($dbEntries as $entry) {
+                $obj = new TestsetRun(
+                    $entry['testset'],
+                    $entry['project'],
+                    $runProject,
+                    $entry['branch'],
+                    $runState,
+                    $entry['buildKey'],
+                    $entry['conf'],
+                    0,
+                    TestsetRun::stripResult($entry['result']),
+                    TestsetRun::isInsignificant($entry['result']),
+                    $entry['timestamp'],
+                    $entry['duration']
+                );
+                $objects[] = $obj;
+            }
+        }
+        // Sort descending by duration
+        usort($objects, function($a, $b)
+        {
+            if ($a->getDuration() === $b->getDuration())
+                return 0;
+            else
+                return ($a->getDuration() > $b->getDuration() ? -1 : 1);
+        });
+        return $objects;
+    }
+
+    /**
+     * Create TestfunctionRun objects with the longest duration for each testfunction
+     * Object list is sorted descending by duration
+     * @param string $testset
+     * @param string $testsetProject
+     * @param string $runProject
+     * @param string $runState
+     * @return array TestfunctionRun objects
+     */
+    public static function createTestfunctionRunsMaxDuration($testset, $project, $runProject, $runState)
+    {
+        $objects = array();
+        $ini = self::conf();
+        $days = intval($ini['top_duration_last_days']) - 1;
+        $since = self::getSinceDate($days);
+        $durationLimitSec = intval($ini['testfunction_top_duration_limit_sec']);
+        $testfunctions = self::db()->getTestfunctionsTestset($testset, $project);
+        foreach($testfunctions as $testfunction) {
+            $dbEntries = self::db()->getTestfunctionMaxDuration($testfunction['id'], $testfunction['testsetId'], $runProject, $runState, $since, $durationLimitSec);
+            foreach($dbEntries as $entry) {
+                $obj = new TestfunctionRun(
+                    $entry['testfunction'],
+                    $entry['testset'],
+                    $entry['project'],
+                    $runProject,
+                    $entry['branch'],
+                    $runState,
+                    $entry['buildKey'],
+                    $entry['conf'],
+                    TestfunctionRun::stripResult($entry['result']),
+                    TestfunctionRun::isBlacklisted($entry['result']),
+                    TestfunctionRun::hasChildren($entry['result']),
+                    $entry['timestamp'],
+                    $entry['duration']
+                );
+                $objects[] = $obj;
+            }
+        }
+        // Sort descending by duration
+        usort($objects, function($a, $b)
+        {
+            if ($a->getDuration() === $b->getDuration())
+                return 0;
+            else
+                return ($a->getDuration() > $b->getDuration() ? -1 : 1);
+        });
         return $objects;
     }
 

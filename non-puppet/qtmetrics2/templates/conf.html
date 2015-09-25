@@ -34,7 +34,7 @@
 
 /**
  * Configuration page
- * @since     17-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -368,11 +368,6 @@ title="insignificant">i</span>
 {%                              else %}
 {%                                  set resultIcon = '' %}
 {%                              endif %}
-{%                              if (run.getDuration / 10) > 60 %}
-{%                                  set durationFormatted = ' (00:' ~ (run.getDuration/10)|date("i:s") ~ ')' %}
-{%                              else %}
-{%                                  set durationFormatted = '' %}
-{%                              endif %}
 {# Print result #}
 <td class="center">
 <span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
@@ -558,8 +553,8 @@ title="<table>
 {%                              else %}
 {%                                  set resultIcon = '' %}
 {%                              endif %}
-{%                              if (run.getDuration / 10) > 60 %}
-{%                                  set durationFormatted = ' (00:' ~ (run.getDuration/10)|date("i:s") ~ ')' %}
+{%                              if run.getDuration > 60 %}
+{%                                  set durationFormatted = ' (00:' ~ (run.getDuration|round)|date("i:s") ~ ')' %}
 {%                              else %}
 {%                                  set durationFormatted = '' %}
 {%                              endif %}
@@ -570,7 +565,7 @@ title="<table>
 <tr><th>Testset: </th><td>{{ run.getName }}</td></tr>
 <tr><th>Timestamp: </th><td>{{ run.getTimestamp }}</td></tr>
 <tr><th>Result: </th><td>{{ run.getResult }} {{ flaky }}</td></tr>
-<tr><th>Duration: </th><td>{{ run.getDuration / 10 }} s {{ durationFormatted }}</td></tr>
+<tr><th>Duration: </th><td>{{ run.getDuration }} s {{ durationFormatted }}</td></tr>
 <tr><th>Run #: </th><td>{{ run.getRun }}</td></tr>
 <tr><th>Insignificant: </th><td>{% if run.getInsignificant %}yes{% else %}no{% endif %}</td></tr></table>"></span></td>
 {%                              set buildKeyFound = 1 %}

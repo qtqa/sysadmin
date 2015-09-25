@@ -34,7 +34,7 @@
 
 /**
  * Ajax route calls
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -149,6 +149,35 @@ $(function () {
         .done(function( html ) {
             console.log(this.url + " done");
             $('#testrows_blacklisted_passed_data').html(html);
+        });
+    }
+
+    // Top testset duration
+    if ($.inArray('testsets_duration', divs) > -1) {
+        $.ajax({
+            url: "data/test/duration/testsets",
+            dataType: "html",
+            cache: true
+        })
+        .done(function( html ) {
+            console.log(this.url + " done");
+            $('#testsets_duration').html(html);
+        });
+    }
+
+    // Top testfunction duration
+    if ($.inArray('testfunctions_duration', divs) > -1) {
+        testset = $('#testset').html();
+        project = $('#project').html();
+        url = "data/test/duration/testfunctions/" + testset + "/" + project;
+        $.ajax({
+            url: url,
+            dataType: "html",
+            cache: true
+        })
+        .done(function( html ) {
+            console.log(this.url + " done");
+            $('#testfunctions_duration').html(html);
         });
     }
 

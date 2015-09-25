@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -144,6 +144,31 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getTestsets
+     * @dataProvider testGetTestsetsData
+     */
+    public function testGetTestsets($exp_testset)
+    {
+        $items = array();
+        $db = Factory::db();
+        $result = $db->getTestsets();
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('id', $row);
+            $this->assertArrayHasKey('name', $row);
+            $this->assertArrayHasKey('project', $row);
+            $items[] = $row['name'];
+        }
+        $this->assertContains($exp_testset, $items);
+    }
+    public function testGetTestsetsData()
+    {
+        return array(
+            array('tst_qftp')
+        );
+    }
+
+    /**
      * Test getTestsetsFiltered
      * @dataProvider testGetTestsetsFilteredData
      */
@@ -194,6 +219,33 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             array('tst_qftp', 'qtbase', 2),
             array('tst_qftp', 'Qt5', 2),
             array('invalid-name', '', 0)
+        );
+    }
+
+    /**
+     * Test getTestfunctionsTestset
+     * @dataProvider testGetTestfunctionsTestsetData
+     */
+    public function testGetTestfunctionsTestset($testset, $project, $exp_testfunction)
+    {
+        $items = array();
+        $db = Factory::db();
+        $result = $db->getTestfunctionsTestset($testset, $project);
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('id', $row);
+            $this->assertArrayHasKey('testsetId', $row);
+            $this->assertArrayHasKey('name', $row);
+            $items[] = $row['name'];
+        }
+        $this->assertContains($exp_testfunction, $items);
+    }
+    public function testGetTestfunctionsTestsetData()
+    {
+        return array(
+            array('tst_networkselftest', 'qtbase', 'cleanupTestCase'),
+            array('tst_qfont', 'qtbase', 'defaultFamily'),
+            array('tst_qftp', 'qtbase', 'binaryAscii')
         );
     }
 
@@ -596,6 +648,88 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             array('tst_networkselftest', 'qtbase', '2013-05-01', 'qtbase', 1, 0), // tst_networkselftest has been run but not flaky
             array('invalid-name', 'qtbase', '2013-05-29', '', 0, 0),
             array('tst_qfont', 'invalid-name', '2013-05-29', '', 0, 0)
+        );
+    }
+
+    /**
+     * Test getTestsetMaxDuration
+     * @dataProvider testGetTestsetMaxDurationData
+     */
+    public function testGetTestsetMaxDuration($testsetId, $runProject, $runState, $date, $durationLimitSec, $exp_testset, $exp_durationSec, $has_data)
+    {
+        $testsets = array();
+        $db = Factory::db();
+        $result = $db->getTestsetMaxDuration($testsetId, $runProject, $runState, $date, $durationLimitSec);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('testset', $row);
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('result', $row);
+            $this->assertArrayHasKey('duration', $row);
+            $testsets[] = $row['testset'];
+        }
+        if ($has_data) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_testset, $testsets);
+            $this->assertEquals(1, count($testsets));
+            $this->assertEquals($exp_durationSec, $row['duration']);
+        } else {
+            $this->assertEmpty($result);
+        }
+    }
+    public function testGetTestsetMaxDurationData()
+    {
+        return array(
+            array(3, 'Qt5', 'state', '2013-05-01', 90, 'tst_qftp', 813, 1),   // duration is in seconds in the interface
+            array(3, 'Qt5', 'state', '2013-05-28', 90, 'tst_qftp', 813, 1),
+            array(3, 'Qt5', 'state', '2013-05-28', 900, 'tst_qftp', 0, 0),
+            array(3, 'Qt5', 'state', '2013-05-29', 90, 'tst_qftp', 0, 0),
+            array(999, 'Qt5', 'state', '2013-05-29', 90, 'invalid', 0, 0)
+        );
+    }
+
+    /**
+     * Test getTestfunctionMaxDuration
+     * @dataProvider testGetTestfunctionMaxDurationData
+     */
+    public function testGetTestfunctionMaxDuration($testfunctionId, $testsetId, $runProject, $runState, $date, $durationLimitSec, $exp_testfunction, $exp_durationSec, $has_data)
+    {
+        $testfunctions = array();
+        $db = Factory::db();
+        $result = $db->getTestfunctionMaxDuration($testfunctionId, $testsetId, $runProject, $runState, $date, $durationLimitSec);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('testfunction', $row);
+            $this->assertArrayHasKey('testset', $row);
+            $this->assertArrayHasKey('project', $row);
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('conf', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('result', $row);
+            $this->assertArrayHasKey('duration', $row);
+            $testfunctions[] = $row['testfunction'];
+        }
+        if ($has_data) {
+            $this->assertNotEmpty($result);
+            $this->assertContains($exp_testfunction, $testfunctions);
+            $this->assertEquals(1, count($testfunctions));
+            $this->assertEquals($exp_durationSec, $row['duration']);
+        } else {
+            $this->assertEmpty($result);
+        }
+    }
+    public function testGetTestfunctionMaxDurationData()
+    {
+        return array(
+            array(39, 3, 'Qt5', 'state', '2013-05-01', 5, 'binaryAscii', 31.1, 1),   // duration is in seconds in the interface
+            array(39, 3, 'Qt5', 'state', '2013-05-28', 5, 'binaryAscii', 0, 0),
+            array(39, 3, 'Qt5', 'state', '2013-05-01', 900, 'binaryAscii', 0, 0),
+            array(31, 2, 'Qt5', 'state', '2013-05-01', 5, 'resetFont', 6.1, 1),
+            array(18, 1, 'Qt5', 'state', '2013-05-01', 0.2, 'socks5Proxy', 0.2, 1),
+            array(999, 999, 'Qt5', 'state', '2013-05-29', 5, 'invalid', 0, 0)
         );
     }
 

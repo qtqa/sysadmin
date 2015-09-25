@@ -34,7 +34,7 @@
 
 /**
  * Home page
- * @since     21-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -127,14 +127,15 @@
 </form>
 </div>
 <br>
-<p>See top failure/flaky lists:</p>
+<p>See top lists:</p>
 <div>
 <a class="btn btn-primary btn-xs" href="{{ topRoute }}" role="button">testsets</a>
 <a class="btn btn-primary btn-xs" href="{{ flakyRoute }}" role="button">flaky</a>
 <a class="btn btn-primary btn-xs" href="{{ topTestfunctionsRoute }}" role="button">test functions</a>
+<a class="btn btn-primary btn-xs" href="{{ durationTestsetsRoute }}" role="button">duration</a>
 </div>
 <br>
-<p>See blacklisted tests where tagging could be removed:</p>
+<p>See blacklisted but passed tests:</p>
 <div>
 <a class="btn btn-primary btn-xs" href="{{ bpassedTestfunctionsRoute }}" role="button">test functions</a>
 </div>

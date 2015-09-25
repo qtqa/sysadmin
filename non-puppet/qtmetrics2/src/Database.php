@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -133,9 +133,33 @@ class Database {
     }
 
     /**
+     * Get list of testsets.
+     * @return array (int id, string name, string project)
+     */
+    public function getTestsets()
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT testset.id AS id, testset.name AS testset, project.name AS project
+            FROM testset
+                INNER JOIN project ON testset.project_id = project.id
+            ORDER BY testset.name;
+        ");
+        $query->execute(array());
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'id' => $row['id'],
+                'name' => $row['testset'],
+                'project' => $row['project']
+            );
+        }
+        return $result;
+    }
+
+    /**
      * Get list of testsets matching the filter string.
      * @param string $filter
-     * @return array (string name)
+     * @return array (string name, string project)
      */
     public function getTestsetsFiltered($filter)
     {
@@ -182,6 +206,38 @@ class Database {
             $result[] = array(
                 'name' => $row['testset'],
                 'project' => $row['project']
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get list of testfunctions for a testset
+     * @param string $testset
+     * @param string $project
+     * @return array (int id, int testsetId, string name)
+     */
+    public function getTestfunctionsTestset($testset, $project)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT testfunction.id AS id, testfunction.testset_id AS testset_id, testfunction.name AS testset
+            FROM testfunction
+            WHERE testfunction.testset_id =
+                (SELECT testset.id
+                FROM testset INNER JOIN project ON testset.project_id = project.id
+                WHERE testset.name = ? AND project.name = ?)
+            ORDER BY testfunction.name;
+        ");
+        $query->execute(array(
+            $testset,
+            $project
+        ));
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'id' => $row['id'],
+                'testsetId' => $row['testset_id'],
+                'name' => $row['testset']
             );
         }
         return $result;
@@ -757,6 +813,132 @@ class Database {
     }
 
     /**
+     * Get the longest testset run duration in specified builds since specified date
+     * @param string $runProject
+     * @param string $runState
+     * @param string $date
+     * @param string $durationLimitSec
+     * @return array (string testset, string project, string branch, string conf, string buildKey, string timestamp, string result, int duration)
+     */
+    public function getTestsetMaxDuration($testsetId, $runProject, $runState, $date, $durationLimitSec)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                testset.name AS testset,
+                project.name AS project,
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                project_run.timestamp,
+                testset_run.result,
+                testset_run.duration
+            FROM testset_run
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+                INNER JOIN state ON project_run.state_id = state.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                project_run.timestamp >= ? AND
+                testset_run.testset_id = ? AND
+                testset_run.duration >= ?
+            ORDER BY testset_run.duration DESC
+            LIMIT 1;
+        ");
+        $durationLimitDsec = $durationLimitSec * 10;                    // duration is in deciseconds in the database
+        $query->bindParam(1, $runProject);
+        $query->bindParam(2, $runState);
+        $query->bindParam(3, $date);
+        $query->bindParam(4, $testsetId, PDO::PARAM_INT);               // int data type must be separately set
+        $query->bindParam(5, $durationLimitDsec, PDO::PARAM_INT);
+        $query->execute();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'testset' => $row['testset'],
+                'project' => $row['project'],
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'timestamp' => $row['timestamp'],
+                'result' => $row['result'],
+                'duration' => round($row['duration']/10, 1)             // convert deciseconds to seconds
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Get the longest testfunction run duration in specified builds since specified date
+     * @param string $runProject
+     * @param string $runState
+     * @param string $date
+     * @param string $durationLimitSec
+     * @return array (string testfunction, string testset, string project, string branch, string conf, string buildKey, string timestamp, string result, int duration)
+     */
+    public function getTestfunctionMaxDuration($testfunctionId, $testsetId, $runProject, $runState, $date, $durationLimitSec)
+    {
+        $result = array();
+        $query = $this->db->prepare("
+            SELECT
+                testfunction.name AS testfunction,
+                testset.name AS testset,
+                project.name AS project,
+                branch.name AS branch,
+                conf.name AS conf,
+                project_run.build_key,
+                project_run.timestamp,
+                testfunction_run.result,
+                testfunction_run.duration
+            FROM testfunction_run
+                INNER JOIN testfunction ON testfunction_run.testfunction_id = testfunction.id
+                INNER JOIN testset_run ON testfunction_run.testset_run_id = testset_run.id
+                INNER JOIN testset ON testset_run.testset_id = testset.id
+                INNER JOIN project ON testset.project_id = project.id
+                INNER JOIN conf_run ON testset_run.conf_run_id = conf_run.id
+                INNER JOIN conf ON conf_run.conf_id = conf.id
+                INNER JOIN project_run ON conf_run.project_run_id = project_run.id
+                INNER JOIN branch ON project_run.branch_id = branch.id
+                INNER JOIN state ON project_run.state_id = state.id
+            WHERE
+                project_run.project_id = (SELECT id FROM project WHERE name = ?) AND
+                project_run.state_id = (SELECT id FROM state WHERE name = ?) AND
+                project_run.timestamp >= ? AND
+                testset_run.testset_id = ? AND
+                testfunction_run.testfunction_id = ? AND
+                testfunction_run.duration >= ?
+            ORDER BY testfunction_run.duration DESC
+            LIMIT 1;
+        ");
+        $durationLimitDsec = $durationLimitSec * 10;                    // duration is in deciseconds in the database
+        $query->bindParam(1, $runProject);
+        $query->bindParam(2, $runState);
+        $query->bindParam(3, $date);
+        $query->bindParam(4, $testsetId, PDO::PARAM_INT);               // int data type must be separately set
+        $query->bindParam(5, $testfunctionId, PDO::PARAM_INT);          // int data type must be separately set
+        $query->bindParam(6, $durationLimitDsec, PDO::PARAM_INT);
+        $query->execute();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = array(
+                'testfunction' => $row['testfunction'],
+                'testset' => $row['testset'],
+                'project' => $row['project'],
+                'branch' => $row['branch'],
+                'conf' => $row['conf'],
+                'buildKey' => $row['build_key'],
+                'timestamp' => $row['timestamp'],
+                'result' => $row['result'],
+                'duration' => round($row['duration']/10, 1)             // convert deciseconds to seconds
+            );
+        }
+        return $result;
+    }
+
+    /**
      * Get counts of all passed, failed and skipped runs by testfunction in specified builds since specified date (list length limited)
      * Only the testfunctions that have failed since the specified date are listed
      * @param string $runProject
@@ -1002,7 +1184,7 @@ class Database {
      * Get project run data by branch
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string build_key, string timestamp)
+     * @return array (string branch, string buildKey, string timestamp)
      */
     public function getProjectBuildsByBranch($runProject, $runState)
     {
@@ -1038,7 +1220,7 @@ class Database {
      * Get conf run data by branch
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfBuildsByBranch($runProject, $runState)
     {
@@ -1087,7 +1269,7 @@ class Database {
      * @param string $runProject
      * @param string $runState
      * @param string $targetOs
-     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfOsBuildsByBranch($runProject, $runState, $targetOs)
     {
@@ -1138,7 +1320,7 @@ class Database {
      * @param string $runProject
      * @param string $runState
      * @param string $conf
-     * @return array (string branch, string conf, string build_key, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfBuildByBranch($runProject, $runState, $conf)
     {
@@ -1190,7 +1372,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string build_key, string result, string timestamp, string duration, int run)
+     * @return array (string branch, string conf, string buildKey, string result, string timestamp, string duration, int run)
      */
     public function getTestsetResultsByBranchConf($testset, $testsetProject, $runProject, $runState)
     {
@@ -1232,7 +1414,7 @@ class Database {
                 'buildKey' => $row['build_key'],
                 'result' => $row['result'],
                 'timestamp' => $row['timestamp'],
-                'duration' => $row['duration'],
+                'duration' => round($row['duration']/10, 1),            // convert deciseconds to seconds
                 'run' => $row['run']
             );
         }
@@ -1244,7 +1426,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string build_key, int passed, int ipassed, int failed, int ifailed)
+     * @return array (string branch, string conf, string buildKey, int passed, int ipassed, int failed, int ifailed)
      */
     public function getTestsetProjectResultsByBranchConf($testsetProject, $runProject, $runState)
     {
@@ -1298,7 +1480,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
+     * @return array (string branch, string buildKey, string testset, string project, string result, string timestamp, string duration, int run)
      */
     public function getTestsetConfResultsByBranch($conf, $runProject, $runState)
     {
@@ -1341,7 +1523,7 @@ class Database {
                 'project' => $row['project'],
                 'result' => $row['result'],
                 'timestamp' => $row['timestamp'],
-                'duration' => $row['duration'],
+                'duration' => round($row['duration']/10, 1),            // convert deciseconds to seconds
                 'run' => $row['run']
             );
         }
@@ -1355,7 +1537,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string build_key, string testset, string project, string result, string timestamp, string duration, int run)
+     * @return array (string branch, string buildKey, string testset, string project, string result, string timestamp, string duration, int run)
      */
     public function getTestsetConfProjectResultsByBranch($conf, $testsetProject, $runProject, $runState)
     {
@@ -1400,7 +1582,7 @@ class Database {
                 'project' => $row['project'],
                 'result' => $row['result'],
                 'timestamp' => $row['timestamp'],
-                'duration' => $row['duration'],
+                'duration' => round($row['duration']/10, 1),            // convert deciseconds to seconds
                 'run' => $row['run']
             );
         }
@@ -1415,7 +1597,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string build_key, string testfunction, string result, string timestamp, string duration)
+     * @return array (string branch, string buildKey, string testfunction, string result, string timestamp, string duration)
      */
     public function getTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState)
     {
@@ -1461,7 +1643,7 @@ class Database {
                 'testfunction' => $row['testfunction'],
                 'result' => $row['result'],
                 'timestamp' => $row['timestamp'],
-                'duration' => $row['duration']
+                'duration' => round($row['duration']/10, 1)             // convert deciseconds to seconds
             );
         }
         return $result;
@@ -1476,7 +1658,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string build_key, string testrow, string result, string timestamp)
+     * @return array (string branch, string buildKey, string testrow, string result, string timestamp)
      */
     public function getTestrowConfResultsByBranch($testfunction, $testset, $testsetProject, $conf, $runProject, $runState)
     {

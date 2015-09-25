@@ -37,7 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Factory unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -475,6 +475,64 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 'BuildKeyInStringFormat12345', 'tst_qftp', 1),
             array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', '', '', 0),
             array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', 0)
+        );
+    }
+
+    /**
+     * Test createTestsetRunsMaxDuration
+     * @dataProvider testCreateTestsetRunsMaxDurationData
+     */
+    public function testCreateTestsetRunsMaxDuration($runProject, $runState, $exp_testset, $exp_build_key, $exp_duration, $max_imaginary_duration)
+    {
+        $runs = Factory::createTestsetRunsMaxDuration($runProject, $runState);
+        $this->assertNotEmpty($runs);
+        $prevDuration = $max_imaginary_duration;
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof TestsetRun);
+            $this->assertLessThanOrEqual($prevDuration, $run->getDuration());
+            $prevDuration = $run->getDuration();
+            if ($run->getName() === $exp_testset) {
+                $this->assertEquals($exp_build_key, $run->getBuildKey());
+                $this->assertEquals($exp_duration, $run->getDuration());
+            }
+        }
+    }
+    public function testCreateTestsetRunsMaxDurationData()
+    {
+        return array(
+            array('Qt5', 'state', 'tst_qftp', '1348', 813, 999),
+            array('Qt5', 'state', 'tst_qfont', 'BuildKeyInStringFormat12345', 814, 999),
+            array('Qt5', 'state', 'tst_networkselftest', '1348', 729, 999),
+            array('Qt5', 'state', 'invalid', '', 0, 999)
+        );
+    }
+
+    /**
+     * Test createTestfunctionRunsMaxDuration
+     * @dataProvider testCreateTestfunctionRunsMaxDurationData
+     */
+    public function testCreateTestfunctionRunsMaxDuration($testset, $testsetProject, $runProject, $runState, $exp_testfunction, $exp_build_key, $exp_duration, $max_imaginary_duration)
+    {
+        $runs = Factory::createTestfunctionRunsMaxDuration($testset, $testsetProject, $runProject, $runState);
+        $this->assertNotEmpty($runs);
+        $prevDuration = $max_imaginary_duration;
+        foreach($runs as $run) {
+            $this->assertTrue($run instanceof TestfunctionRun);
+            $this->assertLessThanOrEqual($prevDuration, $run->getDuration());
+            $prevDuration = $run->getDuration();
+            if ($run->getName() === $exp_testfunction) {
+                $this->assertEquals($exp_build_key, $run->getBuildKey());
+                $this->assertEquals($exp_duration, $run->getDuration());
+            }
+        }
+    }
+    public function testCreateTestfunctionRunsMaxDurationData()
+    {
+        return array(
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'binaryAscii', '1023', 31.1, 999),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'resetFont', '1346', 6.1, 999),
+            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'socks5Proxy', '1348', 0.2, 999),
+            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'invalid', '', 0, 999)
         );
     }
 

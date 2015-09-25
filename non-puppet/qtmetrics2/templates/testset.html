@@ -34,7 +34,7 @@
 
 /**
  * Testset page (list of configurations)
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -124,11 +124,15 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 <div>
 <div class="btn-group">
 {% set link = bpassedTestsetRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
-<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">blacklisted passes for<br>test functions</a>
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button"><span class="badge">test functions</span><br>blacklisted passes</a>
 </div>
 <div class="btn-group">
 {% set link = bpassedtestsetTestrowsRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
-<a class="btn btn-primary btn-xs" href="{{ link }}" role="button">blacklisted passes for<br>test rows</a>
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button"><span class="badge">test rows</span><br>blacklisted passes</a>
+</div>
+<div class="btn-group">
+{% set link = durationTestfunctionsRoute ~ '/' ~ testset.getName|url_encode ~ '/' ~ testset.getProjectName|url_encode %}
+<a class="btn btn-primary btn-xs" href="{{ link }}" role="button"><span class="badge">test functions</span><br>duration</a>
 </div>
 </div>
 <hr>
@@ -341,8 +345,8 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 {%                              else %}
 {%                                   set resultIcon = '' %}
 {%                              endif %}
-{%                              if (run.getDuration / 10) > 60 %}
-{%                                   set durationFormatted = ' (00:' ~ (run.getDuration/10)|date("i:s") ~ ')' %}
+{%                              if run.getDuration > 60 %}
+{%                                   set durationFormatted = ' (00:' ~ (run.getDuration|round)|date("i:s") ~ ')' %}
 {%                              else %}
 {%                                   set durationFormatted = '' %}
 {%                              endif %}
@@ -353,7 +357,7 @@ title="<table>
 <tr><th>Configuration: </th><td>{{ run.getConfName }}</td></tr>
 <tr><th>Timestamp: </th><td>{{ run.getTimestamp }}</td></tr>
 <tr><th>Result: </th><td>{{ run.getResult }} {{ flaky }}</td></tr>
-<tr><th>Duration: </th><td>{{ run.getDuration / 10 }} s {{ durationFormatted }}</td></tr>
+<tr><th>Duration: </th><td>{{ run.getDuration }} s {{ durationFormatted }}</td></tr>
 <tr><th>Run #: </th><td>{{ run.getRun }}</td></tr>
 <tr><th>Insignificant: </th><td>{% if run.getInsignificant %}yes{% else %}no{% endif %}</td></tr></table>">
 </span></td>

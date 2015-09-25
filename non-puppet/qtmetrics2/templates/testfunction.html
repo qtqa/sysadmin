@@ -34,7 +34,7 @@
 
 /**
  * Test function page (list of test rows)
- * @since     23-09-2015
+ * @since     24-09-2015
  * @author    Juha Sippola
  */
 
@@ -246,11 +246,6 @@
 {%                                   set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
 {%                              else %}
 {%                                   set resultIcon = '' %}
-{%                              endif %}
-{%                              if (run.getDuration / 10) > 60 %}
-{%                                   set durationFormatted = ' (00:' ~ ((run.getDuration/10)|round)|date("i:s") ~ ')' %}
-{%                              else %}
-{%                                   set durationFormatted = '' %}
 {%                              endif %}
 <td class="center">
 <span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
