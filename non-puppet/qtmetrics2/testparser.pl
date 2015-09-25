@@ -1360,7 +1360,7 @@ sub sql_create_tables
                 project_id            TINYINT UNSIGNED      NOT NULL,
                 branch_id             TINYINT UNSIGNED      NOT NULL,
                 state_id              TINYINT UNSIGNED      NOT NULL,
-                build_key             VARCHAR(256)          NOT NULL,
+                build_key             BIGINT UNSIGNED       NOT NULL,
                 result                ENUM('SUCCESS','FAILURE','ABORTED')    NOT NULL,
                 timestamp             TIMESTAMP             NOT NULL,
                 duration              TIME                  NOT NULL,

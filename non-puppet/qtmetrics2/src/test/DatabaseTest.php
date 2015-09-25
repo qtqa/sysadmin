@@ -279,7 +279,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchBuildKeys
      * @dataProvider testGetLatestProjectBranchBuildKeysData
      */
-    public function testGetLatestProjectBranchBuildKeys($project, $state, $exp_branch, $exp_build_key, $exp_archived)
+    public function testGetLatestProjectBranchBuildKeys($project, $state, $exp_branch, $exp_key, $exp_archived)
     {
         $branches = array();
         $db = Factory::db();
@@ -289,7 +289,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             if ($row['name'] === $exp_branch) {
                 $this->assertArrayHasKey('name', $row);
                 $this->assertArrayHasKey('key', $row);
-                $this->assertEquals($exp_build_key, $row['key']);
+                $this->assertEquals($exp_key, $row['key']);
                 $branches[] = $row['name'];
             }
         }
@@ -301,10 +301,10 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetLatestProjectBranchBuildKeysData()
     {
         return array(
-            array('Qt5', 'state', 'master', '4777', 0),                         // based on test data
-            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 0),
-            array('Qt5', 'state', 'release', '157', 1),
-            array('Qt5', 'state', 'stable', '1348', 0)
+            array('Qt5', 'state', 'master', 4777, 0),                         // based on test data
+            array('Qt5', 'state', 'dev', 18446744073709551615, 0),
+            array('Qt5', 'state', 'release', 157, 1),
+            array('Qt5', 'state', 'stable', 1348, 0)
         );
     }
 
@@ -312,7 +312,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
      * Test getLatestProjectBranchBuildKey
      * @dataProvider testGetLatestProjectBranchBuildKeyData
      */
-    public function testGetLatestProjectBranchBuildKey($project, $branch, $state, $exp_build_key, $exp_archived)
+    public function testGetLatestProjectBranchBuildKey($project, $branch, $state, $exp_key, $exp_archived)
     {
         $db = Factory::db();
         $result = $db->getLatestProjectBranchBuildKey($project, $branch, $state);
@@ -320,16 +320,16 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $this->assertEmpty($result);
         } else {
             $this->assertNotEmpty($result);
-            $this->assertEquals($exp_build_key, $result);
+            $this->assertEquals($exp_key, $result);
         }
     }
     public function testGetLatestProjectBranchBuildKeyData()
     {
         return array(
-            array('Qt5', 'master', 'state', '4777', 0),                         // based on test data
-            array('Qt5', 'dev', 'state', 'BuildKeyInStringFormat12345', 0),
-            array('Qt5', 'release', 'state', '157', 1),
-            array('Qt5', 'stable', 'state', '1348', 0)
+            array('Qt5', 'master', 'state', 4777, 0),                         // based on test data
+            array('Qt5', 'dev', 'state', 18446744073709551615, 0),
+            array('Qt5', 'release', 'state', 157, 1),
+            array('Qt5', 'stable', 'state', 1348, 0)
         );
     }
 
@@ -923,13 +923,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetProjectBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'dev', '1023', 0, 1),
-            array('Qt5', 'state', 'stable', '1348', 0, 1),
-            array('Qt5', 'state', 'stable', '1348', 0, 1),
-            array('Qt5', 'state', 'stable', '1348', 0, 1),
-            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 0, 1),
-            array('Qt5', 'state', 'release', '157', 1, 1),
-            array('Qt5', 'invalid', '', '', 0, 0)
+            array('Qt5', 'state', 'dev', 1023, 0, 1),
+            array('Qt5', 'state', 'stable', 1348, 0, 1),
+            array('Qt5', 'state', 'stable', 1348, 0, 1),
+            array('Qt5', 'state', 'stable', 1348, 0, 1),
+            array('Qt5', 'state', 'dev', 18446744073709551615, 0, 1),
+            array('Qt5', 'state', 'release', 157, 1, 1),
+            array('Qt5', 'invalid', '', 0, 0, 0)
         );
     }
 
@@ -976,12 +976,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1),
-            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1),
-            array('Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1),
-            array('Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1),
-            array('Qt5', 'state', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1),
-            array('Qt5', 'invalid', '', '', '', '', 0, 0)
+            array('Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 1023, 'FAILURE', 0, 1),
+            array('Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 'SUCCESS', 0, 1),
+            array('Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'SUCCESS', 0, 1),
+            array('Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 18446744073709551615, 'FAILURE', 0, 1),
+            array('Qt5', 'state', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 157, 'SUCCESS', 1, 1),
+            array('Qt5', 'invalid', '', '', 0, '', 0, 0)
         );
     }
 
@@ -1031,13 +1031,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfOsBuildsByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'linux', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1, 1),
-            array('Qt5', 'state', 'linux', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1, 1),
-            array('Qt5', 'state', 'windows', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1, 1),
-            array('Qt5', 'state', 'osx', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 1),
-            array('Qt5', 'state', 'linux', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 0),
-            array('Qt5', 'state', 'linux', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1, 1),
-            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0, 0)
+            array('Qt5', 'state', 'linux', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 1023, 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'linux', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 18446744073709551615, 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'windows', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'osx', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'linux', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'SUCCESS', 0, 1, 0),
+            array('Qt5', 'state', 'linux', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 157, 'SUCCESS', 1, 1, 1),
+            array('Qt5', 'state', 'invalid', '', '', 0, '', 0, 0, 0)
         );
     }
 
@@ -1087,13 +1087,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetConfBuildByBranchData()
     {
         return array(
-            array('Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'FAILURE', 0, 1, 1),
-            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'FAILURE', 0, 1, 1),
-            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'SUCCESS', 0, 1, 1),
-            array('Qt5', 'state', 'macx-clang_developer-build_OSX_10.8', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 1),
-            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'SUCCESS', 0, 1, 0),
-            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', '157', 'SUCCESS', 1, 1, 0),
-            array('Qt5', 'state', 'invalid', '', '', '', '', 0, 0, 0)
+            array('Qt5', 'state', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 1023, 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 18446744073709551615, 'FAILURE', 0, 1, 1),
+            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'macx-clang_developer-build_OSX_10.8', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'SUCCESS', 0, 1, 1),
+            array('Qt5', 'state', 'win32-msvc2010_developer-build_angle_Windows_7', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'SUCCESS', 0, 1, 0),
+            array('Qt5', 'state', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'release', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 157, 'SUCCESS', 1, 1, 0),
+            array('Qt5', 'state', 'invalid', '', '', 0, '', 0, 0, 0)
         );
     }
 
@@ -1136,11 +1136,11 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('tst_qftp', 'Qt5', 'Qt5', 'state', '', '', '', '', 0),
-            array('tst_qftp', 'QtBase', 'Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 'ifailed', 1),
-            array('tst_qftp', 'QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'ipassed', 1),
-            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 'failed', 1),
-            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 'passed', 1),
-            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 'failed', 1)
+            array('tst_qftp', 'QtBase', 'Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 1023, 'ifailed', 1),
+            array('tst_qftp', 'QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 'ipassed', 1),
+            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 'failed', 1),
+            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 'passed', 1),
+            array('tst_qfont', 'QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 18446744073709551615, 'failed', 1)
         );
     }
 
@@ -1179,12 +1179,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetProjectResultsByBranchConfData()
     {
         return array(
-            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', '1023', 1),
-            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 1),
-            array('QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', '1348', 1),
-            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', '1348', 1),
-            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'BuildKeyInStringFormat12345', 1),
-            array('Qt5', 'Qt5', 'invalid', '', '', '', '', 0)
+            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 1023, 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'macx-clang_developer-build_OSX_10.8', 1348, 1),
+            array('QtBase', 'Qt5', 'state', 'stable', 'win32-msvc2010_developer-build_angle_Windows_7', 1348, 1),
+            array('QtBase', 'Qt5', 'state', 'dev', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 18446744073709551615, 1),
+            array('Qt5', 'Qt5', 'invalid', '', '', '', 0, 0)
         );
     }
 
@@ -1228,11 +1228,11 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetConfResultsByBranchData()
     {
         return array(
-            array('linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', '1023', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'stable', 'tst_qftp', 'na', 'qtbase', '1348', 1),
-            array('macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'tst_qfont', 'tst_networkselftest', 'qtbase', '1348', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 'BuildKeyInStringFormat12345', 1),
-            array('invalid', 'Qt5', 'state', '', '', '', '', '', 0)
+            array('linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 1023, 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'stable', 'tst_qftp', 'na', 'qtbase', 1348, 1),
+            array('macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'tst_qfont', 'tst_networkselftest', 'qtbase', 1348, 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 18446744073709551615, 1),
+            array('invalid', 'Qt5', 'state', '', '', '', '', 0, 0)
         );
     }
 
@@ -1276,12 +1276,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestsetConfProjectResultsByBranchData()
     {
         return array(
-            array('linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'qtbase', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', '1023', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 'tst_qftp', 'na', 'qtbase', '1348', 1),
-            array('macx-clang_developer-build_OSX_10.8', 'qtbase', 'Qt5', 'state', 'stable', 'tst_qfont', 'tst_networkselftest', 'qtbase', '1348', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 'BuildKeyInStringFormat12345', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', '', '', '', '', 0),
-            array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', '', '', 0)
+            array('linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'qtbase', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 1023, 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 'tst_qftp', 'na', 'qtbase', 1348, 1),
+            array('macx-clang_developer-build_OSX_10.8', 'qtbase', 'Qt5', 'state', 'stable', 'tst_qfont', 'tst_networkselftest', 'qtbase', 1348, 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'dev', 'tst_qftp', 'na', 'qtbase', 18446744073709551615, 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', '', '', '', 0, 0),
+            array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', '', 0, 0)
         );
     }
 
@@ -1322,12 +1322,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestfunctionConfResultsByBranchData()
     {
         return array(
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'exactMatch', 'fail', '1348', 1),
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'skip', '1348', 1),
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'bpass', '1346', 1),
-            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'smbServer', 'skip', '1348', 1),
-            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', '', 0),                                      // no fail or skip
-            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', '', 0)
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'exactMatch', 'fail', 1348, 1),
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'skip', 1348, 1),
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'lastResortFont', 'bpass', 1346, 1),
+            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'smbServer', 'skip', 1348, 1),
+            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0, 0),                                      // no fail or skip
+            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0, 0)
         );
     }
 
@@ -1364,12 +1364,12 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     public function testGetTestrowConfResultsByBranchData()
     {
         return array(
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'monospace', '1346', 1),     // xpass
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'sans-serif', '1346', 1),    // xfail
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'serif', '1346', 1),         // bskip
-            array('binaryAscii', 'tst_qftp', 'qtbase', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', 'WithSocks5ProxyAndSession', '1023', 1), // fail
-            array('httpServerFiles', 'tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),            // no fail or skip
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'monospace', 1346, 1),     // xpass
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'sans-serif', 1346, 1),    // xfail
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 'serif', 1346, 1),         // bskip
+            array('binaryAscii', 'tst_qftp', 'qtbase', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', 'WithSocks5ProxyAndSession', 1023, 1), // fail
+            array('httpServerFiles', 'tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', 0, 0),           // no fail or skip
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', 0, 0)
         );
     }
 

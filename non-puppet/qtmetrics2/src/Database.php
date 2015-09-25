@@ -34,7 +34,7 @@
 
 /**
  * Database class
- * @since     24-09-2015
+ * @since     25-09-2015
  * @author    Juha Sippola
  */
 
@@ -325,7 +325,7 @@ class Database {
      * Get the latest build result by branch for given project and state
      * @param string $runProject
      * @param string $runState
-     * @return array (string name, string result, string buildKey, string timestamp, string duration)
+     * @return array (string name, string result, int buildKey, string timestamp, string duration)
      */
     public function getLatestProjectBranchBuildResults($runProject, $runState)
     {
@@ -372,7 +372,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string name, string result, string buildKey, string timestamp, string duration)
+     * @return array (string name, string result, int buildKey, string timestamp, string duration)
      */
     public function getLatestConfBranchBuildResults($conf, $runProject, $runState)
     {
@@ -402,11 +402,13 @@ class Database {
             ");
             $query->execute(array(
                 $conf,
+
                 $runProject,
                 $runState,
                 $build['name'],
                 $build['key']
             ));
+
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'name' => $row['name'],
@@ -426,7 +428,7 @@ class Database {
      * Get the latest testset result by branch for given project and state
      * @param string $runProject
      * @param string $runState
-     * @return array (string project, string branch, string buildKey, string timestamp, int passed, int failed)
+     * @return array (string project, string branch, int buildKey, string timestamp, int passed, int failed)
      */
     public function getLatestProjectBranchTestsetResults($runProject, $runState)
     {
@@ -462,6 +464,7 @@ class Database {
                 $build['name'],
                 $build['key']
             ));
+
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'project' => $row['project'],
@@ -482,7 +485,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string project, string branch, string buildKey, string timestamp, int passed, int failed)
+     * @return array (string project, string branch, int buildKey, string timestamp, int passed, int failed)
      */
     public function getLatestTestsetProjectBranchTestsetResults($testsetProject, $runProject, $runState)
     {
@@ -520,6 +523,7 @@ class Database {
                 $build['name'],
                 $build['key']
             ));
+
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'project' => $row['project'],
@@ -567,12 +571,14 @@ class Database {
             ");
             $query->execute(array(
                 $testset,
+
                 $testsetProject,
                 $runProject,
                 $runState,
                 $build['name'],
                 $build['key']
             ));
+
             while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $result[] = array(
                     'name' => $row['conf'],
@@ -818,7 +824,7 @@ class Database {
      * @param string $runState
      * @param string $date
      * @param string $durationLimitSec
-     * @return array (string testset, string project, string branch, string conf, string buildKey, string timestamp, string result, int duration)
+     * @return array (string testset, string project, string branch, string conf, int buildKey, string timestamp, string result, int duration)
      */
     public function getTestsetMaxDuration($testsetId, $runProject, $runState, $date, $durationLimitSec)
     {
@@ -878,7 +884,7 @@ class Database {
      * @param string $runState
      * @param string $date
      * @param string $durationLimitSec
-     * @return array (string testfunction, string testset, string project, string branch, string conf, string buildKey, string timestamp, string result, int duration)
+     * @return array (string testfunction, string testset, string project, string branch, string conf, int buildKey, string timestamp, string result, int duration)
      */
     public function getTestfunctionMaxDuration($testfunctionId, $testsetId, $runProject, $runState, $date, $durationLimitSec)
     {
@@ -1184,7 +1190,7 @@ class Database {
      * Get project run data by branch
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string buildKey, string timestamp)
+     * @return array (string branch, int buildKey, string timestamp)
      */
     public function getProjectBuildsByBranch($runProject, $runState)
     {
@@ -1220,7 +1226,7 @@ class Database {
      * Get conf run data by branch
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, int buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfBuildsByBranch($runProject, $runState)
     {
@@ -1269,7 +1275,7 @@ class Database {
      * @param string $runProject
      * @param string $runState
      * @param string $targetOs
-     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, int buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfOsBuildsByBranch($runProject, $runState, $targetOs)
     {
@@ -1320,7 +1326,7 @@ class Database {
      * @param string $runProject
      * @param string $runState
      * @param string $conf
-     * @return array (string branch, string conf, string buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
+     * @return array (string branch, string conf, int buildKey, bool forcesuccess, bool insignificant, string result, string timestamp, string duration)
      */
     public function getConfBuildByBranch($runProject, $runState, $conf)
     {
@@ -1372,7 +1378,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string buildKey, string result, string timestamp, string duration, int run)
+     * @return array (string branch, string conf, int buildKey, string result, string timestamp, string duration, int run)
      */
     public function getTestsetResultsByBranchConf($testset, $testsetProject, $runProject, $runState)
     {
@@ -1426,7 +1432,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string conf, string buildKey, int passed, int ipassed, int failed, int ifailed)
+     * @return array (string branch, string conf, int buildKey, int passed, int ipassed, int failed, int ifailed)
      */
     public function getTestsetProjectResultsByBranchConf($testsetProject, $runProject, $runState)
     {
@@ -1480,7 +1486,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string buildKey, string testset, string project, string result, string timestamp, string duration, int run)
+     * @return array (string branch, int buildKey, string testset, string project, string result, string timestamp, string duration, int run)
      */
     public function getTestsetConfResultsByBranch($conf, $runProject, $runState)
     {
@@ -1537,7 +1543,7 @@ class Database {
      * @param string $testsetProject
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string buildKey, string testset, string project, string result, string timestamp, string duration, int run)
+     * @return array (string branch, int buildKey, string testset, string project, string result, string timestamp, string duration, int run)
      */
     public function getTestsetConfProjectResultsByBranch($conf, $testsetProject, $runProject, $runState)
     {
@@ -1597,7 +1603,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string buildKey, string testfunction, string result, string timestamp, string duration)
+     * @return array (string branch, int buildKey, string testfunction, string result, string timestamp, string duration)
      */
     public function getTestfunctionConfResultsByBranch($testset, $testsetProject, $conf, $runProject, $runState)
     {
@@ -1658,7 +1664,7 @@ class Database {
      * @param string $conf
      * @param string $runProject
      * @param string $runState
-     * @return array (string branch, string buildKey, string testrow, string result, string timestamp)
+     * @return array (string branch, int buildKey, string testrow, string result, string timestamp)
      */
     public function getTestrowConfResultsByBranch($testfunction, $testset, $testsetProject, $conf, $runProject, $runState)
     {

@@ -360,10 +360,10 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateProjectRunsData()
     {
         return array(
-            array('Qt5', 'state', 'stable', '1348', 1),
-            array('Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 1),
-            array('invalid', 'state', '', '', '', 0),
-            array('Qt5', 'invalid', '', '', '', 0)
+            array('Qt5', 'state', 'stable', 1348, 1),
+            array('Qt5', 'state', 'dev', 18446744073709551615, 1),
+            array('invalid', 'state', '', 0, 0),
+            array('Qt5', 'invalid', '', 0, 0)
         );
     }
 
@@ -394,16 +394,16 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateConfRunsData()
     {
         return array(
-            array('Qt5', 'state', '', '', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
-            array('Qt5', 'state', '', '', 'stable', '1348', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', 'windows', '', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
-            array('Qt5', 'state', 'linux', '', 'stable', '1348', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', 'linux', '', 'dev', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', 'invalid', '', '', '', '', 0),
-            array('Qt5', 'state', '', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
-            array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'stable', '1348', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('Qt5', 'state', '', 'invalid', '', '', '', 0)
+            array('Qt5', 'state', '', '', 'stable', 1348, 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
+            array('Qt5', 'state', '', '', 'stable', 1348, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('Qt5', 'state', 'windows', '', 'stable', 1348, 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
+            array('Qt5', 'state', 'linux', '', 'stable', 1348, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('Qt5', 'state', 'linux', '', 'dev', 18446744073709551615, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('Qt5', 'state', 'invalid', '', '', 0, '', 0),
+            array('Qt5', 'state', '', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 'stable', 1348, 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
+            array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'stable', 1348, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('Qt5', 'state', '', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 'dev', 18446744073709551615, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('Qt5', 'state', '', 'invalid', '', 0, '', 0)
         );
     }
 
@@ -434,10 +434,10 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestsetRunsData()
     {
         return array(
-            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'stable', '1348', 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
-            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'dev', 'BuildKeyInStringFormat12345', 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
-            array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', 0),
-            array('tst_qftp', 'invalid', 'Qt5', 'state', '', '', '', 0)
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'stable', 1348, 'win64-msvc2012_developer-build_qtnamespace_Windows_8', 1),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'dev', 18446744073709551615, 'linux-g++-32_developer-build_Ubuntu_10.04_x86', 1),
+            array('invalid', 'qtbase', 'Qt5', 'state', '', 0, '', 0),
+            array('tst_qftp', 'invalid', 'Qt5', 'state', '', 0, '', 0)
         );
     }
 
@@ -468,13 +468,13 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestsetRunsInConfData()
     {
         return array(
-            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', '', 'Qt5', 'state', 'stable', '1348', 'tst_qftp', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', '', 'Qt5', 'state', 'stable', 'BuildKeyInStringFormat12345', 'tst_qftp', 1),
-            array('invalid', '', 'Qt5', 'state', '', '', '', 0),
-            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', 'qtbase', 'Qt5', 'state', 'stable', '1348', 'tst_qftp', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 'BuildKeyInStringFormat12345', 'tst_qftp', 1),
-            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', '', '', 0),
-            array('invalid', 'qtbase', 'Qt5', 'state', '', '', '', 0)
+            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', '', 'Qt5', 'state', 'stable', 1348, 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', '', 'Qt5', 'state', 'stable', 18446744073709551615, 'tst_qftp', 1),
+            array('invalid', '', 'Qt5', 'state', '', 0, '', 0),
+            array('win64-msvc2012_developer-build_qtnamespace_Windows_8', 'qtbase', 'Qt5', 'state', 'stable', 1348, 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'qtbase', 'Qt5', 'state', 'stable', 18446744073709551615, 'tst_qftp', 1),
+            array('linux-g++-32_developer-build_Ubuntu_10.04_x86', 'invalid', 'Qt5', 'state', '', 0, '', 0),
+            array('invalid', 'qtbase', 'Qt5', 'state', '', 0, '', 0)
         );
     }
 
@@ -500,10 +500,10 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestsetRunsMaxDurationData()
     {
         return array(
-            array('Qt5', 'state', 'tst_qftp', '1348', 813, 999),
-            array('Qt5', 'state', 'tst_qfont', 'BuildKeyInStringFormat12345', 814, 999),
-            array('Qt5', 'state', 'tst_networkselftest', '1348', 729, 999),
-            array('Qt5', 'state', 'invalid', '', 0, 999)
+            array('Qt5', 'state', 'tst_qftp', 1348, 813, 999),
+            array('Qt5', 'state', 'tst_qfont', 18446744073709551615, 814, 999),
+            array('Qt5', 'state', 'tst_networkselftest', 1348, 729, 999),
+            array('Qt5', 'state', 'invalid', 0, 0, 999)
         );
     }
 
@@ -529,10 +529,10 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestfunctionRunsMaxDurationData()
     {
         return array(
-            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'binaryAscii', '1023', 31.1, 999),
-            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'resetFont', '1346', 6.1, 999),
-            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'socks5Proxy', '1348', 0.2, 999),
-            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'invalid', '', 0, 999)
+            array('tst_qftp', 'qtbase', 'Qt5', 'state', 'binaryAscii', 1023, 31.1, 999),
+            array('tst_qfont', 'qtbase', 'Qt5', 'state', 'resetFont', 1346, 6.1, 999),
+            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'socks5Proxy', 1348, 0.2, 999),
+            array('tst_networkselftest', 'qtbase', 'Qt5', 'state', 'invalid', 0, 0, 999)
         );
     }
 
@@ -563,11 +563,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestfunctionRunsInConfData()
     {
         return array(
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1348', 'exactMatch', 1),             // fail
-            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1348', 'lastResortFont', 1),         // skip
-            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1348', 'smbServer', 1),    // skip
-            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),                                  // no fail or skip
-            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1348, 'exactMatch', 1),             // fail
+            array('tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1348, 'lastResortFont', 1),         // skip
+            array('tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1348, 'smbServer', 1),    // skip
+            array('tst_qftp', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', 0, '', 0),                                 // no fail or skip
+            array('tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', 0, '', 0)
         );
     }
 
@@ -598,12 +598,12 @@ class FactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTestrowRunsInConfData()
     {
         return array(
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'monospace', 1),     // xpass
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'sans-serif', 1),    // xfail
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', '1346', 'serif', 1),         // bskip
-            array('binaryAscii', 'tst_qftp', 'qtbase', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', '1023', 'WithSocks5ProxyAndSession', 1), // fail
-            array('httpServerFiles', 'tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', '', '', 0),            // no fail or skip
-            array('defaultFamily', 'tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', '', '', 0)
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1346, 'monospace', 1),     // xpass
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1346, 'sans-serif', 1),    // xfail
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', 'stable', 1346, 'serif', 1),         // bskip
+            array('binaryAscii', 'tst_qftp', 'qtbase', 'linux-g++_developer-build_qtnamespace_qtlibinfix_Ubuntu_11.10_x64', 'Qt5', 'state', 'dev', 1023, 'WithSocks5ProxyAndSession', 1), // fail
+            array('httpServerFiles', 'tst_networkselftest', 'qtbase', 'macx-clang_developer-build_OSX_10.8', 'Qt5', 'state', '', 0, '', 0),           // no fail or skip
+            array('defaultFamily', 'tst_qfont', 'qtbase', 'invalid', 'Qt5', 'state', '', 0, '', 0)
         );
     }
 
