@@ -1,0 +1,219 @@
+{#
+#############################################################################
+##
+## Copyright (C) 2015 The Qt Company Ltd.
+## Contact: http://www.qt.io/licensing/
+##
+## This file is part of the Quality Assurance module of the Qt Toolkit.
+##
+## $QT_BEGIN_LICENSE:LGPL21$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see http://www.qt.io/terms-conditions. For further
+## information use the contact form at http://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 or version 3 as published by the Free
+## Software Foundation and appearing in the file LICENSE.LGPLv21 and
+## LICENSE.LGPLv3 included in the packaging of this file. Please review the
+## following information to ensure the GNU Lesser General Public License
+## requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+## http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+##
+## As a special exception, The Qt Company gives you certain additional
+## rights. These rights are described in The Qt Company LGPL Exception
+## version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+
+/**
+ * Overview page
+ * @since     28-09-2015
+ * @author    Juha Sippola
+ */
+
+#}
+
+{% include "header.html" %}
+
+{# Failed/passed bar area size in px #}
+{% set BAR_AREA = 60 %}
+
+<ol class="breadcrumb">
+{% for link in breadcrumb %}
+<li><a href="{{ link.link }}">{{ link.name }}</a></li>
+{% endfor %}
+<li class="active">dashboard</li>
+</ol>
+
+<div class="container-fluid">
+
+<div class="row">
+<div class="col-sm-12 col-md-12 main">
+
+{##### Title #####}
+
+<h1 class="page-header">
+Dashboard
+<button type="button" class="btn btn-xs btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+<span class="glyphicon glyphicon-info-sign"></span>
+</button>
+<small>{{ refreshed }}</small>
+</h1>
+
+{##### Info well #####}
+
+<div class="collapse" id="info">
+<div class="well infoWell">
+<span class="glyphicon glyphicon-info-sign"></span> <strong>Dashboard</strong><br>
+<ul>
+<li><strong>Latest {{ masterProject }} {{ masterState }} Build Status</strong> shows the status
+based on the configuration build results (% of {{ constant('confRun::RESULT_SUCCESS') }} from
+total) in the latest <strong>{{ masterProject }} {{ masterState }}</strong> builds by branch.</li>
+<li><strong>Latest {{ masterProject }} {{ masterState }} Testing Status</strong> shows the status
+based on the testset results (% of {{ constant('testsetRun::RESULT_SUCCESS') }} from total) in the
+latest <strong>{{ masterProject }} {{ masterState }}</strong> builds by branch (in any configuration).</li>
+<li>Details on the result % are available as tooltip</li>
+</ul>
+</div>
+</div>
+
+{##### Latest Build Status #####}
+
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Build Status
+<a class="btn btn-info btn-xs spaceHorizontal" href="{{ buildProjectRoute }}" role="button"><span class="spaceHorizontal glyphicon glyphicon-share-alt"></span></a>
+</h4>
+</div>
+<div class="panel-body">
+<div class="row">
+
+{# Get branches #}
+{% set branches = [] %}
+{% for run in latestConfRuns %}
+{%      if run.branch not in branches %}
+{%          set branches = branches|merge([run.branch]) %}
+{%      endif %}
+{% endfor %}
+
+{# Result (by branch) #}
+{%      for branch in branches %}
+{%          set branchTag = branch %}
+{%          set branchTag = branchTag|replace({'.': '--'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({':': '---'}) %} {# ':' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({',': '----'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({'[': '-----'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({']': '------'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({'_': '-------'}) %} {# '_' used as separator for modal confirmations #}
+{%          for run in latestConfRuns if branch == run.branch %}
+{%              set passed = run.passed %}
+{%              set failed = run.failed %}
+{%              set aborted = run.aborted %}
+{%              set undef = run.undef %}
+{%              set total = passed + failed + aborted + undef %}
+{%              if total > 0 %}
+{%                  set percent = (100 * passed / total)|round(1) %}
+{%              else %}
+{%                  set percent = 0 %}
+{%              endif %}
+<div class="col-md-3">
+<div class="chartSpeedo">
+<h3>{{ branch }}</h3>
+<div id="speedo{{ branchTag }}Build" class="chartArea"></div>
+<h4><span class="label label-primary clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>{{ branch }}</th><td>{{ run.timestamp}}</td></tr>
+<tr><td>{{ constant('confRun::RESULT_SUCCESS') }}: </td><td>{{ passed }}</td></tr>
+<tr><td>{{ constant('confRun::RESULT_FAILURE') }}: </td><td>{{ failed }}</td></tr>
+<tr><td>{{ constant('confRun::RESULT_ABORTED') }}: </td><td>{{ aborted }}</td></tr>
+<tr><td>{{ constant('confRun::RESULT_UNDEF') }}: </td><td>{{ undef }}</td></tr>
+<tr><td>Total: </td><td>{{ total }}</td></tr></table>">
+<span id="speedo{{ branchTag }}BuildValue" class="clickOnTouch">{{ percent }}</span> %
+</span></h4>
+</div>
+</div>
+{%          endfor %}{# run #}
+{%      endfor %}{# branch #}
+
+</div> {# .row #}
+</div> {# .panel-body #}
+</div> {# .panel #}
+
+{##### Latest Testing Status #####}
+
+<div class="panel panel-primary">
+<div class="panel-heading">
+<h4 class="panel-title bold">Latest {{ masterProject }} {{ masterState }} Testing Status
+<a class="btn btn-info btn-xs spaceHorizontal" href="{{ overviewRoute }}" role="button"><span class="spaceHorizontal glyphicon glyphicon-share-alt"></span></a>
+</h4>
+</div>
+<div class="panel-body">
+<div class="row">
+
+{# Get branches #}
+{% set branches = [] %}
+{% for run in latestTestsetRuns %}
+{%      if run.branch not in branches %}
+{%          set branches = branches|merge([run.branch]) %}
+{%      endif %}
+{% endfor %}
+
+{# Result (by branch) #}
+{%      for branch in branches %}
+{%          set branchTag = branch %}
+{%          set branchTag = branchTag|replace({'.': '--'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({':': '---'}) %} {# ':' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({',': '----'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({'[': '-----'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({']': '------'}) %} {# '.' reserved in jQuery #}
+{%          set branchTag = branchTag|replace({'_': '-------'}) %} {# '_' used as separator for modal confirmations #}
+{%          for run in latestTestsetRuns if branch == run.branch %}
+{%              set passed = run.passed %}
+{%              set failed = run.failed %}
+{%              set total = passed + failed %}
+{%              if total > 0 %}
+{%                  set percent = (100 * passed / total)|round(1) %}
+{%              else %}
+{%                  set percent = 0 %}
+{%              endif %}
+<div class="col-md-3">
+<div class="chartSpeedo">
+<h3>{{ branch }}</h3>
+<div id="speedo{{ branchTag }}Testset" class="chartArea"></div>
+<h4><span class="label label-primary clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
+title="<table>
+<tr><th>{{ branch }}</th><td>{{ run.timestamp}}</td></tr>
+<tr><td>{{ constant('testsetRun::RESULT_SUCCESS') }}: </td><td>{{ passed }}</td></tr>
+<tr><td>{{ constant('testsetRun::RESULT_FAILURE') }}: </td><td>{{ failed }}</td></tr>
+<tr><td>Total: </td><td>{{ total }}</td></tr></table>">
+<span id="speedo{{ branchTag }}TestsetValue" class="clickOnTouch">{{ percent }}</span> %
+</span></h4>
+</div>
+</div>
+{%          endfor %}{# run #}
+{%      endfor %}{# branch #}
+
+</div> {# .row #}
+</div> {# .panel-body #}
+</div> {# .panel #}
+
+</div> {# .col... #}
+</div> {# .row #}
+
+</div> {# .container-fluid #}
+
+{% include "footer.html" %}
+
+{# Local scripts for this page #}
+<script src="lib/D3/d3.min.js"></script>
+<script src="scripts/speedo.js"></script>
+<script src="scripts/tooltip.js"></script>
+
+{% include "close.html" %}

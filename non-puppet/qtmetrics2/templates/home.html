@@ -34,7 +34,7 @@
 
 /**
  * Home page
- * @since     24-09-2015
+ * @since     27-09-2015
  * @author    Juha Sippola
  */
 
@@ -64,9 +64,10 @@
 <div class="col-md-4">
 <hr>
 <h2>Overview</h2>
-<p>See the latest build status across the branches:</p>
+<p>See the latest <strong>{{ masterProject }} {{ masterState }}</strong> status:</p>
 <div>
-<a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">{{ masterProject }} {{ masterState }}</a>
+<a class="btn btn-primary btn-xs" href="{{ dashboardRoute }}" role="button">dashboard</a>
+<a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">overview</a>
 </div>
 </div>
 

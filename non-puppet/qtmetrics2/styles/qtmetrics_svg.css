@@ -1,4 +1,4 @@
-<!--
+/*
 #############################################################################
 ##
 ## Copyright (C) 2015 The Qt Company Ltd.
@@ -31,25 +31,50 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
+*/
 
 /**
- * About window content
- * @since     28-09-2015
+ * Qt Metrics style definitions for SVG (scalable vector graphics)
+ * @since     27-09-2015
  * @author    Juha Sippola
  */
 
--->
+/*
+ * Speedo chart
+ * (Note: The normal CSS style definitions are in qtmetrics.css)
+ */
 
-<p>The Qt Metrics web portal visualizes the status and progress of Qt's quality, focusing on Continuous
-Integration (CI). The goal is to automate laborious manual work that is required, for example, in the CI
-release cycle, to report the key information in real time. The Qt integration teams (in The Qt Company)
-and the global Qt developer community are the target audience. For detailed description, see the
-<strong><a href="https://wiki.qt.io/Qt_Metrics_2_Description" target="_blank">wiki page</a></strong>.</p>
-
-<p>In case of questions, proposals, and improvement ideas, please contact the
-<strong><a href="https://wiki.qt.io/Qt_Metrics_2_Description#SUPPORT" target="_blank">development team</a></strong>.</p>
-
-<p>See the <strong><a href="https://wiki.qt.io/Qt_Metrics_2_Backlog" target="_blank">backlog</a></strong>
-for development items currently identified or in progress.</p>
-
-<p><small>Version 0.36 (28-Sep-2015)</small></p>
+.chart-color1 {
+  fill: #FF0000;
+}
+.chart-color2 {
+  fill: #FF4D00;
+}
+.chart-color3 {
+  fill: #FF8200;
+}
+.chart-color4 {
+  fill: #FFA600;
+}
+.chart-color5 {
+  fill: #FFDC00;
+}
+.chart-color6 {
+  fill: #FFE600;
+}
+.chart-color7 {
+  fill: #FFF800;
+}
+.chart-color8 {
+  fill: #D5FF00;
+}
+.chart-color9 {
+  fill: #72F600;
+}
+.chart-color10 {
+  fill: #07FB00;
+}
+.needle,
+.needle-center {
+  fill: #464A4F;
+}

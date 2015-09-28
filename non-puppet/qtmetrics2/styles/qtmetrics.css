@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @since     22-09-2015
+ * @since     27-09-2015
  * @author    Juha Sippola
  */
 
@@ -207,4 +207,34 @@ thead {
 }
 .hidden {
   visibility: hidden;
+}
+
+/*
+ * Speedo chart
+ * (Note: The SVG style definitions are in qtmetrics_svg.css)
+ */
+.chartSpeedo {
+  float: left;
+  margin: 2px 10px 2px 10px;
+  text-align: center;
+}
+.chartSpeedo p {
+  font-size: 1em;
+  float: left;
+  width: 100%;
+}
+.chartSpeedo p em {
+  font-size: 3em;
+  clear: both;
+  width: 100%;
+}
+
+.chartSpeedo .chartArea {
+  margin: 0px 0px -40px 0px;
+}
+
+.chartSpeedo .label {
+  color: #464A4F;
+  background-color: white;
+  border: 1px solid #464A4F;
 }

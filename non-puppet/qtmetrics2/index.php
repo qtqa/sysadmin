@@ -34,7 +34,7 @@
 
 /**
  * Qt Metrics API
- * @since     24-09-2015
+ * @since     28-09-2015
  * @author    Juha Sippola
  */
 
@@ -69,6 +69,7 @@ $app->get('/', function() use($app)
         'dbStatus' => $dbStatus,
         'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'overviewRoute' => Slim\Slim::getInstance()->urlFor('overview'),
+        'dashboardRoute' => Slim\Slim::getInstance()->urlFor('dashboard'),
         'platformRoute' => $buildProjectPlatformRoute,
         'topRoute' => Slim\Slim::getInstance()->urlFor('top'),
         'flakyRoute' => Slim\Slim::getInstance()->urlFor('flaky'),
@@ -81,6 +82,36 @@ $app->get('/', function() use($app)
         'platforms' => Factory::db()->getTargetPlatformOs()
     ));
 })->name('root');
+
+/**
+ * UI route: /dashboard (GET)
+ */
+
+$app->get('/dashboard', function() use($app)
+{
+    $ini = Factory::conf();
+    $dbStatus = Factory::db()->getDbRefreshStatus();
+    $breadcrumb = array(
+        array('name' => 'home', 'link' => Slim\Slim::getInstance()->urlFor('root'))
+    );
+    $overviewRoute = Slim\Slim::getInstance()->urlFor('overview');
+    $buildProjectRoute = Slim\Slim::getInstance()->urlFor('buildproject');
+    $app->render('dashboard.html', array(
+        'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
+        'breadcrumb' => $breadcrumb,
+        'overviewRoute' => $overviewRoute,
+        'buildProjectRoute' => $buildProjectRoute,
+        'masterProject' => $ini['master_build_project'],
+        'masterState' => $ini['master_build_state'],
+        'latestConfRuns' => Factory::db()->getLatestConfBranchBuildResultsSum(
+            $ini['master_build_project'],
+            $ini['master_build_state']),
+        'latestTestsetRuns' => Factory::db()->getLatestProjectBranchTestsetResultsSum(
+            $ini['master_build_project'],
+            $ini['master_build_state'])
+    ));
+})->name('dashboard');
 
 /**
  * UI route: /overview (GET)

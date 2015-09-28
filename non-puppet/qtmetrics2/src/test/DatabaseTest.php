@@ -38,7 +38,7 @@ require_once(__DIR__.'/../Factory.php');
  * Database unit test class
  * Some of the tests require the test data as inserted into database with qtmetrics_insert.sql
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @since     24-09-2015
+ * @since     27-09-2015
  * @author    Juha Sippola
  */
 
@@ -402,6 +402,35 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test getLatestConfBranchBuildResultsSum
+     * @dataProvider testGetLatestConfBranchBuildResultsSumData
+     */
+    public function testGetLatestConfBranchBuildResultsSum($runProject, $runState, $exp_branches, $exp_achived_branches)
+    {
+        $confs = array();
+        $db = Factory::db();
+        $result = $db->getLatestConfBranchBuildResultsSum($runProject, $runState);
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertArrayHasKey('aborted', $row);
+            $this->assertArrayHasKey('undef', $row);
+            $this->assertContains($row['branch'], $exp_branches);
+            $this->assertNotContains($row['branch'], $exp_achived_branches);
+        }
+    }
+    public function testGetLatestConfBranchBuildResultsSumData()
+    {
+        return array(
+            array('Qt5', 'state', array('dev', 'stable', 'master'), array('release'))
+        );
+    }
+
+    /**
      * Test getLatestProjectBranchTestsetResults
      * @dataProvider testGetLatestProjectBranchTestsetResultsData
      */
@@ -423,6 +452,33 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         }
     }
     public function testGetLatestProjectBranchTestsetResultsData()
+    {
+        return array(
+            array('Qt5', 'state', array('dev', 'stable', 'master'), array('release'))
+        );
+    }
+
+    /**
+     * Test getLatestProjectBranchTestsetResultsSum
+     * @dataProvider testGetLatestProjectBranchTestsetResultsSumData
+     */
+    public function testGetLatestProjectBranchTestsetResultsSum($runProject, $runState, $exp_branches, $exp_achived_branches)
+    {
+        $confs = array();
+        $db = Factory::db();
+        $result = $db->getLatestProjectBranchTestsetResultsSum($runProject, $runState);
+        $this->assertNotEmpty($result);
+        foreach($result as $row) {
+            $this->assertArrayHasKey('branch', $row);
+            $this->assertArrayHasKey('buildKey', $row);
+            $this->assertArrayHasKey('timestamp', $row);
+            $this->assertArrayHasKey('passed', $row);
+            $this->assertArrayHasKey('failed', $row);
+            $this->assertContains($row['branch'], $exp_branches);
+            $this->assertNotContains($row['branch'], $exp_achived_branches);
+        }
+    }
+    public function testGetLatestProjectBranchTestsetResultsSumData()
     {
         return array(
             array('Qt5', 'state', array('dev', 'stable', 'master'), array('release'))
