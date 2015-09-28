@@ -210,15 +210,14 @@ $app->get('/buildproject/platform/:targetOs', function($targetOs) use($app)
         'dbStatus' => $dbStatus,
         'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
+        'buildProjectRoute' => $buildProjectRoute,
         'buildPlatformRoute' => $buildProjectPlatformRoute,
         'confRoute' => $confRoute,
         'masterProject' => $ini['master_build_project'],
         'masterState' => $ini['master_build_state'],
         'platforms' => Factory::db()->getTargetPlatformOs(),
         'targetOs' => $targetOs,
-        'latestProjectRuns' => Factory::db()->getLatestProjectBranchBuildResults(
-            $ini['master_build_project'],
-            $ini['master_build_state']),
+        'latestProjectRuns' => null,                    // not used
         'projectRuns' => Factory::createProjectRuns(
             $ini['master_build_project'],
             $ini['master_build_state']),                // managed as objects

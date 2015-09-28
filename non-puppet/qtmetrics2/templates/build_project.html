@@ -72,7 +72,7 @@
 
 {# Check if any runs available #}
 {% set runsAvailable = 0 %}
-{% for run in latestProjectRuns %}
+{% for run in confRuns %}
 {%      set runsAvailable = 1 %}
 {% endfor %}
 
@@ -89,16 +89,22 @@
 {##### Platform buttons #####}
 
 <div>
+<div class="btn-groupxx">
+{% if targetOs == '' %}
+{%      set buttonStyle = 'btn-primary' %}
+{% else %}
+{%      set buttonStyle = 'btn-default' %}
+{% endif %}
+<a class="btn {{ buttonStyle }} btn-xs" href="{{ buildProjectRoute }}" role="button">all</a>
 {% for platform in platforms %}
 {%      if platform.os == targetOs %}
 {%          set buttonStyle = 'btn-primary' %}
 {%      else %}
 {%          set buttonStyle = 'btn-default' %}
 {%      endif %}
-<div class="btn-group">
 <a class="btn {{ buttonStyle }} btn-xs" href="{{ buildPlatformRoute }}/{{ platform.os|url_encode }}" role="button">{{ platform.os }}</a>
-</div>
 {% endfor %}
+</div>
 </div>
 <hr>
 
@@ -108,10 +114,12 @@
 <div class="well infoWell">
 <span class="glyphicon glyphicon-info-sign"></span> <strong>Build Project</strong><br>
 <ul>
-<li>In <strong>Latest Status</strong>, the <strong>latest result</strong> shows the overall project status based on the
-latest <strong>{{ masterProject }} {{ masterState }}</strong> builds across all branches,
-and the <strong>branch</strong> results across all configurations (both show failed if failed
-in one or in several builds).</li>
+{% if targetOs == '' %}
+<li>In <strong>Latest Status</strong>, the <strong>latest result</strong> shows the overall
+project status based on the latest <strong>{{ masterProject }} {{ masterState }}</strong>
+builds across all branches, and the <strong>branch</strong> results across all configurations
+(both show failed if failed in one or in several builds).</li>
+{% endif %}
 <li><strong>Results in Branches</strong> shows the {{ project.getName }} run results by branch
 and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong> builds
 <ul>
@@ -133,6 +141,8 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 
 {##### Latest Status #####}
 
+{%      if targetOs == '' %}
+
 <div class="panel panel-primary">
 <div class="panel-heading">
 <h4 class="panel-title bold">Latest Status</h4>
@@ -144,9 +154,9 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 <tr>
 <th>project</th>
 <th class="rightBorder">latest result</th>
-{%      for branch in latestProjectRuns %}
+{%          for branch in latestProjectRuns %}
 <th class="center">{{ branch.name }}</th>
-{%      endfor %}
+{%          endfor %}
 </tr>
 </thead>
 <tbody>
@@ -155,24 +165,24 @@ and their configuration on <strong>{{ masterProject }} {{ masterState }}</strong
 <td>{{ project.getName }}</td>
 
 {# Testset status according to the latest build results #}
-{%      if project.getStatus == constant('ConfRun::RESULT_SUCCESS') %}
-{%          set resultIcon = 'glyphicon glyphicon-ok green' %}
-{%      elseif project.getStatus == constant('ConfRun::RESULT_FAILURE') %}
-{%          set resultIcon = 'glyphicon glyphicon-remove red' %}
-{%      else %}
-{%          set resultIcon = '' %}
-{%      endif %}
+{%          if project.getStatus == constant('ConfRun::RESULT_SUCCESS') %}
+{%              set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%          elseif project.getStatus == constant('ConfRun::RESULT_FAILURE') %}
+{%              set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%          else %}
+{%              set resultIcon = '' %}
+{%          endif %}
 <td class="rightBorder"><span class="spaceHorizontal {{ resultIcon }}"></span>{{ project.getStatus }}</td>
 
 {# Result (by branch) #}
-{%      for run in latestProjectRuns %}
-{%          if run.result == constant('ConfRun::RESULT_SUCCESS') %}
-{%              set resultIcon = 'glyphicon glyphicon-ok green' %}
-{%          elseif run.result == constant('ConfRun::RESULT_FAILURE') %}
-{%              set resultIcon = 'glyphicon glyphicon-remove red' %}
-{%          else %}
-{%              set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
-{%          endif %}
+{%          for run in latestProjectRuns %}
+{%              if run.result == constant('ConfRun::RESULT_SUCCESS') %}
+{%                  set resultIcon = 'glyphicon glyphicon-ok green' %}
+{%              elseif run.result == constant('ConfRun::RESULT_FAILURE') %}
+{%                  set resultIcon = 'glyphicon glyphicon-remove red' %}
+{%              else %}
+{%                  set resultIcon = 'glyphicon glyphicon-ban-circle gray' %}
+{%              endif %}
 <td class="center">
 <span class="spaceHorizontal {{ resultIcon }} clickOnTouch" data-toggle="tooltip" data-placement="top" data-html="true"
 title="<table>
@@ -182,13 +192,15 @@ title="<table>
 <tr><th>Result: </td><td>{{ run.result }}</td></tr>
 <tr><th>Duration: </td><td>{{ run.duration}}</td></tr></table>">
 </span></td>
-{%      endfor %}{# run #}
+{%          endfor %}{# run #}
 </tr>
 </tbody>
 </table>
 </div> {# .table-responsive #}
 </div> {# .panel-body #}
 </div> {# .panel... #}
+
+{%      endif %}{# targetOs #}
 
 {##### Results in Branches #####}
 
@@ -356,7 +368,7 @@ title="<table>
 
 {% else %}{# runsAvailable #}
 <div class="alert alert-danger" role="alert">
-No build data available for project {{ project.getName }}!
+No {{ targetOs }} build data available for project {{ project.getName }}!
 </div>
 {% endif %}{# runsAvailable #}
 
