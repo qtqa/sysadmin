@@ -98,6 +98,7 @@ $app->get('/dashboard', function() use($app)
     $buildProjectRoute = Slim\Slim::getInstance()->urlFor('buildproject');
     $app->render('dashboard.html', array(
         'root' => Slim\Slim::getInstance()->urlFor('root'),
+        'dbStatus' => $dbStatus,
         'refreshed' => $dbStatus['refreshed'] . ' (GMT)',
         'breadcrumb' => $breadcrumb,
         'overviewRoute' => $overviewRoute,
