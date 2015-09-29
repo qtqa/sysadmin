@@ -1,0 +1,15 @@
+[submodule "non-puppet/qtmetrics2/lib/Slim"]
+	path = non-puppet/qtmetrics2/lib/Slim
+	url = https://github.com/slimphp/Slim.git
+[submodule "non-puppet/qtmetrics2/lib/SlimViews"]
+	path = non-puppet/qtmetrics2/lib/SlimViews
+	url = https://github.com/slimphp/Slim-Views.git
+[submodule "non-puppet/qtmetrics2/lib/Twig"]
+	path = non-puppet/qtmetrics2/lib/Twig
+	url = https://github.com/twigphp/Twig.git
+[submodule "non-puppet/qtmetrics2/lib/Bootstrap"]
+	path = non-puppet/qtmetrics2/lib/Bootstrap
+	url = https://github.com/twbs/bootstrap.git
+[submodule "non-puppet/qtmetrics2/lib/D3"]
+	path = non-puppet/qtmetrics2/lib/D3
+	url = https://github.com/mbostock/d3.git
