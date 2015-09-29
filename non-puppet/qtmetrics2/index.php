@@ -34,14 +34,14 @@
 
 /**
  * Qt Metrics API
- * @since     28-09-2015
+ * @since     29-09-2015
  * @author    Juha Sippola
  */
 
 require_once 'lib/Slim/Slim/Slim.php';
 require_once 'lib/Slim/Slim/View.php';
 require_once 'lib/Slim/Slim/Middleware.php';
-require_once 'lib/Slim/Slim/Views/Twig.php';
+require_once 'lib/SlimViews/Twig.php';
 require_once 'lib/Twig/lib/Twig/Autoloader.php';
 require_once 'src/Factory.php';
 require_once 'src/HttpBasicAuth.php';
