@@ -34,7 +34,7 @@
 
 /**
  * Home page
- * @since     27-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -45,7 +45,7 @@
 <div class="jumbotron">
 <div class="container">
 <div class="col-md-9">
-<h1>Qt Metrics <sup class="masterVersion">2</sup></h1>
+<h1>Qt Metrics</h1>
 </div>
 <div class="col-md-3">
 <div class="well well-sm">
@@ -66,8 +66,8 @@
 <h2>Overview</h2>
 <p>See the latest <strong>{{ masterProject }} {{ masterState }}</strong> status:</p>
 <div>
-<a class="btn btn-primary btn-xs" href="{{ dashboardRoute }}" role="button">dashboard</a>
-<a class="btn btn-primary btn-xs" href="{{ overviewRoute }}" role="button">overview</a>
+<a class="btn btn-primary" href="{{ dashboardRoute }}" role="button">dashboard</a>
+<a class="btn btn-primary" href="{{ overviewRoute }}" role="button">overview</a>
 </div>
 </div>
 
@@ -81,7 +81,7 @@
 <div>
 {% for platform in platforms %}
 <div class="btn-group">
-<a class="btn btn-primary btn-xs" href="{{ platformRoute }}/{{ platform.os|url_encode }}" role="button">{{ platform.os }}</a>
+<a class="btn btn-primary" href="{{ platformRoute }}/{{ platform.os|url_encode }}" role="button">{{ platform.os }}</a>
 </div>
 {% endfor %}
 </div>
@@ -100,7 +100,7 @@
 <p>See testset status for a project:</p>
 <div>
 <form class="form-horizontal" role="form" method="post">
-<div class="input-group input-group-sm">
+<div class="input-group">
 <input id="projectInput" name="projectInputValue" type="text" class="form-control" placeholder="project name...">
 <span class="input-group-btn">
 <input id="projectInputSubmit" name="projectInputSubmit" type="submit" class="btn btn-primary" value="Show">
@@ -119,7 +119,7 @@
 <p>See results for a testset:</p>
 <div>
 <form class="form-horizontal" role="form" method="post">
-<div class="input-group input-group-sm">
+<div class="input-group">
 <input id="testsetInput" name="testsetInputValue" type="text" class="form-control" placeholder="testset name...">
 <span class="input-group-btn">
 <input id="testsetInputSubmit" name="testsetInputSubmit" type="submit" class="btn btn-primary" value="Show">
@@ -130,15 +130,15 @@
 <br>
 <p>See top lists:</p>
 <div>
-<a class="btn btn-primary btn-xs" href="{{ topRoute }}" role="button">testsets</a>
-<a class="btn btn-primary btn-xs" href="{{ flakyRoute }}" role="button">flaky</a>
-<a class="btn btn-primary btn-xs" href="{{ topTestfunctionsRoute }}" role="button">test functions</a>
-<a class="btn btn-primary btn-xs" href="{{ durationTestsetsRoute }}" role="button">duration</a>
+<a class="btn btn-primary" href="{{ topRoute }}" role="button">testsets</a>
+<a class="btn btn-primary" href="{{ flakyRoute }}" role="button">flaky</a>
+<a class="btn btn-primary" href="{{ durationTestsetsRoute }}" role="button">duration</a>
+<a class="btn btn-primary" href="{{ topTestfunctionsRoute }}" role="button">test functions</a>
 </div>
 <br>
 <p>See blacklisted but passed tests:</p>
 <div>
-<a class="btn btn-primary btn-xs" href="{{ bpassedTestfunctionsRoute }}" role="button">test functions</a>
+<a class="btn btn-primary" href="{{ bpassedTestfunctionsRoute }}" role="button">test functions</a>
 </div>
 </div> {# .col-md... #}
 

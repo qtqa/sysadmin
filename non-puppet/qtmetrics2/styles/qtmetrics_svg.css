@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style definitions for SVG (scalable vector graphics)
- * @since     27-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -45,7 +45,7 @@
  */
 
 .chart-color1 {
-  fill: #FF0000;
+  fill: #e41e25;
 }
 .chart-color2 {
   fill: #FF4D00;
@@ -72,7 +72,7 @@
   fill: #72F600;
 }
 .chart-color10 {
-  fill: #07FB00;
+  fill: #80c342;
 }
 .needle,
 .needle-center {

@@ -35,9 +35,112 @@
 
 /**
  * Qt Metrics style sheet
- * @since     29-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
+
+/*
+ * Using Qt brand fonts
+ * (These overwrite the default Bootstrap fonts)
+ */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url('../fonts/OpenSans-Regular.ttf') format('truetype');
+}
+body,
+.tooltip,
+.popover {
+font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Using Qt brand colors
+ * (These overwrite the default Bootstrap colors)
+ */
+/* header */
+.navbar-fixed-top {
+  background-color: #26282a;
+}
+.navbar-fixed-top a {
+  transition: all, 0.3s, ease-in-out;
+}
+.breadcrumb {
+  background-color: #eeeeee;
+}
+/* jumbotron */
+.jumbotron {
+  background-color: #5caa15;
+}
+.jumbotron .well {
+  background-color: #eeeeee;
+}
+.jumbotron h1 {
+  color: #fff;
+}
+/* info button */
+.page-header > .btn-info {
+  background-color: #5caa15;
+}
+.page-header > .btn-info:hover {
+  color: #eeeeee;
+}
+.infoWell{
+  border-color: #5caa15;
+  background-color: #eeeeee;
+}
+/* home page button or active button */
+.btn-primary,
+.btn-primary:focus,
+.btn-primary:link {
+  background-color: #5caa15;
+  border-color: #5caa15;
+}
+.btn-primary:hover,
+.btn-primary:active {
+  color: #5caa15;
+  background-color: white;
+  border-color: #5caa15;
+}
+.btn-primary .badge {
+  color: #5caa15;
+}
+/* remove button */
+.btn-danger:hover,
+.btn-danger:active {
+  color: #e41e25;
+  background-color: white;
+  border-color: #e41e25;
+}
+/* all buttons */
+.btn-default,
+.btn-primary,
+.btn-info,
+.btn-danger {
+  -webkit-transition: all, 0.3s, ease-in-out;
+  -moz-transition: all, 0.3s, ease-in-out;
+  -ms-transition: all, 0.3s, ease-in-out;
+  -o-transition: all, 0.3s, ease-in-out;
+  transition: all, 0.3s, ease-in-out;
+  -webkit-box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.1);
+}
+.btn-default:hover,
+.btn-primary:hover,
+.btn-info:hover,
+.btn-danger:hover {
+  box-shadow: none;
+}
+/* text input area */
+textarea:focus,
+input:focus,
+input[type]:focus,
+.uneditable-input:focus {
+  border-color: #80c342;
+  outline: 0 none;
+}
 
 /*
  * Brand logo and text alignment
@@ -46,27 +149,18 @@
   height: 30px;
   width: auto;
 }
+.navbar-header .navbar-brand:hover {
+  color: #80c342;
+}
 
 /*
- * Load home page image (from www.qt.io) with text color adjustments in tablets and bigger devices only (typically using faster connection)
+ * Load home page image in tablets and bigger devices only (typically using faster connection)
  */
 @media screen and (min-width: 768px) {
   .jumbotron {
     background-image: url("https://d3hp9ud7yvwzy0.cloudfront.net/wp-content/uploads/2014/06/Qt-in-nutshell-hero2.jpg");
     background-size: cover;
   }
-  .jumbotron h1 {
-    color: black;
-    text-shadow: 0 0 8px white;
-  }
-}
-
-/*
- * The master version on home page
- */
-.masterVersion {
-  color: forestgreen;
-  text-shadow: 0 0 8px black;
 }
 
 /*
@@ -154,13 +248,6 @@
 }
 
 /*
- * Metrics page description well
- */
-.infoWell{
-  background: lightblue;
-}
-
-/*
  * Table formatting
  */
 .leftBorder {
@@ -180,31 +267,31 @@ thead {
 }
 
 /*
- * Coloring
+ * Coloring (using Qt brand colors)
  */
 .green {
-  color: green;
+  color: #5caa15;
 }
 .red {
   color: red;
 }
 .gray {
-  color: gray;
+  color: #bdbebf;
 }
 .blue {
-  color: #337AB7;
+  color: #46a2da;
 }
 .greenBackground {
-  background-color: lightgreen;
+  background-color: #80c342;
 }
 .redBackground {
-  background-color: indianred;
+  background-color: #e41e25;
 }
 .blueBackground {
-  background-color: #337AB7;
+  background-color: #46a2da;
 }
 .grayBackground {
-  background-color: lightgray;
+  background-color: #bdbebf;
 }
 
 /*
@@ -248,7 +335,7 @@ thead {
 }
 
 .chartSpeedo .label {
-  color: #464A4F;
+  color: #585a5c;
   background-color: white;
-  border: 1px solid #464A4F;
+  border: 1px solid #585a5c;
 }
