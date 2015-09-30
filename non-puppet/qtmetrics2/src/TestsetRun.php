@@ -34,7 +34,7 @@
 
 /**
  * TestsetRun class
- * @since     24-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -95,7 +95,7 @@ class TestsetRun extends ProjectRun {
      * @param int $run (ordinal number)
      * @param string $result (plain result without any possible flags)
      * @param bool $insignificant (true = insignificant)
-     * @param int $timestamp
+     * @param string $timestamp
      * @param int $duration (in deciseconds)
      */
     public function __construct($name, $testsetProjectName, $projectName, $branchName, $stateName, $buildKey, $confName, $run, $result, $insignificant, $timestamp, $duration) {

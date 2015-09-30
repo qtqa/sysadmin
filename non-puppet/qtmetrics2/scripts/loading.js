@@ -34,7 +34,6 @@
 
 /**
  * Show loading progress bar
- * @version   0.1
  * @since     08-07-2015
  * @author    Juha Sippola
  */

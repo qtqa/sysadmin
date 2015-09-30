@@ -34,8 +34,7 @@
 
 /**
  * Testset class
- * @version   0.2
- * @since     11-06-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -131,11 +130,11 @@ class Testset {
         $status = self::STATUS_EMPTY;
         $statusText = TestsetRun::RESULT_EMPTY;
         foreach ($builds as $build) {
-            if (TestsetRun::stripResult($build['result']) == TestsetRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
+            if (TestsetRun::stripResult($build['result']) === TestsetRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
                 $status = self::STATUS_SUCCESS;
                 $statusText = TestsetRun::RESULT_SUCCESS;
             }
-            if (TestsetRun::stripResult($build['result']) == TestsetRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
+            if (TestsetRun::stripResult($build['result']) === TestsetRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
                 $status = self::STATUS_FAILURE;
                 $statusText = TestsetRun::RESULT_FAILURE;
             }

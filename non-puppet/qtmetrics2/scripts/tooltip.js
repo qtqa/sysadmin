@@ -34,7 +34,6 @@
 
 /**
  * Initialize Bootstrap tooltips
- * @version   0.1
  * @since     26-06-2015
  * @author    Juha Sippola
  */

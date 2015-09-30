@@ -34,7 +34,6 @@
 
 /**
  * Show About window
- * @version   0.2
  * @since     18-06-2015
  * @author    Juha Sippola
  */

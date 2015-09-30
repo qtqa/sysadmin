@@ -34,8 +34,7 @@
 
 /**
  * Configuration class
- * @version   0.1
- * @since     15-07-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -102,19 +101,19 @@ class Conf {
         $statusText = ConfRun::RESULT_EMPTY;
         $builds = Factory::db()->getLatestConfBranchBuildResults( $this->name, $runProject, $runState);
         foreach ($builds as $build) {
-            if ($build['result'] == ConfRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
+            if ($build['result'] === ConfRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
                 $status = self::STATUS_SUCCESS;
                 $statusText = ConfRun::RESULT_SUCCESS;
             }
-            if ($build['result'] == ConfRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
+            if ($build['result'] === ConfRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
                 $status = self::STATUS_FAILURE;
                 $statusText = ConfRun::RESULT_FAILURE;
             }
-            if ($build['result'] == ConfRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
+            if ($build['result'] === ConfRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
                 $status = self::STATUS_ABORTED;
                 $statusText = ConfRun::RESULT_ABORTED;
             }
-            if ($build['result'] == ConfRun::RESULT_UNDEF AND $status <= self::STATUS_UNDEF) {
+            if ($build['result'] === ConfRun::RESULT_UNDEF AND $status <= self::STATUS_UNDEF) {
                 $status = self::STATUS_UNDEF;
                 $statusText = ConfRun::RESULT_UNDEF;
             }

@@ -37,8 +37,7 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Project unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.2
- * @since     12-05-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -70,7 +69,7 @@ class ProjectTest extends PHPUnit_Framework_TestCase
     public function testGetStatus($name, $runProject, $runState, $exp_build_results)
     {
         $project = new Project($name);
-        if ($runProject == $name) {                                     // project with project_run data
+        if ($runProject === $name) {                                     // project with project_run data
             $project->setStatus($runProject, $runState);
             $this->assertContains($project->getStatus(), $exp_build_results);
         } else {

@@ -34,8 +34,7 @@
 
 /**
  * Project class
- * @version   0.2
- * @since     12-06-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -100,18 +99,18 @@ class Project {
         $status = self::STATUS_EMPTY;
         $statusText = ProjectRun::RESULT_EMPTY;
         // Status for project with project_run
-        if ($this->name == $runProject) {
+        if ($this->name === $runProject) {
             $builds = Factory::db()->getLatestProjectBranchBuildResults($runProject, $runState);
             foreach ($builds as $build) {
-                if ($build['result'] == ProjectRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
+                if ($build['result'] === ProjectRun::RESULT_SUCCESS AND $status <= self::STATUS_SUCCESS) {
                     $status = self::STATUS_SUCCESS;
                     $statusText = ProjectRun::RESULT_SUCCESS;
                 }
-                if ($build['result'] == ProjectRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
+                if ($build['result'] === ProjectRun::RESULT_FAILURE AND $status <= self::STATUS_FAILURE) {
                     $status = self::STATUS_FAILURE;
                     $statusText = ProjectRun::RESULT_FAILURE;
                 }
-                if ($build['result'] == ProjectRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
+                if ($build['result'] === ProjectRun::RESULT_ABORTED AND $status <= self::STATUS_ABORTED) {
                     $status = self::STATUS_ABORTED;
                     $statusText = ProjectRun::RESULT_ABORTED;
                 }

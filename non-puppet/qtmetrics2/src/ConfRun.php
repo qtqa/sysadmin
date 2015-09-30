@@ -34,7 +34,7 @@
 
 /**
  * ConfRun class
- * @since     17-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -78,7 +78,7 @@ class ConfRun extends ProjectRun {
      * @param string $result
      * @param bool $forcesuccess (true = forcesuccess on)
      * @param bool $insignificant (true = insignificant)
-     * @param int $timestamp
+     * @param string $timestamp
      * @param int $duration
      */
     public function __construct($name, $projectName, $branchName, $stateName, $buildKey, $result, $forcesuccess, $insignificant, $timestamp, $duration) {

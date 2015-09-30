@@ -34,7 +34,6 @@
 
 /**
  * Project autocomplete
- * @version   0.1
  * @since     30-06-2015
  * @author    Juha Sippola
  */

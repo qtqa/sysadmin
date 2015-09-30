@@ -37,7 +37,6 @@ require_once(__DIR__.'/../Factory.php');
 /**
  * Testset unit test class
  * @example   To run (in qtmetrics root directory): php <path-to-phpunit>/phpunit.phar ./src/test
- * @version   0.2
  * @since     11-06-2015
  * @author    Juha Sippola
  */

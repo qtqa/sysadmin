@@ -34,7 +34,7 @@
 
 /**
  * ProjectRun class
- * @since     17-09-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -104,7 +104,7 @@ class ProjectRun {
      * @param string $stateName
      * @param int $buildKey
      * @param string $result
-     * @param int $timestamp
+     * @param string $timestamp
      * @param int $duration
      */
     public function __construct($projectName, $branchName, $stateName, $buildKey, $result, $timestamp, $duration)

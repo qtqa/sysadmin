@@ -34,7 +34,7 @@
 
 /**
  * Basic HTTP authentication
- * @since     06-08-2015
+ * @since     30-09-2015
  * @author    Juha Sippola
  */
 
@@ -77,7 +77,7 @@ class HttpBasicAuth extends \Slim\Middleware
 
         // Check username and password
         if(isset($username) && isset($password)) {
-            if (($username == $ini['admin_username'] AND $password == $ini['admin_password'])) {
+            if (($username === $ini['admin_username'] AND $password === $ini['admin_password'])) {
                 return true;
             } else {
                 return false;

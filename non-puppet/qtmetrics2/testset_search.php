@@ -34,7 +34,6 @@
 
 /**
  * Testset autocomplete search
- * @version   0.2
  * @since     25-06-2015
  * @author    Juha Sippola
  */
