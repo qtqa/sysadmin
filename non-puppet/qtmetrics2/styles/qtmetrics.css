@@ -35,7 +35,7 @@
 
 /**
  * Qt Metrics style sheet
- * @since     27-09-2015
+ * @since     29-09-2015
  * @author    Juha Sippola
  */
 
@@ -137,6 +137,20 @@
  */
 .ui-autocomplete.ui-menu {
   font-size: 12px;
+}
+
+/*
+ * Breadcrumb to stick on top, below the header navigation (on bigger devices)
+ */
+@media screen and (min-width: 768px) {
+  .breadcrumb {
+    position: fixed;
+    z-index: 999;
+    width: inherit;
+  }
+  .container-fluid {
+    margin-top: 50px;
+  }
 }
 
 /*
