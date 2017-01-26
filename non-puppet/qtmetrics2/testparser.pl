@@ -1269,7 +1269,7 @@ sub sql_create_tables
 
         $dbh->do (
             "CREATE TABLE IF NOT EXISTS compiler (
-                id                    TINYINT UNSIGNED      NOT NULL  AUTO_INCREMENT,
+                id                    INT UNSIGNED          NOT NULL  AUTO_INCREMENT,
                 compiler              VARCHAR(20)           NULL DEFAULT NULL,
                 UNIQUE INDEX unique_compiler (compiler),
                 CONSTRAINT compiler_pk PRIMARY KEY (id)
@@ -1283,7 +1283,7 @@ sub sql_create_tables
                 target_id             SMALLINT UNSIGNED     NOT NULL,
                 host_compiler_id      TINYINT UNSIGNED      NOT NULL,
                 target_compiler_id    TINYINT UNSIGNED      NOT NULL,
-                name                  VARCHAR(100)          NOT NULL,
+                name                  VARCHAR(200)          NOT NULL,
                 features              VARCHAR(100)          NULL DEFAULT NULL,
                 UNIQUE INDEX unique_conf (name),
                 CONSTRAINT conf_pk PRIMARY KEY (id)
