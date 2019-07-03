@@ -355,7 +355,7 @@ sub update_git_dir
     # If our git repo has somehow become out of sync, these commands will warn about it.
     # Note that we warn, instead of dying, because puppet should still run if at all possible
     # (e.g. puppet should still run if the git server is down).
-    system_or_carp( qw(git pull -q) );
+    system_or_carp( qw(git pull) );
     system_or_carp( qw(git --no-pager diff) );
 
     chdir_or_die( $DIR );
