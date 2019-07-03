@@ -13,6 +13,7 @@ class network_test_server::linux::ssl_certs {
 
     ssl_file {
         "qt-test-server-cert.pem":          ensure  =>  present;
+        "qt-test-server-cert_2019.pem":     ensure  =>  present;
         "private/qt-test-server-key.pem":   ensure  =>  present;
     }
 }
