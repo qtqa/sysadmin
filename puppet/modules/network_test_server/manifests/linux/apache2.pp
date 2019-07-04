@@ -20,7 +20,7 @@ class network_test_server::linux::apache2 {
     }
 
     package {
-        "mod_spdy":
+        "mod-spdy-beta":
             ensure   => installed,
             provider => dpkg,
             source   => "/home/qt-test-server/$spdy_filename",
@@ -31,7 +31,7 @@ class network_test_server::linux::apache2 {
     service { "apache2":
         enable  =>  true,
         ensure  =>  running,
-        require =>  Package["apache2", "mod_spdy"],
+        require =>  Package["apache2", "mod-spdy-beta"],
     }
 
     apache2_module {
