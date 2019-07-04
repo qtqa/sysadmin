@@ -61,6 +61,10 @@ class network_test_server::linux::vsftpd {
             mode    =>  1777,
             require =>  File["/home/qt-test-server/ftp"],
         ;
+
+        "/etc/logrotate.d/xferlog":
+            source  =>  "puppet:///modules/network_test_server/logrotate.d/xferlog",
+        ;
     }
 }
 

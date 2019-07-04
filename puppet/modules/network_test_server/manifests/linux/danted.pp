@@ -62,6 +62,11 @@ class network_test_server::linux::danted {
         "/etc/init.d/danted-authenticating":
             source  =>  "puppet:///modules/network_test_server/init/danted",
         ;
+        "/etc/logrotate.d/sockd":
+            source  =>  "puppet:///modules/network_test_server/logrotate.d/sockd",
+        ;
+        "/etc/logrotate.d/sockd-authenticating":
+            source  =>  "puppet:///modules/network_test_server/logrotate.d/sockd-authenticating",
     }
 
 }

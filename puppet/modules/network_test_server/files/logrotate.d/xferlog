@@ -1,0 +1,8 @@
+/var/log/xferlog {
+        daily
+        rotate 7
+        compress
+        delaycompress
+        notifempty
+        missingok
+}
