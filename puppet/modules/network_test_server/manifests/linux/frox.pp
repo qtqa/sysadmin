@@ -8,6 +8,7 @@ class network_test_server::linux::frox {
         "frox":
             enable  =>  true,
             ensure  =>  running,
+            hasstatus=> false,
             require =>  [ Package["frox"], File["/etc/default/frox", "/etc/frox.conf" ] ],
         ;
     }
