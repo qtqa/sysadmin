@@ -28,7 +28,7 @@
         command => "/bin/su -c \"   \
             \
             rm -rf qtqa.cloning && \
-            git clone git://qt.gitorious.org/qt/qtqa qtqa.cloning && \
+            git clone git://code.qt.io/qt/qtqa qtqa.cloning && \
             mv -v qtqa.cloning qtqa && \
             eval \$(perl -Mlocal::lib) && \
             qtqa/scripts/setup.pl --install \

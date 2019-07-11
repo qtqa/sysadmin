@@ -171,12 +171,12 @@ my %INTERACTIVE = (
             default => q{},
         },
         qtgitreadonly => {
-            doc => qq{Base URL of Qt's git repositories (git://qt.gitorious.org/). \n}
+            doc => qq{Base URL of Qt's git repositories (git://code.qt.io/). \n}
                   .qq{This will be used as the 'qtgitreadonly' alias for git \n}
                   .qq{operations while testing. \n\n}
                   .qq{The base URL will have Qt module names appended; for example: \n}
                   .qq{ "git://git.example.com/" => "git://git.example.com/qt/qtbase" \n\n},
-            default => 'git://qt.gitorious.org/',
+            default => 'git://code.qt.io/',
         },
         input => {
             doc => qq{Base HTTP URL where large files are hosted (tarballs etc) \n}

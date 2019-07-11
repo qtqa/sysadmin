@@ -48,7 +48,7 @@ if [ "x$REPO" = "x" ]; then
         echo "Usage: $(basename $0) git://some/git/repo"
         echo ""
         echo "Set up this machine to be managed using the puppet config in the given"
-        echo "git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin.git)"
+        echo "git repository (e.g. git://code.qt.io/qtqa/sysadmin.git)"
     } 1>&2
     exit 2
 fi

@@ -63,7 +63,7 @@ sub usage
 Usage: win_bootstrap.pl [options] git://some/git/repo
 
 Set up this machine to be managed using the puppet config in the given
-git repository (e.g. git://qt.gitorious.org/qtqa/sysadmin)
+git repository (e.g. git://code.qt.io/qtqa/sysadmin)
 
 Options:
 

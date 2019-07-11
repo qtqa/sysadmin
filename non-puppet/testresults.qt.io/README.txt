@@ -1,6 +1,6 @@
 This file contains static setup files for testresults.qt.io host.
 Alternatively, if you are reading this README.txt file _on_ testresults.qt.io,
-it was copied from the git://gitorious.org/qtqa/sysadmin repository.
+it was copied from the git://code.qt.io/qtqa/sysadmin repository.
 
 DEPLOYMENT
 ==========

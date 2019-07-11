@@ -103,7 +103,7 @@ echo.
 echo Usage: %CURFILE% /g:^<url^> [/d:^<url^>] [/p:^<url^>]
 echo.
 echo   /g:^<url^>       Define Git repository where puppet configuration is located.
-echo                  E.g. git://qt.gitorious.org/qtqa/sysadmin.git
+echo                  E.g. git://code.qt.io/qtqa/sysadmin.git
 echo.
 echo OPTIONAL:
 echo   /d:^<url^>       Define download location where binaries are located.
@@ -114,7 +114,7 @@ echo                  on to 'win_boostrap.pl'.
 echo                  If omitted 'win_Bootstrap.pl' uses it's default value.
 echo.
 echo EXAMPLE:
-echo   %CURFILE% /g:git://qt.gitorious.org/qtqa/sysadmin.git /d:http://ci-files01-hki.ci.local/input/ /p:https://downloads.puppetlabs.com/windows/puppet-3.0.0rc2.msi
+echo   %CURFILE% /g:git://code.qt.io/qtqa/sysadmin.git /d:http://ci-files01-hki.ci.local/input/ /p:https://downloads.puppetlabs.com/windows/puppet-3.0.0rc2.msi
 echo.
 goto end
 
