@@ -7,13 +7,14 @@ class network_test_server::linux::danted {
         # old version too, but the tests should really be fixed.
         $dante_deb = $architecture ? {
             i386    =>  'dante-server_1.1.14-2_i386.deb',
-            x86_64  =>  'dante-server_1.1.14-2_ia64.deb',
-            default =>  err("architecture $architecture is not supported!"),
+            x86_64  =>  'dante-server_1.1.14-2_amd64.deb',
+            amd64   =>  'dante-server_1.1.14-2_amd64.deb',
+            default =>  "architecture $architecture is not supported!",
         }
 
         exec { "fetch old dante-server":
             creates =>  "/tmp/$dante_deb",
-            command =>  "/usr/bin/wget -O /tmp/$dante_deb http://snapshot.debian.org/archive/debian/20050312T000000Z/pool/main/d/dante/$dante_deb",
+            command =>  "/usr/bin/wget -O /tmp/$dante_deb http://old-releases.ubuntu.com/ubuntu/pool/universe/d/dante/$dante_deb",
         }
 
         package { "dante-server":

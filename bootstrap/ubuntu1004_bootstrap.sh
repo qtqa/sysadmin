@@ -66,8 +66,9 @@ fi
 PUPPETLIST_FILE=/etc/apt/sources.list.d/bootstrap-puppet.list
 if ! test -e $PUPPETLIST_FILE; then
     echo Setting up bootstrap-puppet.list...
-    echo -e 'deb http://apt.puppetlabs.com/ lucid main\ndeb-src http://apt.puppetlabs.com/ lucid main' > $PUPPETLIST_FILE
-    apt-key adv --keyserver keyserver.ubuntu.com --recv 4BD6EC30
+    echo 'deb http://apt.puppetlabs.com/ precise main'     > $PUPPETLIST_FILE
+    echo 'deb-src http://apt.puppetlabs.com/ precise main' >> $PUPPETLIST_FILE
+    apt-key adv --keyserver keyserver.ubuntu.com --recv 7F438280EF8D349F
     apt-get update
 else
     echo bootstrap-puppet.list already exist

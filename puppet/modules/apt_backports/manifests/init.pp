@@ -1,6 +1,6 @@
 class apt_backports(
     $base_url = $::operatingsystem ? {
-        Ubuntu => "http://archive.ubuntu.com/ubuntu",
+        Ubuntu => "http://old-releases.ubuntu.com/ubuntu",
         Debian => "http://backports.debian.org/debian-backports",
     },
     $sections = $::operatingsystem ? {

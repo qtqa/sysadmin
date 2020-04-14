@@ -29,6 +29,10 @@ Don't enable automatic updates.
 
 Don't install any extra packages (except openssh-server, if you need it).
 
+Fix apt-sources.list to point to active repositories:
+
+# sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/' /etc/apt/sources.list
+
 The machine needs outbound access to the Internet for accessing this git
 repository and Ubuntu package repositories, and needs to accept inbound
 access on whatever local network contains the device(s) on which you'll
@@ -47,10 +51,9 @@ It is recommended that you watch the system log during this step.
 For example, run `tail -f /var/log/syslog &' before proceeding.
 
 From this git repo, put bootstrap/ubuntu1004_bootstrap.sh onto the machine,
-and run it.  e.g.
+and run it with bash.
 
-# wget https://code.qt.io/cgit/qtqa/sysadmin.git/plain/bootstrap/ubuntu1004_bootstrap.sh \
-    && sh ./ubuntu1004_bootstrap.sh git://code.qt.io/qtqa/sysadmin.git
+# bash ./ubuntu1004_bootstrap.sh git://code.qt.io/qtqa/sysadmin.git
 
 This will install and run puppet.
 
@@ -64,7 +67,7 @@ track changes to this git repository.
 
 Due to minor bootstrap issues, in order to complete the setup it will most
 likely be necessary to run puppet a second time.  You may wait for this to
-happen `naturally' or manually run /var/qtqa/sysadmin/puppet/sync_and_run.sh .
+happen `naturally' or manually run /var/qtqa/sysadmin/puppet/sync_and_run.pl .
 
 It is recommended to reboot the machine after the initial puppet setup to
 ensure that all services are correctly launched after boot, and that no outdated
