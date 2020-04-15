@@ -7,40 +7,45 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/danted
 NAME=$(basename $0)     # may be `danted', `danted-authenticating', etc.
 DESC="Dante SOCKS daemon"
-PIDFILE=/var/run/$NAME.pid
 CONFFILE=/etc/$NAME.conf
+
+# danted always writes PIDFILE to /var/run/danted.pid, even when started
+# multiple times with different config files! So we need to keep our own
+# lockfiles separately.
+PIDFILE=/var/run/initscript-lockfiles/$NAME.pid
+
 
 test -f $DAEMON   || exit 0
 test -f $CONFFILE || { echo "error: $CONFFILE does not exist" 1>&2; exit 2; }
+test -d `dirname "$PIDFILE"` || mkdir -p `dirname "$PIDFILE"`
 
 set -e
 
 case "$1" in
   start)
-	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --pidfile $PIDFILE \
+	echo "Starting $DESC: $NAME"
+	start-stop-daemon --start --pidfile $PIDFILE \
 		--startas $DAEMON --make-pidfile --background \
 		-- -f $CONFFILE
-	echo "$NAME."
 	;;
   stop)
-	echo -n "Stopping $DESC: "
+	echo "Stopping $DESC: $NAME"
 	start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
-	echo "$NAME."
+	rm -f "$PIDFILE"
 	;;
   reload|force-reload)
-	echo "Reloading $DESC configuration files."
-	start-stop-daemon --stop --signal 1 --quiet --pidfile \
-		$PIDFILE
+	echo "Reloading $DESC: $NAME configuration files."
+	start-stop-daemon --stop --signal 1 --quiet \
+		--pidfile $PIDFILE
   ;;
   restart)
-	echo -n "Restarting $DESC: "
+	echo "Restarting $DESC: $NAME"
 	start-stop-daemon --stop --quiet --pidfile $PIDFILE || :
+	rm -f "$PIDFILE"
 	sleep 1
 	start-stop-daemon --start --quiet --pidfile $PIDFILE \
 	  --startas $DAEMON --make-pidfile --background      \
 	  -- -f $CONFFILE
-	echo "$NAME."
 	;;
   *)
 	N=/etc/init.d/$NAME

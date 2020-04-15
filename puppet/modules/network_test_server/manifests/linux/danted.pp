@@ -39,12 +39,14 @@ class network_test_server::linux::danted {
             ensure  =>  running,
             hasstatus=> false,
             require =>  Package["dante-server"],
+            pattern =>  "danted.conf",
         ;
         "danted-authenticating":
             enable  =>  true,
             ensure  =>  running,
             hasstatus=> false,
             require =>  Package["dante-server"],
+            pattern =>  "danted-authenticating.conf",
         ;
     }
 
