@@ -1,5 +1,4 @@
 # vim: set expandtab ts=4:
-import "nodes"
 
 class mac {
     #*
