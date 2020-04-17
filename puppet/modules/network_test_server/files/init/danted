@@ -3,9 +3,17 @@
 # dante SOCKS server init.d file. Based on /etc/init.d/skeleton:
 # Version:	@(#)skeleton  1.8  03-Mar-1998  miquels@cistron.nl
 
+
+# NAME of this script may be `danted' or `danted-authenticating'
+NAME=$(basename $0)
+# If basename is like "S20danted", then strip the first 3 characters
+if echo $NAME | grep -q '^[SK][0-9][0-9]'
+then
+    NAME=`echo $NAME | cut -c 4-`
+fi
+
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/danted
-NAME=$(basename $0)     # may be `danted', `danted-authenticating', etc.
 DESC="Dante SOCKS daemon"
 CONFFILE=/etc/$NAME.conf
 
