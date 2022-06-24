@@ -32,9 +32,9 @@ commonName				= supplied
 emailAddress				= optional
  
 [ req ]
-default_bits				= 1024			# Size of keys
+default_bits				= 4096			# Size of keys
 default_keyfile				= key.pem		# name of generated keys
-default_md				= md5				# message digest algorithm
+default_md				= sha512				# message digest algorithm
 string_mask				= nombstr		# permitted characters
 distinguished_name			= req_distinguished_name
 req_extensions				= v3_req
@@ -42,7 +42,7 @@ req_extensions				= v3_req
 [ req_distinguished_name ]
 # Variable name				Prompt string
 #-------------------------	  ----------------------------------
-0.organizationName			= Nokia
+0.organizationName			= The Qt Company
 organizationalUnitName			= Qt Software
 emailAddress				= nobody@nodomain.org
 emailAddress_max			= 40
@@ -57,7 +57,7 @@ commonName_max				= 64
 # Default values for the above, for consistency and less typing.
 # Variable name				Value
 #------------------------	  ------------------------------
-0.organizationName_default		= Nokia
+0.organizationName_default		= The Qt Company
 localityName_default			= Oslo
 stateOrProvinceName_default		= Oslo
 countryName_default			= NO
