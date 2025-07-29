@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ "${HTTP_IF_MODIFIED_SINCE}" ] ; then
+if [ -n "${HTTP_IF_MODIFIED_SINCE}" ] ; then
     echo "Status: 304"
     echo ""
     exit;
