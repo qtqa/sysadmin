@@ -384,7 +384,7 @@ sub run_and_exit
 {
     my (@cmd) = @_;
 
-    print (+ @cmd);
+    print('run_and_exit: ', join(' ', @cmd), "\n");
     system( @cmd );
     exit $?;
 }
