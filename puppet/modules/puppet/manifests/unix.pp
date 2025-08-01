@@ -32,7 +32,7 @@ class puppet::unix {
     $puppetrun = $::operatingsystem ? {
         Solaris =>  "$env $sysadmindir/puppet/sync_and_run.pl",
         Darwin  =>  "$env $sysadmindir/puppet/sync_and_run.pl | logger -t puppet -p daemon.error",
-        default =>  "$sysadmindir/puppet/sync_and_run.pl | logger -t puppet -p daemon.error",
+        default =>  "{ $sysadmindir/puppet/sync_and_run.pl 2>&1 && echo Success. || echo Failure. Exit code: $? ; }  |  logger -t puppet -p daemon.error",
     }
 
     $minute1 = fqdn_rand(15)
