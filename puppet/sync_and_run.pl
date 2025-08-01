@@ -386,7 +386,7 @@ sub run_and_exit
 
     print('run_and_exit: ', join(' ', @cmd), "\n");
     system( @cmd );
-    exit $?;
+    exit $? >> 8;
 }
 
 sub determine_puppet_version
